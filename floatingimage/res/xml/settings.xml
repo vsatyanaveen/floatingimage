@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+        xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+            android:title="@string/feeds">
+            
+         <PreferenceScreen android:title="@string/manageFeeds" android:summary="@string/manageFeedsSummary">
+			<intent 
+			android:action="android.intent.action.MAIN" 
+			android:targetClass="dk.nindroid.rss.settings.ManageFeeds" 
+			android:targetPackage="dk.nindroid.rss" />
+        </PreferenceScreen>
+        
+        <CheckBoxPreference
+                android:key="randomImages"
+                android:title="@string/random"
+                android:summary="@string/randomSummary" 
+                android:defaultValue="false" />
+		<CheckBoxPreference
+                android:key="localImages"
+                android:title="@string/local"
+                android:summary="@string/localSummary"
+                android:defaultValue="true" />
+    </PreferenceCategory>
+                
+    <PreferenceCategory
+            android:title="@string/internals">
+
+        <CheckBoxPreference
+                android:key="useCache"
+                android:title="@string/useCache"
+                android:summary="@string/useCacheSummary"
+                android:defaultValue="false" />
+		<PreferenceScreen android:title="@string/clearCache" android:summary="@string/clearCacheSummary">
+			<intent 
+			android:action="android.intent.action.MAIN" 
+			android:targetClass="dk.nindroid.rss.ClearCache" 
+			android:targetPackage="dk.nindroid.rss" />
+        </PreferenceScreen>
+
+    </PreferenceCategory>
+</PreferenceScreen>
