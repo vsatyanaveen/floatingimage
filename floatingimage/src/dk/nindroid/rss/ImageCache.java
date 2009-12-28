@@ -45,6 +45,7 @@ public class ImageCache implements Runnable {
 		mExploreInfo.mkdirs(); // Make dir if not exists
 		mExplore.mkdirs(); // Make dir if not exists
 		File[] exploreInfoArray = mExploreInfo.listFiles();
+		if(exploreInfoArray == null) return;
 		mExploreFiles = new ArrayList<File>(exploreInfoArray.length);
 		mCached = new HashMap<String, File>(exploreInfoArray.length);
 		for(int i = 0; i < exploreInfoArray.length; ++i){
@@ -69,7 +70,7 @@ public class ImageCache implements Runnable {
 					bank.cached.wait();
 				}
 			} catch (InterruptedException e) {
-				Log.v("Bitmap downloader", "*** Stopping asynchronous downloader thread", e);
+				Log.v("Bitmap downloader", "*** Stopping asynchronous cache thread", e);
 				return;
 			}
 		}

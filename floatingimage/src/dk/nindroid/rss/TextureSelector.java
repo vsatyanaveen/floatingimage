@@ -18,44 +18,80 @@ public class TextureSelector implements Runnable{
 	private static TextureSelector 	mTs;
 	private static Image 			mCurSelected;
 	private static ImageReference 	mRef;
+	private static boolean 			mRun	= true;
 	public boolean abort = false;
 	
-	public static void selectImage(Image img, ImageReference ref){
-		mCurSelected = img;
-		mRef = ref;
-		if(mTs != null){
-			mTs.abort = true;
-		}
+	public static void startThread(){
+		mRun = true;
 		mTs = new TextureSelector();
 		Thread t = new Thread(mTs);
 		t.start();
 	}
+	
+	public static void stopThread(){
+		synchronized (TextureSelector.class) {
+			mRun = false;
+			TextureSelector.class.notifyAll();
+		}
+	}
+	
+	public static void selectImage(Image img, ImageReference ref){
+		synchronized (TextureSelector.class) {
+			mCurSelected = img;
+			mRef = ref;
+			TextureSelector.class.notify();
+		}		
+	}
 	@Override
 	public void run() {
 		Process.setThreadPriority(5);
-		String url = mRef.getBigImageUrl();
-		if(mRef instanceof LocalImage){ // Special case, read from disk
-			Bitmap bmp = LocalFeeder.readImage(new File(url), 450);
-			if(bmp != null){
-				applyLarge(bmp);
+		ImageReference ref = null;
+		while (true){
+			if(!mRun){
+				Log.i("dk.nindroid.rss.TextureSelector", "Stop received");
+				return;
 			}
-		}else{ // Download from web
-			// Retry 5 times.. Why do I have to do this?! This should just WORK!!
-			for(int i = 0; i < 5; ++i){
-				Bitmap bmp = BitmapDownloader.downloadImage(url);
-				if(bmp != null){
-					applyLarge(bmp);
+			synchronized (TextureSelector.class) {
+				ref = mRef;
+				mRef = null;
+			}
+			if(ref != null){
+				String url = ref.getBigImageUrl();
+				if(ref instanceof LocalImage){ // Special case, read from disk
+					Bitmap bmp = LocalFeeder.readImage(new File(url), 450);
+					if(bmp != null){
+						applyLarge(bmp);
+					}
+				}else{ // Download from web
+					// Retry 5 times.. Why do I have to do this?! This should just WORK!!
+					for(int i = 0; i < 5; ++i){
+						Bitmap bmp = BitmapDownloader.downloadImage(url);
+						if(bmp != null){
+							applyLarge(bmp);
+							break;
+						}else{
+							mCurSelected.setFocusTexture(null, 0, 0);
+						}
+					}
+				}
+			}
+			synchronized (TextureSelector.class) {
+				if(!mRun){
+					Log.i("dk.nindroid.rss.TextureSelector", "Stop received");
 					return;
-				}else{
-					Log.v("dk.nindroid.rss.TextureSelector", mRef.getBigImageUrl() + " not found!");
-					mCurSelected.setFocusTexture(null, 0, 0);
+				}
+				if(mRef == null){
+					try {
+						TextureSelector.class.wait();
+					} catch (InterruptedException e) {
+					}
 				}
 			}
 		}
 	}
 	
 	private void applyLarge(Bitmap bmp){
-		if(!abort){
+		if(mRef == null){
 			mCanvas.drawBitmap(bmp, 0, 0, mPaint);
 			bmp.recycle();
 			mCurSelected.setFocusTexture(mBitmap, (float)bmp.getWidth() / 512.0f, (float)bmp.getHeight() / 512.0f);

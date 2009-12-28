@@ -64,15 +64,19 @@ public class BitmapDownloader implements Runnable {
 						bank.addNewBitmap(ir);
 					}
 				}
-				try {
-					synchronized (bank.unseen) {
-						if(imageFeed.isEmpty()){
-						}
-						bank.unseen.wait();
+				synchronized (bank.unseen) {
+					if(bank.stopThreads){
+						Log.v("Bitmap downloader", "*** Stopping asynchronous downloader thread per request");
+						return;
 					}
-				} catch (InterruptedException e) {
-					Log.v("Bitmap downloader", "*** Stopping asynchronous downloader thread", e);
-					return;
+					try {
+						if(imageFeed.isEmpty()){
+							bank.unseen.wait();
+						}
+					} catch (InterruptedException e) {
+						Log.v("Bitmap downloader", "*** Stopping asynchronous downloader thread", e);
+						return;
+					}
 				}
 			}catch(Exception e){
 				Log.e("dk.nindroid.BitmapDownloader", "Unexpected exception caught...", e);

@@ -137,19 +137,27 @@ public class GlowImage {
 	 * @param szZ
 	 */
 	public static void draw(GL10 gl){
+		gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE);
 		// Draw glow
 		gl.glPushMatrix();
-			gl.glScalef(1.15f, 1.15f, 1);
+			gl.glScalef(1.10f, 1.10f, 1);
 			gl.glActiveTexture(GL10.GL_TEXTURE0);
 	        gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
-			gl.glFrontFace(GL10.GL_CCW);
 			gl.glVertexPointer(3, GL10.GL_FIXED, 0, mVertexBuffer);
-			gl.glEnable(GL10.GL_TEXTURE_2D);
 			gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mTexBuffer);
-			gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE);
-			gl.glEnable(GL10.GL_BLEND);
 	        gl.glDrawElements(GL10.GL_TRIANGLE_STRIP, 4, GL10.GL_UNSIGNED_BYTE, mIndexBuffer);
-	        gl.glDisable(GL10.GL_BLEND);
 		gl.glPopMatrix();
+	}
+	
+	public static void setState(GL10 gl){
+		gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+        gl.glEnable(GL10.GL_TEXTURE_2D);
+		gl.glFrontFace(GL10.GL_CCW);
+		gl.glEnable(GL10.GL_BLEND);
+	}
+	
+	public static void unsetState(GL10 gl){
+		gl.glDisable(GL10.GL_BLEND);
+		gl.glDisable(GL10.GL_TEXTURE_2D);
 	}
 }

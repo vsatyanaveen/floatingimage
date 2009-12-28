@@ -9,9 +9,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import android.app.Activity;
-import android.app.KeyguardManager;
 import android.app.AlertDialog.Builder;
-import android.app.KeyguardManager.KeyguardLock;
 import android.content.Context;
 import android.content.Intent;
 import android.opengl.GLSurfaceView;
@@ -24,16 +22,17 @@ import android.view.MotionEvent;
 import android.view.Window;
 import android.view.WindowManager;
 import dk.nindroid.rss.menu.Settings;
+import dk.nindroid.rss.settings.DirectoryBrowser;
+import dk.nindroid.rss.settings.FeedsDbAdapter;
 
 public class ShowStreams extends Activity {
 	public static final int ABOUT_ID = Menu.FIRST;
 	public static final int SETTINGS_ID = Menu.FIRST + 1;
-	public static final String version = "1.2.1";
+	public static final String version = "2.0.0";
 	public static ShowStreams current;
 	private GLSurfaceView mGLSurfaceView;
 	private RiverRenderer renderer;
 	private PowerManager.WakeLock wl;
-	private KeyguardLock lock;
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -49,14 +48,11 @@ public class ShowStreams extends Activity {
 			Log.e("Floating Image", "Cannot create error stream.", e);
 		}
 		try{
-			/** Test keyguard func. **/
-			KeyguardManager keyguardManager = (KeyguardManager)getSystemService(Activity.KEYGUARD_SERVICE);  
-			lock = keyguardManager.newKeyguardLock(KEYGUARD_SERVICE);  
-			lock.disableKeyguard();  
-			/** END Test keyguard func. **/
 			cleanIfOld();
 			saveVersion();
 			GlowImage.init(this);
+			ShadowPainter.init(this);
+			BackgroundPainter.init(this);
 			this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 			this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 			PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
@@ -115,11 +111,6 @@ public class ShowStreams extends Activity {
 	
 	@Override
 	protected void onStop() {
-		/** Test keyguard func. **/
-		if(lock != null){  
-			lock.reenableKeyguard();
-		}
-		/** END Test keyguard func. **/
 		Log.v("Floating image", "Stopping!");
 		super.onStop();
 	}
@@ -168,15 +159,14 @@ public class ShowStreams extends Activity {
 	}
 	@Override 
 	protected void onPause() {
-		super.onPause();
-		mGLSurfaceView.onPause(); // I really should do this...
+		Log.v("Floating image", "Pausing...");
+		mGLSurfaceView.onPause();
 		renderer.onPause();
 		wl.release();
+		Log.v("Floating image", "Paused!");
+		super.onPause();
 	}
 
-	void fillData() {
-
-	}
 	void saveVersion(){
 		File ver = new File("/sdcard/floatingImage/version");
 		try {
@@ -184,6 +174,8 @@ public class ShowStreams extends Activity {
 			FileOutputStream fos = new FileOutputStream(ver);
 			BufferedOutputStream bos = new BufferedOutputStream(fos);
 			bos.write(version.getBytes());
+			bos.close();
+			fos.close();
 		} catch (FileNotFoundException e) {
 			Log.w("dk.nindroid.rss.ShowStreams", "Error writing version to sdcard");
 		} catch (IOException e) {
@@ -193,19 +185,31 @@ public class ShowStreams extends Activity {
 	
 	private void cleanIfOld() {
 		File ver = new File("/sdcard/floatingImage/version");
-		try {
-			FileInputStream fis = new FileInputStream(ver);
-			
-			DataInputStream dis = new DataInputStream(fis);
-			String version = dis.readLine();
-			if(!ShowStreams.version.equals(version)){
-				File oldCache = new File(getString(R.string.dataFolder) + "/exploreCache");
-				if(oldCache.exists()){
-					ClearCache.deleteAll(oldCache);
-				}
+		String version = "0.0";
+		if(ver.exists()){
+			try {
+				FileInputStream fis = new FileInputStream(ver);
+				DataInputStream dis = new DataInputStream(fis);
+				version = dis.readLine();
+			}catch (IOException e) {
+				Log.w("dk.nindroid.rss.ShowStreams", "Error reading old version file!");
 			}
-		}catch (IOException e) {
-			Log.w("dk.nindroid.rss.ShowStreams", "Error reading old version file!");
 		}
+		
+		if(!ShowStreams.version.equals(version)){
+			File oldCache = new File(getString(R.string.dataFolder) + "/exploreCache");
+			if(oldCache.exists()){
+				ClearCache.deleteAll(oldCache);
+			}
+			addDefaultLocalPaths();			
+		}
+	}
+
+	private void addDefaultLocalPaths() {
+		FeedsDbAdapter mDbHelper = new FeedsDbAdapter(this);
+		mDbHelper.open();
+		mDbHelper.addFeed(DirectoryBrowser.ID, "/sdcard/DCIM");
+		mDbHelper.addFeed(DirectoryBrowser.ID, "/sdcard/download");
+		mDbHelper.close();
 	}
 }

@@ -58,18 +58,6 @@ public class InfoBar {
 		mVertexBuffer.put(vertices);
 		mVertexBuffer.position(0);
 		
-		int[] colors  = { 
-				0, 0, 0, one / 2,
-				0, 0, 0, one / 2,
-				0, 0, 0, one / 2,
-				0, 0, 0, one / 2
-				};
-		ByteBuffer cbb = ByteBuffer.allocateDirect(64);
-		cbb.order(ByteOrder.nativeOrder());
-		mColorBuffer = cbb.asIntBuffer();
-		mColorBuffer.put(colors);
-		mColorBuffer.position(0);
-		
 		mIndexBuffer = ByteBuffer.allocateDirect(indices.length);
 		mIndexBuffer.put(indices);
 		mIndexBuffer.position(0);
@@ -124,23 +112,51 @@ public class InfoBar {
 		mHeight = height;	
 	}
 	
-	public static void draw(GL10 gl){
-		//Set the face rotation
+	static void setAlpha(float col){
+		int alpha = (int)(one * col);
+		int[] colors  = { 
+				0, 0, 0, alpha,
+				0, 0, 0, alpha,
+				0, 0, 0, alpha,
+				0, 0, 0, alpha
+				};
+		ByteBuffer cbb = ByteBuffer.allocateDirect(64);
+		cbb.order(ByteOrder.nativeOrder());
+		mColorBuffer = cbb.asIntBuffer();
+		mColorBuffer.put(colors);
+		mColorBuffer.position(0);
+	}
+	
+	public static void setState(GL10 gl){
 		gl.glFrontFace(GL10.GL_CCW);
         gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
-		gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
 		gl.glEnableClientState(GL10.GL_COLOR_ARRAY);
-		gl.glDisable(GL10.GL_TEXTURE_2D);
+		gl.glDisable(GL10.GL_TEXTURE_2D);	
+	}
+	
+	public static void unsetState(GL10 gl){
+	}
+	
+	public static void draw(GL10 gl, float fraction){
+		setAlpha(1.0f - fraction * 0.25f);
+		
+		//Set the face rotation
+		
 		//Point to our vertex buffer
 		gl.glVertexPointer(3, GL10.GL_FIXED, 0, mVertexBuffer);
 		gl.glColorPointer(4, GL10.GL_FIXED, 0, mColorBuffer);
 				
 		gl.glPushMatrix();
-		gl.glScalef(1.0f, 0.5f, 1.0f);
-		gl.glTranslatef(0.0f, -2.9f, -0.5f);
+		gl.glLoadIdentity();
+		gl.glTranslatef(0.0f, -2.0f, -1.0f);
+		gl.glScalef(RiverRenderer.mDisplayRatio * 2.0f, 80.0f / RiverRenderer.mScreenHeight * 4.0f, 1.0f);
+		
 		
 		//Draw the vertices as triangle strip
+		gl.glBlendFunc(GL10.GL_ZERO, GL10.GL_SRC_ALPHA);
+		gl.glEnable(GL10.GL_BLEND);
 		gl.glDrawElements(GL10.GL_TRIANGLE_STRIP, 4, GL10.GL_UNSIGNED_BYTE, mIndexBuffer);
+		gl.glDisable(GL10.GL_BLEND);
 		
 		gl.glDisableClientState(GL10.GL_COLOR_ARRAY);
 		
@@ -156,8 +172,5 @@ public class InfoBar {
 		mInfo.endDrawing(gl);
 		
 		gl.glPopMatrix();
-		
-		//Disable the client state before leaving
-		gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
 	}
 }
