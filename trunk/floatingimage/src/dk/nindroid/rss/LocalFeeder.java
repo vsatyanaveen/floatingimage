@@ -3,8 +3,10 @@ package dk.nindroid.rss;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
@@ -12,20 +14,24 @@ import android.os.Process;
 import android.util.Log;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.LocalImage;
+import dk.nindroid.rss.settings.DirectoryBrowser;
+import dk.nindroid.rss.settings.FeedsDbAdapter;
 
 public class LocalFeeder implements Runnable{
 	private final static int 	SEARCH_LEVELS = 2;
 	private final TextureBank 	mBank;
 	private Random 				mRand = new Random(new Date().getTime());
 	ArrayList<String> 			mImages = new ArrayList<String>();
-	private final static String[] sources = new String[]{"/sdcard/DCIM", "/sdcard/download"};
+	private List<String> sources = new ArrayList<String>();
 	
 	public LocalFeeder(TextureBank bank){
 		this.mBank = bank;
 	}
 	@Override
 	public void run() {
-		// Find all local image files
+		fillSources();
+		
+		// Find images in sources
 		Log.v("LocalFeeder", "Building local image index");
 		mImages.clear();
 		for(String src : sources){
@@ -40,6 +46,7 @@ public class LocalFeeder implements Runnable{
 		while(true){
 			try{
 				if(mBank.stopThreads){
+					Log.v("Bitmap downloader", "*** Stopping asynchronous local feeder");
 					return;
 				}
 				while(mBank.cached.size() < mBank.textureCache && mImages.size() > 0){
@@ -54,12 +61,28 @@ public class LocalFeeder implements Runnable{
 						mBank.cached.wait();
 					}
 				}catch (InterruptedException e) {
+					Log.v("Bitmap downloader", "*** Stopping asynchronous local feeder");
 					return;
 				}
 			}catch(Exception e){
 				Log.e("dk.nindroid.rss.LocalFeeder", "Unexpected exception", e);
 			}
 		}
+	}
+	
+	private void fillSources() {
+		FeedsDbAdapter mDbHelper = new FeedsDbAdapter(ShowStreams.current);
+		mDbHelper.open();
+		sources.clear();
+		Cursor c = mDbHelper.fetchAllFeeds();
+		while(c.moveToNext()){
+			if(c.getString(1).equals(DirectoryBrowser.ID)){
+				sources.add(c.getString(2));
+			}
+		}
+		c.close();
+		mDbHelper.close();
+		Log.v("LocalFeeder", sources.size() + " local sources added.");
 	}
 	
 	private void buildImageIndex(File dir, int level){;

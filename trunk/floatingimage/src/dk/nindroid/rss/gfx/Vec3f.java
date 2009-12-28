@@ -47,17 +47,23 @@ public class Vec3f {
 	public float dot(Vec3f vec){
 		return mX * vec.mX + mY * vec.mY + mZ * vec.mZ;
 	}
-	public Vec3f cross(Vec3f vec){
+	public void cross(Vec3f vec, Vec3f out){
 		float x = mY * vec.mZ - mZ * vec.mY;
 		float y = mZ * vec.mX - mX * vec.mZ;
 		float z = mX * vec.mY - mY * vec.mX;
-		return new Vec3f(x, y, z);
+		out.mX = x;
+		out.mY = y;
+		out.mZ = z;
 	}
-	public Vec3f minus(Vec3f vec){
-		return new Vec3f(mX - vec.mX, mY - vec.mY, mZ - vec.mZ);
+	public void minus(Vec3f vec, Vec3f out){
+		out.mX = mX - vec.mX;
+		out.mY = mY - vec.mY;
+		out.mZ = mZ - vec.mZ;
 	}
-	public Vec3f plus(Vec3f vec){
-		return new Vec3f(mX + vec.mX, mY + vec.mY, mZ + vec.mZ);
+	public void plus(Vec3f vec, Vec3f out){
+		out.mX = mX + vec.mX;
+		out.mY = mY + vec.mY;
+		out.mZ = mZ + vec.mZ;
 	}
 	public float length(){
 		return (float)Math.sqrt(dot(this));			

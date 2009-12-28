@@ -16,14 +16,10 @@ import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.Ray;
 import dk.nindroid.rss.gfx.Vec3f;
 import dk.nindroid.rss.helpers.MatrixTrackingGL;
+import dk.nindroid.rss.settings.Settings;
 
 public class Image {
 	private static int  ids = 0;
-	private static long mMoveToFocusDuration = 300;
-	private static final float	mFocusX = 0.0f;
-	private static final float  mFocusY = 0.0f;
-	private static final float  mFocusZ = -1.0f;
-	private static final float  mFloatZ = -3.5f;
 	
 	private static final int STATE_FLOATING =   0;
 	private static final int STATE_FOCUSING =   1;
@@ -37,15 +33,13 @@ public class Image {
 	private float  		maspect;
 	private Vec3f		mPos;
 	private int			mRotations;
+	private float		mRotation;
+	private float		mRotationSaved;
 	private Vec3f		mJitter = new Vec3f(0.0f, 0.0f, 0.0f);
 	private Random		mRand;
 	private TextureBank mbank;
-	private float 		mFarRight;
 	private final long		mStartTime;
 	private final long 	mTraversal;
-	private float jitterX;
-	private float jitterY;
-	private float jitterZ;
 	private ImageReference mCurImage;
 	private ImageReference mLastImage;
 	private ImageReference mShowingImage;
@@ -54,8 +48,8 @@ public class Image {
 	private MatrixTrackingGL gl2;
 	
 	// Selected vars
-	private long		mSelectedTime;
 	private Vec3f		mSelectedPos = new Vec3f();
+	private float		mFocusedOffset;
 	private float 		mYPos;
 	private Bitmap		mFocusBmp;
 	private float		mFocusWidth;
@@ -90,13 +84,18 @@ public class Image {
 			}
 		}
 	}
+	public boolean canSelect(){
+		if(mShowingImage == null){
+			return false;
+		}
+		return true;
+	}
 	
 	public ImageReference getShowing(){
 		return mShowingImage;
 	}
 	
 	public void select(GL10 gl, long time, long realTime){
-		mSelectedTime = realTime;
 		mSelectedPos.set(mPos);
 		if(mState == STATE_FOCUSED){
 			mState = STATE_DEFOCUSING;
@@ -104,20 +103,19 @@ public class Image {
 			if(mShowingImage == null){
 				return;
 			}
+			mFocusedOffset = isTall() ? 2.0f - RiverRenderer.mDisplayHeight : 0.0f;
 			// Select
 			mState = STATE_FOCUSING;
+			mRotationSaved = mRotation;
 			// Get large texture, if not already there.
-			InfoBar.select(gl, this.mShowingImage);
-			if(!mLargeTex){
-				TextureSelector.selectImage(this, this.mShowingImage);
-			}
+			InfoBar.select(gl, this.mShowingImage);			
 		}
 	}
 	
 	public void setSelected(GL10 gl, Bitmap bmp, float width, float height, long time){
 		mState = STATE_FOCUSED;
 		setFocusedPosition();
-		
+		mRotation = 0.0f;
 		mFocusBmp = bmp;
 		mFocusWidth = width;
 		mFocusHeight = height;
@@ -125,12 +123,8 @@ public class Image {
 		setFocusTexture(gl);
 	}
 	
-	public Image(TextureBank bank, long traversal, float jitterX, float jitterY, float jitterZ, Pos layer, long startTime, float farRight){
-		this.mFarRight = farRight;
+	public Image(TextureBank bank, long traversal, Pos layer, long startTime){
 		this.mID = ids++;
-		this.jitterX = jitterX;
-		this.jitterY = jitterY;
-		this.jitterZ = jitterZ;
 		mTraversal = traversal;
 		mbank = bank;
 		mRand = new Random(new Date().getTime());
@@ -139,7 +133,7 @@ public class Image {
 			case MIDDLE: mYPos = 0.0f; break;
 			case DOWN: mYPos = -2.5f; break;
 		}
-		mPos = new Vec3f(-mFarRight, mYPos, mFloatZ);
+		mPos = new Vec3f(-RiverRenderer.mFarRight, mYPos, RiverRenderer.mFloatZ);
 		reJitter();
 		mStartTime = startTime;
 				
@@ -188,12 +182,19 @@ public class Image {
 	
 	// Draw this after draw.
 	public void drawGlow(GL10 gl){
+		gl.glPushMatrix();
+		gl.glLoadMatrixf(mModelviewMatrix, 0);
 		if(mCurImage != null && mCurImage.isNew()){
-			gl.glPushMatrix();
-				gl.glLoadMatrixf(mModelviewMatrix, 0);
-				GlowImage.draw(gl);
-			gl.glPopMatrix();
+			GlowImage.draw(gl);
 		}
+		else{
+			ShadowPainter.draw(gl);
+		}
+		gl.glPopMatrix();
+	}
+	
+	private boolean isTall(){
+		return maspect < RiverRenderer.mDisplayRatio * 1.5f;
 	}
 	
 	public void draw(GL10 gl, long time, long realTime){
@@ -203,30 +204,24 @@ public class Image {
 		x = mPos.getX() + mJitter.getX();
 		y = mPos.getY() + mJitter.getY();
 		z = mPos.getZ() + mJitter.getZ();
-		if(maspect < 1.25f){
-			szX = maspect;
-			szY = 1;
+		if(isTall()){
+			szY = RiverRenderer.mDisplayHeight * 0.9f;
+			szX = maspect * szY;
 		}else{
-			szX = 1.25f;
-			szY = 1 / maspect * 1.25f;
+			szX = RiverRenderer.mDisplayRatio * 1.9f;
+			szY = szX / maspect;
 		}
 		
-		gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_REPLACE);
 		gl.glActiveTexture(GL10.GL_TEXTURE0);
         gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
-		gl.glFrontFace(GL10.GL_CCW);
-		gl.glVertexPointer(3, GL10.GL_FIXED, 0, mVertexBuffer);
-		gl.glEnable(GL10.GL_TEXTURE_2D);
+        gl.glVertexPointer(3, GL10.GL_FIXED, 0, mVertexBuffer);
+        
 		gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mTexBuffer);
 		
-		gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER,GL10.GL_NEAREST);
-        gl.glTexParameterf(GL10.GL_TEXTURE_2D,GL10.GL_TEXTURE_MAG_FILTER,GL10.GL_LINEAR);
-        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S,GL10.GL_CLAMP_TO_EDGE);
-        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T,GL10.GL_CLAMP_TO_EDGE);
-        
 		gl2.glPushMatrix();
 				
 		gl2.glTranslatef(x, y, z);
+		gl2.glRotatef(mRotation, 0, 0, 1);
 		gl2.glScalef(szX, szY, 1);
 		gl2.glDrawElements(GL10.GL_TRIANGLE_STRIP, 4, GL10.GL_UNSIGNED_BYTE, mIndexBuffer);
 		
@@ -235,23 +230,38 @@ public class Image {
         gl2.glPopMatrix();
 	}
 	
+	public static void setState(GL10 gl){
+		gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_REPLACE);
+		gl.glFrontFace(GL10.GL_CCW);
+		gl.glEnable(GL10.GL_TEXTURE_2D);
+		gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER,GL10.GL_NEAREST);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D,GL10.GL_TEXTURE_MAG_FILTER,GL10.GL_LINEAR);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S,GL10.GL_CLAMP_TO_EDGE);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T,GL10.GL_CLAMP_TO_EDGE);
+	}
+	
+	public static void unsetState(GL10 gl){
+		gl.glDisable(GL10.GL_TEXTURE_2D);
+	}
+	
 	
 	/************ Position functions ************/
 	
 	private void reJitter(){
-		mJitter.setX(mRand.nextFloat() * jitterX * 2 - jitterX);
-		mJitter.setY(mRand.nextFloat() * jitterY * 2 - jitterY);
-		mJitter.setZ(mRand.nextFloat() * jitterZ * 2 - jitterZ);
+		mJitter.setX(mRand.nextFloat() * RiverRenderer.mJitterX * 2 - RiverRenderer.mJitterX);
+		mJitter.setY(mRand.nextFloat() * RiverRenderer.mJitterY * 2 - RiverRenderer.mJitterY);
+		mJitter.setZ(mRand.nextFloat() * RiverRenderer.mJitterZ * 2 - RiverRenderer.mJitterZ);
+		mRotation = Settings.rotateImages ? mRand.nextFloat() * 20.0f - 10.0f : 0;
 	}
 	
 	private float getXPos(long relativeTime){
-		return -mFarRight + (((float)(relativeTime % mTraversal) / mTraversal) * mFarRight * 2);
+		return -RiverRenderer.mFarRight + (((float)(relativeTime % mTraversal) / mTraversal) * RiverRenderer.mFarRight * 2);
 	}
 	
 	private void updateFloating(GL10 gl, long time){
 		long totalTime = time - mStartTime;
 		
-		mPos.setZ(mFloatZ);
+		mPos.setZ(RiverRenderer.mFloatZ);
 		mPos.setY(mYPos); 
 		mPos.setX(getXPos(totalTime));
 		boolean isInRewind = totalTime < mTraversal * (mRotations - 1);
@@ -278,19 +288,29 @@ public class Image {
 		}
 	}
 	
+	private float smoothstep(float val){
+		return Math.min(val * val * (3.0f - 2.0f * val), 1.0f);
+	}
+	
 	private void moveToFocus(GL10 gl, long realTime){
-		float fraction = ((float)(realTime - mSelectedTime)) / mMoveToFocusDuration;
+		float fraction = RiverRenderer.getFraction(realTime);
 		if(fraction > 1){
+			mRotation = 0.0f;
+			if(!mLargeTex){
+				TextureSelector.selectImage(this, this.mShowingImage);
+			}
 			mState = STATE_FOCUSED;
 			return;
 		}
+		mRotation = (1.0f - fraction) * mRotationSaved;
+		fraction = smoothstep(fraction);
 		float selectedX = mSelectedPos.getX();		
 		float selectedY = mSelectedPos.getY();
 		float selectedZ = mSelectedPos.getZ();
 		
-		float distX = mFocusX - selectedX - mJitter.getX();
-		float distY = mFocusY - selectedY - mJitter.getY();
-		float distZ = mFocusZ - selectedZ - mJitter.getZ();
+		float distX = RiverRenderer.mFocusX - selectedX - mJitter.getX();
+		float distY = RiverRenderer.mFocusY - selectedY - mJitter.getY() + mFocusedOffset;
+		float distZ = RiverRenderer.mFocusZ - selectedZ - mJitter.getZ();
 		
 		mPos.setX(distX * fraction + selectedX);
 		mPos.setY(distY * fraction + selectedY);
@@ -298,8 +318,9 @@ public class Image {
 	}
 	
 	private void moveToFloat(GL10 gl, long time, long realTime){
-		float fraction = ((float)(realTime - mSelectedTime)) / mMoveToFocusDuration;
+		float fraction = RiverRenderer.getFraction(realTime);
 		if(fraction > 1){
+			mRotation = mRotationSaved;
 			long totalTime = time - mStartTime;
 			mRotations = (int)(totalTime / mTraversal) + 1;
 			mState = STATE_FLOATING;
@@ -316,13 +337,16 @@ public class Image {
 		float selectedY = mSelectedPos.getY();
 		float selectedZ = mSelectedPos.getZ();
 		
-		long timeToFloat = realTime - mStartTime - mSelectedTime - mMoveToFocusDuration;
+		fraction = smoothstep(fraction);
 		
+		long timeToFloat = realTime - mStartTime - RiverRenderer.mSelectedTime - RiverRenderer.mFocusDuration;
+		
+		mRotation = fraction * mRotationSaved;
 		float floatX = getXPos(time + timeToFloat);
 		
 		float distX = floatX - selectedX;
 		float distY = mYPos - selectedY;
-		float distZ = mFloatZ - selectedZ;
+		float distZ = RiverRenderer.mFloatZ - selectedZ;
 		
 		mPos.setX(distX * fraction + selectedX);
 		mPos.setY(distY * fraction + selectedY);
@@ -353,18 +377,17 @@ public class Image {
 	}
 	
 	private void setFocusedPosition(){
-		mPos.setX(mFocusX);
-		mPos.setY(mFocusY);
-		mPos.setZ(mFocusZ);
-		mPos = mPos.minus(mJitter);
+		mPos.setX(RiverRenderer.mFocusX);
+		mPos.setY(RiverRenderer.mFocusY + mFocusedOffset);
+		mPos.setZ(RiverRenderer.mFocusZ);
+		mPos.minus(mJitter, mPos);
 	}
 
+	
 	/************ Texture functions ************/
 	
 	private void resetTexture(GL10 gl){
-		if(mFocusBmp != null){
-			mFocusBmp = null;
-		}
+		mFocusBmp = null;
 		if(!mRewinding){
 			if(mLastImage != null){
 				mLastImage.getBitmap().recycle();
@@ -392,7 +415,8 @@ public class Image {
 		}
 		float width = mFocusWidth;
 		float height = mFocusHeight;
-		maspect = width / (float)height;
+		
+		maspect = width / height;
         
         gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
 
@@ -427,7 +451,9 @@ public class Image {
         }catch(IllegalArgumentException e){ // TODO: Handle graciously
         	Log.w("dk.nindroid.rss.Image", "Texture could not be shown", e);
         	setTexture(gl, mShowingImage);
+        	return;
         }
+        setState(gl);
 	}
 	
 	public void setTexture(GL10 gl, ImageReference ir) {
@@ -468,6 +494,7 @@ public class Image {
         };
         mTexBuffer.put(tex);
         mTexBuffer.position(0);
+        setState(gl);
 	}
 	private int mTextureID;
 	private FloatBuffer mTexBuffer;
@@ -512,10 +539,16 @@ public class Image {
 		
 		Vec3f hitPoint = new Vec3f(hitX, hitY, hitZ);
 		
-		Vec3f v1 = mVertices[2].minus(mVertices[0]); // Right
-		Vec3f v2 = mVertices[3].minus(mVertices[2]); // Down
-		Vec3f v4 = hitPoint.minus(mVertices[0].plus(pos));
-		Vec3f v5 = hitPoint.minus(mVertices[3].plus(pos));
+		Vec3f v1 = new Vec3f();
+		mVertices[2].minus(mVertices[0], v1); // Right
+		Vec3f v2 = new Vec3f();
+		mVertices[3].minus(mVertices[2], v2); // Down
+		Vec3f v4 = new Vec3f();
+		mVertices[0].plus(pos, v4);
+		hitPoint.minus(v4, v4);
+		Vec3f v5 = new Vec3f();
+		mVertices[3].plus(pos, v5);
+		hitPoint.minus(v5, v5);
 	
 		
 		if(v1.dot(v4) >= 0 && v1.dot(v5) <= 0 && v4.dot(v2) >= 0 && v5.dot(v2) <= 0){

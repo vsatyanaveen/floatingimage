@@ -2,8 +2,13 @@
 <resources>
 	<string name="settings">Settings</string>
 	<string name="feeds">Feeds</string>
-	<string name="manageFeeds">Manage feeds</string>
-	<string name="manageFeedsSummary">Choose which images to show</string>
+	<!--  <string name="manageFeeds">Manage feeds</string> 
+	<string name="manageFeedsSummary">Choose which images to show</string> -->
+	<string name="manageFeeds">Manage local directories</string> 
+	<string name="manageFeedsSummary">Which directories should local images come from</string>
+	<string name="display">Display</string>
+	<string name="rotateImages">Rotate images</string>
+	<string name="rotateImagesSummary">Tilt images for a slightly more messed up effect</string>
 	<string name="internals">Internals</string>
 	<string name="random">Use random images</string>
 	<string name="randomSummary">Use pretty from Flickr</string>
@@ -13,7 +18,9 @@
 	<string name="useCacheSummary">This gives a steadier flow when streaming</string>
 	<string name="clearCache">Clear cache</string>
 	<string name="clearCacheSummary">Erase entire image cache</string>
-	<string name="noFeeds">No feeds selected. Press menu to add one now</string>
-	<string name="feedMenuAdd">Add new feed</string>
-	<string name="feedMenuRemove">Remove feed</string>
+	<string name="noFeeds">No directories selected. Press menu to add one now</string>
+	<string name="feedMenuAdd">Add new directory</string>
+	<string name="feedMenuRemove">Remove directory</string>
+	<string name="selectFolder">Select folder</string>
+	<string name="selectCurrentFolder">Select current folder</string>
 </resources>

@@ -1,6 +1,7 @@
 package dk.nindroid.rss.settings;
 
 import android.app.ListActivity;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.ContextMenu;
@@ -23,8 +24,8 @@ public class ManageFeeds extends ListActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		setContentView(R.layout.manage_feeds);
 		mDbHelper = new FeedsDbAdapter(this);
-		mDbHelper.open();
-		fillData();
+		//mDbHelper.open();
+		//fillData();
 		registerForContextMenu(getListView());
 		super.onCreate(savedInstanceState);
 	}
@@ -47,7 +48,7 @@ public class ManageFeeds extends ListActivity {
 	}
 	
 	void addFeed(){
-		mDbHelper.addFeed("New feed", "");
+		startActivityForResult(new Intent(this, DirectoryBrowser.class), 0);
 		fillData();
 	}
 
@@ -55,7 +56,7 @@ public class ManageFeeds extends ListActivity {
 		Cursor c = mDbHelper.fetchAllFeeds();
 		startManagingCursor(c);
 		String[] from = new String[] {FeedsDbAdapter.KEY_TITLE, FeedsDbAdapter.KEY_URI};
-		int[] to = new int[]{R.id.feedRowTitle};
+		int[] to = new int[]{R.id.feedRowTitle, R.id.feedRowURI};
 		SimpleCursorAdapter feeds = new SimpleCursorAdapter(this, R.layout.feeds_row, c, from, to);
 		setListAdapter(feeds);
 	}
@@ -84,5 +85,18 @@ public class ManageFeeds extends ListActivity {
 		Toast t = Toast.makeText(this, "Launch directory picker please...", Toast.LENGTH_SHORT);
         t.show();
 		super.onListItemClick(l, v, position, id);
+	}
+	
+	@Override
+	protected void onPause() {
+		mDbHelper.close();
+		super.onPause();
+	}
+	
+	@Override
+	protected void onResume() {
+		mDbHelper.open();
+		fillData();
+		super.onResume();
 	}
 }

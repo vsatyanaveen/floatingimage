@@ -1,9 +1,5 @@
 package dk.nindroid.rss;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.Date;
 
 import javax.microedition.khronos.egl.EGL10;
@@ -22,10 +18,22 @@ import dk.nindroid.rss.gfx.Vec2f;
 import dk.nindroid.rss.gfx.Vec3f;
 
 public class RiverRenderer implements GLSurfaceView.Renderer {
+	public static float			mDisplayRatio;
+	public static int 			mScreenWidth;
+	public static int 			mScreenHeight;
+	public static float			mFarRight;
+	public static final long 	mFocusDuration = 300;
+	public static long			mSelectedTime;
+	public static final float  mFocusX = 0.0f;
+	public static final float  mFocusY = 0.0f;
+	public static final float  mFocusZ = -1.0f;
+	public static final float  mFloatZ = -3.5f;
+	public static final float  mDisplayHeight = 1.6f;
+	public static final float  mJitterX = 0.8f;
+	public static final float  mJitterY = 0.5f;
+	public static final float  mJitterZ = 1.5f;
+	
 	private static final long	SPLASHTIME = 2000l;
-	private int 			mScreenWidth;
-	private int 			mScreenHeight;
-	private float			mFarRight;
 	private boolean 		mTranslucentBackground = false;
 	private boolean 		mNewStart = true;
 	private Image[] 		mImgs;
@@ -61,10 +69,10 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 		for(int i = 0; i < mTotalImgRows; ++i){
 			
 			if(mCreateMiddle){
-	        	mImgs[mImgCnt++] = new Image(mBank, mTraversal, 0.8f, 0.5f, 1.5f, Pos.MIDDLE, curTime - creationOffset, mFarRight);
+	        	mImgs[mImgCnt++] = new Image(mBank, mTraversal, Pos.MIDDLE, curTime - creationOffset);
 	        }else{
-	        	mImgs[mImgCnt++] = new Image(mBank, mTraversal, 0.8f, 0.5f, 1.5f, Pos.UP, curTime - creationOffset, mFarRight);
-	        	mImgs[mImgCnt++] = new Image(mBank, mTraversal, 0.8f, 0.5f, 1.5f, Pos.DOWN, curTime - creationOffset, mFarRight);
+	        	mImgs[mImgCnt++] = new Image(mBank, mTraversal, Pos.UP, curTime - creationOffset);
+	        	mImgs[mImgCnt++] = new Image(mBank, mTraversal, Pos.DOWN, curTime - creationOffset);
 	        }
 	        	mCreateMiddle ^= true;
 	        	creationOffset += mInterval;
@@ -72,15 +80,6 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	}
 	@Override
 	public void onDrawFrame(GL10 gl) {
-		String dataFolder = ShowStreams.current.getString(R.string.dataFolder);
-		File error = new File(dataFolder + "openGL.err");
-		
-		FileOutputStream fos = null;
-		try {
-			fos = new FileOutputStream(error);
-		} catch (FileNotFoundException e) {
-			Log.e("dk.nindroid.rss.RiverRenderer", "Cannot error stream.", e);
-		}
 		try{
 			gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE,
 	                GL10.GL_MODULATE);
@@ -111,6 +110,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 				mDefocusSplashTime = time + SPLASHTIME;
 			}
 	        if(mSplashImg != null && realTime > mDefocusSplashTime){
+	        	mSelectedTime = realTime;
 	        	mSplashImg.select(gl, time, realTime);
 	        	mSplashImg = null;
 	        }
@@ -119,12 +119,13 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	        	if(mClicked){
 		        	mClicked = false;
 		        	if(mSelected.inFocus()){
+		        		mSelectedTime = realTime;
 			        	mSelected.select(gl, time, realTime);
 			        	mSelected = null;
 		        	}
 	        	}
 	        }else{
-	        	if(mClicked){
+	        	if(mClicked && mSplashImg == null){
 		        	// Only works for camera looking directly at (0, 0, -1)...
 		        	Vec3f rayDir = new Vec3f(mClickedPos.getX(), mClickedPos.getY(), -1);
 		        	rayDir.normalize();
@@ -140,37 +141,62 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 		            		selected = mImgs[i];
 		            	}
 		            }
-		        	if(selected != null){
+		        	if(selected != null && selected.canSelect()){
+		        		mSelectedTime = realTime;
 		        		mSelected = selected;
 		        		selected.select(gl, time, realTime);
 		        	}
-		        	mClicked = false;
 		        }
+	        	mClicked = false;
 	        }
 	        
+	        BackgroundPainter.draw(gl);
+	        
+	        Image.setState(gl);
 	        for(int i = 0; i < mImgCnt; ++i){
-	        	mImgs[i].draw(gl, time, realTime);
+	        	if(mImgs[i] != mSelected){
+	        		mImgs[i].draw(gl, time, realTime);
+	        	}
 	        }
-	        //backdrop.draw(gl, mOffset);
-	        gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
-	        gl.glEnable(GL10.GL_TEXTURE_2D);
+	        Image.unsetState(gl);
+	        
 	        gl.glDepthMask(false);
+	        GlowImage.setState(gl);
 	        for(int i = 0; i < mImgCnt; ++i){
 	        	mImgs[i].drawGlow(gl);
 	        }
-	        gl.glDepthMask(true);
-	        if(mSelected != null && mSelected.inFocus()){
-	        	InfoBar.draw(gl);
+	        GlowImage.unsetState(gl);
+	        if(mSelected != null){
+	        	if(mSelected.inFocus()){
+	        		Dimmer.draw(gl, 1.0f);
+	        		InfoBar.setState(gl);
+	        		InfoBar.draw(gl, 1.0f);
+	        		InfoBar.unsetState(gl);
+	        	}else{
+	        		float fraction = getFraction(realTime);
+	        		Dimmer.draw(gl, fraction);
+	        		InfoBar.setState(gl);
+	        		InfoBar.draw(gl, fraction);
+	        		InfoBar.unsetState(gl);
+	        	}
+	        	gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+	        	GlowImage.setState(gl);
+	        	mSelected.drawGlow(gl);
+	        	GlowImage.unsetState(gl);
+	        	Image.setState(gl);
+	        	mSelected.draw(gl, time, realTime);
+	        	Image.unsetState(gl);
 	        }
+	        
+	        gl.glDepthMask(true);
+	        
 		}catch(Throwable t){
-			try {
-				Log.e("Floating Image", "Uncaught exception caught!", t);
-				fos.write(t.getMessage().getBytes());
-				fos.flush();
-				fos.close();
-			} catch (IOException e) {
-			}
+			Log.e("Floating Image", "Uncaught exception caught!", t);
 		}
+	}
+	
+	public static float getFraction(long realTime){
+		return Math.min(((float)(realTime - RiverRenderer.mSelectedTime)) / RiverRenderer.mFocusDuration, 1.1f);
 	}
 	
 	private void fadeOffset(long time) {
@@ -191,10 +217,12 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	
 	public void onResume(){
 		mBank.start();
+		TextureSelector.startThread();
 		mFadeOffset = 0.0f;
 	}
 	public void onPause(){
 		mBank.stop();
+		TextureSelector.stopThread();
 	}
 	
 	public int[] getConfigSpec() {
@@ -233,10 +261,12 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
          * be set when the viewport is resized.
          */
 
-        float ratio = (float) width / height;
+		mDisplayRatio = (float) width / height;
+        mFarRight = mDisplayRatio * (-mFloatZ + mJitterZ) * 1.2f + 1.2f + mJitterX;
+        Log.v("RiverRenderer", "Aspect ratio is " + mDisplayRatio);
         gl.glMatrixMode(GL10.GL_PROJECTION);
         gl.glLoadIdentity();
-        gl.glFrustumf(-ratio, ratio, -1, 1, 1, 50);
+        gl.glFrustumf(-mDisplayRatio, mDisplayRatio, -1, 1, 1, 50);
         InfoBar.setView(width, height);
 	}
 	
@@ -251,7 +281,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	
 	public void onClick(float x, float y){
 		mClicked = true;
-		mClickedPos = new Vec2f(x/mScreenWidth * 2.0f - 1.0f, -(y / mScreenHeight * 2.0f - 1.0f));
+		mClickedPos = new Vec2f((x/mScreenWidth * 2.0f - 1.0f) * mDisplayRatio, -(y / mScreenHeight * 2.0f - 1.0f));
 	} 
  
 	@Override 
@@ -290,6 +320,8 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
          gl.glShadeModel(GL10.GL_SMOOTH);
          gl.glEnable(GL10.GL_DEPTH_TEST);
        	 GlowImage.initTexture(gl);
+       	 ShadowPainter.initTexture(gl);
+       	 BackgroundPainter.initTexture(gl);
 	}
 
 }

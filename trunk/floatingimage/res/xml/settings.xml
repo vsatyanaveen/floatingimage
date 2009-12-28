@@ -23,7 +23,14 @@
                 android:summary="@string/localSummary"
                 android:defaultValue="true" />
     </PreferenceCategory>
-                
+    <PreferenceCategory
+            android:title="@string/display">
+            <CheckBoxPreference
+                android:key="rotateImages"
+                android:title="@string/rotateImages"
+                android:summary="@string/rotateImagesSummary"
+                android:defaultValue="true" />
+    </PreferenceCategory>      
     <PreferenceCategory
             android:title="@string/internals">
 
