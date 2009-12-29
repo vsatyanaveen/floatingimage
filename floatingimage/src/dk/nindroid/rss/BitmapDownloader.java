@@ -22,6 +22,7 @@ import android.graphics.BitmapFactory;
 import android.os.Process;
 import android.util.Log;
 import dk.nindroid.rss.data.ImageReference;
+import dk.nindroid.rss.data.Progress;
 import dk.nindroid.rss.data.RssElement;
 import dk.nindroid.rss.flickr.ExploreFeeder;
 import dk.nindroid.rss.parser.RSSParser;
@@ -55,7 +56,7 @@ public class BitmapDownloader implements Runnable {
 					ImageReference ir = imageFeed.poll();
 					String url = ir.getSmallImageUrl();
 					if(bank.doDownload(ir.getImageID())){
-						Bitmap bmp = downloadImage(url);
+						Bitmap bmp = downloadImage(url, null);
 						if(bmp == null){
 							continue;
 						}
@@ -129,12 +130,12 @@ public class BitmapDownloader implements Runnable {
 		return rssParser.getData();
 	}
 	
-	public static Bitmap downloadImage(String URL){
+	public static Bitmap downloadImage(String URL, Progress progress){
 		URL url;
 		byte[] bitmapByteArray;
 		try {
 			url = new URL(URL);		
-			bitmapByteArray = DownloadUtil.fetchUrlBytes(url, "Floating image/Android");
+			bitmapByteArray = DownloadUtil.fetchUrlBytes(url, "Floating image/Android", progress);
 			Bitmap bm = BitmapFactory.decodeByteArray(bitmapByteArray, 0, bitmapByteArray.length);
 			return bm;
 		} catch (IOException e) {

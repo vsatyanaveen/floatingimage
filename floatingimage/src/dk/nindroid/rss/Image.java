@@ -103,7 +103,9 @@ public class Image {
 			if(mShowingImage == null){
 				return;
 			}
-			mFocusedOffset = isTall() ? 2.0f - RiverRenderer.mDisplayHeight : 0.0f;
+			mShowingImage.setOld();
+			//mFocusedOffset = isTall() ? 2.0f - RiverRenderer.mDisplayHeight : 0.0f;
+			mFocusedOffset = 2.0f - RiverRenderer.mDisplayHeight;
 			// Select
 			mState = STATE_FOCUSING;
 			mRotationSaved = mRotation;
@@ -211,6 +213,9 @@ public class Image {
 			szX = RiverRenderer.mDisplayRatio * 1.9f;
 			szY = szX / maspect;
 		}
+		gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_REPLACE);
+		gl.glFrontFace(GL10.GL_CCW);
+		gl.glEnable(GL10.GL_TEXTURE_2D);
 		
 		gl.glActiveTexture(GL10.GL_TEXTURE0);
         gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
@@ -228,6 +233,10 @@ public class Image {
 		gl2.getMatrix(mModelviewMatrix, 0);
         
         gl2.glPopMatrix();
+        
+        if(mState == STATE_FOCUSED && !mLargeTex){
+        	ProgressBar.draw(gl, TextureSelector.getProgress());
+        }
 	}
 	
 	public static void setState(GL10 gl){
@@ -326,7 +335,6 @@ public class Image {
 			mState = STATE_FLOATING;
 			mRewinding = false;
 			if(mCurImage != null){
-				mCurImage.setOld();
 				setTexture(gl, mShowingImage);
 				mFocusBmp = null;
 			}
