@@ -39,14 +39,6 @@ public class ShowStreams extends Activity {
 		super.onCreate(savedInstanceState);
 		String dataFolder = getString(R.string.dataFolder);
 		new File(dataFolder).mkdirs();
-		File error = new File(dataFolder + "main.err");
-		
-		FileOutputStream fos = null;
-		try {
-			fos = new FileOutputStream(error);
-		} catch (FileNotFoundException e) {
-			Log.e("Floating Image", "Cannot create error stream.", e);
-		}
 		try{
 			cleanIfOld();
 			saveVersion();
@@ -66,13 +58,7 @@ public class ShowStreams extends Activity {
 			mGLSurfaceView.setRenderer(renderer);
 			setContentView(mGLSurfaceView);
 		}catch(Throwable t){
-			try {
-				Log.e("Floating Image", "Uncaught exception caught!", t);
-				fos.write(t.getMessage().getBytes());
-				fos.flush();
-				fos.close();
-			} catch (IOException e) {
-			}
+			Log.e("Floating Image", "Uncaught exception caught!", t);
 		}
 		//*/
 		/*

@@ -14,6 +14,7 @@ import android.os.Process;
 import android.util.Log;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.LocalImage;
+import dk.nindroid.rss.data.Progress;
 import dk.nindroid.rss.settings.DirectoryBrowser;
 import dk.nindroid.rss.settings.FeedsDbAdapter;
 
@@ -106,7 +107,7 @@ public class LocalFeeder implements Runnable{
 			mImages.remove(idx);
 			return null;
 		}
-		Bitmap bmp = readImage(file, 128);
+		Bitmap bmp = readImage(file, 128, null);
 		if(bmp != null){
 			return new LocalImage(file, bmp);
 		}else{
@@ -124,24 +125,24 @@ public class LocalFeeder implements Runnable{
 		return false;
 	}
 	
-	public static synchronized Bitmap readImage(File f, int size){
+	public static synchronized Bitmap readImage(File f, int size, Progress progress){
 		String path = f.getAbsolutePath();
 		Options opts = new Options();
-		
+		setProgress(progress, 10);
 		// Get bitmap dimensions before reading...
 		opts.inJustDecodeBounds = true;
 		BitmapFactory.decodeFile(path, opts);
 		int width = opts.outWidth;
 		int height = opts.outHeight;
 		int largerSide = Math.max(width, height);
-		
+		setProgress(progress, 20);
 		opts.inJustDecodeBounds = false;
 		if(largerSide > size * 2){
 			int sampleSize = getSampleSize(size, largerSide);
 			opts.inSampleSize = sampleSize;
 		}
 		Bitmap bmp = BitmapFactory.decodeFile(f.getAbsolutePath(), opts);
-		
+		setProgress(progress, 60);
 		width = bmp.getWidth();
 		height = bmp.getHeight();
 		largerSide = Math.max(width, height);
@@ -152,7 +153,14 @@ public class LocalFeeder implements Runnable{
 			bmp.recycle();
 			bmp = tmp;
 		}
+		setProgress(progress, 80);
 		return bmp;
+	}
+	
+	public static void setProgress(Progress progress, int percent){
+		if(progress != null){
+			progress.setPercentDone(percent);
+		}
 	}
 	
 	private static int getSampleSize(int target, int source){

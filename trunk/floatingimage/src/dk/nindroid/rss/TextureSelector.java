@@ -10,6 +10,7 @@ import android.os.Process;
 import android.util.Log;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.LocalImage;
+import dk.nindroid.rss.data.Progress;
 
 public class TextureSelector implements Runnable{
 	private final static Bitmap 	mBitmap = Bitmap.createBitmap(512, 512, Config.RGB_565);
@@ -19,6 +20,7 @@ public class TextureSelector implements Runnable{
 	private static Image 			mCurSelected;
 	private static ImageReference 	mRef;
 	private static boolean 			mRun	= true;
+	private static final Progress progress = new Progress();
 	public boolean abort = false;
 	
 	public static void startThread(){
@@ -57,15 +59,17 @@ public class TextureSelector implements Runnable{
 			}
 			if(ref != null){
 				String url = ref.getBigImageUrl();
+				progress.setKey(mCurSelected);
+				progress.setPercentDone(5);
 				if(ref instanceof LocalImage){ // Special case, read from disk
-					Bitmap bmp = LocalFeeder.readImage(new File(url), 450);
+					Bitmap bmp = LocalFeeder.readImage(new File(url), 450, progress);
 					if(bmp != null){
 						applyLarge(bmp);
 					}
 				}else{ // Download from web
 					// Retry 5 times.. Why do I have to do this?! This should just WORK!!
 					for(int i = 0; i < 5; ++i){
-						Bitmap bmp = BitmapDownloader.downloadImage(url);
+						Bitmap bmp = BitmapDownloader.downloadImage(url, progress);
 						if(bmp != null){
 							applyLarge(bmp);
 							break;
@@ -96,5 +100,9 @@ public class TextureSelector implements Runnable{
 			bmp.recycle();
 			mCurSelected.setFocusTexture(mBitmap, (float)bmp.getWidth() / 512.0f, (float)bmp.getHeight() / 512.0f);
 		}
+	}
+	
+	public static int getProgress(){
+		return progress.isKey(mCurSelected) ? progress.getPercentDone() : 2;
 	}
 }

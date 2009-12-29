@@ -100,7 +100,7 @@ public class SpriteTextRenderer implements GLSurfaceView.Renderer{
                 GL10.GL_REPLACE);
 
         
-        Bitmap bitmap = BitmapDownloader.downloadImage("http://farm3.static.flickr.com/2435/3916758400_11710dac6c_t.jpg");
+        Bitmap bitmap = BitmapDownloader.downloadImage("http://farm3.static.flickr.com/2435/3916758400_11710dac6c_t.jpg", null);
         
         GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, bitmap, 0);
         bitmap.recycle();
