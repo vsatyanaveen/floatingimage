@@ -12,8 +12,10 @@ import android.app.Activity;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.Intent;
+import android.hardware.SensorManager;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.PowerManager;
 import android.util.Log;
 import android.view.Menu;
@@ -21,27 +23,39 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 import dk.nindroid.rss.menu.Settings;
+import dk.nindroid.rss.orientation.OrientationManager;
 import dk.nindroid.rss.settings.DirectoryBrowser;
 import dk.nindroid.rss.settings.FeedsDbAdapter;
 
 public class ShowStreams extends Activity {
-	public static final int ABOUT_ID = Menu.FIRST;
-	public static final int SETTINGS_ID = Menu.FIRST + 1;
-	public static final String version = "2.0.0";
-	public static ShowStreams current;
-	private GLSurfaceView mGLSurfaceView;
-	private RiverRenderer renderer;
-	private PowerManager.WakeLock wl;
+	public static final int 			ABOUT_ID 		= Menu.FIRST;
+	public static final int 			SETTINGS_ID 	= Menu.FIRST + 1;
+	public static final String 			version 		= "2.0.0";
+	public static ShowStreams 			current;
+	private GLSurfaceView 				mGLSurfaceView;
+	private RiverRenderer 				renderer;
+	private PowerManager.WakeLock 		wl;
+	private OrientationManager			orientationManager;
+	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		String dataFolder = getString(R.string.dataFolder);
-		new File(dataFolder).mkdirs();
+		dataFolder = Environment.getExternalStorageDirectory().getAbsolutePath() + dataFolder;
+		File dataFile = new File(dataFolder);
+		if(!dataFile.exists() && !dataFile.mkdirs()){
+			Toast error = Toast.makeText(this, "Error creating data folder (Do you have an SD card?)\nCache will not work, operations might be flaky!", Toast.LENGTH_LONG);
+			error.show();
+		}
 		try{
+			SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+			orientationManager = new OrientationManager(sensorManager);
+			
 			cleanIfOld();
-			saveVersion();
+			saveVersion(dataFile);
 			GlowImage.init(this);
 			ShadowPainter.init(this);
 			BackgroundPainter.init(this);
@@ -51,6 +65,7 @@ public class ShowStreams extends Activity {
 			wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "Floating Image");
 			ShowStreams.current = this;
 			renderer = new RiverRenderer(true);
+			orientationManager.addSubscriber(RiverRenderer.mDisplay);
 			ClickHandler.init(renderer);
 			//*
 			setContentView(R.layout.main);
@@ -107,6 +122,7 @@ public class ShowStreams extends Activity {
 		dk.nindroid.rss.settings.Settings.readSettings(this);
 		renderer.onResume();
 		wl.acquire();
+		orientationManager.onResume();
 		mGLSurfaceView.onResume();
 	}
 	
@@ -149,14 +165,15 @@ public class ShowStreams extends Activity {
 		mGLSurfaceView.onPause();
 		renderer.onPause();
 		wl.release();
+		orientationManager.onPause();
 		Log.v("Floating image", "Paused!");
 		super.onPause();
 	}
 
-	void saveVersion(){
-		File ver = new File("/sdcard/floatingImage/version");
+	void saveVersion(File dataFolder){
+		if(!dataFolder.exists()) return;
+		File ver = new File(dataFolder.getAbsolutePath() + "/version");
 		try {
-			new File("/sdcard/floatingImage").mkdirs();
 			FileOutputStream fos = new FileOutputStream(ver);
 			BufferedOutputStream bos = new BufferedOutputStream(fos);
 			bos.write(version.getBytes());
@@ -183,9 +200,11 @@ public class ShowStreams extends Activity {
 		}
 		
 		if(!ShowStreams.version.equals(version)){
-			File oldCache = new File(getString(R.string.dataFolder) + "/exploreCache");
-			if(oldCache.exists()){
-				ClearCache.deleteAll(oldCache);
+			String oldCache = R.string.dataFolder + "/exploreCache";
+			oldCache = Environment.getExternalStorageDirectory().getAbsolutePath() + oldCache;
+			File dir = new File(oldCache);
+			if(dir.exists()){
+				ClearCache.deleteAll(dir);
 			}
 			addDefaultLocalPaths();			
 		}

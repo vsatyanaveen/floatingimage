@@ -78,8 +78,8 @@ public class ProgressBar {
 	 */
 	public static void draw(GL10 gl, int percent){
 		gl.glPushMatrix();
-			gl.glTranslatef(0, -2.0f + 90.0f / RiverRenderer.mScreenHeight * 4.0f, -zDepth);
-			gl.glScalef(RiverRenderer.mDisplayRatio * percent / 100 * 2.0f, 0.02f, 1);
+			gl.glTranslatef(0, -RiverRenderer.mDisplay.getHeight() + 90.0f / RiverRenderer.mDisplay.getHeightPixels() * 2.0f * RiverRenderer.mDisplay.getHeight(), -zDepth);
+			gl.glScalef(RiverRenderer.mDisplay.getWidth() * percent / 100, 0.02f, 1);
 			gl.glFrontFace(GL10.GL_CCW);
 			gl.glDisable(GL10.GL_TEXTURE_2D);
 			gl.glEnableClientState(GL10.GL_COLOR_ARRAY);

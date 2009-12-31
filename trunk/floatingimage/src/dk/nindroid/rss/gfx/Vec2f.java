@@ -33,4 +33,8 @@ public class Vec2f {
 		this.x = vec.x;
 		this.y = vec.y;
 	}
+	@Override
+	public String toString() {
+		return x + "x" + y;
+	}
 }

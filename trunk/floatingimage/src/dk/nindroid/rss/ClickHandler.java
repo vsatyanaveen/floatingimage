@@ -11,14 +11,15 @@ import android.view.MotionEvent;
 import dk.nindroid.rss.gfx.Vec2f;
 import dk.nindroid.rss.uiActivities.Toaster;
 
-public class ClickHandler extends TimerTask{
+public class ClickHandler extends TimerTask {
 	private static RiverRenderer renderer;
 	private static Vec2f 	mTouchLastPos;
 	private static Vec2f	mTouchStartPos;
 	private static Timer	mClickTimer;
 	private static final int LONGCLICKTIME = 1000;
 	private static long 	mMoveTime;
-	private static float[]	mLastSpeed = new float[3];
+	private static float[]	mLastSpeedX = new float[3];
+	private static float[]	mLastSpeedY = new float[3];
 	
 	private static int 		mAction = 0; // 0: nothing, 1: move, 2: long click, 3: ??
 	
@@ -50,6 +51,7 @@ public class ClickHandler extends TimerTask{
 		int action = event.getAction();
 		float x = event.getX(); float y = event.getY();
 		float lastX = mTouchLastPos.getX();
+		float lastY = mTouchLastPos.getY();
 		if(action ==  MotionEvent.ACTION_DOWN){
 			mMoveTime = -1;
 			mAction = ACTION_NOTHING;
@@ -67,28 +69,38 @@ public class ClickHandler extends TimerTask{
 				mAction = ACTION_MOVE;
 			}
 			if(mAction == ACTION_MOVE){
-				float diff = x - lastX;
-				saveSpeed(diff);
-				renderer.xChanged(diff);
+				float diffX = x - lastX;
+				float diffY = y - lastY;
+				saveSpeed(diffX, diffY);
+				renderer.xChanged(diffX);
+				renderer.yChanged(diffY);
 				mMoveTime = new Date().getTime();
 			}
 			mTouchLastPos.setX(x);
 			mTouchLastPos.setY(y);
 		}else if(action == MotionEvent.ACTION_UP && mAction == ACTION_MOVE){
 			//mDragDecelerator.setSpeed((mLastSpeed[0] + mLastSpeed[1] + mLastSpeed[2]) / 3.0f);
-			float speed = (mLastSpeed[0] + mLastSpeed[1] + mLastSpeed[2]) / 3.0f;
-			speed = Math.min(speed, 25.0f);
-			speed = Math.max(speed, -25.0f);
-			renderer.moveRelease(speed, new Date().getTime());
+			float speedX = (mLastSpeedX[0] + mLastSpeedX[1] + mLastSpeedX[2]) / 3.0f;
+			float speedY = (mLastSpeedY[0] + mLastSpeedY[1] + mLastSpeedY[2]) / 3.0f;
+			speedX = Math.min(speedX, 25.0f);
+			speedX = Math.max(speedX, -25.0f);
+			speedY = Math.min(speedY, 25.0f);
+			speedY = Math.max(speedY, -25.0f);
+			renderer.moveRelease(speedX, speedY, new Date().getTime());
 		}
 		return true;
 	}
 	
-	private static void saveSpeed(float diff){
+	private static void saveSpeed(float diffX, float diffY){
 		long timeDiff = new Date().getTime() - mMoveTime;
-		mLastSpeed[2] = mLastSpeed[1];
-		mLastSpeed[1] = mLastSpeed[0];
-		float speed = diff / timeDiff * 10.0f;
-		mLastSpeed[0] = speed;
+		mLastSpeedX[2] = mLastSpeedX[1];
+		mLastSpeedX[1] = mLastSpeedX[0];
+		float speed = diffX / timeDiff * 10.0f;
+		mLastSpeedX[0] = speed;
+		
+		mLastSpeedY[2] = mLastSpeedY[1];
+		mLastSpeedY[1] = mLastSpeedY[0];
+		speed = diffY / timeDiff * 10.0f;
+		mLastSpeedY[0] = speed;
 	}
 }

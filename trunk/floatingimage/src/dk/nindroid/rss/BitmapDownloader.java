@@ -138,7 +138,7 @@ public class BitmapDownloader implements Runnable {
 			bitmapByteArray = DownloadUtil.fetchUrlBytes(url, "Floating image/Android", progress);
 			Bitmap bm = BitmapFactory.decodeByteArray(bitmapByteArray, 0, bitmapByteArray.length);
 			return bm;
-		} catch (IOException e) {
+		} catch (Exception e) {
 			Log.w("dk.nindroid.rss.BitmaDownloader", e);
 		}
 		return null;	

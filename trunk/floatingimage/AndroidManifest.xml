@@ -4,27 +4,25 @@
       android:versionCode="7" android:versionName="2.1.1">
       <uses-permission android:name="android.permission.INTERNET" />
     <application android:icon="@drawable/icon" android:label="@string/app_name" android:debuggable="false">
-        <activity android:name=".ShowStreams"><intent-filter><action android:name="android.intent.action.MAIN"></action>
-
-<category android:name="android.intent.category.LAUNCHER"></category>
-</intent-filter>
-            
-        </activity><action android:name="android.intent.action.MAIN" />
-    <activity android:name=".menu.Settings"></activity>
-<activity android:name=".ClearCache"></activity><activity android:name=".settings.ManageFeeds"></activity>
-
-<activity android:name="Splash">
-</activity>
-<activity android:name=".settings.DirectoryBrowser"></activity>
-</application>
+        <activity android:name=".ShowStreams" android:screenOrientation="portrait">
+        	<intent-filter>
+        		<action android:name="android.intent.action.MAIN"></action>
+				<category android:name="android.intent.category.LAUNCHER"></category>
+			</intent-filter>
+        </activity>
+        <action android:name="android.intent.action.MAIN" />
+    	<activity android:name=".menu.Settings"></activity>
+		<activity android:name=".ClearCache"></activity>
+		<activity android:name=".settings.ManageFeeds"></activity>
+		<activity android:name="Splash"></activity>
+		<activity android:name=".settings.DirectoryBrowser"></activity>
+	</application>
     <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="4" />
 
+	<uses-permission android:name="android.permission.VIBRATE"></uses-permission>
+	<uses-permission android:name="android.permission.WAKE_LOCK"></uses-permission>
 
-<uses-permission android:name="android.permission.VIBRATE"></uses-permission>
-<uses-permission android:name="android.permission.WAKE_LOCK"></uses-permission>
-
-<support-screens>
-	
-</support-screens>
-
+	<support-screens>
+		
+	</support-screens>
 </manifest> 

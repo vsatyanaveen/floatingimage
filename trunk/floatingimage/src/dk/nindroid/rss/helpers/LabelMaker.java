@@ -351,12 +351,13 @@ public class LabelMaker {
      * @param y
      * @param labelID
      */
-    public void draw(GL10 gl, float x, float y, int labelID) {
+    public void draw(GL10 gl, float x, float y, int rotation, int labelID) {
         checkState(STATE_DRAWING, STATE_DRAWING);
         gl.glPushMatrix();
         float snappedX = (float) Math.floor(x);
         float snappedY = (float) Math.floor(y);
         gl.glTranslatef(snappedX, snappedY, 0.0f);
+        gl.glRotatef(rotation, 0.0f, 0.0f, 1.0f);
         Label label = mLabels.get(labelID);
         gl.glEnable(GL10.GL_TEXTURE_2D);
         ((GL11)gl).glTexParameteriv(GL10.GL_TEXTURE_2D,
@@ -412,9 +413,15 @@ public class LabelMaker {
     private boolean mFullColor;
     private Bitmap mBitmap;
     private Canvas mCanvas;
+    public Canvas getCanvas(){
+    	return mCanvas;
+    }
     private Paint mClearPaint;
 
     private int mTextureID;
+    public int getTextureID(){
+    	return mTextureID;
+    }
 
     private float mTexelWidth;  // Convert texel to U
     private float mTexelHeight; // Convert texel to V

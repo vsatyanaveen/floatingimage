@@ -95,9 +95,11 @@ public class TextureSelector implements Runnable{
 	}
 	
 	private void applyLarge(Bitmap bmp){
-		if(mRef == null){
-			mCanvas.drawBitmap(bmp, 0, 0, mPaint);
-			bmp.recycle();
+		if(mRef != null) return;
+		mCanvas.drawBitmap(bmp, 0, 0, mPaint);
+		bmp.recycle();
+		synchronized(TextureSelector.class){
+			if(mRef != null) return;
 			mCurSelected.setFocusTexture(mBitmap, (float)bmp.getWidth() / 512.0f, (float)bmp.getHeight() / 512.0f);
 		}
 	}

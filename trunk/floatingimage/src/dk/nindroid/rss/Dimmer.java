@@ -80,8 +80,9 @@ public class Dimmer {
 	public static void draw(GL10 gl, float fraction){
 		setAlpha(1.0f - fraction * 0.5f);
 		gl.glPushMatrix();
+			gl.glLoadIdentity(); // We fill whole screen, never rotate!
 			gl.glTranslatef(0, 0, -zDepth);
-			gl.glScalef(RiverRenderer.mDisplayRatio * 2.0f * zDepth, 2.0f * zDepth, 1);
+			gl.glScalef(RiverRenderer.mDisplay.getPortraitWidth() * zDepth, RiverRenderer.mDisplay.getPortraitHeight() * zDepth, 1);
 			gl.glFrontFace(GL10.GL_CCW);
 			gl.glDisable(GL10.GL_TEXTURE_2D);
 			gl.glEnableClientState(GL10.GL_COLOR_ARRAY);

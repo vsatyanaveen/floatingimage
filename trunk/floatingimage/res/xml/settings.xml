@@ -16,7 +16,7 @@
                 android:key="randomImages"
                 android:title="@string/random"
                 android:summary="@string/randomSummary" 
-                android:defaultValue="false" />
+                android:defaultValue="true" />
 		<CheckBoxPreference
                 android:key="localImages"
                 android:title="@string/local"

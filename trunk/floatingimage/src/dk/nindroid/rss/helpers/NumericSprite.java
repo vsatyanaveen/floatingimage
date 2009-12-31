@@ -72,7 +72,7 @@ public class NumericSprite {
         for(int i = 0; i < length; i++) {
             char c = mText.charAt(i);
             int digit = c - '0';
-            mLabelMaker.draw(gl, x, y, mLabelId[digit]);
+            mLabelMaker.draw(gl, x, y, 0, mLabelId[digit]);
             x += mWidth[digit];
         }
         mLabelMaker.endDrawing(gl);
