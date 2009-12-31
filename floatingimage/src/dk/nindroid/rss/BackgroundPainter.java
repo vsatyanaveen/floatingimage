@@ -31,7 +31,7 @@ public class BackgroundPainter {
 		InputStream shadowIS = context.getResources().openRawResource(R.drawable.background);
 		bg = BitmapFactory.decodeStream(shadowIS);
 		
-		canvas = Bitmap.createBitmap(256, 256, Config.RGB_565);
+		canvas = Bitmap.createBitmap(512, 512, Config.RGB_565);
 		
 		initPlane();
 	}
@@ -135,8 +135,9 @@ public class BackgroundPainter {
 	public static void draw(GL10 gl){
 		// Draw background
 		gl.glPushMatrix();
+			gl.glLoadIdentity();
 			gl.glTranslatef(0, 0, -zDepth);
-			gl.glScalef(RiverRenderer.mDisplayRatio * 2.0f * zDepth, 2.0f * zDepth, 1);
+			gl.glScalef(RiverRenderer.mDisplay.getPortraitWidth() * zDepth, RiverRenderer.mDisplay.getPortraitHeight() * zDepth, 1);
 			gl.glActiveTexture(GL10.GL_TEXTURE0);
 	        gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
 			gl.glFrontFace(GL10.GL_CCW);

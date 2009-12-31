@@ -12,7 +12,7 @@ public class Settings {
 	
 	public static void readSettings(Context context){
 		SharedPreferences sp = context.getSharedPreferences("dk.nindroid.rss_preferences", 0);
-		useRandom = sp.getBoolean("randomImages", false);
+		useRandom = sp.getBoolean("randomImages", true);
 		useLocal = sp.getBoolean("localImages", true);
 		useCache = sp.getBoolean("useCache", false);
 		rotateImages = sp.getBoolean("rotateImages", true);

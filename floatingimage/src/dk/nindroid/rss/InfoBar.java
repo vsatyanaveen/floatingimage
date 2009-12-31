@@ -2,14 +2,15 @@ package dk.nindroid.rss;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
 
-import android.graphics.Paint;
+import android.graphics.Bitmap;
+import android.opengl.GLUtils;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.gfx.Vec3f;
-import dk.nindroid.rss.helpers.LabelMaker;
 
 public class InfoBar {
 	private static final int 	one = 0x10000;
@@ -17,23 +18,14 @@ public class InfoBar {
 	private static IntBuffer	mVertexBuffer;
 	private static ByteBuffer	mIndexBuffer;
 	private static IntBuffer	mColorBuffer;
-	static private LabelMaker 	mInfo;
-	static private Paint 		mInfoPaint;
-	static private int 			mInfoTitle;
-	static private int 			mInfoTitle2;
-	static private int 			mInfoAuthor;
-	static private int			mWidth;
-	static private int			mHeight;
+	private static final InfoPainter	mInfoPainter;
+	private static int			mTextureID;
+	private static FloatBuffer 	mTexBuffer;
+	private static int 			mLastDisplayWidth = 0;
 	
 	private static final int VERTS = 4;
 	static {
-		mInfoPaint = new Paint();
-		mInfoPaint.setTextSize(22);
-        mInfoPaint.setAntiAlias(true);
-        mInfoPaint.setARGB(0xff, 0xF0, 0xF0, 0xF0);
-        
-		ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
-        tbb.order(ByteOrder.nativeOrder());
+	    mInfoPainter = new InfoPainter(22, 18);
     	
 		int vertices[] = {
 			 -one,  one, -one,
@@ -51,7 +43,7 @@ public class InfoBar {
 			Vec3f p = new Vec3f(vertices[i*3] / one, vertices[i*3 + 1] / one, vertices[i*3 + 2] / one);
 			mVertices[i] = p;
 		}
-				
+		
 		ByteBuffer vbb = ByteBuffer.allocateDirect(vertices.length*4);
 		vbb.order(ByteOrder.nativeOrder());
 		mVertexBuffer = vbb.asIntBuffer();
@@ -64,6 +56,29 @@ public class InfoBar {
 		
 	}
 	
+	private static void updateTextureCoords(GL10 gl) {
+		if(mLastDisplayWidth == RiverRenderer.mDisplay.getWidthPixels()) return;
+		mLastDisplayWidth = RiverRenderer.mDisplay.getWidthPixels();
+		ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
+        tbb.order(ByteOrder.nativeOrder());
+        mTexBuffer = tbb.asFloatBuffer();
+        float ratioX = RiverRenderer.mDisplay.getWidthPixels() / 512.0f;
+        float ratioY = 80.0f / 128.0f;
+        
+        float tex[] = {
+        	0.0f,  0.0f,
+        	0.0f,  ratioY,	
+        	ratioX,  0.0f,
+        	ratioX,  ratioY,
+        };
+        mTexBuffer.put(tex);
+        mTexBuffer.position(0);
+        mInfoPainter.paintCanvas(Math.min(RiverRenderer.mDisplay.getWidthPixels(), 512), 80);
+		gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
+        setTexture(gl, mInfoPainter.getBitmap());
+	}
+	
+	/*
 	public static void select(GL10 gl, ImageReference ir){
 		if(ir == null) return;
 		String title = ir.getTitle();
@@ -79,7 +94,7 @@ public class InfoBar {
 		mInfo.initialize(gl);
 		mInfo.beginAdding(gl);
 		if(title.length() > 25);
-		int newline = title.indexOf(" ", 20);
+		int newline = title.lastIndexOf(" ", 25);
 		if(newline != -1){
 			mInfoTitle = mInfo.add(gl, title.substring(0, newline), mInfoPaint);
 			String title2 = title.substring(newline);
@@ -104,12 +119,34 @@ public class InfoBar {
 		}
 		
 		mInfo.endAdding(gl);
-		
+	}
+	*/
+	
+	public static void select(GL10 gl, ImageReference ir){
+		mInfoPainter.setInfo(ir.getTitle(), ir.getAuthor(), 512, 128);
+		mInfoPainter.paintCanvas(Math.min(RiverRenderer.mDisplay.getWidthPixels(), 512), 80);
+		gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
+        setTexture(gl, mInfoPainter.getBitmap());        
 	}
 	
-	public static void setView(int width, int height){
-		mWidth = width;
-		mHeight = height;	
+	protected static void setTexture(GL10 gl, Bitmap bmp){
+		gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER,
+                GL10.GL_NEAREST);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D,
+                GL10.GL_TEXTURE_MAG_FILTER,
+                GL10.GL_LINEAR);
+
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S,
+                GL10.GL_CLAMP_TO_EDGE);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T,
+                GL10.GL_CLAMP_TO_EDGE);
+
+        gl.glTexEnvf(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE,
+                GL10.GL_BLEND);
+        
+        GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, bmp, 0);
+        bmp.recycle();
+        gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_REPLACE);
 	}
 	
 	static void setAlpha(float col){
@@ -129,8 +166,6 @@ public class InfoBar {
 	
 	public static void setState(GL10 gl){
 		gl.glFrontFace(GL10.GL_CCW);
-        gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
-		gl.glEnableClientState(GL10.GL_COLOR_ARRAY);
 		gl.glDisable(GL10.GL_TEXTURE_2D);	
 	}
 	
@@ -138,6 +173,24 @@ public class InfoBar {
 	}
 	
 	public static void draw(GL10 gl, float fraction){
+		updateTextureCoords(gl);
+		gl.glEnable(GL10.GL_BLEND);
+		gl.glPushMatrix();
+			float height = 80.0f / RiverRenderer.mDisplay.getHeightPixels() * RiverRenderer.mDisplay.getHeight();
+			gl.glTranslatef(0.0f, -RiverRenderer.mDisplay.getHeight() + height, -1.0f);
+			gl.glScalef(RiverRenderer.mDisplay.getWidth(), height, 1.0f);
+			gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+			gl.glEnableClientState(GL10.GL_COLOR_ARRAY);
+			drawBlackBar(gl, fraction);
+			gl.glDisableClientState(GL10.GL_COLOR_ARRAY);
+			gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+			drawInfo(gl);
+			
+		gl.glPopMatrix();
+		gl.glDisable(GL10.GL_BLEND);
+	}
+	
+	protected static void drawBlackBar(GL10 gl, float fraction){
 		setAlpha(1.0f - fraction * 0.25f);
 		
 		//Set the face rotation
@@ -145,32 +198,42 @@ public class InfoBar {
 		//Point to our vertex buffer
 		gl.glVertexPointer(3, GL10.GL_FIXED, 0, mVertexBuffer);
 		gl.glColorPointer(4, GL10.GL_FIXED, 0, mColorBuffer);
-				
-		gl.glPushMatrix();
-		gl.glLoadIdentity();
-		gl.glTranslatef(0.0f, -2.0f, -1.0f);
-		gl.glScalef(RiverRenderer.mDisplayRatio * 2.0f, 80.0f / RiverRenderer.mScreenHeight * 4.0f, 1.0f);
+		//gl.glScalef(RiverRenderer.mScreenWidth, 0.05f, 1.0f);
 		
 		
 		//Draw the vertices as triangle strip
 		gl.glBlendFunc(GL10.GL_ZERO, GL10.GL_SRC_ALPHA);
-		gl.glEnable(GL10.GL_BLEND);
+		
 		gl.glDrawElements(GL10.GL_TRIANGLE_STRIP, 4, GL10.GL_UNSIGNED_BYTE, mIndexBuffer);
-		gl.glDisable(GL10.GL_BLEND);
 		
-		gl.glDisableClientState(GL10.GL_COLOR_ARRAY);
-		
+	}
+	
+	protected static void drawInfo(GL10 gl){
+        gl.glTexParameterx(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S,GL10.GL_REPEAT);
+        gl.glTexParameterx(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_REPEAT);
+		gl.glEnable(GL10.GL_TEXTURE_2D);
+		gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE);
+		gl.glActiveTexture(GL10.GL_TEXTURE0);
+		gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
+		gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mTexBuffer);
+		gl.glDrawElements(GL10.GL_TRIANGLE_STRIP, 4, GL10.GL_UNSIGNED_BYTE, mIndexBuffer);
+	}
+	
+/*
 		mInfo.beginDrawing(gl, mWidth, mHeight);
 		
-		mInfo.draw(gl, mWidth / 2 - mInfo.getWidth(mInfoTitle) / 2, 52, mInfoTitle);
+		int rotation = 0;
+		if(RiverRenderer.mOrientation == RiverRenderer.UP_IS_LEFT){
+			rotation = -90;
+		}
+		
+		mInfo.draw(gl, mWidth / 2 - mInfo.getWidth(mInfoTitle) / 2, 52, rotation, mInfoTitle);
 		if(mInfoTitle2 != -1){
-			mInfo.draw(gl, mWidth / 2 - mInfo.getWidth(mInfoTitle2) / 2, 30, mInfoTitle2);
+			mInfo.draw(gl, mWidth / 2 - mInfo.getWidth(mInfoTitle2) / 2, 30, rotation, mInfoTitle2);
 		}
 		if(mInfoAuthor != -1){
-			mInfo.draw(gl, mWidth - mInfo.getWidth(mInfoAuthor) - 5, 5, mInfoAuthor);
+			mInfo.draw(gl, mWidth - mInfo.getWidth(mInfoAuthor) - 5, 5, rotation, mInfoAuthor);
 		}
 		mInfo.endDrawing(gl);
-		
-		gl.glPopMatrix();
-	}
+*/
 }

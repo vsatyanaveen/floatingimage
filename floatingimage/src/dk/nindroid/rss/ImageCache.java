@@ -19,6 +19,7 @@ import java.util.Random;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
+import android.os.Environment;
 import android.util.Log;
 import dk.nindroid.rss.data.FileDateReverseComparator;
 import dk.nindroid.rss.data.ImageReference;
@@ -36,6 +37,7 @@ public class ImageCache implements Runnable {
 	public ImageCache(TextureBank bank){
 		this.bank = bank;
 		String datafolder = ShowStreams.current.getString(R.string.dataFolder);
+		datafolder = Environment.getExternalStorageDirectory().getAbsolutePath() + datafolder;
 		mExploreInfoFolder = datafolder + ShowStreams.current.getString(R.string.exploreFolder);
 		mExploreFolder = mExploreInfoFolder + "/bmp";
 		mRand = new Random(new Date().getTime());
@@ -59,6 +61,7 @@ public class ImageCache implements Runnable {
 	}
 	
 	public void run(){
+		if(mExploreFiles == null) return;
 		while(true){
 			if(bank.stopThreads) return;
 			while(bank.cached.size() < bank.textureCache && !mExploreFiles.isEmpty()){
@@ -179,6 +182,7 @@ public class ImageCache implements Runnable {
 	}
 	
 	public boolean exists(String name){
+		if(mExploreFiles == null) return false;
 		synchronized(mExploreFiles){
 			if(mCached.containsKey(name + ".info")){
 				return true;

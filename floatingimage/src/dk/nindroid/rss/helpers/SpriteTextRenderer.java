@@ -180,7 +180,7 @@ public class SpriteTextRenderer implements GLSurfaceView.Renderer{
         drawLabel(gl, 1, mLabelB);
         drawLabel(gl, 2, mLabelC);
         float msPFX = mWidth - mLabels.getWidth(mLabelMsPF) - 1;
-        mLabels.draw(gl, msPFX, 0, mLabelMsPF);
+        mLabels.draw(gl, msPFX, 0, 0, mLabelMsPF);
         mLabels.endDrawing(gl);
 
         drawMsPF(gl, msPFX);
@@ -219,7 +219,7 @@ public class SpriteTextRenderer implements GLSurfaceView.Renderer{
         float width = mLabels.getWidth(labelId);
         float tx = sx - width * 0.5f;
         float ty = sy - height * 0.5f;
-        mLabels.draw(gl, tx, ty, labelId);
+        mLabels.draw(gl, tx, ty, 0, labelId);
     }
 
     public void onSurfaceChanged(GL10 gl, int w, int h) {

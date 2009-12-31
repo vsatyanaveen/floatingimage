@@ -45,7 +45,6 @@ public class Image {
 	private ImageReference mShowingImage;
 	private boolean		mRewinding = false;	
 	private Vec3f[]		mVertices;
-	private MatrixTrackingGL gl2;
 	
 	// Selected vars
 	private Vec3f		mSelectedPos = new Vec3f();
@@ -62,7 +61,6 @@ public class Image {
 	};
 	
 	public void init(GL10 gl, long time){
-		gl2 = new MatrixTrackingGL(gl);
 		int[] textures = new int[1];
 		gl.glGenTextures(1, textures, 0);
 		mTextureID = textures[0];
@@ -105,7 +103,7 @@ public class Image {
 			}
 			mShowingImage.setOld();
 			//mFocusedOffset = isTall() ? 2.0f - RiverRenderer.mDisplayHeight : 0.0f;
-			mFocusedOffset = 2.0f - RiverRenderer.mDisplayHeight;
+			mFocusedOffset = RiverRenderer.mDisplay.getHeight() - RiverRenderer.mDisplay.getFocusedHeight();
 			// Select
 			mState = STATE_FOCUSING;
 			mRotationSaved = mRotation;
@@ -125,17 +123,21 @@ public class Image {
 		setFocusTexture(gl);
 	}
 	
+	protected float getYPos(){
+		return mYPos * RiverRenderer.mDisplay.getFocusedHeight();
+	}
+	
 	public Image(TextureBank bank, long traversal, Pos layer, long startTime){
 		this.mID = ids++;
 		mTraversal = traversal;
 		mbank = bank;
 		mRand = new Random(new Date().getTime());
 		switch(layer){
-			case UP: mYPos = 2.5f; break;
+			case UP: mYPos = 1.25f; break;
 			case MIDDLE: mYPos = 0.0f; break;
-			case DOWN: mYPos = -2.5f; break;
+			case DOWN: mYPos = -1.25f; break;
 		}
-		mPos = new Vec3f(-RiverRenderer.mFarRight, mYPos, RiverRenderer.mFloatZ);
+		mPos = new Vec3f(-RiverRenderer.getFarRight(), mYPos, RiverRenderer.mFloatZ);
 		reJitter();
 		mStartTime = startTime;
 				
@@ -196,10 +198,11 @@ public class Image {
 	}
 	
 	private boolean isTall(){
-		return maspect < RiverRenderer.mDisplayRatio * 1.5f;
+		boolean tall = maspect < RiverRenderer.mDisplay.getWidth() / RiverRenderer.mDisplay.getFocusedHeight();
+		return tall;	
 	}
 	
-	public void draw(GL10 gl, long time, long realTime){
+	public void draw(MatrixTrackingGL gl, long time, long realTime){
 		update(gl, time, realTime);
 		
 		float x, y, z, szX, szY;
@@ -207,10 +210,10 @@ public class Image {
 		y = mPos.getY() + mJitter.getY();
 		z = mPos.getZ() + mJitter.getZ();
 		if(isTall()){
-			szY = RiverRenderer.mDisplayHeight * 0.9f;
+			szY = RiverRenderer.mDisplay.getFocusedHeight() * 0.9f;
 			szX = maspect * szY;
 		}else{
-			szX = RiverRenderer.mDisplayRatio * 1.9f;
+			szX = RiverRenderer.mDisplay.getWidth() * 0.95f;
 			szY = szX / maspect;
 		}
 		gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_REPLACE);
@@ -223,16 +226,16 @@ public class Image {
         
 		gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mTexBuffer);
 		
-		gl2.glPushMatrix();
+		gl.glPushMatrix();
 				
-		gl2.glTranslatef(x, y, z);
-		gl2.glRotatef(mRotation, 0, 0, 1);
-		gl2.glScalef(szX, szY, 1);
-		gl2.glDrawElements(GL10.GL_TRIANGLE_STRIP, 4, GL10.GL_UNSIGNED_BYTE, mIndexBuffer);
+		gl.glTranslatef(x, y, z);
+		gl.glRotatef(mRotation, 0, 0, 1);
+		gl.glScalef(szX, szY, 1);
+		gl.glDrawElements(GL10.GL_TRIANGLE_STRIP, 4, GL10.GL_UNSIGNED_BYTE, mIndexBuffer);
 		
-		gl2.getMatrix(mModelviewMatrix, 0);
+		gl.getMatrix(mModelviewMatrix, 0);
         
-        gl2.glPopMatrix();
+        gl.glPopMatrix();
         
         if(mState == STATE_FOCUSED && !mLargeTex){
         	ProgressBar.draw(gl, TextureSelector.getProgress());
@@ -264,14 +267,14 @@ public class Image {
 	}
 	
 	private float getXPos(long relativeTime){
-		return -RiverRenderer.mFarRight + (((float)(relativeTime % mTraversal) / mTraversal) * RiverRenderer.mFarRight * 2);
+		return -RiverRenderer.getFarRight() + (((float)(relativeTime % mTraversal) / mTraversal) * RiverRenderer.getFarRight() * 2);
 	}
 	
 	private void updateFloating(GL10 gl, long time){
 		long totalTime = time - mStartTime;
 		
 		mPos.setZ(RiverRenderer.mFloatZ);
-		mPos.setY(mYPos); 
+		mPos.setY(getYPos()); 
 		mPos.setX(getXPos(totalTime));
 		boolean isInRewind = totalTime < mTraversal * (mRotations - 1);
 		// Get new texture...
@@ -353,7 +356,7 @@ public class Image {
 		float floatX = getXPos(time + timeToFloat);
 		
 		float distX = floatX - selectedX;
-		float distY = mYPos - selectedY;
+		float distY = getYPos() - selectedY;
 		float distZ = RiverRenderer.mFloatZ - selectedZ;
 		
 		mPos.setX(distX * fraction + selectedX);
