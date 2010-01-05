@@ -48,7 +48,6 @@ public class Image {
 	
 	// Selected vars
 	private Vec3f		mSelectedPos = new Vec3f();
-	private float		mFocusedOffset;
 	private float 		mYPos;
 	private Bitmap		mFocusBmp;
 	private float		mFocusWidth;
@@ -103,7 +102,6 @@ public class Image {
 			}
 			mShowingImage.setOld();
 			//mFocusedOffset = isTall() ? 2.0f - RiverRenderer.mDisplayHeight : 0.0f;
-			mFocusedOffset = RiverRenderer.mDisplay.getHeight() - RiverRenderer.mDisplay.getFocusedHeight();
 			// Select
 			mState = STATE_FOCUSING;
 			mRotationSaved = mRotation;
@@ -210,10 +208,10 @@ public class Image {
 		y = mPos.getY() + mJitter.getY();
 		z = mPos.getZ() + mJitter.getZ();
 		if(isTall()){
-			szY = RiverRenderer.mDisplay.getFocusedHeight() * 0.9f;
+			szY = RiverRenderer.mDisplay.getFocusedHeight() * RiverRenderer.mDisplay.getFill();
 			szX = maspect * szY;
 		}else{
-			szX = RiverRenderer.mDisplay.getWidth() * 0.95f;
+			szX = RiverRenderer.mDisplay.getWidth() * RiverRenderer.mDisplay.getFill();
 			szY = szX / maspect;
 		}
 		gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_REPLACE);
@@ -321,7 +319,7 @@ public class Image {
 		float selectedZ = mSelectedPos.getZ();
 		
 		float distX = RiverRenderer.mFocusX - selectedX - mJitter.getX();
-		float distY = RiverRenderer.mFocusY - selectedY - mJitter.getY() + mFocusedOffset;
+		float distY = RiverRenderer.mFocusY - selectedY - mJitter.getY() + getFocusedOffset();
 		float distZ = RiverRenderer.mFocusZ - selectedZ - mJitter.getZ();
 		
 		mPos.setX(distX * fraction + selectedX);
@@ -389,9 +387,13 @@ public class Image {
 	
 	private void setFocusedPosition(){
 		mPos.setX(RiverRenderer.mFocusX);
-		mPos.setY(RiverRenderer.mFocusY + mFocusedOffset);
+		mPos.setY(RiverRenderer.mFocusY + getFocusedOffset());
 		mPos.setZ(RiverRenderer.mFocusZ);
 		mPos.minus(mJitter, mPos);
+	}
+	
+	private float getFocusedOffset(){
+		return RiverRenderer.mDisplay.getHeight() - RiverRenderer.mDisplay.getFocusedHeight();
 	}
 
 	

@@ -176,7 +176,7 @@ public class InfoBar {
 		updateTextureCoords(gl);
 		gl.glEnable(GL10.GL_BLEND);
 		gl.glPushMatrix();
-			float height = 80.0f / RiverRenderer.mDisplay.getHeightPixels() * RiverRenderer.mDisplay.getHeight();
+			float height = RiverRenderer.mDisplay.getInfoBarHeight() / RiverRenderer.mDisplay.getHeightPixels() * RiverRenderer.mDisplay.getHeight();
 			gl.glTranslatef(0.0f, -RiverRenderer.mDisplay.getHeight() + height, -1.0f);
 			gl.glScalef(RiverRenderer.mDisplay.getWidth(), height, 1.0f);
 			gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);

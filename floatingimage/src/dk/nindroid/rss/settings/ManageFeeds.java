@@ -9,15 +9,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
-import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import dk.nindroid.rss.R;
 
 public class ManageFeeds extends ListActivity {
 	public static final int ADD_ID = Menu.FIRST;
     private static final int DELETE_ID = Menu.FIRST + 1;
+    private static final int SELECT_FOLDER = 12;
 	private FeedsDbAdapter mDbHelper;
 	
 	@Override
@@ -48,7 +47,7 @@ public class ManageFeeds extends ListActivity {
 	}
 	
 	void addFeed(){
-		startActivityForResult(new Intent(this, DirectoryBrowser.class), 0);
+		startActivityForResult(new Intent(this, DirectoryBrowser.class), SELECT_FOLDER);
 		fillData();
 	}
 
@@ -81,11 +80,17 @@ public class ManageFeeds extends ListActivity {
 	}
 	
 	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
-		Toast t = Toast.makeText(this, "Launch directory picker please...", Toast.LENGTH_SHORT);
-        t.show();
-		super.onListItemClick(l, v, position, id);
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if(requestCode == SELECT_FOLDER && resultCode == RESULT_OK){
+			Bundle b = data.getExtras();
+			mDbHelper.open();	
+			mDbHelper.addFeed(DirectoryBrowser.ID, (String)b.get("PATH"));
+			fillData();
+			mDbHelper.close();
+		}
 	}
+	
 	
 	@Override
 	protected void onPause() {

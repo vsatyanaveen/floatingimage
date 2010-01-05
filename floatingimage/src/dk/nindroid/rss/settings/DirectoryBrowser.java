@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import android.app.ListActivity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -24,8 +25,6 @@ public class DirectoryBrowser extends ListActivity {
 	public static final String ID = "local"; 
 	private int selected;
 	
-	private FeedsDbAdapter mDbHelper;
-	
 	private List<String> directories;
 	File currentDirectory;
 	@Override
@@ -34,8 +33,6 @@ public class DirectoryBrowser extends ListActivity {
 		directories = new ArrayList<String>();
 		registerForContextMenu(getListView());
 		currentDirectory = new File("/sdcard");
-		mDbHelper = new FeedsDbAdapter(this);
-		mDbHelper.open();
 		if(currentDirectory.exists()){
 			browseTo("/sdcard");
 		}else{
@@ -77,8 +74,7 @@ public class DirectoryBrowser extends ListActivity {
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		String path = directories.get(selected);
-		addToDb(currentDirectory.getAbsolutePath() + "/" + path);
-		finish();
+		returnResult(currentDirectory.getAbsolutePath() + "/" + path);
 		return false;
 	}
 	@Override
@@ -91,13 +87,18 @@ public class DirectoryBrowser extends ListActivity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		addToDb(currentDirectory.getAbsolutePath());
+		returnResult(currentDirectory.getAbsolutePath());
 		finish();
 		return super.onOptionsItemSelected(item);
 	}
 	
-	private void addToDb(String path){
-		mDbHelper.addFeed(ID, path);
+	private void returnResult(String path){
+		Intent intent = new Intent();
+		Bundle b = new Bundle();
+		b.putString("PATH", path);
+		intent.putExtras(b);
+		setResult(RESULT_OK, intent);		
+		finish();
 	}
 }
 

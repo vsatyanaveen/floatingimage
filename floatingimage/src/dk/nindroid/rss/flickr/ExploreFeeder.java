@@ -2,6 +2,7 @@ package dk.nindroid.rss.flickr;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.List;
 
 import javax.xml.parsers.FactoryConfigurationError;
@@ -42,6 +43,8 @@ public class ExploreFeeder {
 		ExploreParser exParser = new ExploreParser();
 		xmlReader.setContentHandler(exParser);
 		xmlReader.parse(new InputSource(stream));
-		return exParser.getData();
+		List<ImageReference> list = exParser.getData();
+		Collections.shuffle(list);
+	return list;
 	}
 }

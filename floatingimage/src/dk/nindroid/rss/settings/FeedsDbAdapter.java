@@ -90,6 +90,7 @@ public class FeedsDbAdapter {
     public void close() {
     	mDb.close();
         mDbHelper.close();
+        mDb = null;
     }
 
 
