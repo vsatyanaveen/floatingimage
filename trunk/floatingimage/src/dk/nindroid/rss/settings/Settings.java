@@ -9,6 +9,7 @@ public class Settings {
 	public static boolean	useLocal;
 	public static boolean	useCache;
 	public static boolean	rotateImages;
+	public static String	showDirectory; // State
 	
 	public static void readSettings(Context context){
 		SharedPreferences sp = context.getSharedPreferences("dk.nindroid.rss_preferences", 0);

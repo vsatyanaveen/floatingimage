@@ -31,13 +31,17 @@ import dk.nindroid.rss.settings.FeedsDbAdapter;
 
 public class ShowStreams extends Activity {
 	public static final int 			ABOUT_ID 		= Menu.FIRST;
-	public static final int 			SETTINGS_ID 	= Menu.FIRST + 1;
+	public static final int 			FULLSCREEN_ID	= Menu.FIRST + 1;
+	public static final int 			SHOW_FOLDER_ID	= Menu.FIRST + 2;
+	public static final int 			SETTINGS_ID 	= Menu.FIRST + 3;
+	public static final int				SHOW_FOLDER_ACTIVITY = 13;
 	public static final String 			version 		= "2.0.0";
 	public static ShowStreams 			current;
 	private GLSurfaceView 				mGLSurfaceView;
 	private RiverRenderer 				renderer;
 	private PowerManager.WakeLock 		wl;
 	private OrientationManager			orientationManager;
+	private MenuItem					selectedItem;
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -129,7 +133,18 @@ public class ShowStreams extends Activity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		boolean res = super.onCreateOptionsMenu(menu);
+		menu.clear();
 		menu.add(0, ABOUT_ID, 0, R.string.about);
+		if(RiverRenderer.mDisplay.isFullscreen()){
+			menu.add(0, FULLSCREEN_ID, 0, R.string.show_details);
+		}else{
+			menu.add(0, FULLSCREEN_ID, 0, R.string.fullscreen);
+		}
+		if(dk.nindroid.rss.settings.Settings.showDirectory == null){
+			menu.add(0, SHOW_FOLDER_ID, 0, R.string.show_folder);
+		}else{
+			menu.add(0, SHOW_FOLDER_ID, 0, R.string.cancel_show_folder);
+		}
 		menu.add(0, SETTINGS_ID, 0, R.string.settings);
 		return res;
 	}
@@ -140,11 +155,40 @@ public class ShowStreams extends Activity {
 		case ABOUT_ID:
 			showAbout();
 			return true;
+		case FULLSCREEN_ID:
+			RiverRenderer.mDisplay.toggleFullscreen();
+			item.setTitle(RiverRenderer.mDisplay.isFullscreen() ? R.string.show_details : R.string.fullscreen);
+			return true;
+		case SHOW_FOLDER_ID:
+			if(dk.nindroid.rss.settings.Settings.showDirectory == null){
+				Intent showFolder = new Intent(this, DirectoryBrowser.class);
+				startActivityForResult(showFolder, SHOW_FOLDER_ACTIVITY);
+				selectedItem = item;
+			}else{
+				dk.nindroid.rss.settings.Settings.showDirectory = null;
+				renderer.cancelShowFolder();
+				item.setTitle(R.string.show_folder);
+			}
+			return true;
 		case SETTINGS_ID:
 			Intent showSettings = new Intent(this, Settings.class);
 			startActivity(showSettings);
+			return true;
 		}
 		return super.onOptionsItemSelected(item);
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if(requestCode == SHOW_FOLDER_ACTIVITY && resultCode == RESULT_OK){
+			Bundle b = data.getExtras();
+			String path = (String)b.get("PATH");
+			dk.nindroid.rss.settings.Settings.showDirectory = path;
+			if(selectedItem != null){
+				selectedItem.setTitle(R.string.cancel_show_folder);
+			}
+		}
 	}
 	
 	private void showAbout(){

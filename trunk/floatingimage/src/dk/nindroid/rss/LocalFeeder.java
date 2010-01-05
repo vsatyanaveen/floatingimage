@@ -17,6 +17,8 @@ import dk.nindroid.rss.data.LocalImage;
 import dk.nindroid.rss.data.Progress;
 import dk.nindroid.rss.settings.DirectoryBrowser;
 import dk.nindroid.rss.settings.FeedsDbAdapter;
+import dk.nindroid.rss.settings.Settings;
+import dk.nindroid.rss.uiActivities.Toaster;
 
 public class LocalFeeder implements Runnable{
 	private final static int 	SEARCH_LEVELS = 2;
@@ -24,12 +26,18 @@ public class LocalFeeder implements Runnable{
 	private Random 				mRand = new Random(new Date().getTime());
 	ArrayList<String> 			mImages = new ArrayList<String>();
 	private List<String> sources = new ArrayList<String>();
+	private boolean stop = false;
+	
+	public void stop(){
+		stop = true;
+	}
 	
 	public LocalFeeder(TextureBank bank){
 		this.mBank = bank;
 	}
 	@Override
 	public void run() {
+		Process.setThreadPriority(10);
 		fillSources();
 		
 		// Find images in sources
@@ -41,12 +49,16 @@ public class LocalFeeder implements Runnable{
 				buildImageIndex(f, 0);
 			}
 		}
-		Process.setThreadPriority(10);
+		if(Settings.showDirectory != null){
+			String images = mImages.size() == 1 ? "image" : "images";
+			Toaster toaster = new Toaster("Showing " + mImages.size() + images + " from " + Settings.showDirectory);
+			ShowStreams.current.runOnUiThread(toaster);
+		}
 		Log.v("LocalFeeder", mImages.size() + " local images found");
 		// Add randomly to texturebank
 		while(true){
 			try{
-				if(mBank.stopThreads){
+				if(mBank.stopThreads || stop){
 					Log.v("Bitmap downloader", "*** Stopping asynchronous local feeder");
 					return;
 				}
@@ -72,18 +84,31 @@ public class LocalFeeder implements Runnable{
 	}
 	
 	private void fillSources() {
-		FeedsDbAdapter mDbHelper = new FeedsDbAdapter(ShowStreams.current);
-		mDbHelper.open();
 		sources.clear();
-		Cursor c = mDbHelper.fetchAllFeeds();
-		while(c.moveToNext()){
-			if(c.getString(1).equals(DirectoryBrowser.ID)){
-				sources.add(c.getString(2));
+		if(Settings.showDirectory != null){
+			sources.add(Settings.showDirectory);
+			Log.v("LocalFeeder", "Showing " + Settings.showDirectory);
+		}else{
+			FeedsDbAdapter mDbHelper = new FeedsDbAdapter(ShowStreams.current);
+			mDbHelper.open();
+			Cursor c = null;
+			try{
+				c = mDbHelper.fetchAllFeeds();
+				while(c.moveToNext()){
+					if(c.getString(1).equals(DirectoryBrowser.ID)){
+						sources.add(c.getString(2));
+					}
+				}
+			}catch(Exception e){
+				Log.e("Local feeder", "Unhandled exception caught", e);
+			}finally{
+				if(c != null){
+					c.close();
+					mDbHelper.close();
+				}
 			}
+			Log.v("LocalFeeder", sources.size() + " local sources added.");
 		}
-		c.close();
-		mDbHelper.close();
-		Log.v("LocalFeeder", sources.size() + " local sources added.");
 	}
 	
 	private void buildImageIndex(File dir, int level){;

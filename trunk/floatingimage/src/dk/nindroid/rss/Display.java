@@ -5,9 +5,29 @@ import dk.nindroid.rss.orientation.OrientationSubscriber;
 
 public class Display implements OrientationSubscriber {
 	private static final long		TURN_TIME = 500;
+	private static final long		FULLSCREEN_TIME = 300;
+	private final static float		INFOBAR_HEIGHT = 80.0f;
+	private static final float		NORMAL_FILL = 0.90f;
+	
 	private long					mTurnedAt;
+	private long					mFullscreenAt;
 	private long					mFrameTime;
 	private boolean					mTurning = false;
+	private boolean					mFullscreen = false;
+	
+	
+	public boolean isFullscreen(){
+		return mFullscreen;
+	}
+	public void toggleFullscreen(){
+		mFullscreen ^= true;
+		mFullscreenAt = mFrameTime;
+		mPreviousInfoBarHeight = mInfoBarHeight;
+		mPreviousFill = mFill;
+		mTargetInfoBarHeight = mFullscreen ? 0 : INFOBAR_HEIGHT;
+		mTargetFill = mFullscreen ? 1.0f : NORMAL_FILL;
+		Log.v("Display", "Fullscreen is " + mFullscreen);
+	}
 	
 	private float smoothstep(float val){
 		return Math.min(val * val * (3.0f - 2.0f * val), 1.0f);
@@ -33,6 +53,20 @@ public class Display implements OrientationSubscriber {
 				mHeightPixels = mTargetHeightPixels;
 				mFocusedHeight = mTargetFocusedHeight;
 				mRotation = mTargetRotation;
+			}
+		}
+		if(mTargetInfoBarHeight != mInfoBarHeight){
+			if(mFrameTime < mFullscreenAt + FULLSCREEN_TIME){
+				float fraction = 1.0f - ((float)((mFullscreenAt + FULLSCREEN_TIME) - mFrameTime)) / FULLSCREEN_TIME;
+				fraction = smoothstep(fraction);
+				mInfoBarHeight = (mTargetInfoBarHeight - mPreviousInfoBarHeight) * fraction + mPreviousInfoBarHeight;
+				mFocusedHeight = calcFocusedHeight(mHeight, mHeightPixels);
+				mFill = (mTargetFill - mPreviousFill) * fraction + mPreviousFill;
+				Log.v("Display", "Fullscreen fraction: " + fraction);
+			}
+			else{
+				mInfoBarHeight = mTargetInfoBarHeight;
+				mFill = mTargetFill;
 			}
 		}
 	}
@@ -71,6 +105,8 @@ public class Display implements OrientationSubscriber {
 	private int 					mPreviousHeightPixels;
 	private float  					mPreviousFocusedHeight;
 	private float					mPreviousRotation;
+	private float					mPreviousInfoBarHeight;
+	private float					mPreviousFill;
 	
 	// Target (After rotation)
 	private float					mTargetWidth;
@@ -79,16 +115,18 @@ public class Display implements OrientationSubscriber {
 	private int 					mTargetHeightPixels;
 	private float  					mTargetFocusedHeight;
 	private float					mTargetRotation;
+	private float					mTargetInfoBarHeight = INFOBAR_HEIGHT;
+	private float					mTargetFill = NORMAL_FILL;
 	
 	// Current
-	
-	
 	private float					mWidth;
 	private float					mHeight;
 	private int 					mWidthPixels;
 	private int 					mHeightPixels;
 	private float  					mFocusedHeight;
 	private float					mRotation;
+	private float					mInfoBarHeight = INFOBAR_HEIGHT;
+	private float					mFill = NORMAL_FILL;
 	
 	public float getWidth(){
 		return mWidth;
@@ -107,6 +145,12 @@ public class Display implements OrientationSubscriber {
 	}
 	public float getRotation(){
 		return mRotation;
+	}
+	public float getInfoBarHeight(){
+		return mInfoBarHeight;
+	}
+	public float getFill(){
+		return mFill;
 	}
 	
 	public Display(){
@@ -159,7 +203,7 @@ public class Display implements OrientationSubscriber {
  		}
 	}
 	
-	private static float calcFocusedHeight(float height, int heightPixels){
-		return height - 80.0f / heightPixels * height;
+	private float calcFocusedHeight(float height, int heightPixels){
+		return height - mInfoBarHeight / heightPixels * height;
 	}
 }

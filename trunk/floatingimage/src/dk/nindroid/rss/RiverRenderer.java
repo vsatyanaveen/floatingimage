@@ -58,7 +58,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	
 	public RiverRenderer(boolean useTranslucentBackground){
 		mTranslucentBackground = useTranslucentBackground;
-		mBank = new TextureBank(5);
+		mBank = new TextureBank(10);
 		mImgs = new Image[mTotalImgRows * 3 / 2];
 		mInterval = mTraversal / mTotalImgRows;
 		long curTime = new Date().getTime();
@@ -93,8 +93,13 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	        gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
 	        gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
 	        
+	        
 	        gl.glHint(GL10.GL_PERSPECTIVE_CORRECTION_HINT,
 	                GL10.GL_FASTEST);
+	        //EGL10 egl = (EGL10)EGLContext.getEGL();
+	        //egl.eglGetConfigs(egl.eglGetCurrentDisplay(), egl.eglg, config_size, num_config)
+	        gl.glEnable(GL10.GL_MULTISAMPLE);
+	        
 	        //gl.glScalef(0.25f, 0.25f, 1.0f);
 	        long realTime = new Date().getTime();
 	        fadeOffset(realTime);
@@ -297,6 +302,10 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 			mFadeOffset = speedY;
 		}
 		mUpTime = time;
+	}
+	
+	public void cancelShowFolder(){
+		mBank.cancelShowFolder();
 	}
 	
 	public void onClick(float x, float y){
