@@ -66,6 +66,7 @@ public class Display implements OrientationSubscriber {
 			}
 			else{
 				mInfoBarHeight = mTargetInfoBarHeight;
+				mFocusedHeight = calcFocusedHeight(mHeight, mHeightPixels);
 				mFill = mTargetFill;
 			}
 		}
