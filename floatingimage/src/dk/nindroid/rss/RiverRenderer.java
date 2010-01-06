@@ -312,11 +312,11 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 		mClicked = true;
 		int orientation = mDisplay.getOrientation();
 		if(orientation == Display.UP_IS_UP){
-			mClickedPos = new Vec2f((x/mDisplay.getWidthPixels() * 2.0f - 1.0f) * mDisplay.getWidth() / 2.0f, -(y / mDisplay.getHeightPixels() * 2.0f - mDisplay.getHeight() / 2.0f));
+			mClickedPos = new Vec2f((x/mDisplay.getWidthPixels() * 2.0f - 1.0f) * mDisplay.getWidth() / 2.0f, -(y / mDisplay.getHeightPixels() * 2.0f - 1.0f) * mDisplay.getHeight() / 2.0f);
 		}else if(orientation == Display.UP_IS_LEFT){
-			//mClickedPos = new Vec2f((y/mScreenWidthPixels * 2.0f - 1.0f) * mScreenWidth / 2.0f,  (x / mScreenHeightPixels * 2.0f - mScreenHeight / 2.0f));
 			mClickedPos = new Vec2f((y/mDisplay.getWidthPixels() * 2.0f - 1.0f) * mDisplay.getWidth() / 2.0f,  (x / mDisplay.getHeightPixels() * 2.0f - 1.0f) * mDisplay.getHeight() / 2.0f);
 		}
+		
 		Log.v("RiverRenderer", "Clicked position: " + mClickedPos.toString());
 	} 
  
