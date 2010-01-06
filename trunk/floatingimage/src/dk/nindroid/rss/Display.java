@@ -159,6 +159,7 @@ public class Display implements OrientationSubscriber {
 	}
 	
 	public void onSurfaceChanged(int width, int height){
+		if(mOrientation != UP_IS_UP) return;
 		mPortraitHeight = 2.0f;
 		mHeight = mPortraitHeight;
 		mPortraitWidthPixels = width;

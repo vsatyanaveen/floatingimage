@@ -8,6 +8,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.util.Log;
 
 public class OrientationManager implements SensorEventListener {
 	private final static long ROTATION_DELAY = 100l; 
@@ -33,7 +34,10 @@ public class OrientationManager implements SensorEventListener {
 	}
 	
 	public void onResume(){
+		currentOrientation = -1; // Resend orientation info!
+		settingOrientation = -1; // Resend orientation info!
 		mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(SensorManager.SENSOR_ORIENTATION), SensorManager.SENSOR_DELAY_NORMAL);
+		Log.v("Orientation manager", "Resume!");
 	}
 	
 	@Override

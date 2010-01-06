@@ -528,15 +528,37 @@ public class Image {
 		float xd = r.getD().getX();
 		float yd = r.getD().getY();
 		float zd = r.getD().getZ();
-		float x1 = mVertices[0].getX() + posX;
-		float x2 = mVertices[2].getX() + posX;
-		float x3 = mVertices[3].getX() + posX;
-		float y1 = mVertices[0].getY() + posY;
-		float y2 = mVertices[2].getY() + posY;
-		float y3 = mVertices[3].getY() + posY;
-		float z1 = mVertices[0].getZ() + posZ;
-		float z2 = mVertices[2].getZ() + posZ;
-		float z3 = mVertices[3].getZ() + posZ;
+		
+		float scaleX;
+		float scaleY;
+		if(isTall()){
+			scaleY = RiverRenderer.mDisplay.getFocusedHeight() * RiverRenderer.mDisplay.getFill();
+			scaleX = maspect * scaleY;
+		}else{
+			scaleX = RiverRenderer.mDisplay.getWidth() * RiverRenderer.mDisplay.getFill();
+			scaleY = scaleX / maspect;
+		}
+		
+		// o is for origo :)
+		float ox1 = mVertices[0].getX() * scaleX;
+		float ox2 = mVertices[2].getX() * scaleX;
+		float ox3 = mVertices[3].getX() * scaleX;
+		float oy1 = mVertices[0].getY() * scaleY;
+		float oy2 = mVertices[2].getY() * scaleY;
+		float oy3 = mVertices[3].getY() * scaleY;
+		float oz1 = mVertices[0].getZ();
+		float oz2 = mVertices[2].getZ();
+		float oz3 = mVertices[3].getZ();
+		
+		float x1 = ox1 + posX;
+		float x2 = ox2 + posX;
+		float x3 = ox3 + posX;
+		float y1 = oy1 + posY;
+		float y2 = oy2 + posY;
+		float y3 = oy3 + posY;
+		float z1 = oz1 + posZ;
+		float z2 = oz2 + posZ;
+		float z3 = oz3 + posZ;
 		
 		float a = y1 * (z2-z3) + y2 * (z3-z1) + y3 * (z1-z2); 
 		float b = z1 * (x2-x3) + z2 * (x3-x1) + z3 * (x1-x2);
@@ -552,17 +574,13 @@ public class Image {
 		
 		Vec3f hitPoint = new Vec3f(hitX, hitY, hitZ);
 		
-		Vec3f v1 = new Vec3f();
-		mVertices[2].minus(mVertices[0], v1); // Right
-		Vec3f v2 = new Vec3f();
-		mVertices[3].minus(mVertices[2], v2); // Down
-		Vec3f v4 = new Vec3f();
-		mVertices[0].plus(pos, v4);
+		Vec3f v1 = new Vec3f(ox2 - ox1, oy2 - oy1, oz2 - oz1); // Right
+		Vec3f v2 = new Vec3f(ox3 - ox2, oy3 - oy2, oz3 - oz2); // Down
+		Vec3f v4 = new Vec3f(x1, y1, z1);
 		hitPoint.minus(v4, v4);
-		Vec3f v5 = new Vec3f();
-		mVertices[3].plus(pos, v5);
+		Vec3f v5 = new Vec3f(ox3, oy3, oz3);
+		v5.plus(pos, v5);
 		hitPoint.minus(v5, v5);
-	
 		
 		if(v1.dot(v4) >= 0 && v1.dot(v5) <= 0 && v4.dot(v2) >= 0 && v5.dot(v2) <= 0){
 			return t;

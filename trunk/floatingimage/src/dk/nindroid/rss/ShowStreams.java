@@ -48,11 +48,17 @@ public class ShowStreams extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		String dataFolder = getString(R.string.dataFolder);
-		dataFolder = Environment.getExternalStorageDirectory().getAbsolutePath() + dataFolder;
+		File sdDir = Environment.getExternalStorageDirectory();
+		dataFolder = sdDir.getAbsolutePath() + dataFolder;
 		File dataFile = new File(dataFolder);
-		if(!dataFile.exists() && !dataFile.mkdirs()){
-			Toast error = Toast.makeText(this, "Error creating data folder (Do you have an SD card?)\nCache will not work, operations might be flaky!", Toast.LENGTH_LONG);
+		if(!sdDir.canWrite()){
+			Toast error = Toast.makeText(this, "SD card not writeable (Or existant)\nCache will not work, operations might be flaky!", Toast.LENGTH_LONG);
 			error.show();
+		}else{
+			if(!dataFile.exists() && !dataFile.mkdirs()){
+				Toast error = Toast.makeText(this, "Error creating data folder (Do you have an SD card?)\nCache will not work, operations might be flaky!", Toast.LENGTH_LONG);
+				error.show();
+			}
 		}
 		try{
 			SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -215,7 +221,6 @@ public class ShowStreams extends Activity {
 	}
 
 	void saveVersion(File dataFolder){
-		if(!dataFolder.exists()) return;
 		File ver = new File(dataFolder.getAbsolutePath() + "/version");
 		try {
 			FileOutputStream fos = new FileOutputStream(ver);
