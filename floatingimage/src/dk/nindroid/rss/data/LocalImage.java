@@ -37,6 +37,15 @@ public class LocalImage implements ImageReference{
 	public String getBigImageUrl() {
 		return mFile.getAbsolutePath();
 	}
+	
+	public String getOriginalImageUrl(){
+		return mFile.getAbsolutePath();
+	}
+	
+	@Override
+	public String getImagePageUrl() {
+		return "";
+	}
 
 	@Override
 	public Bitmap getBitmap() {

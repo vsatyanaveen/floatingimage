@@ -9,6 +9,8 @@ import android.graphics.Bitmap;
 public interface ImageReference {
 	String getSmallImageUrl();
 	String getBigImageUrl();
+	String getOriginalImageUrl();
+	String getImagePageUrl();
 	Intent follow();
 	String getTitle();
 	String getImageID();

@@ -17,13 +17,19 @@ import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.PowerManager;
+import android.os.Vibrator;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.Toast;
+import dk.nindroid.rss.data.ImageReference;
+import dk.nindroid.rss.data.LocalImage;
 import dk.nindroid.rss.menu.Settings;
 import dk.nindroid.rss.orientation.OrientationManager;
 import dk.nindroid.rss.settings.DirectoryBrowser;
@@ -35,6 +41,11 @@ public class ShowStreams extends Activity {
 	public static final int 			SHOW_FOLDER_ID	= Menu.FIRST + 2;
 	public static final int 			SETTINGS_ID 	= Menu.FIRST + 3;
 	public static final int				SHOW_FOLDER_ACTIVITY = 13;
+	public static final int				CONTEXT_GO_TO_SOURCE = Menu.FIRST;
+	public static final int				CONTEXT_SAVE 	= Menu.FIRST + 1;
+	public static final int				CONTEXT_BACKGROUND = Menu.FIRST + 2;
+	public static final int				CONTEXT_SHARE 	= Menu.FIRST + 3;
+	public static final int				MENU_IMAGE_CONTEXT = 13;
 	public static final String 			version 		= "2.0.0";
 	public static ShowStreams 			current;
 	private GLSurfaceView 				mGLSurfaceView;
@@ -61,6 +72,7 @@ public class ShowStreams extends Activity {
 			}
 		}
 		try{
+			this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 			SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 			orientationManager = new OrientationManager(sensorManager);
 			
@@ -69,7 +81,6 @@ public class ShowStreams extends Activity {
 			GlowImage.init(this);
 			ShadowPainter.init(this);
 			BackgroundPainter.init(this);
-			this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 			this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 			PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 			wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "Floating Image");
@@ -112,6 +123,53 @@ public class ShowStreams extends Activity {
 		mGLSurfaceView.setRenderer(new Lesson06(this));
 		setContentView(mGLSurfaceView);
 		//*/
+	}
+	
+	public void openContextMenu(){
+		this.registerForContextMenu(mGLSurfaceView);
+		openContextMenu(mGLSurfaceView);
+		this.unregisterForContextMenu(mGLSurfaceView);
+	}
+	
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenuInfo menuInfo) {
+		((Vibrator)ShowStreams.current.getSystemService(Activity.VIBRATOR_SERVICE)).vibrate(100l);
+		ImageReference ir = renderer.getSelected();
+		if(ir != null){
+			super.onCreateContextMenu(menu, v, menuInfo);
+			menu.add(0, CONTEXT_GO_TO_SOURCE, 0, R.string.go_to_source);
+			if(!(ir instanceof LocalImage)){
+				menu.add(0, CONTEXT_BACKGROUND, 0, R.string.set_as_background);
+				menu.add(0, CONTEXT_SAVE, 0, R.string.save_image);
+			}
+		}else{
+			Toast.makeText(this, "No image selected...", Toast.LENGTH_SHORT).show();
+		}
+	}
+	
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		Intent intent = null;
+		ImageReference ir = null;
+		switch(item.getItemId()){
+			case CONTEXT_GO_TO_SOURCE:
+				intent = renderer.followSelected();
+				if(intent != null){
+					startActivity(intent);
+				}
+				return true;
+			case CONTEXT_BACKGROUND:
+				ir = renderer.getSelected();
+				Toast.makeText(this, "Setting background, please be patient...", Toast.LENGTH_LONG).show();
+				ImageDownloader.setWallpaper(ir.getOriginalImageUrl(), ir.getTitle());
+				return true;
+			case CONTEXT_SAVE:
+				ir = renderer.getSelected();
+				ImageDownloader.downloadImage(ir.getOriginalImageUrl(), ir.getTitle());
+				return true;
+		}
+		return super.onContextItemSelected(item);
 	}
 
 	@Override
@@ -204,11 +262,12 @@ public class ShowStreams extends Activity {
 		builder.setPositiveButton("Ok", null);
 		builder.show();
 	}
-	
 	@Override
-	public boolean onTouchEvent(MotionEvent event) {
-		return ClickHandler.onTouchEvent(event);
+	public boolean dispatchTouchEvent(MotionEvent ev) {
+		super.dispatchTouchEvent(ev);
+		return ClickHandler.onTouchEvent(ev);
 	}
+	
 	@Override 
 	protected void onPause() {
 		Log.v("Floating image", "Pausing...");

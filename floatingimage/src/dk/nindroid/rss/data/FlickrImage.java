@@ -124,12 +124,21 @@ public class FlickrImage implements ImageReference{
 	public String getBigImageUrl() {
 		return "http://farm" + farmID + ".static.flickr.com/" + serverID + "/" + imgID + "_" + secret + "_m.jpg";
 	}
+	@Override
+	public String getOriginalImageUrl() {
+		return "http://farm" + farmID + ".static.flickr.com/" + serverID + "/" + imgID + "_" + secret + "_b.jpg";
+	}
+	
+	@Override
+	public String getImagePageUrl() {
+		return "http://m.flickr.com/photos/" + owner + "/" + imgID;
+	}
 	
 	@Override
 	public Intent follow(){
 		Intent intent = new Intent(Intent.ACTION_VIEW);
 		intent.addCategory(Intent.CATEGORY_BROWSABLE);
-		intent.setData(Uri.parse("http://m.flickr.com/photos/" + owner + "/" + imgID));
+		intent.setData(Uri.parse(getImagePageUrl()));
 		return intent;
 	}
 	@Override
