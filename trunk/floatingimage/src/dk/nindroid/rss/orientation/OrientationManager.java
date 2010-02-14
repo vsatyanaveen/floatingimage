@@ -2,7 +2,6 @@ package dk.nindroid.rss.orientation;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -11,12 +10,10 @@ import android.hardware.SensorManager;
 import android.util.Log;
 
 public class OrientationManager implements SensorEventListener {
-	private final static long ROTATION_DELAY = 100l; 
 	private SensorManager				mSensorManager;
 	List<OrientationSubscriber> subscribers;
 	int currentOrientation = -1;
-	int settingOrientation;
-	private static Timer timer;
+	int settingOrientation = -1;
 	
 	public OrientationManager(SensorManager sensorManager) {
 		subscribers = new ArrayList<OrientationSubscriber>();
@@ -49,25 +46,41 @@ public class OrientationManager implements SensorEventListener {
 	public void onSensorChanged(SensorEvent event) {
 		float x = event.values[0];
 		float y = event.values[1];
+		float z = event.values[2];
+		
+		float absX = Math.abs(x);
+		float absY = Math.abs(y);
+		float absZ = Math.abs(z);
 		
 		int orientation = -1;
-		if(y > 6.0f){
-			orientation = OrientationSubscriber.UP_IS_UP;
-		}else if(y < -6.0f){
-			orientation = OrientationSubscriber.UP_IS_DOWN;
-		}else if(x > 6.0f){
-			orientation = OrientationSubscriber.UP_IS_LEFT;
-		}else if(x < -6.0f){
-			orientation = OrientationSubscriber.UP_IS_RIGHT;
+		if(absY > absX && absY > absZ / 4.0f){
+			if(y > 0){
+				orientation = OrientationSubscriber.UP_IS_UP;
+				Log.v("Orientation manager", "Up is up");
+			}else{
+				orientation = OrientationSubscriber.UP_IS_DOWN;
+				Log.v("Orientation manager", "Up is down");
+			}
+		}else if(absX > absY && absX > absZ / 4.0f){
+			if(x > 0){
+				orientation = OrientationSubscriber.UP_IS_LEFT;
+				Log.v("Orientation manager", "Up is left");
+			}else{
+				orientation = OrientationSubscriber.UP_IS_RIGHT;
+				Log.v("Orientation manager", "Up is right");
+			}
 		}
-		synchronized(this){
-			if(orientation != -1 && orientation != settingOrientation){
-				settingOrientation = orientation;
-				if(timer != null){
-					timer.cancel();
-				}
-				timer = new Timer();
-				timer.schedule(new ChangeOrientation(this), ROTATION_DELAY);
+		if(orientation != -1 && orientation != settingOrientation){
+			settingOrientation = orientation;
+			setOrientation();
+		}
+	}
+	
+	void setOrientation(){
+		if(settingOrientation != currentOrientation){
+			currentOrientation = settingOrientation;
+			for(OrientationSubscriber os : subscribers){
+				os.setOrientation(currentOrientation);
 			}
 		}
 	}

@@ -159,7 +159,7 @@ public class Display implements OrientationSubscriber {
 	}
 	
 	public void onSurfaceChanged(int width, int height){
-		if(mOrientation != UP_IS_UP) return;
+		Log.v("Display", "Display surface changed!");
 		mPortraitHeight = 2.0f;
 		mHeight = mPortraitHeight;
 		mPortraitWidthPixels = width;
@@ -172,12 +172,16 @@ public class Display implements OrientationSubscriber {
 		
 		mPortraitWidth = screenAspect * 2.0f;
 		mWidth = mPortraitWidth;
+		
+		if(mOrientation != -1){
+			setOrientation(mOrientation);
+		}
 	}
 	
 	@Override
 	public void setOrientation(int orientation) {
 		Log.v("dk.nindroid.rss.RiverRenderer", "Orientation change received: " + orientation);
-		if((orientation == UP_IS_UP || orientation == UP_IS_LEFT) && orientation != mOrientation){
+		if(true){
 			mTurnedAt = mFrameTime;
 			mOrientation = orientation;
 			mPreviousWidth = mWidth;
@@ -200,7 +204,22 @@ public class Display implements OrientationSubscriber {
 				mTargetHeightPixels = mPortraitWidthPixels;
 				mTargetFocusedHeight = calcFocusedHeight(mPortraitWidth, mPortraitWidthPixels);
 				mTargetRotation = -90;
+			}else if(orientation == UP_IS_RIGHT){
+				mTargetWidth = mPortraitHeight;
+				mTargetHeight = mPortraitWidth;
+				mTargetWidthPixels  = mPortraitHeightPixels;
+				mTargetHeightPixels = mPortraitWidthPixels;
+				mTargetFocusedHeight = calcFocusedHeight(mPortraitWidth, mPortraitWidthPixels);
+				mTargetRotation = 90;
+			}else if(orientation == UP_IS_DOWN){
+				mTargetWidth = mPortraitWidth;
+				mTargetHeight = mPortraitHeight;
+				mTargetWidthPixels  = mPortraitWidthPixels;
+				mTargetHeightPixels = mPortraitHeightPixels;
+				mTargetFocusedHeight = calcFocusedHeight(mPortraitHeight, mPortraitHeightPixels);
+				mTargetRotation = 180;
 			}
+			
 			mTurning = true;
  		}
 	}

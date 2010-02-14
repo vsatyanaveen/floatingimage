@@ -21,7 +21,7 @@ import dk.nindroid.rss.settings.Settings;
 import dk.nindroid.rss.uiActivities.Toaster;
 
 public class LocalFeeder implements Runnable{
-	private final static int 	SEARCH_LEVELS = 2;
+	private final static int 	SEARCH_LEVELS = 8;
 	private final TextureBank 	mBank;
 	private Random 				mRand = new Random(new Date().getTime());
 	ArrayList<String> 			mImages = new ArrayList<String>();

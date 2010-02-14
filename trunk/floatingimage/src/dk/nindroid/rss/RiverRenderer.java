@@ -1,7 +1,5 @@
 package dk.nindroid.rss;
 
-import java.util.Date;
-
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -13,6 +11,7 @@ import android.opengl.GLSurfaceView;
 import android.opengl.GLU;
 import android.util.Log;
 import dk.nindroid.rss.Image.Pos;
+import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.Ray;
 import dk.nindroid.rss.gfx.Vec2f;
 import dk.nindroid.rss.gfx.Vec3f;
@@ -46,7 +45,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	private long			mUpTime;
 	private Vec2f 			mClickedPos = new Vec2f();
 	private boolean 		mClicked = false;
-	private static final float mSensitivityX = 20.0f;
+	private static final float mSensitivityX = 70.0f;
 	private static final Vec3f mCamPos = new Vec3f(0,0,0);
 	private Image			mSelected = null;
 	private Image			mSplashImg;
@@ -61,7 +60,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 		mBank = new TextureBank(10);
 		mImgs = new Image[mTotalImgRows * 3 / 2];
 		mInterval = mTraversal / mTotalImgRows;
-		long curTime = new Date().getTime();
+		long curTime = System.currentTimeMillis();
 		long creationOffset = 0;
 		for(int i = 0; i < mTotalImgRows; ++i){
 			
@@ -101,7 +100,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	        gl.glEnable(GL10.GL_MULTISAMPLE);
 	        
 	        //gl.glScalef(0.25f, 0.25f, 1.0f);
-	        long realTime = new Date().getTime();
+	        long realTime = System.currentTimeMillis();
 	        fadeOffset(realTime);
 	        long time = realTime + mOffset;
 	        mDisplay.setFrameTime(realTime);
@@ -227,6 +226,10 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 		return null;
 	}
 	
+	public ImageReference getSelected(){
+		return mSelected != null ? mSelected.getShowing() : null;
+	}
+	
 	public void onResume(){
 		mBank.start();
 		TextureSelector.startThread();
@@ -285,23 +288,33 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	}
 	
 	public void xChanged(float amount){
-		if(mDisplay.getOrientation() == Display.UP_IS_UP)
+		if(mDisplay.getOrientation() == Display.UP_IS_UP){
 			mOffset += amount * mSensitivityX;
+		}else if(mDisplay.getOrientation() == Display.UP_IS_DOWN){
+			mOffset -= amount * mSensitivityX;
+		}
 	}
 	
 	public void yChanged(float amount){
-		if(mDisplay.getOrientation() == Display.UP_IS_LEFT)
+		if(mDisplay.getOrientation() == Display.UP_IS_LEFT){
 			mOffset += amount * mSensitivityX;
+		}else if(mDisplay.getOrientation() == Display.UP_IS_RIGHT){
+			mOffset -= amount * mSensitivityX;
+		}
 	}
 	
-	public void moveRelease(float speedX, float speedY, long time){
+	public void moveRelease(float speedX, float speedY){
 		int orientation = mDisplay.getOrientation();
 		if(orientation == Display.UP_IS_UP){
 			mFadeOffset = speedX;
 		}else if(orientation == Display.UP_IS_LEFT){
 			mFadeOffset = speedY;
+		}else if(orientation == Display.UP_IS_RIGHT){
+			mFadeOffset = -speedY;
+		}else if(orientation == Display.UP_IS_DOWN){
+			mFadeOffset = -speedX;
 		}
-		mUpTime = time;
+		mUpTime = System.currentTimeMillis();
 	}
 	
 	public void cancelShowFolder(){
@@ -315,6 +328,10 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 			mClickedPos = new Vec2f((x/mDisplay.getWidthPixels() * 2.0f - 1.0f) * mDisplay.getWidth() / 2.0f, -(y / mDisplay.getHeightPixels() * 2.0f - 1.0f) * mDisplay.getHeight() / 2.0f);
 		}else if(orientation == Display.UP_IS_LEFT){
 			mClickedPos = new Vec2f((y/mDisplay.getWidthPixels() * 2.0f - 1.0f) * mDisplay.getWidth() / 2.0f,  (x / mDisplay.getHeightPixels() * 2.0f - 1.0f) * mDisplay.getHeight() / 2.0f);
+		}else if(orientation == Display.UP_IS_RIGHT){
+			mClickedPos = new Vec2f(-(y/mDisplay.getWidthPixels() * 2.0f - 1.0f) * mDisplay.getWidth() / 2.0f,  -(x / mDisplay.getHeightPixels() * 2.0f - 1.0f) * mDisplay.getHeight() / 2.0f);
+		}else if(orientation == Display.UP_IS_DOWN){
+			mClickedPos = new Vec2f(-(x/mDisplay.getWidthPixels() * 2.0f - 1.0f) * mDisplay.getWidth() / 2.0f, (y / mDisplay.getHeightPixels() * 2.0f - 1.0f) * mDisplay.getHeight() / 2.0f);
 		}
 		
 		Log.v("RiverRenderer", "Clicked position: " + mClickedPos.toString());
@@ -325,7 +342,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 		gl.glMatrixMode(GL10.GL_TEXTURE);
 		gl.glLoadIdentity();
 		gl.glMatrixMode(GL10.GL_MODELVIEW);
-		long time = new Date().getTime();
+		long time = System.currentTimeMillis();
 		for(int i = 0; i < mImgCnt; ++i){
 			mImgs[i].init(gl, time + mOffset);
 		}

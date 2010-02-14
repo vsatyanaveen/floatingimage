@@ -137,4 +137,12 @@ public class RssImage implements ImageReference {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	public String getOriginalImageUrl(){
+		return null;
+	}
+	
+	@Override
+	public String getImagePageUrl() {
+		return null;
+	}
 }

@@ -10,4 +10,9 @@
 	<string name="show_details">Show details</string>
 	<string name="show_folder">Show folder</string>
 	<string name="cancel_show_folder">Cancel show folder</string>
+	<string name="go_to_source">Go to source</string>
+	<string name="save_image">Save image</string>
+	<string name="set_as_background">Set as background</string>
+	<string name="share_image">Share image</string>
+	<string name="user_agent">Floating image/Android</string>
 </resources>

@@ -9,7 +9,9 @@ public class Settings {
 	public static boolean	useLocal;
 	public static boolean	useCache;
 	public static boolean	rotateImages;
+	public static String	downloadDir;
 	public static String	showDirectory; // State
+	
 	
 	public static void readSettings(Context context){
 		SharedPreferences sp = context.getSharedPreferences("dk.nindroid.rss_preferences", 0);
@@ -17,6 +19,7 @@ public class Settings {
 		useLocal = sp.getBoolean("localImages", true);
 		useCache = sp.getBoolean("useCache", false);
 		rotateImages = sp.getBoolean("rotateImages", true);
+		downloadDir = sp.getString("downloadDir", "/sdcard/download/");
 		
 		Log.v("Settings", "useRandom: " + (useRandom ? "true" : "false"));
 		Log.v("Settings", "useLocal: " + (useLocal ? "true" : "false"));
