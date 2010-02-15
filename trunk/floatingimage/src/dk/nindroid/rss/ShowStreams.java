@@ -1,9 +1,7 @@
 package dk.nindroid.rss;
 
 import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -12,6 +10,7 @@ import android.app.Activity;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.hardware.SensorManager;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
@@ -46,7 +45,8 @@ public class ShowStreams extends Activity {
 	public static final int				CONTEXT_BACKGROUND = Menu.FIRST + 2;
 	public static final int				CONTEXT_SHARE 	= Menu.FIRST + 3;
 	public static final int				MENU_IMAGE_CONTEXT = 13;
-	public static final String 			version 		= "2.0.0";
+	public static final int				MISC_ROW_ID		= 201;
+	public static final String 			version 		= "2.2.5";
 	public static ShowStreams 			current;
 	private GLSurfaceView 				mGLSurfaceView;
 	private RiverRenderer 				renderer;
@@ -62,14 +62,9 @@ public class ShowStreams extends Activity {
 		File sdDir = Environment.getExternalStorageDirectory();
 		dataFolder = sdDir.getAbsolutePath() + dataFolder;
 		File dataFile = new File(dataFolder);
-		if(!sdDir.canWrite()){
-			Toast error = Toast.makeText(this, "SD card not writeable (Or existant)\nCache will not work, operations might be flaky!", Toast.LENGTH_LONG);
+		if(!dataFile.exists() && !dataFile.mkdirs()){
+			Toast error = Toast.makeText(this, "Error creating data folder (Do you have an SD card?)\nCache will not work, operations might be flaky!", Toast.LENGTH_LONG);
 			error.show();
-		}else{
-			if(!dataFile.exists() && !dataFile.mkdirs()){
-				Toast error = Toast.makeText(this, "Error creating data folder (Do you have an SD card?)\nCache will not work, operations might be flaky!", Toast.LENGTH_LONG);
-				error.show();
-			}
 		}
 		try{
 			this.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -295,19 +290,9 @@ public class ShowStreams extends Activity {
 	}
 	
 	private void cleanIfOld() {
-		File ver = new File("/sdcard/floatingImage/version");
-		String version = "0.0";
-		if(ver.exists()){
-			try {
-				FileInputStream fis = new FileInputStream(ver);
-				DataInputStream dis = new DataInputStream(fis);
-				version = dis.readLine();
-			}catch (IOException e) {
-				Log.w("dk.nindroid.rss.ShowStreams", "Error reading old version file!");
-			}
-		}
-		
-		if(!ShowStreams.version.equals(version)){
+		SharedPreferences sp = getSharedPreferences("version", 0);
+		String oldVersion = sp.getString("version", "0.0.0");
+		if(isDeprecated(oldVersion)){
 			String oldCache = R.string.dataFolder + "/exploreCache";
 			oldCache = Environment.getExternalStorageDirectory().getAbsolutePath() + oldCache;
 			File dir = new File(oldCache);
@@ -316,6 +301,22 @@ public class ShowStreams extends Activity {
 			}
 			addDefaultLocalPaths();			
 		}
+		SharedPreferences.Editor editor = sp.edit(); 
+		editor.putString("version", version);
+		editor.commit();
+		Log.v("Floating Image", "Old version: " + oldVersion + ", current version: " + version);
+	}
+	
+	boolean isDeprecated(String ver) {
+		String[] oldVersions = ver.split(",");
+		String[] newVersions = version.split(",");
+		if(newVersions.length != oldVersions.length) return true;
+		for(int i = 0; i < newVersions.length; ++i){
+			if(oldVersions[i] != newVersions[i]){
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private void addDefaultLocalPaths() {
