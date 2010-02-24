@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="dk.nindroid.rss"
-      android:versionName="2.3.5" android:versionCode="14">
+      android:versionCode="16" android:versionName="2.3.7">
       <uses-permission android:name="android.permission.INTERNET" />
     <application android:icon="@drawable/icon" android:label="@string/app_name" android:debuggable="false">
         <activity android:name=".ShowStreams" android:screenOrientation="portrait">
         	<intent-filter>
         		<action android:name="android.intent.action.MAIN"></action>
 				<category android:name="android.intent.category.LAUNCHER"></category>
-			<action android:name="android.intent.action.VIEW"></action>
-</intent-filter>
+			</intent-filter>
+		</activity>
         
-</activity>
-        <action android:name="android.intent.action.MAIN" />
     	<activity android:name=".menu.Settings"></activity>
 		<activity android:name=".ClearCache"></activity>
 		<activity android:name=".settings.ManageFeeds"></activity>

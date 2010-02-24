@@ -15,6 +15,7 @@ import dk.nindroid.rss.R;
 
 public class ManageFeeds extends ListActivity {
 	public static final int ADD_ID = Menu.FIRST;
+	public static final int CLEAR_ALL_ID = Menu.FIRST + 1;
     private static final int DELETE_ID = Menu.FIRST + 1;
     private static final int SELECT_FOLDER = 12;
 	private FeedsDbAdapter mDbHelper;
@@ -33,6 +34,7 @@ public class ManageFeeds extends ListActivity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		boolean res = super.onCreateOptionsMenu(menu);
 		menu.add(0, ADD_ID, 0, R.string.feedMenuAdd);
+		menu.add(0, CLEAR_ALL_ID, 0, R.string.feedMenuClearAll);
 		return res;
 	}
 	
@@ -41,13 +43,21 @@ public class ManageFeeds extends ListActivity {
 		switch(item.getItemId()){
 		case ADD_ID:
 			addFeed();
-			return true;		
+			return true;
+		case CLEAR_ALL_ID:
+			clearAll();
+			return true;
 		}
 		return super.onOptionsItemSelected(item);
 	}
 	
 	void addFeed(){
 		startActivityForResult(new Intent(this, DirectoryBrowser.class), SELECT_FOLDER);
+		fillData();
+	}
+	
+	void clearAll(){
+		mDbHelper.deleteAll();
 		fillData();
 	}
 
@@ -58,6 +68,7 @@ public class ManageFeeds extends ListActivity {
 		int[] to = new int[]{R.id.feedRowTitle, R.id.feedRowURI};
 		SimpleCursorAdapter feeds = new SimpleCursorAdapter(this, R.layout.feeds_row, c, from, to);
 		setListAdapter(feeds);
+		stopManagingCursor(c);
 	}
 	
 	@Override

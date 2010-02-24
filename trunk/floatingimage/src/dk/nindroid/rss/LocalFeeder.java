@@ -31,7 +31,10 @@ public class LocalFeeder implements Runnable{
 	public void stop(){
 		stop = true;
 	}
-	
+	public void reloadSources(){
+		fillSources();
+		buildImageIndex();
+	}
 	public LocalFeeder(TextureBank bank){
 		this.mBank = bank;
 	}
@@ -43,15 +46,10 @@ public class LocalFeeder implements Runnable{
 		// Find images in sources
 		Log.v("LocalFeeder", "Building local image index");
 		mImages.clear();
-		for(String src : sources){
-			File f = new File(src);
-			if(f.exists()){
-				buildImageIndex(f, 0);
-			}
-		}
-		if(Settings.showDirectory != null){
+		buildImageIndex();
+		if(Settings.showType != null && Settings.showType == Settings.SHOW_LOCAL){
 			String images = mImages.size() == 1 ? "image" : "images";
-			Toaster toaster = new Toaster("Showing " + mImages.size() + images + " from " + Settings.showDirectory);
+			Toaster toaster = new Toaster("Showing " + mImages.size() + images + " from " + Settings.showPath);
 			ShowStreams.current.runOnUiThread(toaster);
 		}
 		Log.v("LocalFeeder", mImages.size() + " local images found");
@@ -62,11 +60,15 @@ public class LocalFeeder implements Runnable{
 					Log.v("Bitmap downloader", "*** Stopping asynchronous local feeder");
 					return;
 				}
-				while(mBank.cached.size() < mBank.textureCache && mImages.size() > 0){
-					if(mBank.stopThreads) return;
-					ImageReference ir = getImageReference();
-					if(ir != null){
-						mBank.addOldBitmap(ir);
+				if(!doShow()){
+					Thread.sleep(5); // Wait, check again later.
+				}else{
+					while(mBank.cached.size() < mBank.textureCache && mImages.size() > 0){
+						if(mBank.stopThreads) return;
+						ImageReference ir = getImageReference();
+						if(ir != null){
+							mBank.addOldBitmap(ir);
+						}
 					}
 				}
 				try {
@@ -83,11 +85,15 @@ public class LocalFeeder implements Runnable{
 		}
 	}
 	
+	static boolean doShow(){
+		return Settings.useLocal && (Settings.showType == null || Settings.showType == Settings.SHOW_LOCAL); 
+	}
+	
 	private void fillSources() {
 		sources.clear();
-		if(Settings.showDirectory != null){
-			sources.add(Settings.showDirectory);
-			Log.v("LocalFeeder", "Showing " + Settings.showDirectory);
+		if(Settings.showType != null && Settings.showType == Settings.SHOW_LOCAL){
+			sources.add(Settings.showPath);
+			Log.v("LocalFeeder", "Showing " + Settings.showPath);
 		}else{
 			FeedsDbAdapter mDbHelper = new FeedsDbAdapter(ShowStreams.current);
 			mDbHelper.open();
@@ -96,7 +102,11 @@ public class LocalFeeder implements Runnable{
 				c = mDbHelper.fetchAllFeeds();
 				while(c.moveToNext()){
 					if(c.getString(1).equals(DirectoryBrowser.ID)){
-						sources.add(c.getString(2));
+						String feed = c.getString(2);
+						// Only add a single feed once!
+						if(!sources.contains(feed)){
+							sources.add(feed);
+						}
 					}
 				}
 			}catch(Exception e){
@@ -111,7 +121,19 @@ public class LocalFeeder implements Runnable{
 		}
 	}
 	
-	private void buildImageIndex(File dir, int level){;
+	private void buildImageIndex(){
+		synchronized(mImages){
+			mImages.clear();
+			for(String src : sources){
+				File f = new File(src);
+				if(f.exists()){
+					buildImageIndex(f, 0);
+				}
+			}
+		}
+	}
+	
+	private void buildImageIndex(File dir, int level){
 		for(File f : dir.listFiles()){
 			if(f.getName().charAt(0) == '.') continue; // Drop hidden files.
 			if(f.isDirectory() && level < SEARCH_LEVELS){
@@ -125,20 +147,22 @@ public class LocalFeeder implements Runnable{
 	}
 	
 	private ImageReference getImageReference(){
-		int idx = mRand.nextInt(mImages.size());
-		File file = new File(mImages.get(idx));
-		long size = file.length();
-		if(size > 2000000){
-			mImages.remove(idx);
-			return null;
+		synchronized(mImages){
+			int idx = mRand.nextInt(mImages.size());
+			File file = new File(mImages.get(idx));
+			long size = file.length();
+			if(size > 2000000){
+				mImages.remove(idx);
+				return null;
+			}
+			Bitmap bmp = readImage(file, 128, null);
+			if(bmp != null){
+				return new LocalImage(file, bmp);
+			}else{
+				mImages.remove(idx);
+			}
+			return null;		
 		}
-		Bitmap bmp = readImage(file, 128, null);
-		if(bmp != null){
-			return new LocalImage(file, bmp);
-		}else{
-			mImages.remove(idx);
-		}
-		return null;		
 	}
 	
 	private boolean isImage(File f){
@@ -168,6 +192,7 @@ public class LocalFeeder implements Runnable{
 		}
 		Bitmap bmp = BitmapFactory.decodeFile(f.getAbsolutePath(), opts);
 		setProgress(progress, 60);
+		if(bmp == null) return null;
 		width = bmp.getWidth();
 		height = bmp.getHeight();
 		largerSide = Math.max(width, height);

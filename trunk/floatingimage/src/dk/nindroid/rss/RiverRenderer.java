@@ -230,6 +230,14 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 		return mSelected != null ? mSelected.getShowing() : null;
 	}
 	
+	public boolean unselect(){
+		if(mSelected != null){
+			mClicked = true; // Unselect
+			return true;
+		}
+		return false;
+	}
+	
 	public void onResume(){
 		mBank.start();
 		TextureSelector.startThread();
@@ -317,8 +325,8 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 		mUpTime = System.currentTimeMillis();
 	}
 	
-	public void cancelShowFolder(){
-		mBank.cancelShowFolder();
+	public void cancelShow(){
+		mBank.cancelShow();
 	}
 	
 	public void onClick(float x, float y){
