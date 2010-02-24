@@ -56,18 +56,14 @@ public class OrientationManager implements SensorEventListener {
 		if(absY > absX && absY > absZ / 4.0f){
 			if(y > 0){
 				orientation = OrientationSubscriber.UP_IS_UP;
-				Log.v("Orientation manager", "Up is up");
 			}else{
 				orientation = OrientationSubscriber.UP_IS_DOWN;
-				Log.v("Orientation manager", "Up is down");
 			}
 		}else if(absX > absY && absX > absZ / 4.0f){
 			if(x > 0){
 				orientation = OrientationSubscriber.UP_IS_LEFT;
-				Log.v("Orientation manager", "Up is left");
 			}else{
 				orientation = OrientationSubscriber.UP_IS_RIGHT;
-				Log.v("Orientation manager", "Up is right");
 			}
 		}
 		if(orientation != -1 && orientation != settingOrientation){

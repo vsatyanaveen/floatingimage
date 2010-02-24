@@ -97,14 +97,8 @@ public class TextureBank {
 		}
 		return ir;
 	}
-	public void cancelShowFolder(){
-		if(Settings.useLocal || Settings.showDirectory != null){
-			new Thread(local).start();
-		}else{
-			local.stop();
-		}
-		stopThreads = false;
-		startExternal();
+	public void cancelShow(){
+		local.reloadSources();
 	}
 	public void stop(){
 		stopThreads = true;
@@ -116,20 +110,27 @@ public class TextureBank {
 		}
 		ic.cleanCache();
 	}
-	public void startExternal(){
-		if(Settings.showDirectory == null){
+	public boolean startExternal(){
+		if(BitmapDownloader.useExternal()){
 			Runnable downloader = new BitmapDownloader(this);
 			new Thread(downloader).start();
 			if(Settings.useCache){
 				new Thread(ic).start();
 			}
+			return true;
 		}	
+		return false;
+	}
+	public boolean startLocal(){
+		if(LocalFeeder.doShow()){
+			new Thread(local).start();
+			return true;
+		}
+		return false;
 	}
 	public void start(){
 		stopThreads = false;
 		startExternal();
-		if(Settings.useLocal || Settings.showDirectory != null){
-			new Thread(local).start();
-		}
+		startLocal();
 	}
 }

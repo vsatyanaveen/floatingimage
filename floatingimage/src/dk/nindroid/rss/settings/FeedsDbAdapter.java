@@ -61,6 +61,11 @@ public class FeedsDbAdapter {
             onCreate(db);
         }
     }
+    
+    public void deleteAll(){
+    	mDb.execSQL("DROP TABLE IF EXISTS feeds");
+    	mDbHelper.onCreate(mDb);
+    }
 
     /**
      * Constructor - takes the context to allow the database to be

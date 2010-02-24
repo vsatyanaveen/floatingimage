@@ -19,6 +19,7 @@ import android.os.PowerManager;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.ContextMenu;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -58,6 +59,12 @@ public class ShowStreams extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		try {
+			Thread.sleep(3000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		String dataFolder = getString(R.string.dataFolder);
 		File sdDir = Environment.getExternalStorageDirectory();
 		dataFolder = sdDir.getAbsolutePath() + dataFolder;
@@ -199,10 +206,10 @@ public class ShowStreams extends Activity {
 		}else{
 			menu.add(0, FULLSCREEN_ID, 0, R.string.fullscreen);
 		}
-		if(dk.nindroid.rss.settings.Settings.showDirectory == null){
-			menu.add(0, SHOW_FOLDER_ID, 0, R.string.show_folder);
+		if(dk.nindroid.rss.settings.Settings.showType == null){
+			menu.add(0, SHOW_FOLDER_ID, 0, R.string.show);
 		}else{
-			menu.add(0, SHOW_FOLDER_ID, 0, R.string.cancel_show_folder);
+			menu.add(0, SHOW_FOLDER_ID, 0, R.string.cancel_show);
 		}
 		menu.add(0, SETTINGS_ID, 0, R.string.settings);
 		return res;
@@ -219,14 +226,14 @@ public class ShowStreams extends Activity {
 			item.setTitle(RiverRenderer.mDisplay.isFullscreen() ? R.string.show_details : R.string.fullscreen);
 			return true;
 		case SHOW_FOLDER_ID:
-			if(dk.nindroid.rss.settings.Settings.showDirectory == null){
+			if(dk.nindroid.rss.settings.Settings.showType == null){
 				Intent showFolder = new Intent(this, DirectoryBrowser.class);
 				startActivityForResult(showFolder, SHOW_FOLDER_ACTIVITY);
 				selectedItem = item;
 			}else{
-				dk.nindroid.rss.settings.Settings.showDirectory = null;
-				renderer.cancelShowFolder();
 				item.setTitle(R.string.show_folder);
+				dk.nindroid.rss.settings.Settings.showType = null;
+				renderer.cancelShow();
 			}
 			return true;
 		case SETTINGS_ID:
@@ -242,11 +249,22 @@ public class ShowStreams extends Activity {
 		super.onActivityResult(requestCode, resultCode, data);
 		if(requestCode == SHOW_FOLDER_ACTIVITY && resultCode == RESULT_OK){
 			Bundle b = data.getExtras();
+			int type = dk.nindroid.rss.settings.Settings.SHOW_LOCAL; //b.getInt("TYPE");
 			String path = (String)b.get("PATH");
-			dk.nindroid.rss.settings.Settings.showDirectory = path;
+			dk.nindroid.rss.settings.Settings.showPath = path;
+			dk.nindroid.rss.settings.Settings.showType = type;
 			if(selectedItem != null){
-				selectedItem.setTitle(R.string.cancel_show_folder);
+				selectedItem.setTitle(R.string.cancel_show);
 			}
+		}
+	}
+	
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		switch(keyCode){
+		case KeyEvent.KEYCODE_BACK:
+			if(renderer.unselect()) return true;
+		default: return super.onKeyDown(keyCode, event);
 		}
 	}
 	
@@ -308,14 +326,7 @@ public class ShowStreams extends Activity {
 	}
 	
 	boolean isDeprecated(String ver) {
-		String[] oldVersions = ver.split(",");
-		String[] newVersions = version.split(",");
-		if(newVersions.length != oldVersions.length) return true;
-		for(int i = 0; i < newVersions.length; ++i){
-			if(oldVersions[i] != newVersions[i]){
-				return true;
-			}
-		}
+		if(!version.equals(ver)) return true;
 		return false;
 	}
 

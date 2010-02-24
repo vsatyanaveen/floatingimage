@@ -32,7 +32,6 @@ public class BitmapDownloader implements Runnable {
 	TextureBank bank;
 	Queue<ImageReference> imageFeed = new LinkedList<ImageReference>();
 	List<String> feeds = new ArrayList<String>();
-	private boolean exploreFailed = true;
 	public BitmapDownloader(TextureBank bank){
 		this.bank = bank;
 	}
@@ -41,13 +40,10 @@ public class BitmapDownloader implements Runnable {
 	public void run() {
 		Log.v("Bitmap downloader", "*** Starting asynchronous downloader thread");
 		Process.setThreadPriority(10);
+		fillFeed();
 		while(true){
 			try{
 				if(bank.stopThreads) return;
-				//checkFeeds();
-				if(Settings.useRandom && exploreFailed){
-					explore();
-				}
 				while(bank.unseen.size() < bank.textureCache && !imageFeed.isEmpty()){
 					if(bank.stopThreads){
 						Log.v("Bitmap downloader", "*** Stopping asynchronous downloader thread per request");
@@ -85,42 +81,43 @@ public class BitmapDownloader implements Runnable {
 		}
 	}
 	
+	private void fillFeed(){
+		if(useExternal()){
+			if(Settings.showType != null && Settings.showType == Settings.SHOW_FLICKR){
+				// TODO: Make me! :D
+			}
+			int i = 0;
+			while(true){
+				try{
+					explore();
+					break;
+				}catch(Exception e){
+					Log.w("dk.nindroid.BitmapDownloader", "Failed getting explore feed, retrying...");
+					++i;
+					if(i > 5) {
+						Log.e("dk.nindroid.BitmapDownloader", "Failed getting explore feed too many times, giving up!", e);
+						break;
+					}
+				}
+			}
+		}
+		
+	}
+	
+	static boolean useExternal(){
+		return Settings.useRandom && (Settings.showType == null || Settings.showType != Settings.SHOW_LOCAL);
+	}
+	
 	private void explore(){
 		List<ImageReference> bitmaps = ExploreFeeder.getImageUrls();
 		if(bitmaps != null){
 			for(ImageReference bmp : bitmaps){
 				imageFeed.add(bmp);
 			}
-			exploreFailed = false;
 		}
 		Log.v("dk.nindroid.rss.BitmapDownloader", imageFeed.size() + " images from daily explore.");
 	}
-	/*
-	private void checkFeeds(){
-		Log.v("Bitmap downloader", "Checking rss feeds");
-		Vector<String> streamList = new Vector<String>(bank.streams);
-		for(String feed : streamList){
-			if(feeds.contains(feed)) continue;
-			Log.v("Bitmap downloader", "New feed: " + feed);
-			try {				
-				List<RssElement> rssElements = parseRss(new URL(feed));
-				for(RssElement element : rssElements){
-					RssImage post = new RssImage(element);
-					imageFeed.add(post);
-				}
-			} catch (IOException e) {
-				Log.v("Bitmap downloader", "Rss feed download failed", e);
-			} catch (ParserConfigurationException e) {
-				Log.v("Bitmap downloader", "Rss feed download failed", e);
-			} catch (SAXException e) {
-				Log.v("Bitmap downloader", "Rss feed download failed", e);
-			} catch (FactoryConfigurationError e) {
-				Log.v("Bitmap downloader", "Rss feed download failed", e);
-			}
-			feeds.add(feed);
-		}
-	}
-	*/
+
 	public static List<RssElement> parseRss(URL feed) throws ParserConfigurationException, SAXException, FactoryConfigurationError, IOException{
 		SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
 		XMLReader xmlReader = parser.getXMLReader();

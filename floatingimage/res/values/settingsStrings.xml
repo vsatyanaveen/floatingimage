@@ -20,6 +20,7 @@
 	<string name="clearCacheSummary">Erase entire image cache</string>
 	<string name="noFeeds">No directories selected. Press menu to add one now</string>
 	<string name="feedMenuAdd">Add new directory</string>
+	<string name="feedMenuClearAll">Clear all</string>
 	<string name="feedMenuRemove">Remove directory</string>
 	<string name="selectFolder">Select folder</string>
 	<string name="selectCurrentFolder">Select current folder</string>
