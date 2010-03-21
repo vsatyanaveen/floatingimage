@@ -17,19 +17,31 @@ public class Settings {
 	public static String  downloadDir;
 	public static Integer showType;
 	public static String  showPath; // State
+	
+	public static boolean fullscreen;
 
+	private static SharedPreferences sp;
+	
 	public static void readSettings(Context context) {
-		SharedPreferences sp = context.getSharedPreferences(
+		Settings.sp = context.getSharedPreferences(
 				"dk.nindroid.rss_preferences", 0);
 		useRandom = sp.getBoolean("randomImages", true);
 		useLocal = sp.getBoolean("localImages", true);
 		useCache = sp.getBoolean("useCache", false);
 		rotateImages = sp.getBoolean("rotateImages", true);
 		downloadDir = sp.getString("downloadDir", "/sdcard/download/");
+		fullscreen = sp.getBoolean("fullscreen", false);
 
 		Log.v("Settings", "useRandom: " + (useRandom ? "true" : "false"));
 		Log.v("Settings", "useLocal: " + (useLocal ? "true" : "false"));
 		Log.v("Settings", "useCache: " + (useCache ? "true" : "false"));
 		Log.v("Settings", "rotateImages: " + (rotateImages ? "true" : "false"));
+	}
+	
+	public static void setFullscreen(boolean fullscreen){
+		Settings.fullscreen = fullscreen;
+		SharedPreferences.Editor editor = sp.edit();
+		editor.putBoolean("fullscreen", fullscreen);
+		editor.commit();
 	}
 }

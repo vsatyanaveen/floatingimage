@@ -213,4 +213,7 @@ public class FlickrImage implements ImageReference{
 	public float getWidth() {
 		return width;
 	}
+	public int getRotation(){
+		return 0;
+	}
 }

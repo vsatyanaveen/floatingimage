@@ -224,6 +224,7 @@ public class ShowStreams extends Activity {
 		case FULLSCREEN_ID:
 			RiverRenderer.mDisplay.toggleFullscreen();
 			item.setTitle(RiverRenderer.mDisplay.isFullscreen() ? R.string.show_details : R.string.fullscreen);
+			dk.nindroid.rss.settings.Settings.setFullscreen(RiverRenderer.mDisplay.isFullscreen());
 			return true;
 		case SHOW_FOLDER_ID:
 			if(dk.nindroid.rss.settings.Settings.showType == null){

@@ -62,7 +62,7 @@ public class InfoBar {
 		ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
         tbb.order(ByteOrder.nativeOrder());
         mTexBuffer = tbb.asFloatBuffer();
-        float ratioX = RiverRenderer.mDisplay.getWidthPixels() / 512.0f;
+        float ratioX = RiverRenderer.mDisplay.getWidthPixels() / 1024.0f;
         float ratioY = 80.0f / 128.0f;
         
         float tex[] = {
@@ -73,7 +73,7 @@ public class InfoBar {
         };
         mTexBuffer.put(tex);
         mTexBuffer.position(0);
-        mInfoPainter.paintCanvas(Math.min(RiverRenderer.mDisplay.getWidthPixels(), 512), 80);
+        mInfoPainter.paintCanvas(Math.min(RiverRenderer.mDisplay.getWidthPixels(), 1024), 80);
 		gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
         setTexture(gl, mInfoPainter.getBitmap());
 	}
@@ -123,8 +123,8 @@ public class InfoBar {
 	*/
 	
 	public static void select(GL10 gl, ImageReference ir){
-		mInfoPainter.setInfo(ir.getTitle(), ir.getAuthor(), 512, 128);
-		mInfoPainter.paintCanvas(Math.min(RiverRenderer.mDisplay.getWidthPixels(), 512), 80);
+		mInfoPainter.setInfo(ir.getTitle(), ir.getAuthor(), 1024, 128);
+		mInfoPainter.paintCanvas(Math.min(RiverRenderer.mDisplay.getWidthPixels(), 1024), 80);
 		gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
         setTexture(gl, mInfoPainter.getBitmap());        
 	}

@@ -27,4 +27,5 @@ public interface ImageReference {
 	boolean isPersonal();
 	String getAuthor();
 	void getExtended();
+	int getRotation();
 }

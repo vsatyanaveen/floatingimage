@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Vector;
 
+import android.util.Log;
+
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.settings.Settings;
 
@@ -25,6 +27,7 @@ public class TextureBank {
 	public void addNewBitmap(ImageReference ir){
 		synchronized (unseen) {
 			unseen.add(ir);
+			//Log.v("Texture bank", unseen.size() + " new images.");
 			if(Settings.useCache){
 				ic.saveExploreImage(ir);
 			}
@@ -33,6 +36,7 @@ public class TextureBank {
 	public void addOldBitmap(ImageReference ir){
 		synchronized (cached) {
 			cached.add(ir);
+			//Log.v("Texture bank", cached.size() + " old images.");
 		}
 	}
 	
@@ -73,7 +77,8 @@ public class TextureBank {
 			unseen.notify();
 			
 			if(ir != null){
-				mActiveBitmaps.put(ir.getID(), ir);	
+				mActiveBitmaps.put(ir.getID(), ir);
+				//Log.v("Texture bank", cached.size() + " new images.");
 			}
 		}
 		return ir;
@@ -87,6 +92,7 @@ public class TextureBank {
 					ir.getBitmap().recycle();
 				}
 				ir = cached.poll();
+				//Log.v("Texture bank", cached.size() + " old images.");
 				cached.notify();
 				if(ir == null) return null;
 				if(++attempts == 5){
