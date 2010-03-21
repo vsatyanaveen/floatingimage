@@ -2,6 +2,7 @@ package dk.nindroid.rss;
 
 import android.util.Log;
 import dk.nindroid.rss.orientation.OrientationSubscriber;
+import dk.nindroid.rss.settings.Settings;
 
 public class Display implements OrientationSubscriber {
 	private static final long		TURN_TIME = 500;
@@ -167,6 +168,9 @@ public class Display implements OrientationSubscriber {
 		mPortraitHeightPixels = height;
 		mHeightPixels = height;
 		mFocusedHeight = calcFocusedHeight(mPortraitHeight, height);
+		mFullscreen = Settings.fullscreen;
+		mInfoBarHeight = mFullscreen ? 0 : INFOBAR_HEIGHT;
+		mFill = mFullscreen ? 1.0f : NORMAL_FILL;
 		
 		float screenAspect = (float)width / height;
 		
@@ -204,6 +208,10 @@ public class Display implements OrientationSubscriber {
 				mTargetHeightPixels = mPortraitWidthPixels;
 				mTargetFocusedHeight = calcFocusedHeight(mPortraitWidth, mPortraitWidthPixels);
 				mTargetRotation = -90;
+				if(mRotation > 90){
+					mRotation -= 360;
+					mPreviousRotation = mRotation;
+				}
 			}else if(orientation == UP_IS_RIGHT){
 				mTargetWidth = mPortraitHeight;
 				mTargetHeight = mPortraitWidth;
@@ -218,6 +226,10 @@ public class Display implements OrientationSubscriber {
 				mTargetHeightPixels = mPortraitHeightPixels;
 				mTargetFocusedHeight = calcFocusedHeight(mPortraitHeight, mPortraitHeightPixels);
 				mTargetRotation = 180;
+				if(mRotation < 0){
+					mRotation += 360;
+					mPreviousRotation = mRotation;
+				}
 			}
 			
 			mTurning = true;

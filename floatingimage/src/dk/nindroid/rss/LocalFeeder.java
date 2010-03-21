@@ -48,7 +48,7 @@ public class LocalFeeder implements Runnable{
 		mImages.clear();
 		buildImageIndex();
 		if(Settings.showType != null && Settings.showType == Settings.SHOW_LOCAL){
-			String images = mImages.size() == 1 ? "image" : "images";
+			String images = mImages.size() == 1 ? " image" : " images";
 			Toaster toaster = new Toaster("Showing " + mImages.size() + images + " from " + Settings.showPath);
 			ShowStreams.current.runOnUiThread(toaster);
 		}
@@ -86,7 +86,7 @@ public class LocalFeeder implements Runnable{
 	}
 	
 	static boolean doShow(){
-		return Settings.useLocal && (Settings.showType == null || Settings.showType == Settings.SHOW_LOCAL); 
+		return Settings.useLocal || (Settings.showType != null &&	 Settings.showType == Settings.SHOW_LOCAL); 
 	}
 	
 	private void fillSources() {
@@ -157,7 +157,8 @@ public class LocalFeeder implements Runnable{
 			}
 			Bitmap bmp = readImage(file, 128, null);
 			if(bmp != null){
-				return new LocalImage(file, bmp);
+				int rotation = 0;
+				return new LocalImage(file, bmp, rotation);
 			}else{
 				mImages.remove(idx);
 			}
@@ -196,14 +197,14 @@ public class LocalFeeder implements Runnable{
 		width = bmp.getWidth();
 		height = bmp.getHeight();
 		largerSide = Math.max(width, height);
-		
+		setProgress(progress, 80);
 		if(largerSide > size){
 			float scale = (float)size / largerSide;
 			Bitmap tmp = Bitmap.createScaledBitmap(bmp, (int)(width * scale), (int)(height * scale), true);
 			bmp.recycle();
 			bmp = tmp;
 		}
-		setProgress(progress, 80);
+		setProgress(progress, 90);
 		return bmp;
 	}
 	

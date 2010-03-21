@@ -145,4 +145,8 @@ public class RssImage implements ImageReference {
 	public String getImagePageUrl() {
 		return null;
 	}
+	
+	public int getRotation(){
+		return 0;
+	}
 }

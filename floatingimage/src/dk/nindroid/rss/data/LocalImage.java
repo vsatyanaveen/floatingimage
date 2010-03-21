@@ -17,8 +17,10 @@ public class LocalImage implements ImageReference{
 	private final Bitmap 	mBitmap;
 	private final float		mWidth;
 	private final float		mHeight;
+	private int 			mRotation = 0;
 	
-	public LocalImage(File file, Bitmap bmp){
+	public LocalImage(File file, Bitmap bmp, int rotation){
+		this.mRotation = rotation;
 		this.mFile = file;
 		this.mBitmap = Bitmap.createBitmap(128, 128, Config.RGB_565);
 		Canvas cvs = new Canvas(this.mBitmap);
@@ -128,5 +130,7 @@ public class LocalImage implements ImageReference{
 	public void setOld() {
 		// No can do
 	}
-
+	public int getRotation(){
+		return this.mRotation;
+	}
 }
