@@ -34,13 +34,14 @@ import dk.nindroid.rss.menu.Settings;
 import dk.nindroid.rss.orientation.OrientationManager;
 import dk.nindroid.rss.settings.DirectoryBrowser;
 import dk.nindroid.rss.settings.FeedsDbAdapter;
+import dk.nindroid.rss.settings.SourceSelector;
 
 public class ShowStreams extends Activity {
 	public static final int 			ABOUT_ID 		= Menu.FIRST;
 	public static final int 			FULLSCREEN_ID	= Menu.FIRST + 1;
 	public static final int 			SHOW_FOLDER_ID	= Menu.FIRST + 2;
 	public static final int 			SETTINGS_ID 	= Menu.FIRST + 3;
-	public static final int				SHOW_FOLDER_ACTIVITY = 13;
+	public static final int				SHOW_ACTIVITY 	= 13;
 	public static final int				CONTEXT_GO_TO_SOURCE = Menu.FIRST;
 	public static final int				CONTEXT_SAVE 	= Menu.FIRST + 1;
 	public static final int				CONTEXT_BACKGROUND = Menu.FIRST + 2;
@@ -59,12 +60,6 @@ public class ShowStreams extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		try {
-			Thread.sleep(3000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		String dataFolder = getString(R.string.dataFolder);
 		File sdDir = Environment.getExternalStorageDirectory();
 		dataFolder = sdDir.getAbsolutePath() + dataFolder;
@@ -228,8 +223,8 @@ public class ShowStreams extends Activity {
 			return true;
 		case SHOW_FOLDER_ID:
 			if(dk.nindroid.rss.settings.Settings.showType == null){
-				Intent showFolder = new Intent(this, DirectoryBrowser.class);
-				startActivityForResult(showFolder, SHOW_FOLDER_ACTIVITY);
+				Intent showFolder = new Intent(this, SourceSelector.class);
+				startActivityForResult(showFolder, SHOW_ACTIVITY);
 				selectedItem = item;
 			}else{
 				item.setTitle(R.string.show_folder);
@@ -248,9 +243,9 @@ public class ShowStreams extends Activity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		if(requestCode == SHOW_FOLDER_ACTIVITY && resultCode == RESULT_OK){
+		if(requestCode == SHOW_ACTIVITY && resultCode == RESULT_OK){
 			Bundle b = data.getExtras();
-			int type = dk.nindroid.rss.settings.Settings.SHOW_LOCAL; //b.getInt("TYPE");
+			int type = b.getInt("TYPE");
 			String path = (String)b.get("PATH");
 			dk.nindroid.rss.settings.Settings.showPath = path;
 			dk.nindroid.rss.settings.Settings.showType = type;
@@ -312,7 +307,7 @@ public class ShowStreams extends Activity {
 		SharedPreferences sp = getSharedPreferences("version", 0);
 		String oldVersion = sp.getString("version", "0.0.0");
 		if(isDeprecated(oldVersion)){
-			String oldCache = R.string.dataFolder + "/exploreCache";
+			String oldCache = this.getResources().getString(R.string.dataFolder) + "/exploreCache";
 			oldCache = Environment.getExternalStorageDirectory().getAbsolutePath() + oldCache;
 			File dir = new File(oldCache);
 			if(dir.exists()){

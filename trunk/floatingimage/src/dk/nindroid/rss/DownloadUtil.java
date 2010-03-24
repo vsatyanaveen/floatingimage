@@ -66,7 +66,7 @@ public class DownloadUtil {
 			}
 			spaceLeft = CHUNKSIZE - chunkIndex;
 		}
-		Log.v("Download util", "Bytes read: " + bytesRead);
+		Log.v("Download util", "Bytes read: " + totalRead);
 		
 		if(progress != null){
 			progress.setPercentDone(100);

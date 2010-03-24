@@ -1,4 +1,4 @@
-package dk.nindroid.rss.parser;
+package dk.nindroid.rss.parser.flickr;
 
 public interface FlickrUserInfoTags {
 	public static final String	PERSON 		= "person";

@@ -1,4 +1,4 @@
-package dk.nindroid.rss.parser;
+package dk.nindroid.rss.parser.flickr;
 
 import java.util.Stack;
 
