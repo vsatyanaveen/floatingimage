@@ -1,4 +1,4 @@
-package dk.nindroid.rss.parser;
+package dk.nindroid.rss.parser.flickr;
 
 public class ExploreTags {
 	public static final String PHOTOS = "photos";

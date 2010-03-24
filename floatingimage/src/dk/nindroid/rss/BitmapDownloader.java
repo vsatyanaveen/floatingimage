@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -24,7 +25,7 @@ import android.util.Log;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.Progress;
 import dk.nindroid.rss.data.RssElement;
-import dk.nindroid.rss.flickr.ExploreFeeder;
+import dk.nindroid.rss.flickr.FlickrFeeder;
 import dk.nindroid.rss.parser.RSSParser;
 import dk.nindroid.rss.settings.Settings;
 
@@ -82,40 +83,48 @@ public class BitmapDownloader implements Runnable {
 	}
 	
 	private void fillFeed(){
-		if(useExternal()){
+		if(useExternal()){			
 			if(Settings.showType != null && Settings.showType == Settings.SHOW_FLICKR){
-				// TODO: Make me! :D
+				addImageUrls(Settings.showPath, false);
 			}
-			int i = 0;
-			while(true){
-				try{
-					explore();
-					break;
-				}catch(Exception e){
-					Log.w("dk.nindroid.BitmapDownloader", "Failed getting explore feed, retrying...");
-					++i;
-					if(i > 5) {
-						Log.e("dk.nindroid.BitmapDownloader", "Failed getting explore feed too many times, giving up!", e);
-						break;
-					}
+			else{
+				// Soon to disappear!
+				if(Settings.useRandom){
+					addImageUrls("http://api.flickr.com/services/rest/?method=flickr.interestingness.getList&api_key=f6fdb5a636863d148afa8e7bb056bf1b&per_page=500", true);
 				}
+				// More to come!
 			}
 		}
-		
 	}
 	
 	static boolean useExternal(){
-		return Settings.useRandom && (Settings.showType == null || Settings.showType != Settings.SHOW_LOCAL);
+		return (Settings.useRandom  && Settings.showType == null) || Settings.showType != Settings.SHOW_LOCAL;
 	}
 	
-	private void explore(){
-		List<ImageReference> bitmaps = ExploreFeeder.getImageUrls();
-		if(bitmaps != null){
-			for(ImageReference bmp : bitmaps){
-				imageFeed.add(bmp);
+	private void addImageUrls(String feed, boolean shuffle){
+		int i = 0;
+		while(true){
+			try{
+				List<ImageReference> bitmaps = FlickrFeeder.getImageUrls(feed);
+				if(shuffle){
+					Collections.shuffle(bitmaps);
+				}
+				if(bitmaps != null){
+					for(ImageReference bmp : bitmaps){
+						imageFeed.add(bmp);
+					}
+				}
+				return;
+			}catch(Exception e){
+				Log.w("dk.nindroid.BitmapDownloader", "Failed getting feed, retrying...");
+				++i;
+				if(i > 5) {
+					Log.e("dk.nindroid.BitmapDownloader", "Failed getting feed too many times, giving up!", e);
+					break;
+				}
 			}
 		}
-		Log.v("dk.nindroid.rss.BitmapDownloader", imageFeed.size() + " images from daily explore.");
+		Log.v("dk.nindroid.rss.BitmapDownloader", imageFeed.size() + " images from feed.");
 	}
 
 	public static List<RssElement> parseRss(URL feed) throws ParserConfigurationException, SAXException, FactoryConfigurationError, IOException{

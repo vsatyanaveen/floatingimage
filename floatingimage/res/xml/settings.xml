@@ -19,7 +19,7 @@
                 android:defaultValue="true" />
 		<CheckBoxPreference
                 android:key="localImages"
-                android:title="@string/local"
+                android:title="@string/useLocal"
                 android:summary="@string/localSummary"
                 android:defaultValue="true" />
     </PreferenceCategory>
