@@ -82,14 +82,18 @@ public class BitmapDownloader implements Runnable {
 		}
 	}
 	
-	private void fillFeed(){
+	public void fillFeed(){
+		imageFeed.clear();
 		if(useExternal()){			
 			if(Settings.showType != null && Settings.showType == Settings.SHOW_FLICKR){
+				Log.v("dk.nindroid.BitmapDownloader", "Showing specific URL: " + Settings.showPath);
 				addImageUrls(Settings.showPath, false);
+				Log.v("dk.nindroid.BitmapDownloader", "Showing path contains " + imageFeed.size() + " images.");
 			}
 			else{
 				// Soon to disappear!
 				if(Settings.useRandom){
+					Log.v("dk.nindroid.BitmapDownloader", "Showing from explore!");
 					addImageUrls("http://api.flickr.com/services/rest/?method=flickr.interestingness.getList&api_key=f6fdb5a636863d148afa8e7bb056bf1b&per_page=500", true);
 				}
 				// More to come!

@@ -168,9 +168,6 @@ public class Display implements OrientationSubscriber {
 		mPortraitHeightPixels = height;
 		mHeightPixels = height;
 		mFocusedHeight = calcFocusedHeight(mPortraitHeight, height);
-		mFullscreen = Settings.fullscreen;
-		mInfoBarHeight = mFullscreen ? 0 : INFOBAR_HEIGHT;
-		mFill = mFullscreen ? 1.0f : NORMAL_FILL;
 		
 		float screenAspect = (float)width / height;
 		
@@ -179,6 +176,12 @@ public class Display implements OrientationSubscriber {
 		
 		if(mOrientation != -1){
 			setOrientation(mOrientation);
+		}
+		
+		if(Settings.fullscreen){
+			if(!mFullscreen){
+				toggleFullscreen();
+			}
 		}
 	}
 	

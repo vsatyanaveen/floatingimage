@@ -77,7 +77,7 @@ public class FlickrBrowser extends ListActivity {
 			break;
 		}
 	}
-	
+
 	private void returnStream(String username){
 		String uid = FlickrFeeder.findByUsername(username);
 		if(username.length() == 0){ // This actually returns a user with no images!
