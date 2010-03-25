@@ -15,6 +15,7 @@ public class TextureBank {
 	Queue<ImageReference> 					cached   = new LinkedList<ImageReference>();
 	ImageCache 								ic = new ImageCache(this);
 	LocalFeeder								local = new LocalFeeder(this);
+	BitmapDownloader						bitmapDownloader = new BitmapDownloader(this); 
 	private Map<String, ImageReference> 	mActiveBitmaps = new HashMap<String, ImageReference>();
 	int 									textureCache;
 	boolean 								stopThreads = false;
@@ -106,6 +107,7 @@ public class TextureBank {
 	}
 	public void cancelShow(){
 		local.reloadSources();
+		bitmapDownloader.fillFeed();
 	}
 	public void stop(){
 		stopThreads = true;
@@ -119,8 +121,7 @@ public class TextureBank {
 	}
 	public boolean startExternal(){
 		if(BitmapDownloader.useExternal()){
-			Runnable downloader = new BitmapDownloader(this);
-			new Thread(downloader).start();
+			new Thread(bitmapDownloader).start();
 			if(Settings.useCache){
 				new Thread(ic).start();
 			}

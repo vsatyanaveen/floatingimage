@@ -71,6 +71,7 @@ public class FlickrFeeder {
 	}
 	
 	public static String findByUsername(String username){
+		username = username.replaceAll(" ", "%20");
 		String url = FIND_BY_USERNAME + username;
 		InputStream stream;
 		try {
