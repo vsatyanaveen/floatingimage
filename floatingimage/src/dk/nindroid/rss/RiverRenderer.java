@@ -55,9 +55,9 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 		mDisplay = new Display();
 	}
 	
-	public RiverRenderer(boolean useTranslucentBackground){
+	public RiverRenderer(boolean useTranslucentBackground, TextureBank textureBank){
 		mTranslucentBackground = useTranslucentBackground;
-		mBank = new TextureBank(10);
+		mBank = textureBank;
 		mImgs = new Image[mTotalImgRows * 3 / 2];
 		mInterval = mTraversal / mTotalImgRows;
 		long curTime = System.currentTimeMillis();
@@ -323,10 +323,6 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 			mFadeOffset = -speedX;
 		}
 		mUpTime = System.currentTimeMillis();
-	}
-	
-	public void cancelShow(){
-		mBank.cancelShow();
 	}
 	
 	public void onClick(float x, float y){

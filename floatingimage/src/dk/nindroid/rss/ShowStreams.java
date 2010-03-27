@@ -28,10 +28,13 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.Toast;
+import dk.nindroid.rss.data.FeedReference;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.LocalImage;
 import dk.nindroid.rss.menu.Settings;
 import dk.nindroid.rss.orientation.OrientationManager;
+import dk.nindroid.rss.parser.ParserProvider;
+import dk.nindroid.rss.parser.flickr.FlickrParser;
 import dk.nindroid.rss.settings.DirectoryBrowser;
 import dk.nindroid.rss.settings.FeedsDbAdapter;
 import dk.nindroid.rss.settings.SourceSelector;
@@ -50,16 +53,21 @@ public class ShowStreams extends Activity {
 	public static final int				MISC_ROW_ID		= 201;
 	public static final String 			version 		= "2.2.5";
 	public static ShowStreams 			current;
+	private boolean 					mShowing = false;
 	private GLSurfaceView 				mGLSurfaceView;
 	private RiverRenderer 				renderer;
 	private PowerManager.WakeLock 		wl;
 	private OrientationManager			orientationManager;
 	private MenuItem					selectedItem;
+	private FeedController				mFeedController;
+	private LocalFeeder 				mLocalFeeder;
+	private ImageCache 					mImageCache;
 	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		registerParsers();
 		String dataFolder = getString(R.string.dataFolder);
 		File sdDir = Environment.getExternalStorageDirectory();
 		dataFolder = sdDir.getAbsolutePath() + dataFolder;
@@ -72,7 +80,6 @@ public class ShowStreams extends Activity {
 			this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 			SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 			orientationManager = new OrientationManager(sensorManager);
-			
 			cleanIfOld();
 			saveVersion(dataFile);
 			GlowImage.init(this);
@@ -82,10 +89,10 @@ public class ShowStreams extends Activity {
 			PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 			wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "Floating Image");
 			ShowStreams.current = this;
-			renderer = new RiverRenderer(true);
+			TextureBank textureBank = setupFeeders();
+			renderer = new RiverRenderer(true, textureBank);
 			orientationManager.addSubscriber(RiverRenderer.mDisplay);
 			ClickHandler.init(renderer);
-			//*
 			setContentView(R.layout.main);
 			mGLSurfaceView = new GLSurfaceView(this);
 			mGLSurfaceView.setRenderer(renderer);
@@ -93,33 +100,20 @@ public class ShowStreams extends Activity {
 		}catch(Throwable t){
 			Log.e("Floating Image", "Uncaught exception caught!", t);
 		}
-		//*/
-		/*
-		mGLSurfaceView = new GLSurfaceView(this);
-        mGLSurfaceView.setGLWrapper(new GLSurfaceView.GLWrapper() {
-            public GL wrap(GL gl) {
-                return new MatrixTrackingGL(gl);
-            }});
-        mGLSurfaceView.setRenderer(new SpriteTextRenderer(	));
-        setContentView(mGLSurfaceView);
-        //*/
-		/*
-		String feed = "http://api.flickr.com/services/feeds/photos_public.gne?id=73523270@N00&lang=en-us&format=rss_200";
-		TextureBank bank = new TextureBank(60, 5);
-		bank.addStream(feed);
-		//*/
-		/*
-		mGLSurfaceView = new GLSurfaceView(this);
-		mGLSurfaceView.setEGLConfigChooser(false);
-		mGLSurfaceView.setRenderer(new TriangleRenderer(this));
-		setContentView(mGLSurfaceView);
-		//*/
-		/*
-	 	mGLSurfaceView = new GLSurfaceView(this);
-		mGLSurfaceView.setEGLConfigChooser(false);
-		mGLSurfaceView.setRenderer(new Lesson06(this));
-		setContentView(mGLSurfaceView);
-		//*/
+	}
+	
+	void registerParsers(){
+		ParserProvider.registerParser(dk.nindroid.rss.settings.Settings.TYPE_FLICKR, FlickrParser.class);
+	}
+	
+	TextureBank setupFeeders(){
+		TextureBank bank = new TextureBank(15);
+		mFeedController = new FeedController();
+		BitmapDownloader bitmapDownloader = new BitmapDownloader(bank, mFeedController);
+		mLocalFeeder = new LocalFeeder(bank);
+		mImageCache = new ImageCache(bank);
+		bank.setFeeders(bitmapDownloader, mLocalFeeder, mImageCache);
+		return bank;
 	}
 	
 	public void openContextMenu(){
@@ -189,6 +183,7 @@ public class ShowStreams extends Activity {
 		wl.acquire();
 		orientationManager.onResume();
 		mGLSurfaceView.onResume();
+		mFeedController.readFeeds(); // Run this in a thread!!
 	}
 	
 	@Override
@@ -201,7 +196,7 @@ public class ShowStreams extends Activity {
 		}else{
 			menu.add(0, FULLSCREEN_ID, 0, R.string.fullscreen);
 		}
-		if(dk.nindroid.rss.settings.Settings.showType == null){
+		if(!mShowing){
 			menu.add(0, SHOW_FOLDER_ID, 0, R.string.show);
 		}else{
 			menu.add(0, SHOW_FOLDER_ID, 0, R.string.cancel_show);
@@ -222,14 +217,14 @@ public class ShowStreams extends Activity {
 			dk.nindroid.rss.settings.Settings.setFullscreen(RiverRenderer.mDisplay.isFullscreen());
 			return true;
 		case SHOW_FOLDER_ID:
-			if(dk.nindroid.rss.settings.Settings.showType == null){
+			if(!mShowing){
 				Intent showFolder = new Intent(this, SourceSelector.class);
 				startActivityForResult(showFolder, SHOW_ACTIVITY);
 				selectedItem = item;
 			}else{
 				item.setTitle(R.string.show_folder);
-				dk.nindroid.rss.settings.Settings.showType = null;
-				renderer.cancelShow();
+				mShowing = false;
+				mImageCache.resume();
 			}
 			return true;
 		case SETTINGS_ID:
@@ -247,10 +242,20 @@ public class ShowStreams extends Activity {
 			Bundle b = data.getExtras();
 			int type = b.getInt("TYPE");
 			String path = (String)b.get("PATH");
-			dk.nindroid.rss.settings.Settings.showPath = path;
-			dk.nindroid.rss.settings.Settings.showType = type;
-			if(selectedItem != null){
-				selectedItem.setTitle(R.string.cancel_show);
+			String name = (String)b.get("NAME");
+			
+			FeedReference feed = mFeedController.getFeedReference(path, type, name);
+			if(!mFeedController.showFeed(feed) && !mLocalFeeder.showFeed(feed)){
+				mFeedController.readFeeds();
+				mLocalFeeder.reloadSources();
+				String error = this.getResources().getString(R.string.empty_feed) + feed.getName();
+				Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
+			}else{
+				mShowing = true;
+				mImageCache.pause();
+				if(selectedItem != null){
+					selectedItem.setTitle(R.string.cancel_show);
+				}
 			}
 		}
 	}

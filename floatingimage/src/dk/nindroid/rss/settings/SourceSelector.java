@@ -52,10 +52,10 @@ public class SourceSelector extends ListActivity {
 			Bundle b = data.getExtras();
 			switch(requestCode){
 			case LOCAL_ACTIVITY:
-				b.putInt("TYPE", Settings.SHOW_LOCAL);
+				b.putInt("TYPE", Settings.TYPE_LOCAL);
 				break;
 			case FLICKR_ACTIVITY:
-				b.putInt("TYPE", Settings.SHOW_FLICKR);
+				b.putInt("TYPE", Settings.TYPE_FLICKR);
 				break;
 			}
 			intent.putExtras(b);

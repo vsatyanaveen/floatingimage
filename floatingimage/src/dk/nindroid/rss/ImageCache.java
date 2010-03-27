@@ -23,16 +23,18 @@ import android.os.Environment;
 import android.util.Log;
 import dk.nindroid.rss.data.FileDateReverseComparator;
 import dk.nindroid.rss.data.ImageReference;
+import dk.nindroid.rss.settings.Settings;
 
 public class ImageCache implements Runnable {
 	TextureBank bank;
-	private final String mExploreFolder;
-	private final String mExploreInfoFolder;
-	List<File>	mExploreFiles;
-	Map<String, File> mCached;
-	Random 			mRand;
-	File 			mExplore;
-	File 			mExploreInfo;
+	private final String 	mExploreFolder;
+	private final String 	mExploreInfoFolder;
+	private boolean			mActive = true;
+	List<File>				mExploreFiles;
+	Map<String, File> 		mCached;
+	Random 					mRand;
+	File 					mExplore;
+	File 					mExploreInfo;
 	
 	public ImageCache(TextureBank bank){
 		this.bank = bank;
@@ -58,6 +60,14 @@ public class ImageCache implements Runnable {
 				mCached.put(f.getName(), f);
 			}
 		}
+	}
+	
+	public void pause(){
+		mActive = false;
+	}
+	
+	public void resume(){
+		mActive = true;
 	}
 	
 	public void run(){
@@ -142,7 +152,7 @@ public class ImageCache implements Runnable {
 		}
 	}
 	public ImageReference getRandomExplore(){
-		if(mExploreFiles.size() == 0) return null;
+		if(mExploreFiles.size() == 0 || (!mActive || !Settings.useCache)) return null;
 		int idx = mRand.nextInt(mExploreFiles.size());
 		InputStream is;
 		try {

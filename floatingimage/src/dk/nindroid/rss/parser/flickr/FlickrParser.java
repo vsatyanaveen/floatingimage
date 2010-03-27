@@ -5,12 +5,12 @@ import java.util.List;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
 
 import dk.nindroid.rss.data.FlickrImage;
 import dk.nindroid.rss.data.ImageReference;
+import dk.nindroid.rss.parser.FeedParser;
 
-public class ExploreParser extends DefaultHandler{
+public class FlickrParser extends FeedParser {
 	List<ImageReference> imgs;
 	StringBuilder data = new StringBuilder();
 	

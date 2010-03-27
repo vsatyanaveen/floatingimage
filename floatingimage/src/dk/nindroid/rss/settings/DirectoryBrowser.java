@@ -96,6 +96,7 @@ public class DirectoryBrowser extends ListActivity {
 		Intent intent = new Intent();
 		Bundle b = new Bundle();
 		b.putString("PATH", path);
+		b.putString("NAME", path);
 		intent.putExtras(b);
 		setResult(RESULT_OK, intent);		
 		finish();

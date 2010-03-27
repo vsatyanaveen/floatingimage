@@ -19,4 +19,5 @@
 	<string name="set_as_background">Set as background</string>
 	<string name="share_image">Share image</string>
 	<string name="user_agent">Floating image/Android</string>
+	<string name="empty_feed">No pictures found in feed</string>
 </resources>

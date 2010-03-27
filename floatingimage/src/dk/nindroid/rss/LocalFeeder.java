@@ -12,29 +12,26 @@ import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
 import android.os.Process;
 import android.util.Log;
+import dk.nindroid.rss.data.FeedReference;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.LocalImage;
 import dk.nindroid.rss.data.Progress;
 import dk.nindroid.rss.settings.DirectoryBrowser;
 import dk.nindroid.rss.settings.FeedsDbAdapter;
 import dk.nindroid.rss.settings.Settings;
-import dk.nindroid.rss.uiActivities.Toaster;
 
 public class LocalFeeder implements Runnable{
 	private final static int 	SEARCH_LEVELS = 8;
 	private final TextureBank 	mBank;
 	private Random 				mRand = new Random(new Date().getTime());
 	ArrayList<String> 			mImages = new ArrayList<String>();
-	private List<String> sources = new ArrayList<String>();
+	private List<String> 		mSources = new ArrayList<String>();
 	private boolean stop = false;
 	
 	public void stop(){
 		stop = true;
 	}
-	public void reloadSources(){
-		fillSources();
-		buildImageIndex();
-	}
+	
 	public LocalFeeder(TextureBank bank){
 		this.mBank = bank;
 	}
@@ -47,11 +44,7 @@ public class LocalFeeder implements Runnable{
 		Log.v("LocalFeeder", "Building local image index");
 		mImages.clear();
 		buildImageIndex();
-		if(Settings.showType != null && Settings.showType == Settings.SHOW_LOCAL){
-			String images = mImages.size() == 1 ? " image" : " images";
-			Toaster toaster = new Toaster("Showing " + mImages.size() + images + " from " + Settings.showPath);
-			ShowStreams.current.runOnUiThread(toaster);
-		}
+		
 		Log.v("LocalFeeder", mImages.size() + " local images found");
 		// Add randomly to texturebank
 		while(true){
@@ -60,7 +53,7 @@ public class LocalFeeder implements Runnable{
 					Log.v("Bitmap downloader", "*** Stopping asynchronous local feeder");
 					return;
 				}
-				if(!doShow()){
+				if(mImages.isEmpty()){
 					Thread.sleep(5); // Wait, check again later.
 				}else{
 					while(mBank.cached.size() < mBank.textureCache && mImages.size() > 0){
@@ -85,16 +78,20 @@ public class LocalFeeder implements Runnable{
 		}
 	}
 	
-	static boolean doShow(){
-		return Settings.useLocal || (Settings.showType != null &&	 Settings.showType == Settings.SHOW_LOCAL); 
+	public void reloadSources(){
+		fillSources();
+		buildImageIndex();
+	}
+	public boolean showFeed(FeedReference feed){
+		mSources.clear();
+		mSources.add(feed.getFeedLocation());
+		buildImageIndex();
+		return !mImages.isEmpty();
 	}
 	
 	private void fillSources() {
-		sources.clear();
-		if(Settings.showType != null && Settings.showType == Settings.SHOW_LOCAL){
-			sources.add(Settings.showPath);
-			Log.v("LocalFeeder", "Showing " + Settings.showPath);
-		}else{
+		mSources.clear();
+		if(Settings.useLocal){
 			FeedsDbAdapter mDbHelper = new FeedsDbAdapter(ShowStreams.current);
 			mDbHelper.open();
 			Cursor c = null;
@@ -104,8 +101,8 @@ public class LocalFeeder implements Runnable{
 					if(c.getString(1).equals(DirectoryBrowser.ID)){
 						String feed = c.getString(2);
 						// Only add a single feed once!
-						if(!sources.contains(feed)){
-							sources.add(feed);
+						if(!mSources.contains(feed)){
+							mSources.add(feed);
 						}
 					}
 				}
@@ -117,14 +114,14 @@ public class LocalFeeder implements Runnable{
 					mDbHelper.close();
 				}
 			}
-			Log.v("LocalFeeder", sources.size() + " local sources added.");
+			Log.v("LocalFeeder", mSources.size() + " local sources added.");
 		}
 	}
 	
 	private void buildImageIndex(){
 		synchronized(mImages){
 			mImages.clear();
-			for(String src : sources){
+			for(String src : mSources){
 				File f = new File(src);
 				if(f.exists()){
 					buildImageIndex(f, 0);
