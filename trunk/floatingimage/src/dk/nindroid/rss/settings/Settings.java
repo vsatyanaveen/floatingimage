@@ -5,18 +5,15 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 public class Settings {
-	public static final int SHOW_LOCAL  = 1;
-	public static final int SHOW_FLICKR = 2;
-	public static final int SEARCH_FLICKR = 3;
-	
+	public static final int TYPE_LOCAL  = 1;
+	public static final int TYPE_FLICKR = 2;
+	public static final int TYPE_PICASA = 3;
 	
 	public static boolean useRandom;
 	public static boolean useLocal;
 	public static boolean useCache;
 	public static boolean rotateImages;
 	public static String  downloadDir;
-	public static Integer showType;
-	public static String  showPath; // State
 	
 	public static boolean fullscreen;
 

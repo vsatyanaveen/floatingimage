@@ -16,7 +16,7 @@ import org.xml.sax.XMLReader;
 import android.util.Log;
 import dk.nindroid.rss.HttpTools;
 import dk.nindroid.rss.data.ImageReference;
-import dk.nindroid.rss.parser.flickr.ExploreParser;
+import dk.nindroid.rss.parser.flickr.FlickrParser;
 import dk.nindroid.rss.parser.flickr.FindByUsernameParser;
 
 public class FlickrFeeder {
@@ -48,7 +48,7 @@ public class FlickrFeeder {
 	public static List<ImageReference> parseStream(InputStream stream) throws ParserConfigurationException, SAXException, FactoryConfigurationError, IOException{
 		SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
 		XMLReader xmlReader = parser.getXMLReader();
-		ExploreParser exParser = new ExploreParser();
+		FlickrParser exParser = new FlickrParser();
 		xmlReader.setContentHandler(exParser);
 		xmlReader.parse(new InputSource(stream));
 		List<ImageReference> list = exParser.getData();

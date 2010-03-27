@@ -14,8 +14,8 @@ public class TextureBank {
 	Vector<String> 							streams  = new Vector<String>();
 	Queue<ImageReference> 					cached   = new LinkedList<ImageReference>();
 	ImageCache 								ic = new ImageCache(this);
-	LocalFeeder								local = new LocalFeeder(this);
-	BitmapDownloader						bitmapDownloader = new BitmapDownloader(this); 
+	LocalFeeder								local;
+	BitmapDownloader						bitmapDownloader; 
 	private Map<String, ImageReference> 	mActiveBitmaps = new HashMap<String, ImageReference>();
 	int 									textureCache;
 	boolean 								stopThreads = false;
@@ -23,6 +23,13 @@ public class TextureBank {
 	public TextureBank(int textureCache){
 		this.textureCache = textureCache;
 	}
+	
+	public void setFeeders(BitmapDownloader bitmapDownloader, LocalFeeder localFeeder, ImageCache ic){
+		this.local = localFeeder;
+		this.bitmapDownloader = bitmapDownloader;
+		this.ic = ic;
+	}
+	
 	public void addNewBitmap(ImageReference ir){
 		synchronized (unseen) {
 			unseen.add(ir);
@@ -77,15 +84,11 @@ public class TextureBank {
 			
 			if(ir != null){
 				mActiveBitmaps.put(ir.getID(), ir);
-				//Log.v("Texture bank", cached.size() + " new images.");
 			}
 		}
 		return ir;
 	}
 	private ImageReference getCached(){
-		if(Settings.showType != null){
-			return null;
-		}
 		ImageReference ir = null;
 		synchronized (cached) {
 			int attempts = 0;
@@ -94,7 +97,6 @@ public class TextureBank {
 					ir.getBitmap().recycle();
 				}
 				ir = cached.poll();
-				//Log.v("Texture bank", cached.size() + " old images.");
 				cached.notify();
 				if(ir == null) return null;
 				if(++attempts == 5){
@@ -105,10 +107,7 @@ public class TextureBank {
 		}
 		return ir;
 	}
-	public void cancelShow(){
-		local.reloadSources();
-		bitmapDownloader.fillFeed();
-	}
+	
 	public void stop(){
 		stopThreads = true;
 		synchronized(unseen){
@@ -119,22 +118,12 @@ public class TextureBank {
 		}
 		ic.cleanCache();
 	}
-	public boolean startExternal(){
-		if(BitmapDownloader.useExternal()){
-			new Thread(bitmapDownloader).start();
-			if(Settings.useCache){
-				new Thread(ic).start();
-			}
-			return true;
-		}	
-		return false;
+	public void startExternal(){
+		new Thread(bitmapDownloader).start();
+		new Thread(ic).start();
 	}
-	public boolean startLocal(){
-		if(LocalFeeder.doShow()){
-			new Thread(local).start();
-			return true;
-		}
-		return false;
+	public void startLocal(){
+		new Thread(local).start();
 	}
 	public void start(){
 		stopThreads = false;

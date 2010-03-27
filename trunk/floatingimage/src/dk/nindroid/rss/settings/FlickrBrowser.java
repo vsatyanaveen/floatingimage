@@ -92,6 +92,7 @@ public class FlickrBrowser extends ListActivity {
 		Bundle b = new Bundle();
 		String streamURL = FlickrFeeder.getPublicPhotos(uid);
 		b.putString("PATH", streamURL);
+		b.putString("NAME", "Stream: " + username);
 		intent.putExtras(b);
 		setResult(RESULT_OK, intent);		
 		finish();
@@ -106,6 +107,7 @@ public class FlickrBrowser extends ListActivity {
 		Bundle b = new Bundle();
 		String streamURL = FlickrFeeder.getSearch(criteria);
 		b.putString("PATH", streamURL);
+		b.putString("NAME", "Search: " + criteria);
 		intent.putExtras(b);
 		setResult(RESULT_OK, intent);		
 		finish();
