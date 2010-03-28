@@ -31,18 +31,22 @@ public class TextureBank {
 	}
 	
 	public void addNewBitmap(ImageReference ir){
-		synchronized (unseen) {
-			unseen.add(ir);
-			//Log.v("Texture bank", unseen.size() + " new images.");
-			if(Settings.useCache){
-				ic.saveExploreImage(ir);
+		if(ir != null){
+			synchronized (unseen) {
+				unseen.add(ir);
+				//Log.v("Texture bank", unseen.size() + " new images.");
+				if(Settings.useCache){
+					ic.saveExploreImage(ir);
+				}
 			}
 		}
 	}
 	public void addOldBitmap(ImageReference ir){
-		synchronized (cached) {
-			cached.add(ir);
-			//Log.v("Texture bank", cached.size() + " old images.");
+		if(ir != null){
+			synchronized (cached) {
+				cached.add(ir);
+				//Log.v("Texture bank", cached.size() + " old images.");
+			}
 		}
 	}
 	
@@ -58,16 +62,23 @@ public class TextureBank {
 	}
 		
 	public ImageReference getTexture(ImageReference previousImage){
-		// Remove previous image, if any
-		if(previousImage != null){
-			mActiveBitmaps.remove(previousImage.getID());
-		}
 		ImageReference ir = getUnseen();
-		if(ir != null) return ir;
+		if(ir != null){
+			// Remove previous image, if any
+			if(previousImage != null){
+				mActiveBitmaps.remove(previousImage.getID());
+			}
+			return ir;
+		}
 		// If no new pictures, try some old ones.
 		// Do not show an image that's already being shown
 		if(Settings.useCache || Settings.useLocal){
-			return getCached();
+			ir = getCached();
+			
+			if(ir != null && previousImage != null){
+				mActiveBitmaps.remove(previousImage.getID());
+			}
+			return ir;
 		}else{
 			return null;
 		}

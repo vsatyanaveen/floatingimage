@@ -46,13 +46,15 @@ public class DirectoryBrowser extends ListActivity {
 		String[] files = current.list();
 		directories.clear();
 		directories.add("..");
-		for(String file : files){
-			File f = new File(curDir + "/" + file);
-			if(f.isDirectory()){
-				directories.add(file);
+		if(files != null){
+			for(String file : files){
+				File f = new File(curDir + "/" + file);
+				if(f.isDirectory()){
+					directories.add(file);
+				}
 			}
+			Collections.sort(directories, new stringUncaseComparator());
 		}
-		Collections.sort(directories, new stringUncaseComparator());
 		setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, directories));
 	}
 	
