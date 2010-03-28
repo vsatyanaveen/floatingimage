@@ -22,6 +22,7 @@ public class FeedsDbAdapter {
 
     public static final String KEY_TITLE = "title";
     public static final String KEY_URI = "uri";
+    public static final String KEY_TYPE = "type";
     public static final String KEY_ROWID = "_id";
 
     private static final String TAG = "FeedsDbAdapter";
@@ -33,11 +34,11 @@ public class FeedsDbAdapter {
      */
     private static final String DATABASE_CREATE =
             "create table feeds (_id integer primary key autoincrement, "
-                    + "title text not null, uri text not null);";
+                    + "type integer not null, uri text not null, title text not null);";
 
     private static final String DATABASE_NAME = "floatingImage";
     private static final String DATABASE_TABLE = "feeds";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     private final Context mCtx;
 
@@ -106,10 +107,11 @@ public class FeedsDbAdapter {
      * @param body the body of the note
      * @return rowId or -1 if failed
      */
-    public long addFeed(String title, String uri) {
+    public long addFeed(String title, String uri, int type) {
         ContentValues initialValues = new ContentValues();
         initialValues.put(KEY_TITLE, title);
         initialValues.put(KEY_URI, uri);
+        initialValues.put(KEY_TYPE, type);
 
         return mDb.insert(DATABASE_TABLE, null, initialValues);
     }
@@ -133,7 +135,7 @@ public class FeedsDbAdapter {
     public Cursor fetchAllFeeds() {
 
         return mDb.query(DATABASE_TABLE, new String[] {KEY_ROWID, KEY_TITLE,
-                KEY_URI}, null, null, null, null, null);
+                KEY_URI, KEY_TYPE}, null, null, null, null, null);
     }
 
     /**
@@ -148,7 +150,7 @@ public class FeedsDbAdapter {
         Cursor mCursor =
 
                 mDb.query(true, DATABASE_TABLE, new String[] {KEY_ROWID,
-                        KEY_TITLE, KEY_URI}, KEY_ROWID + "=" + rowId, null,
+                        KEY_TITLE, KEY_URI, KEY_TYPE}, KEY_ROWID + "=" + rowId, null,
                         null, null, null, null);
         if (mCursor != null) {
             mCursor.moveToFirst();
@@ -167,10 +169,11 @@ public class FeedsDbAdapter {
      * @param body value to set note body to
      * @return true if the note was successfully updated, false otherwise
      */
-    public boolean updateFeed(long rowId, String title, String body) {
+    public boolean updateFeed(long rowId, String title, String body, int type) {
         ContentValues args = new ContentValues();
         args.put(KEY_TITLE, title);
         args.put(KEY_URI, body);
+        args.put(KEY_TYPE, type);
 
         return mDb.update(DATABASE_TABLE, args, KEY_ROWID + "=" + rowId, null) > 0;
     }
