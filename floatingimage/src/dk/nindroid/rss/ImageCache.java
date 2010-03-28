@@ -152,7 +152,16 @@ public class ImageCache implements Runnable {
 		}
 	}
 	public ImageReference getRandomExplore(){
-		if(mExploreFiles.size() == 0 || (!mActive || !Settings.useCache)) return null;
+		if(mExploreFiles.size() == 0 || (!mActive || !Settings.useCache)){
+			try {
+				Thread.sleep(10); 	// Sleep for a bit, we're not doing anything anyway...
+									// TODO: Make this wait() instead!
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
+		}
 		int idx = mRand.nextInt(mExploreFiles.size());
 		InputStream is;
 		try {

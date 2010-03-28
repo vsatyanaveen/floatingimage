@@ -16,7 +16,6 @@ import dk.nindroid.rss.data.FeedReference;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.LocalImage;
 import dk.nindroid.rss.data.Progress;
-import dk.nindroid.rss.settings.DirectoryBrowser;
 import dk.nindroid.rss.settings.FeedsDbAdapter;
 import dk.nindroid.rss.settings.Settings;
 
@@ -98,7 +97,7 @@ public class LocalFeeder implements Runnable{
 			try{
 				c = mDbHelper.fetchAllFeeds();
 				while(c.moveToNext()){
-					if(c.getString(1).equals(DirectoryBrowser.ID)){
+					if(c.getInt(3) == Settings.TYPE_LOCAL){
 						String feed = c.getString(2);
 						// Only add a single feed once!
 						if(!mSources.contains(feed)){
@@ -147,11 +146,13 @@ public class LocalFeeder implements Runnable{
 		synchronized(mImages){
 			int idx = mRand.nextInt(mImages.size());
 			File file = new File(mImages.get(idx));
+			/*
 			long size = file.length();
 			if(size > 2000000){
 				mImages.remove(idx);
 				return null;
 			}
+			*/
 			Bitmap bmp = readImage(file, 128, null);
 			if(bmp != null){
 				int rotation = 0;
@@ -188,7 +189,7 @@ public class LocalFeeder implements Runnable{
 			int sampleSize = getSampleSize(size, largerSide);
 			opts.inSampleSize = sampleSize;
 		}
-		Bitmap bmp = BitmapFactory.decodeFile(f.getAbsolutePath(), opts);
+		Bitmap bmp = BitmapFactory.decodeFile(path, opts);
 		setProgress(progress, 60);
 		if(bmp == null) return null;
 		width = bmp.getWidth();
@@ -213,7 +214,9 @@ public class LocalFeeder implements Runnable{
 	
 	private static int getSampleSize(int target, int source){
 		int fraction = source / target;
-		if(fraction > 16){
+		if(fraction > 32){
+			return 32;
+		}if(fraction > 16){
 			return 16;
 		}if(fraction > 8){
 			return 8;
