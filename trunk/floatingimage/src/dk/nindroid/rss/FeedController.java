@@ -14,6 +14,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
+import android.database.Cursor;
 import android.util.Log;
 import dk.nindroid.rss.data.FeedReference;
 import dk.nindroid.rss.data.ImageReference;
@@ -52,18 +53,17 @@ public class FeedController {
 		if(Settings.useRandom){
 			mFeeds.add(getFeedReference(FlickrFeeder.getExplore(), Settings.TYPE_FLICKR, "Explore"));
 		}
-		// DB is not current!
 		FeedsDbAdapter mDbHelper = new FeedsDbAdapter(ShowStreams.current);
-		/*
+		
 		mDbHelper.open();
 		Cursor c = null;
 		try{
 			c = mDbHelper.fetchAllFeeds();
 			while(c.moveToNext()){
-				int type = c.getInt(1); 
+				int type = c.getInt(3); 
 				if(type != Settings.TYPE_LOCAL){
 					String feed = c.getString(2);
-					String name = "UNKNOWN";// c.getString(3);
+					String name = c.getString(1);
 					
 					// Only add a single feed once!
 					if(!mFeeds.contains(feed)){
@@ -79,7 +79,7 @@ public class FeedController {
 				mDbHelper.close();
 			}
 		}
-		*/
+		
 		parseFeeds();
 	}
 	
@@ -114,7 +114,7 @@ public class FeedController {
 					reference = parseFeed(feed);
 					break;
 				}catch (Exception e){
-					Log.w("FeedController", "Failed getting feed, retrying...");
+					Log.w("FeedController", "Failed getting feed, retrying...", e);
 				}
 			}
 			if(reference != null){

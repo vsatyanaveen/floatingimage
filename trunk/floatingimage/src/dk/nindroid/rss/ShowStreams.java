@@ -31,11 +31,11 @@ import android.widget.Toast;
 import dk.nindroid.rss.data.FeedReference;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.LocalImage;
+import dk.nindroid.rss.launchers.ReadFeeds;
 import dk.nindroid.rss.menu.Settings;
 import dk.nindroid.rss.orientation.OrientationManager;
 import dk.nindroid.rss.parser.ParserProvider;
 import dk.nindroid.rss.parser.flickr.FlickrParser;
-import dk.nindroid.rss.settings.DirectoryBrowser;
 import dk.nindroid.rss.settings.FeedsDbAdapter;
 import dk.nindroid.rss.settings.SourceSelector;
 
@@ -183,7 +183,9 @@ public class ShowStreams extends Activity {
 		wl.acquire();
 		orientationManager.onResume();
 		mGLSurfaceView.onResume();
-		mFeedController.readFeeds(); // Run this in a thread!!
+		if(!mShowing){ // Feed is already loaded!
+			ReadFeeds.runAsync(mFeedController);
+		}
 	}
 	
 	@Override
@@ -225,6 +227,7 @@ public class ShowStreams extends Activity {
 				item.setTitle(R.string.show_folder);
 				mShowing = false;
 				mImageCache.resume();
+				ReadFeeds.runAsync(mFeedController);
 			}
 			return true;
 		case SETTINGS_ID:
@@ -246,7 +249,6 @@ public class ShowStreams extends Activity {
 			
 			FeedReference feed = mFeedController.getFeedReference(path, type, name);
 			if(!mFeedController.showFeed(feed) && !mLocalFeeder.showFeed(feed)){
-				mFeedController.readFeeds();
 				mLocalFeeder.reloadSources();
 				String error = this.getResources().getString(R.string.empty_feed) + feed.getName();
 				Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
@@ -334,8 +336,8 @@ public class ShowStreams extends Activity {
 	private void addDefaultLocalPaths() {
 		FeedsDbAdapter mDbHelper = new FeedsDbAdapter(this);
 		mDbHelper.open();
-		mDbHelper.addFeed(DirectoryBrowser.ID, "/sdcard/DCIM");
-		mDbHelper.addFeed(DirectoryBrowser.ID, "/sdcard/download");
+		mDbHelper.addFeed("Camera pictures", "/sdcard/DCIM", dk.nindroid.rss.settings.Settings.TYPE_LOCAL);
+		mDbHelper.addFeed("Downloads", "/sdcard/download", dk.nindroid.rss.settings.Settings.TYPE_LOCAL);
 		mDbHelper.close();
 	}
 }

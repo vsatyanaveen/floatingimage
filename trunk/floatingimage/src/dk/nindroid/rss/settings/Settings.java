@@ -41,4 +41,17 @@ public class Settings {
 		editor.putBoolean("fullscreen", fullscreen);
 		editor.commit();
 	}
+	
+	public static String typeToString(int type){
+		switch(type){
+		case TYPE_LOCAL:
+			return "Local";
+		case TYPE_FLICKR:
+			return "Flickr";
+		case TYPE_PICASA:
+			return "Picasa";
+		default:
+			return "Unknown";
+		}
+	}
 }
