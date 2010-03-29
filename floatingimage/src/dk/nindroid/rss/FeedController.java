@@ -1,5 +1,6 @@
 package dk.nindroid.rss;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import android.database.Cursor;
 import android.util.Log;
 import dk.nindroid.rss.data.FeedReference;
 import dk.nindroid.rss.data.ImageReference;
+import dk.nindroid.rss.data.LocalImage;
 import dk.nindroid.rss.flickr.FlickrFeeder;
 import dk.nindroid.rss.parser.FeedParser;
 import dk.nindroid.rss.parser.ParserProvider;
@@ -28,7 +30,12 @@ public class FeedController {
 	private List<List<ImageReference>> 		mReferences;
 	private List<Integer>					mFeedIndex;
 	private List<FeedReference>				mFeeds;
-	private int nextFeed = 0;
+	private boolean showing = false;
+	private int lastFeed = -1;
+	
+	public boolean isShowing(){
+		return showing;
+	}
 	
 	public FeedController(){
 		mFeeds = new ArrayList<FeedReference>();
@@ -39,11 +46,12 @@ public class FeedController {
 	public ImageReference getImageReference(){
 		ImageReference ir = null;
 		if(mReferences.size() == 0) return null;
-		List<ImageReference> feed = mReferences.get(nextFeed); 
-		int index = mFeedIndex.get(nextFeed);
+		int thisFeed = (lastFeed + 1) % mReferences.size();
+		List<ImageReference> feed = mReferences.get(thisFeed); 
+		int index = mFeedIndex.get(thisFeed);
 		ir = feed.get(index);
-		mFeedIndex.set(nextFeed, (index + 1) % feed.size());
-		nextFeed = (nextFeed + 1) % mReferences.size();
+		mFeedIndex.set(thisFeed, (index + 1) % feed.size());
+		lastFeed = thisFeed;
 		return ir;
 	}
 	
@@ -61,14 +69,12 @@ public class FeedController {
 			c = mDbHelper.fetchAllFeeds();
 			while(c.moveToNext()){
 				int type = c.getInt(3); 
-				if(type != Settings.TYPE_LOCAL){
-					String feed = c.getString(2);
-					String name = c.getString(1);
-					
-					// Only add a single feed once!
-					if(!mFeeds.contains(feed)){
-						mFeeds.add(getFeedReference(feed, type, name));
-					}
+				String feed = c.getString(2);
+				String name = c.getString(1);
+				
+				// Only add a single feed once!
+				if(!mFeeds.contains(feed)){
+					mFeeds.add(getFeedReference(feed, type, name));
 				}
 			}
 		}catch(Exception e){
@@ -79,6 +85,7 @@ public class FeedController {
 				mDbHelper.close();
 			}
 		}
+		showing = false;
 		
 		parseFeeds();
 	}
@@ -92,33 +99,36 @@ public class FeedController {
 	
 	public boolean showFeed(FeedReference feed){
 		mFeeds.clear();
-		if(feed.getParser() != null){
-			mFeeds.add(feed);
-			return parseFeeds();
-		}
-		return false;
+		mFeeds.add(feed);
+		showing = true;
+		lastFeed = -1;
+		return parseFeeds();
 	}
 	
 	public FeedReference getFeedReference(String path, int type, String name){
-		return new FeedReference(getParser(type), path, name);
+		return new FeedReference(getParser(type), path, name, type);
 	}
 	
 	// False if no images.
 	private boolean parseFeeds(){
 		mReferences.clear();
 		for(FeedReference feed : mFeeds){
-			int i = 5;
-			List<ImageReference> reference = null;
-			while(i-->0){
-				try{
-					reference = parseFeed(feed);
-					break;
-				}catch (Exception e){
-					Log.w("FeedController", "Failed getting feed, retrying...", e);
+			List<ImageReference> references = null;
+			if(feed.getType() == Settings.TYPE_LOCAL){
+				references = readLocalFeed(feed);
+			}else{
+				int i = 5;
+				while(i-->0){
+					try{
+						references = parseFeed(feed);
+						break;
+					}catch (Exception e){
+						Log.w("FeedController", "Failed getting feed, retrying...", e);
+					}
 				}
 			}
-			if(reference != null){
-				mReferences.add(reference); // These two 
+			if(references != null){
+				mReferences.add(references); // These two 
 				mFeedIndex.add(0);			// are in sync!
 			}else{
 				Log.w("FeedController", "Reading feed failed too many times, giving up!");
@@ -159,5 +169,38 @@ public class FeedController {
 			Log.v("FeedController", list.size() + " photos found.");
 		}
 		return list;
+	}
+	
+	// LOCAL
+	private static List<ImageReference> readLocalFeed(FeedReference feed){
+		File f = new File(feed.getFeedLocation());
+		List<ImageReference> images = new ArrayList<ImageReference>();
+		if(f.exists()){
+			buildImageIndex(images, f, 0);
+		}
+		return images;
+	}
+	
+	private static void buildImageIndex(List<ImageReference> images, File dir, int level){
+		for(File f : dir.listFiles()){
+			if(f.getName().charAt(0) == '.') continue; // Drop hidden files.
+			if(f.isDirectory() && level < 20){ // Some high number to avoid any infinite loops...
+				buildImageIndex(images, f, level + 1);
+			}else{
+				if(isImage(f)){
+					ImageReference ir = new LocalImage(f, 0);
+					images.add(ir);
+				}
+			}
+		}
+	}
+	
+	private static boolean isImage(File f){
+		String filename = f.getName();
+		String extension = filename.substring(filename.lastIndexOf('.') + 1);
+		if("jpg".equalsIgnoreCase(extension) || "png".equalsIgnoreCase(extension)){
+			return true;
+		}
+		return false;
 	}
 }

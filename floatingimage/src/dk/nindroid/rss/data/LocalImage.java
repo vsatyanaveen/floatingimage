@@ -14,10 +14,17 @@ import android.net.Uri;
 public class LocalImage implements ImageReference{
 	private final static Paint paint = new Paint();
 	private final File 		mFile;
-	private final Bitmap 	mBitmap;
-	private final float		mWidth;
-	private final float		mHeight;
+	private 	  Bitmap 	mBitmap;
+	private 	  float		mWidth;
+	private 	  float		mHeight;
 	private int 			mRotation = 0;
+	
+	public LocalImage(File file, int rotation){
+		this.mRotation = rotation;
+		this.mFile = file;
+		mWidth = 0;
+		mHeight = 0;
+	}
 	
 	public LocalImage(File file, Bitmap bmp, int rotation){
 		this.mRotation = rotation;
@@ -117,8 +124,13 @@ public class LocalImage implements ImageReference{
 	}
 
 	@Override
-	public void set128Bitmap(Bitmap bitmap) {
-		// No can do
+	public void set128Bitmap(Bitmap bmp) {
+		this.mBitmap = Bitmap.createBitmap(128, 128, Config.RGB_565);
+		Canvas cvs = new Canvas(this.mBitmap);
+		cvs.drawBitmap(bmp, 0, 0, paint);
+		this.mWidth = bmp.getWidth() / 128.0f;
+		this.mHeight = bmp.getHeight() / 128.0f;
+		bmp.recycle();
 	}
 
 	@Override
@@ -132,5 +144,9 @@ public class LocalImage implements ImageReference{
 	}
 	public int getRotation(){
 		return this.mRotation;
+	}
+	
+	public File getFile(){
+		return mFile;
 	}
 }

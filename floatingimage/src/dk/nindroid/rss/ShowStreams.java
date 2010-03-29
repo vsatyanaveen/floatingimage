@@ -60,7 +60,6 @@ public class ShowStreams extends Activity {
 	private OrientationManager			orientationManager;
 	private MenuItem					selectedItem;
 	private FeedController				mFeedController;
-	private LocalFeeder 				mLocalFeeder;
 	private ImageCache 					mImageCache;
 	
 	/** Called when the activity is first created. */
@@ -110,9 +109,8 @@ public class ShowStreams extends Activity {
 		TextureBank bank = new TextureBank(15);
 		mFeedController = new FeedController();
 		BitmapDownloader bitmapDownloader = new BitmapDownloader(bank, mFeedController);
-		mLocalFeeder = new LocalFeeder(bank);
 		mImageCache = new ImageCache(bank);
-		bank.setFeeders(bitmapDownloader, mLocalFeeder, mImageCache);
+		bank.setFeeders(bitmapDownloader, mImageCache);
 		return bank;
 	}
 	
@@ -248,8 +246,7 @@ public class ShowStreams extends Activity {
 			String name = (String)b.get("NAME");
 			
 			FeedReference feed = mFeedController.getFeedReference(path, type, name);
-			if(!mFeedController.showFeed(feed) && !mLocalFeeder.showFeed(feed)){
-				mLocalFeeder.reloadSources();
+			if(!mFeedController.showFeed(feed)){
 				String error = this.getResources().getString(R.string.empty_feed) + feed.getName();
 				Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
 			}else{

@@ -78,7 +78,9 @@ public class Dimmer {
 	 * @param szZ
 	 */
 	public static void draw(GL10 gl, float fraction){
-		setAlpha(1.0f - fraction * 0.5f);
+		float dark = RiverRenderer.mDisplay.getFill();
+		dark *= dark;
+		setAlpha(1.0f - fraction * dark);
 		gl.glPushMatrix();
 			gl.glLoadIdentity(); // We fill whole screen, never rotate!
 			gl.glTranslatef(0, 0, -zDepth);

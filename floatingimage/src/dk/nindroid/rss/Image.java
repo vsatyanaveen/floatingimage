@@ -66,7 +66,15 @@ public class Image {
 		revive(gl, time);
 	}
 	
-	public boolean inFocus(){
+	public boolean stateFloating(){
+		return this.mState == STATE_FLOATING;
+	}
+	
+	public boolean stateFocusing(){
+		return this.mState == STATE_FOCUSING;
+	}
+	
+	public boolean stateInFocus(){
 		return mState == STATE_FOCUSED;
 	}
 	
