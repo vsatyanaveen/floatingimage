@@ -1,5 +1,6 @@
 package dk.nindroid.rss;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -19,6 +20,7 @@ import android.graphics.BitmapFactory;
 import android.os.Process;
 import android.util.Log;
 import dk.nindroid.rss.data.ImageReference;
+import dk.nindroid.rss.data.LocalImage;
 import dk.nindroid.rss.data.Progress;
 import dk.nindroid.rss.data.RssElement;
 import dk.nindroid.rss.parser.RSSParser;
@@ -46,15 +48,10 @@ public class BitmapDownloader implements Runnable {
 					ImageReference ir = mFeedController.getImageReference();
 					if(ir == null)
 						break;
-					String url = ir.getSmallImageUrl();
-					if(bank.doDownload(ir.getImageID())){
-						Bitmap bmp = downloadImage(url, null);
-						if(bmp == null){
-							continue;
-						}
-						ir.set128Bitmap(bmp);
-						ir.getExtended();
-						bank.addNewBitmap(ir);
+					if(ir instanceof LocalImage){
+						addLocalImage((LocalImage)ir);
+					}else {
+						addExternalImage(ir);
 					}
 				}
 				synchronized (bank.unseen) {
@@ -72,6 +69,32 @@ public class BitmapDownloader implements Runnable {
 			}catch(Exception e){
 				Log.e("dk.nindroid.BitmapDownloader", "Unexpected exception caught...", e);
 			}
+		}
+	}
+	
+	public void addExternalImage(ImageReference ir){
+		String url = ir.getSmallImageUrl();
+		if(bank.doDownload(ir.getImageID())){
+			Bitmap bmp = downloadImage(url, null);
+			if(bmp == null){
+				return;
+			}
+			ir.set128Bitmap(bmp);
+			ir.getExtended();
+			bank.addNewBitmap(ir);
+		}else{
+			if(mFeedController.isShowing()){
+				bank.addFromCache(ir.getImageID());
+			}
+		}
+	}
+	
+	public void addLocalImage(LocalImage image){
+		File file = image.getFile();
+		Bitmap bmp = ImageFileReader.readImage(file, 128, null);
+		if(bmp != null){
+			image.set128Bitmap(bmp);
+			bank.addOldBitmap(image);
 		}
 	}
 	

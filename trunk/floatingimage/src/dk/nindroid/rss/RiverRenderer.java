@@ -121,11 +121,13 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	        if(mSelected != null){
 	        	if(mClicked){
 		        	mClicked = false;
-		        	if(mSelected.inFocus()){
+		        	if(mSelected.stateInFocus()){
 		        		mSelectedTime = realTime;
-			        	mSelected.select(gl, time, realTime);
-			        	mSelected = null;
+			        	mSelected.select(gl, time, realTime); // Deselect!
 		        	}
+	        	}
+	        	if(mSelected.stateFloating()){
+	        		mSelected = null;
 	        	}
 	        }else{
 	        	if(mClicked && mSplashImg == null){
@@ -172,23 +174,23 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	        	mImgs[i].drawGlow(gl);
 	        }
 	        GlowImage.unsetState(gl);
+	        float fraction = getFraction(realTime);
 	        if(mSelected != null){
-	        	if(mSelected.inFocus()){
+	        	if(mSelected.stateInFocus()){
 	        		Dimmer.draw(gl, 1.0f);
-	        		if(!mDisplay.isTurning()){
-		        		InfoBar.setState(gl);
-		        		InfoBar.draw(gl, 1.0f);
-		        		InfoBar.unsetState(gl);
-	        		}
-	        	}else{
-	        		float fraction = getFraction(realTime);
+	        		fraction = 1.0f;
+	        	}else if (mSelected.stateFocusing()){
 	        		Dimmer.draw(gl, fraction);
-	        		if(!mDisplay.isTurning()){
-		        		InfoBar.setState(gl);
-		        		InfoBar.draw(gl, fraction);
-		        		InfoBar.unsetState(gl);
-	        		}
+	        		// Fraction is right!
+	        	}else{
+	        		Dimmer.draw(gl, 1.0f - fraction);
+	        		fraction = 1.0f - fraction;
 	        	}
+	        	if(!mDisplay.isTurning()){
+	        		InfoBar.setState(gl);
+	        		InfoBar.draw(gl, fraction);
+	        		InfoBar.unsetState(gl);
+        		}
 	        	
 	        	gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
 	        	GlowImage.setState(gl);
@@ -205,6 +207,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 			Log.e("Floating Image", "Uncaught exception caught!", t);
 		}
 	}
+	
 	
 	public static float getFraction(long realTime){
 		return Math.min(((float)(realTime - RiverRenderer.mSelectedTime)) / RiverRenderer.mFocusDuration, 1.1f);

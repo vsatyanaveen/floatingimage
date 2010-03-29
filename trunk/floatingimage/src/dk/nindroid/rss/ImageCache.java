@@ -31,7 +31,7 @@ public class ImageCache implements Runnable {
 	private final String 	mExploreInfoFolder;
 	private boolean			mActive = true;
 	List<File>				mExploreFiles;
-	Map<String, File> 		mCached;
+	Map<String, Integer>	mCached;
 	Random 					mRand;
 	File 					mExplore;
 	File 					mExploreInfo;
@@ -51,13 +51,12 @@ public class ImageCache implements Runnable {
 		File[] exploreInfoArray = mExploreInfo.listFiles();
 		if(exploreInfoArray == null) return;
 		mExploreFiles = new ArrayList<File>(exploreInfoArray.length);
-		mCached = new HashMap<String, File>(exploreInfoArray.length);
+		mCached = new HashMap<String, Integer>(exploreInfoArray.length);
 		for(int i = 0; i < exploreInfoArray.length; ++i){
 			File f = exploreInfoArray[i];
 			if(f == null) break;
 			if(!f.isDirectory()){
-				mExploreFiles.add(f);
-				mCached.put(f.getName(), f);
+				addFile(f);
 			}
 		}
 	}
@@ -118,7 +117,7 @@ public class ImageCache implements Runnable {
 			mExploreFiles.clear();
 			int entries = Math.min(limit, files.length);
 			for(int i = 0; i < entries; ++i){
-				mExploreFiles.add(files[i]);
+				addFile(files[i]);
 			}
 		}catch(IOException e){
 			Log.w("dk.nindroid.rss.ImageCache", "Error removing old images...", e);
@@ -140,8 +139,8 @@ public class ImageCache implements Runnable {
 			fos_info.flush();
 			fos_info.close();
 			synchronized(mExploreFiles){
-				mExploreFiles.add(f_info);
-				mCached.put(f_info.getName(), f_info);
+				addFile(f_info);
+				mCached.put(f_info.getName(), mExploreFiles.size() - 1);
 			}
 		} catch (FileNotFoundException e) {
 			Log.w("dk.nindroid.rss.ImageCache", "Image could not be cached", e);
@@ -151,21 +150,30 @@ public class ImageCache implements Runnable {
 			return;
 		}
 	}
+	
+	protected void addFile(File file){
+		mExploreFiles.add(file);
+		mCached.put(file.getName(), mExploreFiles.size() - 1);
+	}
+	
 	public ImageReference getRandomExplore(){
 		if(mExploreFiles.size() == 0 || (!mActive || !Settings.useCache)){
 			try {
-				Thread.sleep(10); 	// Sleep for a bit, we're not doing anything anyway...
-									// TODO: Make this wait() instead!
+				Thread.sleep(10000); 	// Sleep for a bit, we're not doing anything anyway...
+										// TODO: Make this wait() instead!
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Log.w("ImageCache", "We were interrupted!");
 			}
 			return null;
 		}
-		int idx = mRand.nextInt(mExploreFiles.size());
+		Log.v("Image cache", "Adding random cached image");
+		return getFile(mRand.nextInt(mExploreFiles.size()));
+	}
+	
+	public ImageReference getFile(int index){
 		InputStream is;
 		try {
-			File f_info = mExploreFiles.get(idx);
+			File f_info = mExploreFiles.get(index);
 			InputStream is_info = new FileInputStream(f_info);
 			BufferedInputStream bis_info = new BufferedInputStream(is_info, 256);
 			DataInputStream dis = new DataInputStream(bis_info);
@@ -192,7 +200,7 @@ public class ImageCache implements Runnable {
 			bis.close();
 			return ir;
 		} catch (FileNotFoundException e) {
-			mExploreFiles.remove(idx);
+			//mExploreFiles.remove(index);
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -208,5 +216,10 @@ public class ImageCache implements Runnable {
 			}
 			return false;
 		}
+	}
+	
+	public void addImage(String name){
+		Log.v("Image cache", "Adding cached image by request");
+		bank.addNewBitmap(getFile(mCached.get(name + ".info")));
 	}
 }

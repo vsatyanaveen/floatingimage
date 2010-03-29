@@ -6,6 +6,12 @@ public class FeedReference {
 	private FeedParser 	mParser;
 	private String 		mFeedLocation;
 	private String		mName;
+	private int			mType;
+	
+	public int getType(){
+		return mType;
+	}
+	
 	public FeedParser getParser(){
 		return mParser;
 	}
@@ -17,9 +23,11 @@ public class FeedReference {
 		return mName;
 	}
 	
-	public FeedReference(FeedParser parser, String feedLocation, String name){
+	public FeedReference(FeedParser parser, String feedLocation, String name, int type){
 		this.mParser = parser;
 		this.mFeedLocation = feedLocation;
+		this.mName = name;
+		this.mType = type;
 	}
 	
 	@Override

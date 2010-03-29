@@ -14,7 +14,6 @@ public class TextureBank {
 	Vector<String> 							streams  = new Vector<String>();
 	Queue<ImageReference> 					cached   = new LinkedList<ImageReference>();
 	ImageCache 								ic = new ImageCache(this);
-	LocalFeeder								local;
 	BitmapDownloader						bitmapDownloader; 
 	private Map<String, ImageReference> 	mActiveBitmaps = new HashMap<String, ImageReference>();
 	int 									textureCache;
@@ -24,8 +23,7 @@ public class TextureBank {
 		this.textureCache = textureCache;
 	}
 	
-	public void setFeeders(BitmapDownloader bitmapDownloader, LocalFeeder localFeeder, ImageCache ic){
-		this.local = localFeeder;
+	public void setFeeders(BitmapDownloader bitmapDownloader, ImageCache ic){
 		this.bitmapDownloader = bitmapDownloader;
 		this.ic = ic;
 	}
@@ -52,6 +50,10 @@ public class TextureBank {
 	
 	public boolean doDownload(String url){
 		return !ic.exists(url);
+	}
+	
+	public void addFromCache(String name){
+		ic.addImage(name);
 	}
 	
 	public void addStream(String stream){
@@ -133,12 +135,9 @@ public class TextureBank {
 		new Thread(bitmapDownloader).start();
 		new Thread(ic).start();
 	}
-	public void startLocal(){
-		new Thread(local).start();
-	}
+	
 	public void start(){
 		stopThreads = false;
 		startExternal();
-		startLocal();
 	}
 }

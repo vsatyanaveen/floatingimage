@@ -62,7 +62,7 @@ public class TextureSelector implements Runnable{
 				progress.setKey(mCurSelected);
 				progress.setPercentDone(5);
 				if(ref instanceof LocalImage){ // Special case, read from disk
-					Bitmap bmp = LocalFeeder.readImage(new File(url), 450, progress);
+					Bitmap bmp = ImageFileReader.readImage(new File(url), 450, progress);
 					if(bmp != null){
 						applyLarge(bmp);
 					}
