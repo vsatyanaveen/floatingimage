@@ -97,6 +97,14 @@ public class FeedController {
 		return ParserProvider.getParser(feedType);
 	}
 	
+	public int getShowing(){
+		int count = 0;
+		for(List<ImageReference> list : mReferences){
+			count += list.size();
+		}
+		return count;
+	}
+	
 	public boolean showFeed(FeedReference feed){
 		mFeeds.clear();
 		mFeeds.add(feed);
@@ -110,7 +118,7 @@ public class FeedController {
 	}
 	
 	// False if no images.
-	private boolean parseFeeds(){
+	private synchronized boolean parseFeeds(){
 		mReferences.clear();
 		for(FeedReference feed : mFeeds){
 			List<ImageReference> references = null;
@@ -134,13 +142,12 @@ public class FeedController {
 				Log.w("FeedController", "Reading feed failed too many times, giving up!");
 			}
 		}
+		Log.v("FeedController", "Showing images from " + mReferences.size() + " feeds");
 		return mReferences.size() > 0;
 	}
 	
 	private static List<ImageReference> parseFeed(FeedReference feed){
 		try {
-			// Explore //InputStream stream = HttpTools.openHttpConnection("http://api.flickr.com/services/rest/?method=flickr.interestingness.getList&api_key=f6fdb5a636863d148afa8e7bb056bf1b&per_page=500");
-			// Mine    //InputStream stream = HttpTools.openHttpConnection("http://api.flickr.com/services/rest/?method=flickr.people.getPublicPhotos&api_key=f6fdb5a636863d148afa8e7bb056bf1b&per_page=500&user_id=73523270@N00");
 			InputStream stream = HttpTools.openHttpConnection(feed.getFeedLocation());
 			Log.v("FeedController", "Fetching stream: " + feed.getFeedLocation());
 			return parseStream(stream, feed.getParser());

@@ -5,51 +5,30 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLU;
 import android.util.Log;
-import dk.nindroid.rss.Image.Pos;
 import dk.nindroid.rss.data.ImageReference;
-import dk.nindroid.rss.data.Ray;
 import dk.nindroid.rss.gfx.Vec2f;
-import dk.nindroid.rss.gfx.Vec3f;
 import dk.nindroid.rss.helpers.MatrixTrackingGL;
+import dk.nindroid.rss.renderers.Renderer;
 
 public class RiverRenderer implements GLSurfaceView.Renderer {
 	public static Display		mDisplay;
 	
-	public static final long 	mFocusDuration = 300;
-	public static long			mSelectedTime;
-	public static final float  mFocusX = 0.0f;
-	public static final float  mFocusY = 0.0f;
-	public static final float  mFocusZ = -1.0f;
-	public static final float  mFloatZ = -3.5f;
-	public static final float  mJitterX = 0.8f;
-	public static final float  mJitterY = 0.5f;
-	public static final float  mJitterZ = 1.5f;
 	
-	private static final long	SPLASHTIME = 2000l;
 	private boolean 		mTranslucentBackground = false;
-	private boolean 		mNewStart = true;
-	private Image[] 		mImgs;
+	
+	
 	private TextureBank 	mBank;
-	private long 			mTraversal = 30000;
-	private long 			mInterval;
-	private int 			mTotalImgRows = 6;
-	private int 			mImgCnt = 0;
-	private boolean 		mCreateMiddle = true;
-	private long 			mOffset = 0;
-	private float			mFadeOffset = 0;
 	private long			mUpTime;
 	private Vec2f 			mClickedPos = new Vec2f();
 	private boolean 		mClicked = false;
+	private long 			mOffset = 0;
+	private float			mFadeOffset = 0;
 	private static final float mSensitivityX = 70.0f;
-	private static final Vec3f mCamPos = new Vec3f(0,0,0);
-	private Image			mSelected = null;
-	private Image			mSplashImg;
-	private long			mDefocusSplashTime;
+	
+	private Renderer  mRenderer;
 	
 	static {
 		mDisplay = new Display();
@@ -58,22 +37,12 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	public RiverRenderer(boolean useTranslucentBackground, TextureBank textureBank){
 		mTranslucentBackground = useTranslucentBackground;
 		mBank = textureBank;
-		mImgs = new Image[mTotalImgRows * 3 / 2];
-		mInterval = mTraversal / mTotalImgRows;
-		long curTime = System.currentTimeMillis();
-		long creationOffset = 0;
-		for(int i = 0; i < mTotalImgRows; ++i){
-			
-			if(mCreateMiddle){
-	        	mImgs[mImgCnt++] = new Image(mBank, mTraversal, Pos.MIDDLE, curTime - creationOffset);
-	        }else{
-	        	mImgs[mImgCnt++] = new Image(mBank, mTraversal, Pos.UP, curTime - creationOffset);
-	        	mImgs[mImgCnt++] = new Image(mBank, mTraversal, Pos.DOWN, curTime - creationOffset);
-	        }
-	        	mCreateMiddle ^= true;
-	        	creationOffset += mInterval;
-		}
 	}
+	
+	public void setRenderer(Renderer renderer){
+		this.mRenderer = renderer;
+	}
+	
 	@Override
 	public void onDrawFrame(GL10 gl10) {
 		MatrixTrackingGL gl = new MatrixTrackingGL(gl10);
@@ -105,112 +74,20 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	        long time = realTime + mOffset;
 	        mDisplay.setFrameTime(realTime);
 	        
-	        if(mNewStart){
-				mSplashImg = mImgs[4];
-				Bitmap splash = BitmapFactory.decodeStream(ShowStreams.current.getResources().openRawResource(R.drawable.splash));
-				mSplashImg.setSelected(gl, splash, 343.0f/512.0f, 1.0f, time);
-				mNewStart = false;
-				mDefocusSplashTime = time + SPLASHTIME;
-			}
-	        if(mSplashImg != null && realTime > mDefocusSplashTime){
-	        	mSelectedTime = realTime;
-	        	mSplashImg.select(gl, time, realTime);
-	        	mSplashImg = null;
-	        }
-	        
-	        if(mSelected != null){
-	        	if(mClicked){
-		        	mClicked = false;
-		        	if(mSelected.stateInFocus()){
-		        		mSelectedTime = realTime;
-			        	mSelected.select(gl, time, realTime); // Deselect!
-		        	}
-	        	}
-	        	if(mSelected.stateFloating()){
-	        		mSelected = null;
-	        	}
-	        }else{
-	        	if(mClicked && mSplashImg == null){
-		        	// Only works for camera looking directly at (0, 0, -1)...
-		        	Vec3f rayDir = new Vec3f(mClickedPos.getX(), mClickedPos.getY(), -1);
-		        	rayDir.normalize();
-		        	Ray r = new Ray(mCamPos, rayDir);
-		        	int i = 0;
-		        	Image selected = null;
-		        	float closest = Float.MAX_VALUE;
-		        	float t;
-		        	for(; i < mImgCnt; ++i){
-		        		t = mImgs[i].intersect(r); 
-		            	if(t > 0 && t < closest){
-		            		closest = t;
-		            		selected = mImgs[i];
-		            	}
-		            }
-		        	if(selected != null && selected.canSelect()){
-		        		mSelectedTime = realTime;
-		        		mSelected = selected;
-		        		selected.select(gl, time, realTime);
-		        	}
-		        }
+	        if(mClicked){
 	        	mClicked = false;
+	        	mRenderer.click(gl, mClickedPos.getX(), mClickedPos.getY(), time, realTime);
 	        }
+	        mRenderer.update(gl, time, realTime);
 	        
 	        /********* DRAWING *********/
 	        gl.glRotatef(mDisplay.getRotation(), 0.0f, 0.0f, 1.0f);
+	        mRenderer.render(gl, time, realTime);
 	        
-	        BackgroundPainter.draw(gl);
-	        
-	        Image.setState(gl);
-	        for(int i = 0; i < mImgCnt; ++i){
-	        	if(mImgs[i] != mSelected){
-	        		mImgs[i].draw(gl, time, realTime);
-	        	}
-	        }
-	        Image.unsetState(gl);
-	        
-	        gl.glDepthMask(false);
-	        GlowImage.setState(gl);
-	        for(int i = 0; i < mImgCnt; ++i){
-	        	mImgs[i].drawGlow(gl);
-	        }
-	        GlowImage.unsetState(gl);
-	        float fraction = getFraction(realTime);
-	        if(mSelected != null){
-	        	if(mSelected.stateInFocus()){
-	        		Dimmer.draw(gl, 1.0f);
-	        		fraction = 1.0f;
-	        	}else if (mSelected.stateFocusing()){
-	        		Dimmer.draw(gl, fraction);
-	        		// Fraction is right!
-	        	}else{
-	        		Dimmer.draw(gl, 1.0f - fraction);
-	        		fraction = 1.0f - fraction;
-	        	}
-	        	if(!mDisplay.isTurning()){
-	        		InfoBar.setState(gl);
-	        		InfoBar.draw(gl, fraction);
-	        		InfoBar.unsetState(gl);
-        		}
-	        	
-	        	gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
-	        	GlowImage.setState(gl);
-	        	mSelected.drawGlow(gl);
-	        	GlowImage.unsetState(gl);
-	        	Image.setState(gl);
-	        	mSelected.draw(gl, time, realTime);
-	        	Image.unsetState(gl);
-	        }
-	        
-	        gl.glDepthMask(true);
 	        
 		}catch(Throwable t){
 			Log.e("Floating Image", "Uncaught exception caught!", t);
 		}
-	}
-	
-	
-	public static float getFraction(long realTime){
-		return Math.min(((float)(realTime - RiverRenderer.mSelectedTime)) / RiverRenderer.mFocusDuration, 1.1f);
 	}
 	
 	private void fadeOffset(long time) {
@@ -223,22 +100,15 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 		}
 	}
 	public Intent followSelected(){
-		if(mSelected != null){
-			return mSelected.getShowing().follow();
-		}
-		return null;
+		return mRenderer.followCurrent();
 	}
 	
 	public ImageReference getSelected(){
-		return mSelected != null ? mSelected.getShowing() : null;
+		return mRenderer.getCurrent();
 	}
 	
 	public boolean unselect(){
-		if(mSelected != null){
-			mClicked = true; // Unselect
-			return true;
-		}
-		return false;
+		return mRenderer.back();
 	}
 	
 	public void onResume(){
@@ -272,10 +142,6 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
             };
             return configSpec;
         }
-	}
-	
-	public static float getFarRight(){
-		return mDisplay.getWidth() * 0.5f * (-mFloatZ + mJitterZ) * 1.2f + 1.2f + mJitterX;
 	}
 
 	@Override
@@ -349,13 +215,8 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 		gl.glMatrixMode(GL10.GL_TEXTURE);
 		gl.glLoadIdentity();
 		gl.glMatrixMode(GL10.GL_MODELVIEW);
-		long time = System.currentTimeMillis();
-		for(int i = 0; i < mImgCnt; ++i){
-			mImgs[i].init(gl, time + mOffset);
-		}
-		if(mSelected != null){
-			InfoBar.select(gl, mSelected.getShowing());
-		}
+		mRenderer.init(gl, System.currentTimeMillis() + mOffset);
+		
 		/*
          * By default, OpenGL enables features that improve quality
          * but reduce performance. One might want to tweak that

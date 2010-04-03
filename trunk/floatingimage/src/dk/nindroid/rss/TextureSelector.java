@@ -11,6 +11,7 @@ import android.util.Log;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.LocalImage;
 import dk.nindroid.rss.data.Progress;
+import dk.nindroid.rss.renderers.Image;
 
 public class TextureSelector implements Runnable{
 	private final static Bitmap 	mBitmap = Bitmap.createBitmap(512, 512, Config.RGB_565);
