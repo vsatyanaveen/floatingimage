@@ -1,4 +1,4 @@
-package dk.nindroid.rss;
+package dk.nindroid.rss.renderers;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -12,6 +12,13 @@ import javax.microedition.khronos.opengles.GL10;
 import android.graphics.Bitmap;
 import android.opengl.GLUtils;
 import android.util.Log;
+import dk.nindroid.rss.GlowImage;
+import dk.nindroid.rss.InfoBar;
+import dk.nindroid.rss.ProgressBar;
+import dk.nindroid.rss.RiverRenderer;
+import dk.nindroid.rss.ShadowPainter;
+import dk.nindroid.rss.TextureBank;
+import dk.nindroid.rss.TextureSelector;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.Ray;
 import dk.nindroid.rss.gfx.Vec3f;
@@ -143,7 +150,7 @@ public class Image {
 			case MIDDLE: mYPos = 0.0f; break;
 			case DOWN: mYPos = -1.25f; break;
 		}
-		mPos = new Vec3f(-RiverRenderer.getFarRight(), mYPos, RiverRenderer.mFloatZ);
+		mPos = new Vec3f(-FloatingRenderer.getFarRight(), mYPos, FloatingRenderer.mFloatZ);
 		reJitter();
 		mStartTime = startTime;
 				
@@ -266,20 +273,20 @@ public class Image {
 	/************ Position functions ************/
 	
 	private void reJitter(){
-		mJitter.setX(mRand.nextFloat() * RiverRenderer.mJitterX * 2 - RiverRenderer.mJitterX);
-		mJitter.setY(mRand.nextFloat() * RiverRenderer.mJitterY * 2 - RiverRenderer.mJitterY);
-		mJitter.setZ(mRand.nextFloat() * RiverRenderer.mJitterZ * 2 - RiverRenderer.mJitterZ);
+		mJitter.setX(mRand.nextFloat() * FloatingRenderer.mJitterX * 2 - FloatingRenderer.mJitterX);
+		mJitter.setY(mRand.nextFloat() * FloatingRenderer.mJitterY * 2 - FloatingRenderer.mJitterY);
+		mJitter.setZ(mRand.nextFloat() * FloatingRenderer.mJitterZ * 2 - FloatingRenderer.mJitterZ);
 		mRotation = Settings.rotateImages ? mRand.nextFloat() * 20.0f - 10.0f : 0;
 	}
 	
 	private float getXPos(long relativeTime){
-		return -RiverRenderer.getFarRight() + (((float)(relativeTime % mTraversal) / mTraversal) * RiverRenderer.getFarRight() * 2);
+		return -FloatingRenderer.getFarRight() + (((float)(relativeTime % mTraversal) / mTraversal) * FloatingRenderer.getFarRight() * 2);
 	}
 	
 	private void updateFloating(GL10 gl, long time){
 		long totalTime = time - mStartTime;
 		
-		mPos.setZ(RiverRenderer.mFloatZ);
+		mPos.setZ(FloatingRenderer.mFloatZ);
 		mPos.setY(getYPos()); 
 		mPos.setX(getXPos(totalTime));
 		boolean isInRewind = totalTime < mTraversal * (mRotations - 1);
@@ -311,7 +318,7 @@ public class Image {
 	}
 	
 	private void moveToFocus(GL10 gl, long realTime){
-		float fraction = RiverRenderer.getFraction(realTime);
+		float fraction = FloatingRenderer.getFraction(realTime);
 		if(fraction > 1){
 			mRotation = 0.0f;
 			if(!mLargeTex){
@@ -326,9 +333,9 @@ public class Image {
 		float selectedY = mSelectedPos.getY();
 		float selectedZ = mSelectedPos.getZ();
 		
-		float distX = RiverRenderer.mFocusX - selectedX - mJitter.getX();
-		float distY = RiverRenderer.mFocusY - selectedY - mJitter.getY() + getFocusedOffset();
-		float distZ = RiverRenderer.mFocusZ - selectedZ - mJitter.getZ();
+		float distX = FloatingRenderer.mFocusX - selectedX - mJitter.getX();
+		float distY = FloatingRenderer.mFocusY - selectedY - mJitter.getY() + getFocusedOffset();
+		float distZ = FloatingRenderer.mFocusZ - selectedZ - mJitter.getZ();
 		
 		mPos.setX(distX * fraction + selectedX);
 		mPos.setY(distY * fraction + selectedY);
@@ -336,7 +343,7 @@ public class Image {
 	}
 	
 	private void moveToFloat(GL10 gl, long time, long realTime){
-		float fraction = RiverRenderer.getFraction(realTime);
+		float fraction = FloatingRenderer.getFraction(realTime);
 		if(fraction > 1){
 			mRotation = mRotationSaved;
 			long totalTime = time - mStartTime;
@@ -356,14 +363,14 @@ public class Image {
 		
 		fraction = smoothstep(fraction);
 		
-		long timeToFloat = realTime - mStartTime - RiverRenderer.mSelectedTime - RiverRenderer.mFocusDuration;
+		long timeToFloat = realTime - mStartTime - FloatingRenderer.mSelectedTime - FloatingRenderer.mFocusDuration;
 		
 		mRotation = fraction * mRotationSaved;
 		float floatX = getXPos(time + timeToFloat);
 		
 		float distX = floatX - selectedX;
 		float distY = getYPos() - selectedY;
-		float distZ = RiverRenderer.mFloatZ - selectedZ;
+		float distZ = FloatingRenderer.mFloatZ - selectedZ;
 		
 		mPos.setX(distX * fraction + selectedX);
 		mPos.setY(distY * fraction + selectedY);
@@ -394,9 +401,9 @@ public class Image {
 	}
 	
 	private void setFocusedPosition(){
-		mPos.setX(RiverRenderer.mFocusX);
-		mPos.setY(RiverRenderer.mFocusY + getFocusedOffset());
-		mPos.setZ(RiverRenderer.mFocusZ);
+		mPos.setX(FloatingRenderer.mFocusX);
+		mPos.setY(FloatingRenderer.mFocusY + getFocusedOffset());
+		mPos.setZ(FloatingRenderer.mFocusZ);
 		mPos.minus(mJitter, mPos);
 	}
 	

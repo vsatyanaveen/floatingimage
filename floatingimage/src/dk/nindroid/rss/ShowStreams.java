@@ -36,6 +36,7 @@ import dk.nindroid.rss.menu.Settings;
 import dk.nindroid.rss.orientation.OrientationManager;
 import dk.nindroid.rss.parser.ParserProvider;
 import dk.nindroid.rss.parser.flickr.FlickrParser;
+import dk.nindroid.rss.renderers.FloatingRenderer;
 import dk.nindroid.rss.settings.FeedsDbAdapter;
 import dk.nindroid.rss.settings.SourceSelector;
 
@@ -89,7 +90,9 @@ public class ShowStreams extends Activity {
 			wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "Floating Image");
 			ShowStreams.current = this;
 			TextureBank textureBank = setupFeeders();
+			FloatingRenderer defaultRenderer = new FloatingRenderer(textureBank);
 			renderer = new RiverRenderer(true, textureBank);
+			renderer.setRenderer(defaultRenderer);
 			orientationManager.addSubscriber(RiverRenderer.mDisplay);
 			ClickHandler.init(renderer);
 			setContentView(R.layout.main);
@@ -252,6 +255,7 @@ public class ShowStreams extends Activity {
 			}else{
 				mShowing = true;
 				mImageCache.pause();
+				Toast.makeText(this, "Showing " + mFeedController.getShowing() + " images from " + path, Toast.LENGTH_SHORT).show();
 				if(selectedItem != null){
 					selectedItem.setTitle(R.string.cancel_show);
 				}
