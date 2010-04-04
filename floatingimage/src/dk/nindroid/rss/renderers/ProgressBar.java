@@ -1,4 +1,4 @@
-package dk.nindroid.rss;
+package dk.nindroid.rss.renderers;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -6,6 +6,7 @@ import java.nio.IntBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import dk.nindroid.rss.RiverRenderer;
 import dk.nindroid.rss.gfx.Vec3f;
 
 public class ProgressBar {

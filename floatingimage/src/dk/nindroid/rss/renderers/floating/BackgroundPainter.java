@@ -1,4 +1,4 @@
-package dk.nindroid.rss;
+package dk.nindroid.rss.renderers.floating;
 
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -13,10 +13,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.Config;
 import android.opengl.GLUtils;
+import dk.nindroid.rss.R;
+import dk.nindroid.rss.RiverRenderer;
 import dk.nindroid.rss.gfx.Vec3f;
 
-public class GlowImage {
-	private static Bitmap glow;
+public class BackgroundPainter {
+	private static final float zDepth = 15.0f;
+	private static Bitmap bg;
 	private static Bitmap canvas;
 	private static int mTextureID;
 	private static FloatBuffer mTexBuffer;
@@ -27,10 +30,10 @@ public class GlowImage {
 	private static final int VERTS = 4;
 	
 	public static void init(Context context){
-		InputStream glowIS = context.getResources().openRawResource(R.drawable.glow_trans);
-		glow = BitmapFactory.decodeStream(glowIS);
+		InputStream shadowIS = context.getResources().openRawResource(R.drawable.background);
+		bg = BitmapFactory.decodeStream(shadowIS);
 		
-		canvas = Bitmap.createBitmap(128, 128, Config.RGB_565);
+		canvas = Bitmap.createBitmap(512, 512, Config.RGB_565);
 		
 		initPlane();
 	}
@@ -79,12 +82,7 @@ public class GlowImage {
 		mIndexBuffer.position(0);
 	}
 	
-	public static void initTexture(GL10 gl){
-		int height = glow.getHeight();
-		int width  = glow.getWidth();
-		float heightRatio = ((float)height) / 128;
-		float widthRatio = ((float)width) / 128;
-		
+	public static void initTexture(GL10 gl){		
 		int[] textures = new int[1];
         gl.glGenTextures(1, textures, 0);
 		mTextureID = textures[0];		
@@ -105,7 +103,7 @@ public class GlowImage {
                 GL10.GL_BLEND);
         
         GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, canvas, 0);
-        GLUtils.texSubImage2D(GL10.GL_TEXTURE_2D, 0, 0, 0, glow);
+        GLUtils.texSubImage2D(GL10.GL_TEXTURE_2D, 0, 0, 0, bg);
 		
         ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
         tbb.order(ByteOrder.nativeOrder());
@@ -113,9 +111,9 @@ public class GlowImage {
         
         float tex[] = {
         	0.0f,  0.0f,
-        	0.0f,  heightRatio,	
-        	widthRatio,  0.0f,
-        	widthRatio,  heightRatio,
+        	0.0f,  1.0f,	
+        	1.0f,  0.0f,
+        	1.0f,  1.0f,
         };
         mTexBuffer.put(tex);
         mTexBuffer.position(0);
@@ -137,27 +135,18 @@ public class GlowImage {
 	 * @param szZ
 	 */
 	public static void draw(GL10 gl){
-		gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE);
-		// Draw glow
+		// Draw background
 		gl.glPushMatrix();
-			gl.glScalef(1.10f, 1.10f, 1);
+			gl.glLoadIdentity();
+			gl.glTranslatef(0, 0, -zDepth);
+			gl.glScalef(RiverRenderer.mDisplay.getPortraitWidth() * zDepth, RiverRenderer.mDisplay.getPortraitHeight() * zDepth, 1);
 			gl.glActiveTexture(GL10.GL_TEXTURE0);
 	        gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
+			gl.glFrontFace(GL10.GL_CCW);
 			gl.glVertexPointer(3, GL10.GL_FIXED, 0, mVertexBuffer);
+			gl.glEnable(GL10.GL_TEXTURE_2D);
 			gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mTexBuffer);
-	        gl.glDrawElements(GL10.GL_TRIANGLE_STRIP, 4, GL10.GL_UNSIGNED_BYTE, mIndexBuffer);
+			gl.glDrawElements(GL10.GL_TRIANGLE_STRIP, 4, GL10.GL_UNSIGNED_BYTE, mIndexBuffer);
 		gl.glPopMatrix();
-	}
-	
-	public static void setState(GL10 gl){
-		gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
-        gl.glEnable(GL10.GL_TEXTURE_2D);
-		gl.glFrontFace(GL10.GL_CCW);
-		gl.glEnable(GL10.GL_BLEND);
-	}
-	
-	public static void unsetState(GL10 gl){
-		gl.glDisable(GL10.GL_BLEND);
-		gl.glDisable(GL10.GL_TEXTURE_2D);
 	}
 }

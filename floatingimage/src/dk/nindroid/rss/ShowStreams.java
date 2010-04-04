@@ -37,6 +37,11 @@ import dk.nindroid.rss.orientation.OrientationManager;
 import dk.nindroid.rss.parser.ParserProvider;
 import dk.nindroid.rss.parser.flickr.FlickrParser;
 import dk.nindroid.rss.renderers.FloatingRenderer;
+import dk.nindroid.rss.renderers.Renderer;
+import dk.nindroid.rss.renderers.floating.BackgroundPainter;
+import dk.nindroid.rss.renderers.floating.GlowImage;
+import dk.nindroid.rss.renderers.floating.ShadowPainter;
+import dk.nindroid.rss.renderers.slideshow.SlideshowRenderer;
 import dk.nindroid.rss.settings.FeedsDbAdapter;
 import dk.nindroid.rss.settings.SourceSelector;
 
@@ -90,7 +95,8 @@ public class ShowStreams extends Activity {
 			wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "Floating Image");
 			ShowStreams.current = this;
 			TextureBank textureBank = setupFeeders();
-			FloatingRenderer defaultRenderer = new FloatingRenderer(textureBank);
+			Renderer defaultRenderer = new FloatingRenderer(textureBank);
+			defaultRenderer = new SlideshowRenderer(textureBank);
 			renderer = new RiverRenderer(true, textureBank);
 			renderer.setRenderer(defaultRenderer);
 			orientationManager.addSubscriber(RiverRenderer.mDisplay);

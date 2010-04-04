@@ -1,4 +1,4 @@
-package dk.nindroid.rss;
+package dk.nindroid.rss.renderers.floating;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -9,6 +9,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import android.graphics.Bitmap;
 import android.opengl.GLUtils;
+import dk.nindroid.rss.RiverRenderer;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.gfx.Vec3f;
 

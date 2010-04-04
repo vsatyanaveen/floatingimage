@@ -6,10 +6,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
-import dk.nindroid.rss.BackgroundPainter;
-import dk.nindroid.rss.Dimmer;
-import dk.nindroid.rss.GlowImage;
-import dk.nindroid.rss.InfoBar;
 import dk.nindroid.rss.R;
 import dk.nindroid.rss.RiverRenderer;
 import dk.nindroid.rss.ShowStreams;
@@ -18,7 +14,12 @@ import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.Ray;
 import dk.nindroid.rss.gfx.Vec3f;
 import dk.nindroid.rss.helpers.MatrixTrackingGL;
-import dk.nindroid.rss.renderers.Image.Pos;
+import dk.nindroid.rss.renderers.floating.BackgroundPainter;
+import dk.nindroid.rss.renderers.floating.Dimmer;
+import dk.nindroid.rss.renderers.floating.GlowImage;
+import dk.nindroid.rss.renderers.floating.Image;
+import dk.nindroid.rss.renderers.floating.InfoBar;
+import dk.nindroid.rss.renderers.floating.Image.Pos;
 
 public class FloatingRenderer implements Renderer {
 	public static final long 	mFocusDuration = 300;
