@@ -1,4 +1,4 @@
-package dk.nindroid.rss;
+package dk.nindroid.rss.renderers.floating;
 
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -13,6 +13,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.Config;
 import android.opengl.GLUtils;
+import dk.nindroid.rss.R;
 import dk.nindroid.rss.gfx.Vec3f;
 
 public class ShadowPainter {

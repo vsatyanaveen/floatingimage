@@ -1,4 +1,4 @@
-package dk.nindroid.rss;
+package dk.nindroid.rss.renderers.floating;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;

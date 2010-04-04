@@ -12,6 +12,9 @@ import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.gfx.Vec2f;
 import dk.nindroid.rss.helpers.MatrixTrackingGL;
 import dk.nindroid.rss.renderers.Renderer;
+import dk.nindroid.rss.renderers.floating.BackgroundPainter;
+import dk.nindroid.rss.renderers.floating.GlowImage;
+import dk.nindroid.rss.renderers.floating.ShadowPainter;
 
 public class RiverRenderer implements GLSurfaceView.Renderer {
 	public static Display		mDisplay;

@@ -1,4 +1,4 @@
-package dk.nindroid.rss.renderers;
+package dk.nindroid.rss.renderers.floating;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -12,20 +12,19 @@ import javax.microedition.khronos.opengles.GL10;
 import android.graphics.Bitmap;
 import android.opengl.GLUtils;
 import android.util.Log;
-import dk.nindroid.rss.GlowImage;
-import dk.nindroid.rss.InfoBar;
-import dk.nindroid.rss.ProgressBar;
 import dk.nindroid.rss.RiverRenderer;
-import dk.nindroid.rss.ShadowPainter;
 import dk.nindroid.rss.TextureBank;
 import dk.nindroid.rss.TextureSelector;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.Ray;
 import dk.nindroid.rss.gfx.Vec3f;
 import dk.nindroid.rss.helpers.MatrixTrackingGL;
+import dk.nindroid.rss.renderers.FloatingRenderer;
+import dk.nindroid.rss.renderers.ImagePlane;
+import dk.nindroid.rss.renderers.ProgressBar;
 import dk.nindroid.rss.settings.Settings;
 
-public class Image {
+public class Image implements ImagePlane {
 	private static int  ids = 0;
 	
 	private static final int STATE_FLOATING =   0;
@@ -116,7 +115,6 @@ public class Image {
 				return;
 			}
 			mShowingImage.setOld();
-			//mFocusedOffset = isTall() ? 2.0f - RiverRenderer.mDisplayHeight : 0.0f;
 			// Select
 			mState = STATE_FOCUSING;
 			mRotationSaved = mRotation;

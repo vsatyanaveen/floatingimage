@@ -11,14 +11,14 @@ import android.util.Log;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.LocalImage;
 import dk.nindroid.rss.data.Progress;
-import dk.nindroid.rss.renderers.Image;
+import dk.nindroid.rss.renderers.ImagePlane;
 
 public class TextureSelector implements Runnable{
 	private final static Bitmap 	mBitmap = Bitmap.createBitmap(512, 512, Config.RGB_565);
 	private final static Paint		mPaint  = new Paint();
 	private final static Canvas		mCanvas = new Canvas(mBitmap); 
 	private static TextureSelector 	mTs;
-	private static Image 			mCurSelected;
+	private static ImagePlane		mCurSelected;
 	private static ImageReference 	mRef;
 	private static boolean 			mRun	= true;
 	private static final Progress progress = new Progress();
@@ -38,7 +38,7 @@ public class TextureSelector implements Runnable{
 		}
 	}
 	
-	public static void selectImage(Image img, ImageReference ref){
+	public static void selectImage(ImagePlane img, ImageReference ref){
 		synchronized (TextureSelector.class) {
 			mCurSelected = img;
 			mRef = ref;
