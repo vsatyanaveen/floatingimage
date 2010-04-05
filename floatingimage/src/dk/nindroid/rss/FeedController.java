@@ -56,38 +56,40 @@ public class FeedController {
 	}
 	
 	public void readFeeds(){
-		mFeeds.clear();
-		mFeedIndex.clear();
-		if(Settings.useRandom){
-			mFeeds.add(getFeedReference(FlickrFeeder.getExplore(), Settings.TYPE_FLICKR, "Explore"));
-		}
-		FeedsDbAdapter mDbHelper = new FeedsDbAdapter(ShowStreams.current);
-		
-		mDbHelper.open();
-		Cursor c = null;
-		try{
-			c = mDbHelper.fetchAllFeeds();
-			while(c.moveToNext()){
-				int type = c.getInt(3); 
-				String feed = c.getString(2);
-				String name = c.getString(1);
-				
-				// Only add a single feed once!
-				if(!mFeeds.contains(feed)){
-					mFeeds.add(getFeedReference(feed, type, name));
+		synchronized(mFeeds){
+			mFeeds.clear();
+			mFeedIndex.clear();
+			if(Settings.useRandom){
+				mFeeds.add(getFeedReference(FlickrFeeder.getExplore(), Settings.TYPE_FLICKR, "Explore"));
+			}
+			FeedsDbAdapter mDbHelper = new FeedsDbAdapter(ShowStreams.current);
+			
+			mDbHelper.open();
+			Cursor c = null;
+			try{
+				c = mDbHelper.fetchAllFeeds();
+				while(c.moveToNext()){
+					int type = c.getInt(3); 
+					String feed = c.getString(2);
+					String name = c.getString(1);
+					
+					// Only add a single feed once!
+					if(!mFeeds.contains(feed)){
+						mFeeds.add(getFeedReference(feed, type, name));
+					}
+				}
+			}catch(Exception e){
+				Log.e("Local feeder", "Unhandled exception caught", e);
+			}finally{
+				if(c != null){
+					c.close();
+					mDbHelper.close();
 				}
 			}
-		}catch(Exception e){
-			Log.e("Local feeder", "Unhandled exception caught", e);
-		}finally{
-			if(c != null){
-				c.close();
-				mDbHelper.close();
-			}
+			showing = false;
+			
+			parseFeeds();
 		}
-		showing = false;
-		
-		parseFeeds();
 	}
 	
 	private FeedParser getParser(int feedType){
@@ -106,11 +108,13 @@ public class FeedController {
 	}
 	
 	public boolean showFeed(FeedReference feed){
-		mFeeds.clear();
-		mFeeds.add(feed);
-		showing = true;
-		lastFeed = -1;
-		return parseFeeds();
+		synchronized(mFeeds){
+			mFeeds.clear();
+			mFeeds.add(feed);
+			showing = true;
+			lastFeed = -1;
+			return parseFeeds();
+		}
 	}
 	
 	public FeedReference getFeedReference(String path, int type, String name){
@@ -119,31 +123,33 @@ public class FeedController {
 	
 	// False if no images.
 	private synchronized boolean parseFeeds(){
-		mReferences.clear();
-		for(FeedReference feed : mFeeds){
-			List<ImageReference> references = null;
-			if(feed.getType() == Settings.TYPE_LOCAL){
-				references = readLocalFeed(feed);
-			}else{
-				int i = 5;
-				while(i-->0){
-					try{
-						references = parseFeed(feed);
-						break;
-					}catch (Exception e){
-						Log.w("FeedController", "Failed getting feed, retrying...", e);
+		synchronized(mFeeds){
+			mReferences.clear();
+			for(FeedReference feed : mFeeds){
+				List<ImageReference> references = null;
+				if(feed.getType() == Settings.TYPE_LOCAL){
+					references = readLocalFeed(feed);
+				}else{
+					int i = 5;
+					while(i-->0){
+						try{
+							references = parseFeed(feed);
+							break;
+						}catch (Exception e){
+							Log.w("FeedController", "Failed getting feed, retrying...", e);
+						}
 					}
 				}
+				if(references != null){
+					mReferences.add(references); // These two 
+					mFeedIndex.add(0);			// are in sync!
+				}else{
+					Log.w("FeedController", "Reading feed failed too many times, giving up!");
+				}
 			}
-			if(references != null){
-				mReferences.add(references); // These two 
-				mFeedIndex.add(0);			// are in sync!
-			}else{
-				Log.w("FeedController", "Reading feed failed too many times, giving up!");
-			}
+			Log.v("FeedController", "Showing images from " + mReferences.size() + " feeds");
+			return mReferences.size() > 0;
 		}
-		Log.v("FeedController", "Showing images from " + mReferences.size() + " feeds");
-		return mReferences.size() > 0;
 	}
 	
 	private static List<ImageReference> parseFeed(FeedReference feed){

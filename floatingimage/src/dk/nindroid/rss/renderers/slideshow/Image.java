@@ -29,6 +29,7 @@ public class Image implements ImagePlane {
 	private float 		mBitmapWidth;
 	private float 		mBitmapHeight;
 	private boolean		mHasBitmap;
+	private float		mAlpha = 1.0f;
 	
 	private Vec3f		mPos;
 	
@@ -39,6 +40,12 @@ public class Image implements ImagePlane {
 	}
 	
 	public void clear(){
+		if(this.mBitmap != null){
+			this.mBitmap.recycle();
+		}
+		if(this.mImage != null){
+			this.mImage.getBitmap().recycle();
+		}
 		this.mBitmap = null;
 		this.mImage = null;
 		this.mBitmapHeight = 0;
@@ -108,6 +115,14 @@ public class Image implements ImagePlane {
 		return mImage;
 	}
 	
+	public void setAlpha(float alpha){
+		this.mAlpha = alpha;
+	}
+	
+	public float getAlpha(){
+		return this.mAlpha;
+	}
+	
 	public void setPos(Vec3f pos){
 		this.mPos = pos;
 	}
@@ -140,12 +155,15 @@ public class Image implements ImagePlane {
 		gl.glFrontFace(GL10.GL_CCW);
 		gl.glEnable(GL10.GL_TEXTURE_2D);
 		
+		gl.glColor4f(1.0f, 1.0f, 1.0f, mAlpha);
 		gl.glActiveTexture(GL10.GL_TEXTURE0);
         gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
         gl.glVertexPointer(3, GL10.GL_FIXED, 0, mVertexBuffer);
         
 		gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mTexBuffer);
 		
+		gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+		gl.glEnable(GL10.GL_BLEND);
 		gl.glPushMatrix();
 				
 		gl.glTranslatef(x, y, z);
@@ -153,10 +171,11 @@ public class Image implements ImagePlane {
 		gl.glDrawElements(GL10.GL_TRIANGLE_STRIP, 4, GL10.GL_UNSIGNED_BYTE, mIndexBuffer);
 		
 		gl.glPopMatrix();
+		gl.glDisable(GL10.GL_BLEND);
     }
 	
 	public void setTexture(GL10 gl) {
-		if(mBitmap == null){ // TODO: Handle graciously
+		if(mBitmap == null){
 			return;
 		}
 		float width = mBitmapWidth;
@@ -194,7 +213,7 @@ public class Image implements ImagePlane {
             };
             mTexBuffer.put(tex);
             mTexBuffer.position(0);
-        }catch(IllegalArgumentException e){ // TODO: Handle graciously
+        }catch(IllegalArgumentException e){
         	Log.w("dk.nindroid.rss.renderers.SlideshowRenderer.Image", "Texture could not be set", e);
         }
         mBitmap = null;

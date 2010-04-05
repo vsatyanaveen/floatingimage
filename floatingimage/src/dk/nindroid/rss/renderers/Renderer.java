@@ -14,4 +14,6 @@ public interface Renderer {
 	Intent followCurrent();
 	ImageReference getCurrent();
 	boolean back();
+	void onPause();
+	void onResume();
 }

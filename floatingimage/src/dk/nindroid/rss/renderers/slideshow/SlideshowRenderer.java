@@ -3,6 +3,8 @@ package dk.nindroid.rss.renderers.slideshow;
 import javax.microedition.khronos.opengles.GL10;
 
 import android.content.Intent;
+import android.util.Log;
+import dk.nindroid.rss.RiverRenderer;
 import dk.nindroid.rss.TextureBank;
 import dk.nindroid.rss.TextureSelector;
 import dk.nindroid.rss.data.ImageReference;
@@ -10,13 +12,17 @@ import dk.nindroid.rss.gfx.Vec3f;
 import dk.nindroid.rss.helpers.MatrixTrackingGL;
 import dk.nindroid.rss.renderers.ProgressBar;
 import dk.nindroid.rss.renderers.Renderer;
+import dk.nindroid.rss.renderers.slideshow.transitions.CrossFade;
+import dk.nindroid.rss.renderers.slideshow.transitions.FadeToBlack;
+import dk.nindroid.rss.renderers.slideshow.transitions.FadeToWhite;
+import dk.nindroid.rss.renderers.slideshow.transitions.Instant;
+import dk.nindroid.rss.renderers.slideshow.transitions.Random;
 import dk.nindroid.rss.renderers.slideshow.transitions.SlideRightToLeft;
+import dk.nindroid.rss.renderers.slideshow.transitions.SlideTopToBottom;
 import dk.nindroid.rss.renderers.slideshow.transitions.Transition;
+import dk.nindroid.rss.settings.Settings;
 
 public class SlideshowRenderer implements Renderer {
-	public final long SLIDETIME = 5000;
-	public final long TRANSITIONDURATION = 300;
-	
 	Image 			mPrevious, mCurrent, mNext;
 	TextureBank 	mBank;
 	long			mSlideTime;
@@ -28,6 +34,47 @@ public class SlideshowRenderer implements Renderer {
 		mCurrent = new Image();
 		mNext = new Image();
 		this.mBank = bank;
+	}
+	
+	protected void setTransition(int mode){
+		switch(mode){
+		case Settings.MODE_CROSSFADE:
+			mCurrentTransition = new CrossFade();
+			break;
+		case Settings.MODE_FADE_TO_BLACK:
+			mCurrentTransition = new FadeToBlack();
+			break;
+		case Settings.MODE_FADE_TO_WHITE:
+			mCurrentTransition = new FadeToWhite();
+			break;
+		case Settings.MODE_NONE:
+			mCurrentTransition = new Instant();
+			break;
+		case Settings.MODE_RANDOM:
+			mCurrentTransition = new Random();
+			break;
+		case Settings.MODE_SLIDE_RIGHT_TO_LEFT:
+			mCurrentTransition = new SlideRightToLeft();
+			break;
+		case Settings.MODE_SLIDE_TOP_TO_BOTTOM:
+			mCurrentTransition = new SlideTopToBottom();
+			break;
+		default:
+			mCurrentTransition = new Random(); // This should never happen, but better have a safe fallback!
+			break;
+		}
+		Log.v("Slideshow renderer", "Using mode: " + mode);
+	}
+	
+	@Override
+	public void onPause(){}
+	
+	@Override
+	public void onResume(){
+		setTransition(Settings.mode);
+		if(!RiverRenderer.mDisplay.isFullscreen()){
+			RiverRenderer.mDisplay.toggleFullscreen();
+		}
 	}
 	
 	@Override
@@ -65,13 +112,21 @@ public class SlideshowRenderer implements Renderer {
 
 	@Override
 	public void render(MatrixTrackingGL gl, long frameTime, long realtime) {
+		gl.glDisable(GL10.GL_DEPTH_TEST);
+		gl.glDepthMask(false);
+		if(!mCurrentTransition.isFinished()){
+			mCurrentTransition.preRender(gl, frameTime);
+		}
 		mPrevious.render(gl);
 		mCurrent.render(gl);
 		if(!mCurrent.hasBitmap()){
-			gl.glDepthMask(false);
 			ProgressBar.draw(gl, TextureSelector.getProgress());
-			gl.glDepthMask(true);
 		}
+		if(!mCurrentTransition.isFinished()){
+			mCurrentTransition.postRender(gl, frameTime);
+		}
+		gl.glDepthMask(true);
+		gl.glEnable(GL10.GL_DEPTH_TEST);
 	}
 
 	@Override
@@ -83,16 +138,12 @@ public class SlideshowRenderer implements Renderer {
 		}else if(mCurrent.hasBitmap() && mNext.getImage() == null){ // Load next image when first is done.
 				mNext.setImage(gl, mBank.getTexture(null));
 		}// Continue with normal slideshow
-		else if(realTime - mSlideTime > SLIDETIME){
+		else if(realTime - mSlideTime > Settings.slideshowInterval + Settings.slideSpeed){
 			next(gl, realTime);
 		}
 		
-		if(mCurrentTransition != null){
-			if(mCurrentTransition.isFinished()){
-				mCurrentTransition = null;
-			}else{
-				mCurrentTransition.update(realTime);
-			}
+		if(!mCurrentTransition.isFinished()){
+			mCurrentTransition.update(realTime);
 		}
 	}
 	
@@ -101,9 +152,10 @@ public class SlideshowRenderer implements Renderer {
 		mCurrent = mNext;
 		mNext = mPrevious;
 		mPrevious = temp;
+		ImageReference oldImage = mNext.getImage();
 		mNext.clear(); // Clean slate
-		mNext.setImage(gl, mBank.getTexture(null));
+		mNext.setImage(gl, mBank.getTexture(oldImage));
 		mSlideTime = realTime;
-		mCurrentTransition = new SlideRightToLeft(mPrevious, mCurrent, realTime, TRANSITIONDURATION);
+		mCurrentTransition.init(mPrevious, mCurrent, realTime, Settings.slideSpeed);
 	}
 }
