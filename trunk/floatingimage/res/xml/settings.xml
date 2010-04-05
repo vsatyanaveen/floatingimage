@@ -11,26 +11,54 @@
 			android:targetClass="dk.nindroid.rss.settings.ManageFeeds" 
 			android:targetPackage="dk.nindroid.rss" />
         </PreferenceScreen>
-        
         <CheckBoxPreference
                 android:key="randomImages"
                 android:title="@string/random"
                 android:summary="@string/randomSummary" 
                 android:defaultValue="true" />
-		<CheckBoxPreference
-                android:key="localImages"
-                android:title="@string/useLocal"
-                android:summary="@string/localSummary"
+        <CheckBoxPreference
+                android:key="shuffleImages"
+                android:title="@string/shuffle"
+                android:summary="@string/shuffleSummary" 
                 android:defaultValue="true" />
     </PreferenceCategory>
     <PreferenceCategory
             android:title="@string/display">
+            <ListPreference
+                android:key="mode"
+                android:title="@string/mode"
+                android:summary="@string/modeSummary"
+                android:entries="@array/displayModeDescriptions"
+                android:entryValues="@array/displayModeValues"
+                android:dialogTitle="@string/modeTitle" />
+            <ListPreference
+                android:key="slideInterval"
+                android:title="@string/slideInterval"
+                android:summary="@string/slideIntervalSummary"
+                android:entries="@array/slideIntervalDescriptions"
+                android:entryValues="@array/slideIntervalValues"
+                android:dialogTitle="@string/slideIntervalTitle" />
+            <ListPreference
+                android:key="slideSpeed"
+                android:title="@string/slideSpeed"
+                android:summary="@string/slideSpeedSummary"
+                android:entries="@array/slideSpeedDescriptions"
+                android:entryValues="@array/slideSpeedValues"
+                android:dialogTitle="@string/slideSpeedTitle" />
+    </PreferenceCategory>
+    <PreferenceCategory
+            android:title="@string/floating">
             <CheckBoxPreference
                 android:key="rotateImages"
                 android:title="@string/rotateImages"
                 android:summary="@string/rotateImagesSummary"
                 android:defaultValue="true" />
-    </PreferenceCategory>      
+			<CheckBoxPreference
+                android:key="fullscreenBlack"
+                android:title="@string/fullscreenBlack"
+                android:summary="@string/fullscreenBlackSummary"
+                android:defaultValue="true" />
+    </PreferenceCategory>
     <PreferenceCategory
             android:title="@string/internals">
 

@@ -74,7 +74,7 @@ public class TextureBank {
 		}
 		// If no new pictures, try some old ones.
 		// Do not show an image that's already being shown
-		if(Settings.useCache || Settings.useLocal){
+		if(Settings.useCache){
 			ir = getCached();
 			
 			if(ir != null && previousImage != null){

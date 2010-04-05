@@ -6,6 +6,7 @@ import java.nio.IntBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import android.util.Log;
 import dk.nindroid.rss.RiverRenderer;
 import dk.nindroid.rss.gfx.Vec3f;
 
@@ -16,6 +17,7 @@ public class Dimmer {
 	private static ByteBuffer  	mIndexBuffer;
 	private static IntBuffer	mColorBuffer;
 	private static final int 	one = 0x10000;
+	private static int r,g,b;
 	
 	private static final int VERTS = 4;
 	
@@ -52,13 +54,20 @@ public class Dimmer {
 		mIndexBuffer.position(0);
 	}
 	
+	public static void setColor(float r, float g, float b){
+		Dimmer.r = (int)(r * one);
+		Dimmer.g = (int)(g * one);
+		Dimmer.b = (int)(b * one);
+	}
+	
 	static void setAlpha(float col){
 		int alpha = (int)(one * col);
+		Log.v("Dimmer", "" + col);
 		int[] colors  = { 
-				0, 0, 0, alpha,
-				0, 0, 0, alpha,
-				0, 0, 0, alpha,
-				0, 0, 0, alpha
+				r, g, b, alpha,
+				r, g, b, alpha,
+				r, g, b, alpha,
+				r, g, b, alpha
 				};
 		ByteBuffer cbb = ByteBuffer.allocateDirect(64);
 		cbb.order(ByteOrder.nativeOrder());
@@ -78,10 +87,8 @@ public class Dimmer {
 	 * @param szY
 	 * @param szZ
 	 */
-	public static void draw(GL10 gl, float fraction){
-		float dark = RiverRenderer.mDisplay.getFill();
-		dark *= dark;
-		setAlpha(1.0f - fraction * dark);
+	public static void draw(GL10 gl, float fraction, float finalIntensity){
+		setAlpha(fraction * finalIntensity);
 		gl.glPushMatrix();
 			gl.glLoadIdentity(); // We fill whole screen, never rotate!
 			gl.glTranslatef(0, 0, -zDepth);
@@ -92,7 +99,7 @@ public class Dimmer {
 			gl.glEnable(GL10.GL_COLOR_ARRAY);
 			gl.glVertexPointer(3, GL10.GL_FIXED, 0, mVertexBuffer);
 			gl.glColorPointer(4, GL10.GL_FIXED, 0, mColorBuffer);
-			gl.glBlendFunc(GL10.GL_ZERO, GL10.GL_SRC_ALPHA);
+			gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
 			gl.glEnable(GL10.GL_BLEND);
 			gl.glDrawElements(GL10.GL_TRIANGLE_STRIP, 4, GL10.GL_UNSIGNED_BYTE, mIndexBuffer);
 			gl.glDisable(GL10.GL_BLEND);

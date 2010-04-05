@@ -67,6 +67,7 @@ public class ShowStreams extends Activity {
 	private MenuItem					selectedItem;
 	private FeedController				mFeedController;
 	private ImageCache 					mImageCache;
+	private TextureBank					mTextureBank;
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -94,11 +95,8 @@ public class ShowStreams extends Activity {
 			PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 			wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "Floating Image");
 			ShowStreams.current = this;
-			TextureBank textureBank = setupFeeders();
-			Renderer defaultRenderer = new FloatingRenderer(textureBank);
-			defaultRenderer = new SlideshowRenderer(textureBank);
-			renderer = new RiverRenderer(true, textureBank);
-			renderer.setRenderer(defaultRenderer);
+			mTextureBank = setupFeeders();
+			renderer = new RiverRenderer(true, mTextureBank);
 			orientationManager.addSubscriber(RiverRenderer.mDisplay);
 			ClickHandler.init(renderer);
 			setContentView(R.layout.main);
@@ -186,6 +184,13 @@ public class ShowStreams extends Activity {
 	protected void onResume() {
 		super.onResume();
 		dk.nindroid.rss.settings.Settings.readSettings(this);
+		Renderer defaultRenderer = null;
+		if(dk.nindroid.rss.settings.Settings.mode == dk.nindroid.rss.settings.Settings.MODE_FLOATING_IMAGE){
+			defaultRenderer = new FloatingRenderer(mTextureBank);
+		}else{
+			defaultRenderer = new SlideshowRenderer(mTextureBank);
+		}
+		renderer.setRenderer(defaultRenderer);
 		renderer.onResume();
 		wl.acquire();
 		orientationManager.onResume();

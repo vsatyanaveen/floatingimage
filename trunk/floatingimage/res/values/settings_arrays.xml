@@ -1,0 +1,71 @@
+<resources>
+	<string-array name="displayModeDescriptions">
+		<item>None</item>
+		<item>Slide horizontal</item>
+		<item>Slide vertical</item>
+		<item>Crossfade</item>
+		<item>Fade to black</item>
+		<item>Fade to white</item>
+		<item>Random from the above</item>
+		<item>Floating images</item>
+	</string-array>
+	
+	<string-array name="displayModeValues">
+		<item>none</item>
+		<item>slideRightToLeft</item>
+		<item>SlideTopToBottom</item>
+		<item>crossFade</item>
+		<item>fadeToBlack</item>
+		<item>fadeToWhite</item>
+		<item>random</item>
+		<item>floatingImages</item>
+	</string-array>
+	
+	<string-array name="slideIntervalDescriptions">
+		<item>2 seconds</item>
+		<item>5 seconds</item>
+		<item>10 seconds</item>
+		<item>30 seconds</item>
+		<item>1 minute</item>
+		<item>2 minutes</item>
+		<item>5 minutes</item>
+		<item>10 minutes</item>
+		<item>30 minutes</item>
+		<item>1 hour</item>
+		<item>2 hours</item>
+		<item>6 hours</item>
+		<item>12 hours</item>
+		<item>1 day</item>
+		<item>1 week</item>
+	</string-array>
+	
+	<string-array name="slideIntervalValues">
+		<item>2000</item>
+		<item>5000</item>
+		<item>10000</item>
+		<item>30000</item>
+		<item>60000</item>
+		<item>120000</item>
+		<item>300000</item>
+		<item>600000</item>
+		<item>1800000</item>
+		<item>3600000</item>
+		<item>7200000</item>
+		<item>21600000</item>
+		<item>43200000</item>
+		<item>86400000</item>
+		<item>604800000</item>
+	</string-array>
+	
+	<string-array name="slideSpeedDescriptions">
+		<item>fast</item>
+		<item>slow</item>
+		<item>really slow</item>
+	</string-array>
+	
+	<string-array name="slideSpeedValues">
+		<item>300</item>
+		<item>1000</item>
+		<item>3000</item>
+	</string-array>
+</resources>

@@ -118,8 +118,10 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 		mBank.start();
 		TextureSelector.startThread();
 		mFadeOffset = 0.0f;
+		mRenderer.onResume();
 	}
 	public void onPause(){
+		mRenderer.onPause();
 		mBank.stop();
 		TextureSelector.stopThread();
 	}
@@ -152,7 +154,6 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 		gl.glViewport(0, 0, width, height);
 		mDisplay.onSurfaceChanged(width, height);
 		
-		Log.v("RiverRenderer", "Dimensions: " + width + "x" + height);
         /*
          * Set our projection matrix. This doesn't have to be done
          * each time we draw, but usually a new projection needs to

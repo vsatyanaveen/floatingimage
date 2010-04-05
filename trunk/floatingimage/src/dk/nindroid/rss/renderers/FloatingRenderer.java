@@ -20,6 +20,7 @@ import dk.nindroid.rss.renderers.floating.GlowImage;
 import dk.nindroid.rss.renderers.floating.Image;
 import dk.nindroid.rss.renderers.floating.InfoBar;
 import dk.nindroid.rss.renderers.floating.Image.Pos;
+import dk.nindroid.rss.settings.Settings;
 
 public class FloatingRenderer implements Renderer {
 	public static final long 	mFocusDuration = 300;
@@ -151,14 +152,16 @@ public class FloatingRenderer implements Renderer {
         GlowImage.unsetState(gl);
         float fraction = getFraction(realTime);
         if(mSelected != null){
+        	float dark = Settings.fullscreenBlack ? RiverRenderer.mDisplay.getFill() * RiverRenderer.mDisplay.getFill() : 0.8f;
+        	Dimmer.setColor(0.0f, 0.0f, 0.0f);
         	if(mSelected.stateInFocus()){
-        		Dimmer.draw(gl, 1.0f);
+        		Dimmer.draw(gl, 1.0f, dark);
         		fraction = 1.0f;
         	}else if (mSelected.stateFocusing()){
-        		Dimmer.draw(gl, fraction);
+        		Dimmer.draw(gl, fraction, dark);
         		// Fraction is right!
         	}else{
-        		Dimmer.draw(gl, 1.0f - fraction);
+        		Dimmer.draw(gl, 1.0f - fraction, dark);
         		fraction = 1.0f - fraction;
         	}
         	if(!RiverRenderer.mDisplay.isTurning()){
@@ -195,6 +198,12 @@ public class FloatingRenderer implements Renderer {
 			InfoBar.select(gl, mSelected.getShowing());
 		}
 	}
+	
+	@Override
+	public void onPause(){}
+	
+	@Override
+	public void onResume(){}
 
 	@Override
 	public boolean back() {
