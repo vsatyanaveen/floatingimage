@@ -3,7 +3,7 @@ package dk.nindroid.rss.renderers.slideshow.transitions;
 import javax.microedition.khronos.opengles.GL10;
 
 import dk.nindroid.rss.gfx.Vec3f;
-import dk.nindroid.rss.renderers.floating.Dimmer;
+import dk.nindroid.rss.renderers.Dimmer;
 import dk.nindroid.rss.renderers.slideshow.Image;
 
 public class FadeToWhite extends Transition {

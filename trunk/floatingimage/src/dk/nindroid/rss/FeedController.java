@@ -48,9 +48,9 @@ public class FeedController {
 		if(mReferences.size() == 0) return null;
 		int thisFeed = (lastFeed + 1) % mReferences.size();
 		List<ImageReference> feed = mReferences.get(thisFeed); 
-		int index = mFeedIndex.get(thisFeed);
+		int index = (mFeedIndex.get(thisFeed) + 1) % feed.size();
 		ir = feed.get(index);
-		mFeedIndex.set(thisFeed, (index + 1) % feed.size());
+		mFeedIndex.set(thisFeed, index);
 		lastFeed = thisFeed;
 		return ir;
 	}
