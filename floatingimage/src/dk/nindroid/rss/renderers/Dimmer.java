@@ -1,4 +1,4 @@
-package dk.nindroid.rss.renderers.floating;
+package dk.nindroid.rss.renderers;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -6,7 +6,6 @@ import java.nio.IntBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
 
-import android.util.Log;
 import dk.nindroid.rss.RiverRenderer;
 import dk.nindroid.rss.gfx.Vec3f;
 
@@ -62,7 +61,6 @@ public class Dimmer {
 	
 	static void setAlpha(float col){
 		int alpha = (int)(one * col);
-		Log.v("Dimmer", "" + col);
 		int[] colors  = { 
 				r, g, b, alpha,
 				r, g, b, alpha,

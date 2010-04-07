@@ -15,7 +15,6 @@ import dk.nindroid.rss.data.Ray;
 import dk.nindroid.rss.gfx.Vec3f;
 import dk.nindroid.rss.helpers.MatrixTrackingGL;
 import dk.nindroid.rss.renderers.floating.BackgroundPainter;
-import dk.nindroid.rss.renderers.floating.Dimmer;
 import dk.nindroid.rss.renderers.floating.GlowImage;
 import dk.nindroid.rss.renderers.floating.Image;
 import dk.nindroid.rss.renderers.floating.InfoBar;
