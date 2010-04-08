@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Vector;
 
+import android.util.Log;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.settings.Settings;
 
@@ -43,7 +44,7 @@ public class TextureBank {
 		if(ir != null){
 			synchronized (cached) {
 				cached.add(ir);
-				//Log.v("Texture bank", cached.size() + " old images.");
+				Log.v("Texture bank", cached.size() + " old images.");
 			}
 		}
 	}

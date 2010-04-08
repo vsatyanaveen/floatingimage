@@ -57,7 +57,7 @@ public class ShowStreams extends Activity {
 	public static final int				CONTEXT_SHARE 	= Menu.FIRST + 3;
 	public static final int				MENU_IMAGE_CONTEXT = 13;
 	public static final int				MISC_ROW_ID		= 201;
-	public static final String 			version 		= "2.2.5";
+	public static final String 			version 		= "2.2.13";
 	public static ShowStreams 			current;
 	private boolean 					mShowing = false;
 	private GLSurfaceView 				mGLSurfaceView;
@@ -186,9 +186,13 @@ public class ShowStreams extends Activity {
 		dk.nindroid.rss.settings.Settings.readSettings(this);
 		Renderer defaultRenderer = null;
 		if(dk.nindroid.rss.settings.Settings.mode == dk.nindroid.rss.settings.Settings.MODE_FLOATING_IMAGE){
-			defaultRenderer = new FloatingRenderer(mTextureBank);
+			if(!(defaultRenderer instanceof FloatingRenderer)){
+				defaultRenderer = new FloatingRenderer(mTextureBank);
+			}
 		}else{
-			defaultRenderer = new SlideshowRenderer(mTextureBank);
+			if(!(defaultRenderer instanceof SlideshowRenderer)){
+				defaultRenderer = new SlideshowRenderer(mTextureBank);
+			}
 		}
 		renderer.setRenderer(defaultRenderer);
 		renderer.onResume();
@@ -326,12 +330,12 @@ public class ShowStreams extends Activity {
 		SharedPreferences sp = getSharedPreferences("version", 0);
 		String oldVersion = sp.getString("version", "0.0.0");
 		if(isDeprecated(oldVersion)){
-			String oldCache = this.getResources().getString(R.string.dataFolder) + "/exploreCache";
-			oldCache = Environment.getExternalStorageDirectory().getAbsolutePath() + oldCache;
-			File dir = new File(oldCache);
-			if(dir.exists()){
-				ClearCache.deleteAll(dir);
-			}
+			//String oldCache = this.getResources().getString(R.string.dataFolder) + "/exploreCache";
+			//oldCache = Environment.getExternalStorageDirectory().getAbsolutePath() + oldCache;
+			//File dir = new File(oldCache);
+			//if(dir.exists()){
+			//	ClearCache.deleteAll(dir);
+			//}
 			addDefaultLocalPaths();			
 		}
 		SharedPreferences.Editor editor = sp.edit(); 
