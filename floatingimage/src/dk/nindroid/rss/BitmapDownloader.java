@@ -94,7 +94,7 @@ public class BitmapDownloader implements Runnable {
 		Bitmap bmp = ImageFileReader.readImage(file, 128, null);
 		if(bmp != null){
 			image.set128Bitmap(bmp);
-			bank.addOldBitmap(image);
+			bank.addNewBitmap(image);
 		}
 	}
 	

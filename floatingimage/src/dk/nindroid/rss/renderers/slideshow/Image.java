@@ -102,6 +102,8 @@ public class Image implements ImagePlane {
 	}
 	
 	public void setImage(GL10 gl, ImageReference image){
+		if(image == null)
+			return;
 		this.mHasBitmap = false; // No bitmap until it's large!
 		this.mImage = image;
 		this.mBitmap = image.getBitmap();

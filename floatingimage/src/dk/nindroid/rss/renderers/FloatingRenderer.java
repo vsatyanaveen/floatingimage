@@ -111,17 +111,21 @@ public class FloatingRenderer implements Renderer {
 			Bitmap splash = BitmapFactory.decodeStream(ShowStreams.current.getResources().openRawResource(R.drawable.splash));
 			mSplashImg.setSelected(gl, splash, 343.0f/512.0f, 1.0f, frameTime);
 			mNewStart = false;
-			mDefocusSplashTime = frameTime + SPLASHTIME;
+			mDefocusSplashTime = realTime + SPLASHTIME;
 		}
 		if(mDoUnselect){
 			mDoUnselect = false;
 			deselect(gl, frameTime, realTime);
 		}
 		// Defocus splash image after defined period.
-        if(mSplashImg != null && realTime > mDefocusSplashTime){
-        	mSelectedTime = realTime;
-        	mSplashImg.select(gl, frameTime, realTime);
-        	mSplashImg = null;
+        if(mSplashImg != null){
+        	if(realTime > mDefocusSplashTime && mSplashImg.stateInFocus()){
+	        	mSelectedTime = realTime;
+	        	mSplashImg.select(gl, frameTime, realTime);
+        	}
+        	if(mSplashImg.stateFloating()){
+        		mSplashImg = null;
+        	}
         }
         
         // Deselect selected when it is floating.

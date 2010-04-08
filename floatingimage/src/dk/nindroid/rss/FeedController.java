@@ -47,11 +47,15 @@ public class FeedController {
 		ImageReference ir = null;
 		if(mReferences.size() == 0) return null;
 		int thisFeed = (lastFeed + 1) % mReferences.size();
+		lastFeed = thisFeed;
 		List<ImageReference> feed = mReferences.get(thisFeed); 
 		int index = (mFeedIndex.get(thisFeed) + 1) % feed.size();
 		ir = feed.get(index);
-		mFeedIndex.set(thisFeed, index);
-		lastFeed = thisFeed;
+		try{
+			mFeedIndex.set(thisFeed, index);
+		}catch(Exception e){
+			Log.v("FeedController", "Could not save position. FeedIndex size: " + mFeedIndex.size() + ", trying to set index: " + index, e);
+		}
 		return ir;
 	}
 	
@@ -60,6 +64,7 @@ public class FeedController {
 			mFeeds.clear();
 			mFeedIndex.clear();
 			if(Settings.useRandom){
+				Log.v("FeedController", "Adding flickr explore feed");
 				mFeeds.add(getFeedReference(FlickrFeeder.getExplore(), Settings.TYPE_FLICKR, "Explore"));
 			}
 			FeedsDbAdapter mDbHelper = new FeedsDbAdapter(ShowStreams.current);
@@ -125,6 +130,7 @@ public class FeedController {
 	private synchronized boolean parseFeeds(){
 		synchronized(mFeeds){
 			mReferences.clear();
+			mFeedIndex.clear();
 			for(FeedReference feed : mFeeds){
 				List<ImageReference> references = null;
 				if(feed.getType() == Settings.TYPE_LOCAL){
@@ -140,7 +146,7 @@ public class FeedController {
 						}
 					}
 				}
-				if(references != null){
+				if(references != null && references.size() != 0){
 					mReferences.add(references); // These two 
 					mFeedIndex.add(0);			// are in sync!
 				}else{
