@@ -46,6 +46,10 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 		this.mRenderer = renderer;
 	}
 	
+	public Renderer getRenderer(){
+		return this.mRenderer;
+	}
+	
 	@Override
 	public void onDrawFrame(GL10 gl10) {
 		MatrixTrackingGL gl = new MatrixTrackingGL(gl10);

@@ -4,8 +4,8 @@
 	<string name="feeds">Feeds</string>
 	<!--  <string name="manageFeeds">Manage feeds</string> 
 	<string name="manageFeedsSummary">Choose which images to show</string> -->
-	<string name="manageFeeds">Manage local directories</string> 
-	<string name="manageFeedsSummary">Which directories should local images come from</string>
+	<string name="manageFeeds">Manage feeds</string> 
+	<string name="manageFeedsSummary">Where should the images float from</string>
 	<string name="display">Display</string>
 	<string name="floating">Floating images</string>
 	<string name="rotateImages">Rotate images</string>
@@ -32,9 +32,9 @@
 	<string name="clearCache">Clear cache</string>
 	<string name="clearCacheSummary">Erase entire image cache</string>
 	<string name="noFeeds">No directories selected. Press menu to add one now</string>
-	<string name="feedMenuAdd">Add new directory</string>
+	<string name="feedMenuAdd">Add new feed</string>
 	<string name="feedMenuClearAll">Clear all</string>
-	<string name="feedMenuRemove">Remove directory</string>
+	<string name="feedMenuRemove">Remove feed</string>
 	<string name="selectFolder">Select folder</string>
 	<string name="selectCurrentFolder">Select current folder</string>
 	<string name="flickr">Flickr</string>
@@ -42,7 +42,7 @@
 	<string name="flickrShowStreamUsername">Please enter the stream username</string>
 	<string name="flickrShowStreamBadUsername">Sorry, Flickr user not found.</string>
 	<string name="flickrShowStreamNoUsername">Please fill in a username.</string>
-	<string name="flickrSearch">Search</string>
+	<string name="flickrSearch">Search for tags</string>
 	<string name="flickrSearchTerm">Search, separate search terms with a comma (,)</string>
 	<string name="flickrSearchNoText">Please search for something.</string>
 	<string name="local">Local</string>

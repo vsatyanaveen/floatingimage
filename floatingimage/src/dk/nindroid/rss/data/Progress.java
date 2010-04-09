@@ -8,7 +8,7 @@ public class Progress {
 		this.key = key;
 	}
 	public synchronized boolean isKey(Object key){
-		return this.key.equals(key);
+		return this.key == null ? false : this.key.equals(key);
 	}
 	public synchronized int getPercentDone(){
 		return percentDone;		

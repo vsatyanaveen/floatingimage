@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -38,11 +39,12 @@ public class FlickrBrowser extends ListActivity {
 		super.onListItemClick(l, v, position, id);
 		FrameLayout fl = new FrameLayout(this);
 		final EditText input = new EditText(this);
+
 		fl.addView(input, FrameLayout.LayoutParams.FILL_PARENT);
 		input.setGravity(Gravity.CENTER);
 		switch(position){
 		case SHOW_STREAM:
-			new AlertDialog.Builder(this)
+			final AlertDialog streamDialog = new AlertDialog.Builder(this)
 				.setView(fl)
 				.setTitle(R.string.flickrShowStreamUsername)
 				.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -56,10 +58,12 @@ public class FlickrBrowser extends ListActivity {
 					public void onClick(DialogInterface dialog, int which) {
 						dialog.dismiss();
 					}
-				}).create().show();
+				}).create();
+			showKeyboard(streamDialog, input);
+			streamDialog.show();
 			break;
 		case SEARCH:
-			new AlertDialog.Builder(this)
+			final AlertDialog searchDialog = new AlertDialog.Builder(this)
 			.setView(fl)
 			.setTitle(R.string.flickrSearchTerm)
 			.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -73,9 +77,22 @@ public class FlickrBrowser extends ListActivity {
 				public void onClick(DialogInterface dialog, int which) {
 					dialog.dismiss();
 				}
-			}).create().show();
+			}).create();
+			showKeyboard(searchDialog, input);
+			searchDialog.show();
 			break;
 		}
+	}
+	
+	protected static void showKeyboard(final AlertDialog dialog, EditText editText){
+		editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+		    @Override
+		    public void onFocusChange(View v, boolean hasFocus) {
+		        if (hasFocus) {
+		        	dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+		        }
+		    }
+		});
 	}
 
 	private void returnStream(String username){

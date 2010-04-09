@@ -8,6 +8,7 @@ import java.util.Vector;
 
 import android.util.Log;
 import dk.nindroid.rss.data.ImageReference;
+import dk.nindroid.rss.data.LocalImage;
 import dk.nindroid.rss.settings.Settings;
 
 public class TextureBank {
@@ -33,8 +34,8 @@ public class TextureBank {
 		if(ir != null){
 			synchronized (unseen) {
 				unseen.add(ir);
-				//Log.v("Texture bank", unseen.size() + " new images.");
-				if(Settings.useCache){
+				// Don't cache local images.
+				if(Settings.useCache && !(ir instanceof LocalImage)){
 					ic.saveExploreImage(ir);
 				}
 			}

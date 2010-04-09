@@ -14,14 +14,14 @@ import dk.nindroid.rss.data.Progress;
 import dk.nindroid.rss.renderers.ImagePlane;
 
 public class TextureSelector implements Runnable{
-	private final static Bitmap 	mBitmap = Bitmap.createBitmap(512, 512, Config.RGB_565);
+	private final static Bitmap 	mBitmap = Bitmap.createBitmap(1024, 1024, Config.RGB_565);
 	private final static Paint		mPaint  = new Paint();
 	private final static Canvas		mCanvas = new Canvas(mBitmap); 
 	private static TextureSelector 	mTs;
 	private static ImagePlane		mCurSelected;
 	private static ImageReference 	mRef;
 	private static boolean 			mRun	= true;
-	private static final Progress progress = new Progress();
+	private static final Progress 	progress = new Progress();
 	public boolean abort = false;
 	
 	public static void startThread(){
@@ -63,7 +63,7 @@ public class TextureSelector implements Runnable{
 				progress.setKey(mCurSelected);
 				progress.setPercentDone(5);
 				if(ref instanceof LocalImage){ // Special case, read from disk
-					Bitmap bmp = ImageFileReader.readImage(new File(url), 450, progress);
+					Bitmap bmp = ImageFileReader.readImage(new File(url), Math.max(RiverRenderer.mDisplay.getHeightPixels(), RiverRenderer.mDisplay.getWidthPixels()), progress);
 					if(bmp != null){
 						applyLarge(bmp);
 					}
@@ -101,7 +101,7 @@ public class TextureSelector implements Runnable{
 		bmp.recycle();
 		synchronized(TextureSelector.class){
 			if(mRef != null) return;
-			mCurSelected.setFocusTexture(mBitmap, (float)bmp.getWidth() / 512.0f, (float)bmp.getHeight() / 512.0f);
+			mCurSelected.setFocusTexture(mBitmap, (float)bmp.getWidth() / 1024.0f, (float)bmp.getHeight() / 1024.0f);
 		}
 	}
 	

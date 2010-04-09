@@ -116,7 +116,7 @@ public class BitmapDownloader implements Runnable {
 			Bitmap bm = BitmapFactory.decodeByteArray(bitmapByteArray, 0, bitmapByteArray.length);
 			return bm;
 		} catch (Exception e) {
-			Log.w("dk.nindroid.rss.BitmaDownloader", e);
+			Log.w("dk.nindroid.rss.BitmaDownloader", "Error handling URL \"" + URL + "\"", e);
 		}
 		return null;	
 	}
