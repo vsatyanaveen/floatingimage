@@ -18,6 +18,8 @@ import dk.nindroid.rss.HttpTools;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.parser.flickr.FlickrParser;
 import dk.nindroid.rss.parser.flickr.FindByUsernameParser;
+import dk.nindroid.rss.parser.flickr.ImageSizesParser;
+import dk.nindroid.rss.parser.flickr.data.ImageSizes;
 
 public class FlickrFeeder {
 	private static final String API_KEY = "f6fdb5a636863d148afa8e7bb056bf1b";
@@ -25,7 +27,8 @@ public class FlickrFeeder {
 	private static final String FIND_BY_USERNAME = "http://api.flickr.com/services/rest/?method=flickr.people.findByUsername&api_key=" + API_KEY + "&username=";
 	private static final String GET_PUBLIC_PHOTOS = "http://api.flickr.com/services/rest/?method=flickr.people.getPublicPhotos&api_key=" + API_KEY + "&per_page=500&user_id=";
 	private static final String SEARCH = "http://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + API_KEY + "&safe_search=2&per_page=500&tags=";
-		
+	private static final String IMAGE_SIZES = "http://api.flickr.com/services/rest/?method=flickr.photos.getSizes&api_key=" + API_KEY + "&photo_id=";
+	
 	public static List<ImageReference> getImageUrls(String url){
 		try {
 			// Explore //InputStream stream = HttpTools.openHttpConnection("http://api.flickr.com/services/rest/?method=flickr.interestingness.getList&api_key=f6fdb5a636863d148afa8e7bb056bf1b&per_page=500");
@@ -71,6 +74,14 @@ public class FlickrFeeder {
 	}
 	
 	public static String findByUsername(String username){
+		int length = username.length();
+		if (length > 5){
+			char[] c = new char[1];
+			username.getChars(length - 4, length - 3, c, 0);
+			if(c[0] == '@'){
+				return username;
+			}
+		}
 		username = username.replaceAll(" ", "%20");
 		String url = FIND_BY_USERNAME + username;
 		InputStream stream;
@@ -93,6 +104,33 @@ public class FlickrFeeder {
 		SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
 		XMLReader xmlReader = parser.getXMLReader();
 		FindByUsernameParser contentHandler = new FindByUsernameParser();
+		xmlReader.setContentHandler(contentHandler);
+		xmlReader.parse(new InputSource(stream));
+		return contentHandler.getData();
+	}
+	
+	public static ImageSizes getImageSizes(String photoID){
+		String url = IMAGE_SIZES + photoID;
+		InputStream stream;
+		try {
+			stream = HttpTools.openHttpConnection(url);
+			return parseGetImageSizes(stream);
+		} catch (IOException e) {
+			Log.e("FlickrFeeder", "Unexpected exception caught", e);
+		} catch (ParserConfigurationException e) {
+			Log.e("FlickrFeeder", "Unexpected exception caught", e);
+		} catch (SAXException e) {
+			Log.e("FlickrFeeder", "Unexpected exception caught", e);
+		} catch (FactoryConfigurationError e) {
+			Log.e("FlickrFeeder", "Unexpected exception caught", e);
+		}
+		return null;
+	}
+	
+	public static ImageSizes parseGetImageSizes(InputStream stream)throws ParserConfigurationException, SAXException, FactoryConfigurationError, IOException{
+		SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
+		XMLReader xmlReader = parser.getXMLReader();
+		ImageSizesParser contentHandler = new ImageSizesParser();
 		xmlReader.setContentHandler(contentHandler);
 		xmlReader.parse(new InputSource(stream));
 		return contentHandler.getData();

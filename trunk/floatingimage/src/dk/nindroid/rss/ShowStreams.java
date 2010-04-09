@@ -184,13 +184,15 @@ public class ShowStreams extends Activity {
 	protected void onResume() {
 		super.onResume();
 		dk.nindroid.rss.settings.Settings.readSettings(this);
-		Renderer defaultRenderer = null;
+		Renderer defaultRenderer = renderer.getRenderer();
 		if(dk.nindroid.rss.settings.Settings.mode == dk.nindroid.rss.settings.Settings.MODE_FLOATING_IMAGE){
 			if(!(defaultRenderer instanceof FloatingRenderer)){
+				Log.v("Floating Image", "Switching to floating renderer");
 				defaultRenderer = new FloatingRenderer(mTextureBank);
 			}
 		}else{
 			if(!(defaultRenderer instanceof SlideshowRenderer)){
+				Log.v("Floating Image", "Switching to slideshow renderer");
 				defaultRenderer = new SlideshowRenderer(mTextureBank);
 			}
 		}

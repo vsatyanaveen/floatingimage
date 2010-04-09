@@ -9,7 +9,10 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Bitmap.Config;
 import android.net.Uri;
+import android.util.Log;
+import dk.nindroid.rss.flickr.FlickrFeeder;
 import dk.nindroid.rss.flickr.PersonInfo;
+import dk.nindroid.rss.parser.flickr.data.ImageSizes;
 
 public class FlickrImage implements ImageReference{
 	private final static String imageType = "flickrInternal";
@@ -26,6 +29,7 @@ public class FlickrImage implements ImageReference{
 	boolean personal;
 	float width;
 	float height;
+	ImageSizes sizes;
 	
 	public String getID(){
 		return imgID;
@@ -122,11 +126,44 @@ public class FlickrImage implements ImageReference{
 	}
 	@Override
 	public String getBigImageUrl() {
-		return "http://farm" + farmID + ".static.flickr.com/" + serverID + "/" + imgID + "_" + secret + "_m.jpg";
+		if(sizes == null){
+			sizes = FlickrFeeder.getImageSizes(imgID);
+		}
+		if(sizes == null){
+			return null;
+		}
+		if(sizes.getMediumUrl() != null) {
+			Log.v("dk.nindroid.rss.data.FlickrImage", "\"" + title + "\" is available as Medium image.");
+			return sizes.getMediumUrl();
+		}
+		if(sizes.getSmallUrl() != null) {
+			Log.v("dk.nindroid.rss.data.FlickrImage", "\"" + title + "\" is available as Small image.");
+			return sizes.getSmallUrl();
+		}
+		return null;
 	}
 	@Override
 	public String getOriginalImageUrl() {
-		return "http://farm" + farmID + ".static.flickr.com/" + serverID + "/" + imgID + "_" + secret + "_b.jpg";
+		if(sizes == null){
+			sizes = FlickrFeeder.getImageSizes(imgID);
+		}
+		if(sizes == null){
+			return null;
+		}
+		if(sizes.getOriginalUrl() != null) {
+			Log.v("dk.nindroid.rss.data.FlickrImage", "\"" + title + "\" is available as Original image.");
+			return sizes.getOriginalUrl();
+		}
+		if(sizes.getMediumUrl() != null) {
+			Log.v("dk.nindroid.rss.data.FlickrImage", "\"" + title + "\" is available as Medium image.");
+			return sizes.getMediumUrl();
+		}
+		if(sizes.getSmallUrl() != null) {
+			Log.v("dk.nindroid.rss.data.FlickrImage", "\"" + title + "\" is available as Small image.");
+			return sizes.getSmallUrl();
+		}
+		Log.v("dk.nindroid.rss.data.FlickrImage", "\"" + title + "\" is not available in any resonable resolution.");
+		return null;
 	}
 	
 	@Override

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.xml.parsers.FactoryConfigurationError;
@@ -147,6 +148,9 @@ public class FeedController {
 					}
 				}
 				if(references != null && references.size() != 0){
+					if(Settings.shuffleImages){
+						Collections.shuffle(references);
+					}
 					mReferences.add(references); // These two 
 					mFeedIndex.add(0);			// are in sync!
 				}else{
