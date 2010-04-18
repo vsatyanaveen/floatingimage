@@ -1,4 +1,4 @@
-package dk.nindroid.rss.data;
+package dk.nindroid.rss.flickr;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -10,8 +10,7 @@ import android.graphics.Paint;
 import android.graphics.Bitmap.Config;
 import android.net.Uri;
 import android.util.Log;
-import dk.nindroid.rss.flickr.FlickrFeeder;
-import dk.nindroid.rss.flickr.PersonInfo;
+import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.parser.flickr.data.ImageSizes;
 
 public class FlickrImage implements ImageReference{

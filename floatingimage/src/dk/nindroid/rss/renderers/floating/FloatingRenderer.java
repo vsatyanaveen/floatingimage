@@ -1,41 +1,41 @@
-package dk.nindroid.rss.renderers;
+package dk.nindroid.rss.renderers.floating;
 
 import javax.microedition.khronos.opengles.GL10;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-
+import android.util.Log;
 import dk.nindroid.rss.R;
 import dk.nindroid.rss.RiverRenderer;
 import dk.nindroid.rss.ShowStreams;
 import dk.nindroid.rss.TextureBank;
+import dk.nindroid.rss.TextureSelector;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.Ray;
 import dk.nindroid.rss.gfx.Vec3f;
 import dk.nindroid.rss.helpers.MatrixTrackingGL;
-import dk.nindroid.rss.renderers.floating.BackgroundPainter;
-import dk.nindroid.rss.renderers.floating.GlowImage;
-import dk.nindroid.rss.renderers.floating.Image;
-import dk.nindroid.rss.renderers.floating.InfoBar;
+import dk.nindroid.rss.renderers.Dimmer;
+import dk.nindroid.rss.renderers.Renderer;
 import dk.nindroid.rss.renderers.floating.Image.Pos;
 import dk.nindroid.rss.settings.Settings;
 
 public class FloatingRenderer implements Renderer {
 	public static final long 	mFocusDuration = 300;
 	public static long			mSelectedTime;
-	public static final float  mFocusX = 0.0f;
-	public static final float  mFocusY = 0.0f;
-	public static final float  mFocusZ = -1.0f;
-	public static final float  mFloatZ = -3.5f;
-	public static final float  mJitterX = 0.8f;
-	public static final float  mJitterY = 0.5f;
-	public static final float  mJitterZ = 1.5f;
+	public static final float  	mFocusX = 0.0f;
+	public static final float  	mFocusY = 0.0f;
+	public static final float 	mFocusZ = -1.0f;
+	public static final float  	mFloatZ = -3.5f;
+	public static final float  	mJitterX = 0.8f;
+	public static final float  	mJitterY = 0.5f;
+	public static final float  	mJitterZ = 1.5f;
 	private static final long	SPLASHTIME = 2000l;
 	
 	private boolean 		mNewStart = true;
 	private Image[] 		mImgs;
 	private TextureBank 	mBank;
+	public static TextureSelector mTextureSelector;
 	private long 			mTraversal = 30000;
 	private long 			mInterval;
 	private int 			mTotalImgRows = 6;
@@ -43,12 +43,17 @@ public class FloatingRenderer implements Renderer {
 	private boolean 		mCreateMiddle = true;
 	private boolean			mDoUnselect = false;
 	
+	
 	private static final Vec3f mCamPos = new Vec3f(0,0,0);
 	private Image			mSelected = null;
+	private int				mSelectedIndex;
 	private Image			mSplashImg;
 	private long			mDefocusSplashTime;
+	private boolean			mSelectingNext;
+	private boolean			mSelectingPrev;
 	
 	public FloatingRenderer(TextureBank bank){
+		mTextureSelector = new TextureSelector();
 		this.mBank = bank;
 		mImgs = new Image[mTotalImgRows * 3 / 2];
 		mInterval = mTraversal / mTotalImgRows;
@@ -86,6 +91,7 @@ public class FloatingRenderer implements Renderer {
 	            	if(t > 0 && t < closest){
 	            		closest = t;
 	            		selected = mImgs[i];
+	            		mSelectedIndex = i;
 	            	}
 	            }
 	        	if(selected != null && selected.canSelect()){
@@ -127,11 +133,29 @@ public class FloatingRenderer implements Renderer {
         		mSplashImg = null;
         	}
         }
-        
         // Deselect selected when it is floating.
         if(mSelected != null){
+        	if(mSelected.stateInFocus()){
+        		if(mSelectingNext || mSelectingPrev){
+        			deselect(gl, frameTime, realTime);
+        		}
+        	}
         	if(mSelected.stateFloating()){
-        		mSelected = null;
+        		if(mSelectingNext || mSelectingPrev){
+        			Log.v("FloatingRenderer", mSelectingNext ? "next" : "prev");
+        			int imageCount = mImgs.length;
+        			Log.v("FloatingRenderer", "Previous selected: " + mSelectedIndex);
+        			mSelectedIndex += (mSelectingNext ? imageCount - 1 : 1);
+        			mSelectedIndex %= imageCount;
+        			Log.v("FloatingRenderer", "Updated  selected: " + mSelectedIndex);
+        			mSelected = mImgs[mSelectedIndex];
+        			mSelectedTime = realTime;
+        			mSelectingNext = false;
+        			mSelectingPrev = false;
+        			mSelected.select(gl, frameTime, realTime);
+        		}else{
+        			mSelected = null;
+        		}
         	}
         }
 	}
@@ -203,10 +227,14 @@ public class FloatingRenderer implements Renderer {
 	}
 	
 	@Override
-	public void onPause(){}
+	public void onPause(){
+		mTextureSelector.stopThread();
+	}
 	
 	@Override
-	public void onResume(){}
+	public void onResume(){
+		mTextureSelector.startThread();
+	}
 
 	@Override
 	public boolean back() {
@@ -228,5 +256,34 @@ public class FloatingRenderer implements Renderer {
 	@Override
 	public ImageReference getCurrent() {
 		return mSelected != null ? mSelected.getShowing() : null;
+	}
+
+	@Override
+	public boolean slideLeft(long realTime) {
+		if(mSelected != null){
+			mSelectingNext = true;
+			mSelectingPrev = false;
+			Log.v("FloatingRenderer", "Select left");
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean slideRight(long realTime) {
+		if(mSelected != null){
+			mSelectingNext = false;
+			mSelectingPrev = true;
+			Log.v("FloatingRenderer", "Select right");
+			return true;
+		}
+		return false;
+	}
+	
+	@Override
+	public void setBackground(){
+		if(mSelected != null){
+			mSelected.setBackground();
+		}
 	}
 }

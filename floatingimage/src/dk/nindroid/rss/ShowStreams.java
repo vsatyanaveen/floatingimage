@@ -36,9 +36,10 @@ import dk.nindroid.rss.menu.Settings;
 import dk.nindroid.rss.orientation.OrientationManager;
 import dk.nindroid.rss.parser.ParserProvider;
 import dk.nindroid.rss.parser.flickr.FlickrParser;
-import dk.nindroid.rss.renderers.FloatingRenderer;
+import dk.nindroid.rss.parser.picasa.PicasaParser;
 import dk.nindroid.rss.renderers.Renderer;
 import dk.nindroid.rss.renderers.floating.BackgroundPainter;
+import dk.nindroid.rss.renderers.floating.FloatingRenderer;
 import dk.nindroid.rss.renderers.floating.GlowImage;
 import dk.nindroid.rss.renderers.floating.ShadowPainter;
 import dk.nindroid.rss.renderers.slideshow.SlideshowRenderer;
@@ -110,6 +111,7 @@ public class ShowStreams extends Activity {
 	
 	void registerParsers(){
 		ParserProvider.registerParser(dk.nindroid.rss.settings.Settings.TYPE_FLICKR, FlickrParser.class);
+		ParserProvider.registerParser(dk.nindroid.rss.settings.Settings.TYPE_PICASA, PicasaParser.class);
 	}
 	
 	TextureBank setupFeeders(){
@@ -156,6 +158,7 @@ public class ShowStreams extends Activity {
 				}
 				return true;
 			case CONTEXT_BACKGROUND:
+				//renderer.setBackground();
 				ir = renderer.getSelected();
 				Toast.makeText(this, "Setting background, please be patient...", Toast.LENGTH_LONG).show();
 				ImageDownloader.setWallpaper(ir.getOriginalImageUrl(), ir.getTitle());

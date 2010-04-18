@@ -1,5 +1,6 @@
 package dk.nindroid.rss.renderers.floating;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -13,16 +14,16 @@ import android.graphics.Bitmap;
 import android.opengl.GLUtils;
 import android.util.Log;
 import dk.nindroid.rss.RiverRenderer;
+import dk.nindroid.rss.ShowStreams;
 import dk.nindroid.rss.TextureBank;
-import dk.nindroid.rss.TextureSelector;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.Ray;
 import dk.nindroid.rss.gfx.Vec3f;
 import dk.nindroid.rss.helpers.MatrixTrackingGL;
-import dk.nindroid.rss.renderers.FloatingRenderer;
 import dk.nindroid.rss.renderers.ImagePlane;
 import dk.nindroid.rss.renderers.ProgressBar;
 import dk.nindroid.rss.settings.Settings;
+import dk.nindroid.rss.uiActivities.Toaster;
 
 public class Image implements ImagePlane {
 	private static int  ids = 0;
@@ -60,6 +61,7 @@ public class Image implements ImagePlane {
 	private float		mFocusHeight;
 	private boolean		mLargeTex = false;
 	private float[]		mModelviewMatrix = new float[16];
+	private boolean		mSetBackgroundWhenReady = false;
 	
 	public enum Pos {
 		UP, MIDDLE, DOWN
@@ -82,6 +84,24 @@ public class Image implements ImagePlane {
 	
 	public boolean stateInFocus(){
 		return mState == STATE_FOCUSED;
+	}
+	
+	public void setBackground(){
+		if(mLargeTex){
+			try {
+				if(mFocusBmp.isRecycled()){
+					Log.e("Floating Image", "Trying to set recycled bitmap as background!");
+				}else{
+					ShowStreams.current.setWallpaper(mFocusBmp);
+				}
+			} catch (IOException e) {
+				Log.e("Floating Image", "Failed to get image", e);
+				Toaster toaster = new Toaster("Sorry, there was an error setting wallpaper!");
+				ShowStreams.current.runOnUiThread(toaster);
+			}
+		}else{
+			mSetBackgroundWhenReady = true;
+		}
 	}
 	
 	public void revive(GL10 gl, long time){
@@ -132,6 +152,10 @@ public class Image implements ImagePlane {
 		mFocusHeight = height;
 		mLargeTex = true;
 		setFocusTexture(gl);
+		if(mSetBackgroundWhenReady){
+			setBackground();
+		}
+		mSetBackgroundWhenReady = false;
 	}
 	
 	protected float getYPos(){
@@ -244,12 +268,20 @@ public class Image implements ImagePlane {
 		gl.glScalef(szX, szY, 1);
 		gl.glDrawElements(GL10.GL_TRIANGLE_STRIP, 4, GL10.GL_UNSIGNED_BYTE, mIndexBuffer);
 		
+		/*
+		// Try this on Nexus hardware!
+		gl.glEnable(GL10.GL_BLEND);
+		gl.glEnable(GL10.GL_LINE_SMOOTH);
+		gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+		gl.glHint(GL10.GL_LINE_SMOOTH_HINT, GL10.GL_NICEST);
+		gl.glLineWidth(1.5f);
+		gl.glDrawElements(GL10.GL_LINE_STRIP, 4, GL10.GL_UNSIGNED_BYTE, mIndexBuffer);
 		gl.getMatrix(mModelviewMatrix, 0);
-        
+        */
         gl.glPopMatrix();
         
         if(mState == STATE_FOCUSED && !mLargeTex){
-        	ProgressBar.draw(gl, TextureSelector.getProgress());
+        	ProgressBar.draw(gl, FloatingRenderer.mTextureSelector.getProgress());
         }
 	}
 	
@@ -320,7 +352,7 @@ public class Image implements ImagePlane {
 		if(fraction > 1){
 			mRotation = 0.0f;
 			if(!mLargeTex){
-				TextureSelector.selectImage(this, this.mShowingImage);
+				FloatingRenderer.mTextureSelector.selectImage(this, this.mShowingImage);
 			}
 			mState = STATE_FOCUSED;
 			return;
@@ -480,6 +512,7 @@ public class Image implements ImagePlane {
         	return;
         }
         setState(gl);
+        mFocusBmp.recycle();
 	}
 	
 	public void setTexture(GL10 gl, ImageReference ir) {
@@ -490,7 +523,7 @@ public class Image implements ImagePlane {
 		
 		maspect = width / height;
 		
-        gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
+		gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
 
         gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER,
                 GL10.GL_NEAREST);
@@ -506,20 +539,24 @@ public class Image implements ImagePlane {
         gl.glTexEnvf(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE,
                 GL10.GL_BLEND);
         
-        GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, ir.getBitmap(), 0);
-        
-        ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
-        tbb.order(ByteOrder.nativeOrder());
-        mTexBuffer = tbb.asFloatBuffer();
-        
-        float tex[] = {
-        	0.0f,  0.0f,
-        	0.0f,  height,	
-        	width,  0.0f,
-        	width,  height,
-        };
-        mTexBuffer.put(tex);
-        mTexBuffer.position(0);
+        try{
+	        GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, ir.getBitmap(), 0);
+	        
+	        ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
+	        tbb.order(ByteOrder.nativeOrder());
+	        mTexBuffer = tbb.asFloatBuffer();
+	        
+	        float tex[] = {
+	        	0.0f,  0.0f,
+	        	0.0f,  height,	
+	        	width,  0.0f,
+	        	width,  height,
+	        };
+	        mTexBuffer.put(tex);
+	        mTexBuffer.position(0);
+        }catch(IllegalArgumentException e){
+        	Log.e("dk.nindroid.rss.Image", "Error setting texture", e);
+        }
         setState(gl);
 	}
 	private int mTextureID;

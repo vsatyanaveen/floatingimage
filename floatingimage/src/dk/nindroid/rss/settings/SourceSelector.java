@@ -12,8 +12,9 @@ import dk.nindroid.rss.R;
 public class SourceSelector extends ListActivity {
 	public static final int		LOCAL = Menu.FIRST;
 	public static final int		FLICKR = Menu.FIRST + 1;
-	public static final int 	LOCAL_ACTIVITY = 13;
+	public static final int 	LOCAL_ACTIVITY  = 13;
 	public static final int 	FLICKR_ACTIVITY = 14;
+	public static final int 	PICASA_ACTIVITY = 15;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +26,8 @@ public class SourceSelector extends ListActivity {
 	protected void fillMenu(){
 		String local = this.getResources().getString(R.string.local);
 		String flickr = this.getResources().getString(R.string.flickr);
-		String[] options = new String[] {local, flickr};
+		String picasa = this.getResources().getString(R.string.picasa);
+		String[] options = new String[] {local, flickr, picasa};
 		setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, options));
 	}
 	
@@ -40,6 +42,10 @@ public class SourceSelector extends ListActivity {
 		case 1: // Flickr
 			Intent showFlickr = new Intent(this, FlickrBrowser.class);
 			startActivityForResult(showFlickr, FLICKR_ACTIVITY);
+			break;
+		case 2: // Picasa
+			Intent showPicasa = new Intent(this, PicasaBrowser.class);
+			startActivityForResult(showPicasa, PICASA_ACTIVITY);
 			break;
 		}
 	}
@@ -56,6 +62,9 @@ public class SourceSelector extends ListActivity {
 				break;
 			case FLICKR_ACTIVITY:
 				b.putInt("TYPE", Settings.TYPE_FLICKR);
+				break;
+			case PICASA_ACTIVITY:
+				b.putInt("TYPE", Settings.TYPE_PICASA);
 				break;
 			}
 			intent.putExtras(b);

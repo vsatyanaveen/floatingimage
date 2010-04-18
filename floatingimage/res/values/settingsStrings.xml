@@ -45,5 +45,13 @@
 	<string name="flickrSearch">Search for tags</string>
 	<string name="flickrSearchTerm">Search, separate search terms with a comma (,)</string>
 	<string name="flickrSearchNoText">Please search for something.</string>
+	<string name="picasa">Picasa</string>
+	<string name="picasaShowStream">Show stream</string>
+	<string name="picasaShowStreamUsername">Please enter the stream username</string>
+	<string name="picasaShowStreamBadUsername">Sorry, Picasa user not found.</string>
+	<string name="picasaShowStreamNoUsername">Please fill in a username.</string>
+	<string name="picasaSearch">Search for keywords</string>
+	<string name="picasaSearchTerm">Search, separate search terms with a comma (,)</string>
+	<string name="picasaSearchNoText">Please search for something.</string>
 	<string name="local">Local</string>
 </resources>

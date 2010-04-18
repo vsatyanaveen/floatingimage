@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.util.Log;
 import dk.nindroid.rss.RiverRenderer;
 import dk.nindroid.rss.TextureBank;
-import dk.nindroid.rss.TextureSelector;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.gfx.Vec3f;
 import dk.nindroid.rss.helpers.MatrixTrackingGL;
@@ -67,7 +66,14 @@ public class SlideshowRenderer implements Renderer {
 	}
 	
 	@Override
-	public void onPause(){}
+	public void onPause(){
+		mPrevious.onPause();
+		mCurrent.onPause();
+		mNext.onPause();
+		mPrevious.clear();
+		mCurrent.clear();
+		mNext.clear();
+	}
 	
 	@Override
 	public void onResume(){
@@ -75,6 +81,9 @@ public class SlideshowRenderer implements Renderer {
 		if(!RiverRenderer.mDisplay.isFullscreen()){
 			RiverRenderer.mDisplay.toggleFullscreen();
 		}
+		mPrevious.onResume();
+		mCurrent.onResume();
+		mNext.onResume();
 	}
 	
 	@Override
@@ -120,7 +129,7 @@ public class SlideshowRenderer implements Renderer {
 		mPrevious.render(gl);
 		mCurrent.render(gl);
 		if(!mCurrent.hasBitmap()){
-			ProgressBar.draw(gl, TextureSelector.getProgress());
+			ProgressBar.draw(gl, mCurrent.getProgress());
 		}
 		if(!mCurrentTransition.isFinished()){
 			mCurrentTransition.postRender(gl, frameTime);
@@ -157,5 +166,21 @@ public class SlideshowRenderer implements Renderer {
 		mNext.setImage(gl, mBank.getTexture(oldImage));
 		mSlideTime = realTime;
 		mCurrentTransition.init(mPrevious, mCurrent, realTime, Settings.slideSpeed);
+	}
+	
+	@Override
+	public boolean slideLeft(long realTime) {
+		mSlideTime = 0;
+		return true;
+	}
+
+	@Override
+	public boolean slideRight(long realTime) {
+		return false;
+	}
+	
+	@Override
+	public void setBackground() {
+		mCurrent.setBackground();
 	}
 }

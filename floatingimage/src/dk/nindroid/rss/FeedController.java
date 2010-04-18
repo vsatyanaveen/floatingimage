@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.ParserConfigurationException;
@@ -31,8 +33,9 @@ public class FeedController {
 	private List<List<ImageReference>> 		mReferences;
 	private List<Integer>					mFeedIndex;
 	private List<FeedReference>				mFeeds;
-	private boolean showing = false;
-	private int lastFeed = -1;
+	private boolean 						showing = false;
+	private Random 							mRand = new Random(System.currentTimeMillis());
+	//private int lastFeed = -1;
 	
 	public boolean isShowing(){
 		return showing;
@@ -47,17 +50,39 @@ public class FeedController {
 	public ImageReference getImageReference(){
 		ImageReference ir = null;
 		if(mReferences.size() == 0) return null;
-		int thisFeed = (lastFeed + 1) % mReferences.size();
-		lastFeed = thisFeed;
+		//int thisFeed = (lastFeed + 1) % mReferences.size();
+		//lastFeed = thisFeed;
+		int thisFeed = getFeed();
 		List<ImageReference> feed = mReferences.get(thisFeed); 
 		int index = (mFeedIndex.get(thisFeed) + 1) % feed.size();
 		ir = feed.get(index);
+		Log.v("FeedController", "Showing [" + thisFeed + ", " + index + "/" + feed.size() + "]");
 		try{
 			mFeedIndex.set(thisFeed, index);
 		}catch(Exception e){
 			Log.v("FeedController", "Could not save position. FeedIndex size: " + mFeedIndex.size() + ", trying to set index: " + index, e);
 		}
 		return ir;
+	}
+	
+	public int getFeed(){
+		float rand = mRand.nextFloat();
+		int feeds = mReferences.size();
+		float[] fraction = new float[feeds];
+		int total = 0;
+		for(int i = 0; i < feeds; ++i){
+			total += mReferences.get(i).size();
+			fraction[i] = total;
+		}
+		for(int i = 0; i < feeds; ++i){
+			fraction[i] /= total;
+			if(fraction[i] > rand){
+				Log.v("FeedController", "Fraction: " + fraction + ", selecting feed [" + i + "/" + feeds + "]");
+				return i;
+			}
+		}
+		Log.v("FeedController", "Falling back to last feed!");
+		return mReferences.size() - 1;
 	}
 	
 	public void readFeeds(){
@@ -85,7 +110,7 @@ public class FeedController {
 					}
 				}
 			}catch(Exception e){
-				Log.e("Local feeder", "Unhandled exception caught", e);
+				Log.e("FeedController", "Unhandled exception caught", e);
 			}finally{
 				if(c != null){
 					c.close();
@@ -118,7 +143,7 @@ public class FeedController {
 			mFeeds.clear();
 			mFeeds.add(feed);
 			showing = true;
-			lastFeed = -1;
+			//lastFeed = -1;
 			return parseFeeds();
 		}
 	}
@@ -205,7 +230,11 @@ public class FeedController {
 	}
 	
 	private static void buildImageIndex(List<ImageReference> images, File dir, int level){
-		for(File f : dir.listFiles()){
+		File[] files = dir.listFiles();
+		if(!Settings.shuffleImages){
+			Arrays.sort(files);
+		}
+		for(File f : files){
 			if(f.getName().charAt(0) == '.') continue; // Drop hidden files.
 			if(f.isDirectory() && level < 20){ // Some high number to avoid any infinite loops...
 				buildImageIndex(images, f, level + 1);
@@ -221,7 +250,7 @@ public class FeedController {
 	private static boolean isImage(File f){
 		String filename = f.getName();
 		String extension = filename.substring(filename.lastIndexOf('.') + 1);
-		if("jpg".equalsIgnoreCase(extension) || "png".equalsIgnoreCase(extension)){
+		if("jpg".equalsIgnoreCase(extension) || "jpeg".equalsIgnoreCase(extension) || "png".equalsIgnoreCase(extension)){
 			return true;
 		}
 		return false;

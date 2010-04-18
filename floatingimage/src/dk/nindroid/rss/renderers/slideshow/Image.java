@@ -1,5 +1,6 @@
 package dk.nindroid.rss.renderers.slideshow;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -11,27 +12,31 @@ import android.graphics.Bitmap;
 import android.opengl.GLUtils;
 import android.util.Log;
 import dk.nindroid.rss.RiverRenderer;
+import dk.nindroid.rss.ShowStreams;
 import dk.nindroid.rss.TextureSelector;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.gfx.Vec3f;
 import dk.nindroid.rss.renderers.ImagePlane;
+import dk.nindroid.rss.uiActivities.Toaster;
 
 public class Image implements ImagePlane {
-	private static final int VERTS = 4;
-	private int mTextureID;
-	private FloatBuffer mTexBuffer;
-	private Vec3f[]		mVertices;
-	private IntBuffer   mVertexBuffer;
-	private ByteBuffer  mIndexBuffer;
-	private ImageReference mImage;
-	private Bitmap 		mBitmap;
-	private float 		mAspect = 1;
-	private float 		mBitmapWidth;
-	private float 		mBitmapHeight;
-	private boolean		mHasBitmap;
-	private float		mAlpha = 1.0f;
+	private static final int 	VERTS = 4;
+	private int 				mTextureID;
+	private FloatBuffer 		mTexBuffer;
+	private Vec3f[]				mVertices;
+	private IntBuffer   		mVertexBuffer;
+	private ByteBuffer  		mIndexBuffer;
+	private ImageReference 		mImage;
+	private Bitmap 				mBitmap;
+	private float 				mAspect = 1;
+	private float 				mBitmapWidth;
+	private float 				mBitmapHeight;
+	private boolean				mHasBitmap;
+	private float				mAlpha = 1.0f;
+	private TextureSelector		mTextureSelector;
+	private boolean				mSetBackgroundWhenReady = false;
 	
-	private Vec3f		mPos;
+	private Vec3f				mPos;
 	
 	public void init(GL10 gl, long time){
 		int[] textures = new int[1];
@@ -53,6 +58,7 @@ public class Image implements ImagePlane {
 	}
 
 	public Image(){
+		mTextureSelector = new TextureSelector();
 		ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
         tbb.order(ByteOrder.nativeOrder());
         mTexBuffer = tbb.asFloatBuffer();
@@ -110,7 +116,7 @@ public class Image implements ImagePlane {
 		this.mBitmapWidth = image.getWidth();
 		this.mBitmapHeight = image.getHeight();
 		setTexture(gl);
-		TextureSelector.selectImage(this, image);
+		mTextureSelector.selectImage(this, image);
 	}
 	
 	public ImageReference getImage(){
@@ -135,6 +141,14 @@ public class Image implements ImagePlane {
 	
 	public boolean hasBitmap(){
 		return mHasBitmap;
+	}
+	
+	public void onResume(){
+		mTextureSelector.startThread();
+	}
+	
+	public void onPause(){
+		mTextureSelector.stopThread();
 	}
 	
 	public void render(GL10 gl){
@@ -242,5 +256,27 @@ public class Image implements ImagePlane {
 		this.mBitmapWidth = width;
 		this.mBitmapHeight = height;
 		this.mHasBitmap = true;
+		if(mSetBackgroundWhenReady){
+			setBackground();
+		}
+		mSetBackgroundWhenReady = false;
+	}
+
+	public int getProgress() {
+		return mTextureSelector.getProgress();
+	}
+	
+	public void setBackground(){
+		if(mHasBitmap){
+			try {
+				ShowStreams.current.setWallpaper(mBitmap);
+			} catch (IOException e) {
+				Log.e("ImageDownloader", "Failed to get image", e);
+				Toaster toaster = new Toaster("Sorry, there was an error setting wallpaper!");
+				ShowStreams.current.runOnUiThread(toaster);
+			}
+		}else{
+			mSetBackgroundWhenReady = true;
+		}
 	}
 }

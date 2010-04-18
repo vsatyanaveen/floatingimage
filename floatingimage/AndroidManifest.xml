@@ -18,6 +18,7 @@
 		<activity android:name=".settings.DirectoryBrowser"></activity>
 	<activity android:name=".settings.SourceSelector"></activity>
 <activity android:name=".settings.FlickrBrowser"></activity>
+<activity android:name=".settings.PicasaBrowser"></activity>
 </application>
     <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="4" />
 

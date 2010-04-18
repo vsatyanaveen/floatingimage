@@ -1,4 +1,4 @@
-package dk.nindroid.rss.data;
+package dk.nindroid.rss.flickr;
 
 public class FlickrUserInfo {
 	String username;
