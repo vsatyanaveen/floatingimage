@@ -13,99 +13,116 @@ import dk.nindroid.rss.data.LocalImage;
 import dk.nindroid.rss.data.Progress;
 import dk.nindroid.rss.renderers.ImagePlane;
 
-public class TextureSelector implements Runnable{
-	private final static Bitmap 	mBitmap = Bitmap.createBitmap(1024, 1024, Config.RGB_565);
-	private final static Paint		mPaint  = new Paint();
-	private final static Canvas		mCanvas = new Canvas(mBitmap); 
-	private static TextureSelector 	mTs;
-	private static ImagePlane		mCurSelected;
-	private static ImageReference 	mRef;
-	private static boolean 			mRun	= true;
-	private static final Progress 	progress = new Progress();
-	public boolean abort = false;
-	
-	public static void startThread(){
-		mRun = true;
-		mTs = new TextureSelector();
-		Thread t = new Thread(mTs);
+public class TextureSelector {
+	private Worker 		mWorker;
+		
+	public void startThread(){
+		if(mWorker != null) stopThread();
+		mWorker = new Worker();
+		mWorker.mRun = true;
+		Thread t = new Thread(mWorker);
 		t.start();
 	}
 	
-	public static void stopThread(){
-		synchronized (TextureSelector.class) {
-			mRun = false;
-			TextureSelector.class.notifyAll();
+	public void stopThread(){
+		synchronized (mWorker) {
+			mWorker.mRun = false;
+			mWorker.notifyAll();
 		}
 	}
 	
-	public static void selectImage(ImagePlane img, ImageReference ref){
-		synchronized (TextureSelector.class) {
-			mCurSelected = img;
-			mRef = ref;
-			TextureSelector.class.notify();
+	public void selectImage(ImagePlane img, ImageReference ref){
+		synchronized (mWorker) {
+			mWorker.mCurSelected = img;
+			mWorker.mRef = ref;
+			mWorker.notify();
 		}		
 	}
-	@Override
-	public void run() {
-		Process.setThreadPriority(5);
-		ImageReference ref = null;
-		while (true){
-			if(!mRun){
-				Log.i("dk.nindroid.rss.TextureSelector", "Stop received");
-				return;
-			}
-			synchronized (TextureSelector.class) {
-				ref = mRef;
-				mRef = null;
-			}
-			if(ref != null){
-				String url = ref.getBigImageUrl();
-				progress.setKey(mCurSelected);
-				progress.setPercentDone(5);
-				if(ref instanceof LocalImage){ // Special case, read from disk
-					Bitmap bmp = ImageFileReader.readImage(new File(url), Math.max(RiverRenderer.mDisplay.getHeightPixels(), RiverRenderer.mDisplay.getWidthPixels()), progress);
-					if(bmp != null){
-						applyLarge(bmp);
-					}
-				}else{ // Download from web
-					// Retry 5 times.. Why do I have to do this?! This should just WORK!!
-					for(int i = 0; i < 5; ++i){
-						Bitmap bmp = BitmapDownloader.downloadImage(url, progress);
-						if(bmp != null){
-							applyLarge(bmp);
-							break;
-						}else{
-							mCurSelected.setFocusTexture(null, 0, 0);
-						}
-					}
-				}
-			}
-			synchronized (TextureSelector.class) {
+	
+	public int getProgress(){
+		return mWorker.progress.isKey(mWorker.mCurSelected) ? mWorker.progress.getPercentDone() : 2;
+	}
+	
+	private class Worker implements Runnable{
+		private final Paint			mPaint  = new Paint(); 
+		private ImagePlane			mCurSelected;
+		private ImageReference 		mRef;
+		private boolean 			mRun	= true;
+		private final Progress 		progress = new Progress();
+		
+		@Override
+		public void run() {
+			Process.setThreadPriority(5);
+			ImageReference ref = null;
+			while (true){
 				if(!mRun){
 					Log.i("dk.nindroid.rss.TextureSelector", "Stop received");
 					return;
 				}
-				if(mRef == null){
-					try {
-						TextureSelector.class.wait();
-					} catch (InterruptedException e) {
+				synchronized (this) {
+					ref = mRef;
+					mRef = null;
+				}
+				if(ref != null){
+					String url = ref.getBigImageUrl();
+					progress.setKey(mCurSelected);
+					progress.setPercentDone(5);
+					if(ref instanceof LocalImage){ // Special case, read from disk
+						Bitmap bmp = ImageFileReader.readImage(new File(url), Math.max(RiverRenderer.mDisplay.getHeightPixels(), RiverRenderer.mDisplay.getWidthPixels()), progress);
+						if(bmp != null){
+							applyLarge(bmp);
+						}
+					}else{ // Download from web
+						// Retry 5 times.. Why do I have to do this?! This should just WORK!!
+						for(int i = 0; i < 5; ++i){
+							Bitmap bmp = BitmapDownloader.downloadImage(url, progress);
+							if(bmp != null){
+								applyLarge(bmp);
+								break;
+							}else{
+								mCurSelected.setFocusTexture(null, 0, 0);
+							}
+						}
+					}
+				}
+				synchronized (this) {
+					if(!mRun){
+						Log.i("dk.nindroid.rss.TextureSelector", "Stop received");
+						return;
+					}
+					if(mRef == null){
+						try {
+							this.wait();
+						} catch (InterruptedException e) {
+						}
 					}
 				}
 			}
 		}
-	}
-	
-	private void applyLarge(Bitmap bmp){
-		if(mRef != null) return;
-		mCanvas.drawBitmap(bmp, 0, 0, mPaint);
-		bmp.recycle();
-		synchronized(TextureSelector.class){
+		
+		private void applyLarge(Bitmap bmp){
 			if(mRef != null) return;
-			mCurSelected.setFocusTexture(mBitmap, (float)bmp.getWidth() / 1024.0f, (float)bmp.getHeight() / 1024.0f);
+			int height = bmp.getHeight();
+			int width = bmp.getWidth();
+			int max = Math.max(width, height);
+			int screenMax = Math.max(RiverRenderer.mDisplay.getHeightPixels(), RiverRenderer.mDisplay.getWidthPixels());
+			if(max > screenMax){
+				float scale = (float)screenMax / max;
+				Bitmap tmp = Bitmap.createScaledBitmap(bmp, (int)(width * scale), (int)(height * scale), true);
+				bmp.recycle();
+				bmp = tmp;
+			}
+			Bitmap bitmap = Bitmap.createBitmap(1024, 1024, Config.RGB_565);
+			Canvas canvas = new Canvas(bitmap);
+			canvas.drawBitmap(bmp, 0, 0, mPaint);
+			bmp.recycle();
+			synchronized(this){
+				if(mRef != null){
+					bitmap.recycle();
+				}else{
+					mCurSelected.setFocusTexture(bitmap, (float)bmp.getWidth() / 1024.0f, (float)bmp.getHeight() / 1024.0f);
+				}
+			}
 		}
-	}
-	
-	public static int getProgress(){
-		return progress.isKey(mCurSelected) ? progress.getPercentDone() : 2;
 	}
 }

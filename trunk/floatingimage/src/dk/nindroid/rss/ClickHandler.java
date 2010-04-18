@@ -72,7 +72,14 @@ public class ClickHandler extends TimerTask {
 				float diffX = x - lastX;
 				float diffY = y - lastY;
 				saveSpeed(diffX, diffY);
-				renderer.moveRelease((mLastSpeedX[0] + mLastSpeedX[1]) / 2, (mLastSpeedY[0] + mLastSpeedY[1]) / 2);
+				renderer.move((mLastSpeedX[0] + mLastSpeedX[1]) / 2, (mLastSpeedY[0] + mLastSpeedY[1]) / 2);
+			}
+		}
+		if(action == MotionEvent.ACTION_UP){
+			renderer.moveRelease();
+			for(int i = 0; i < 2; ++i){
+				mLastSpeedX[i] = 0;
+				mLastSpeedY[i] = 0;
 			}
 		}
 		mTouchLastPos.setX(x);

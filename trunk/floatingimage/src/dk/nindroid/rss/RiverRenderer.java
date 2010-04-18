@@ -19,10 +19,8 @@ import dk.nindroid.rss.renderers.floating.ShadowPainter;
 public class RiverRenderer implements GLSurfaceView.Renderer {
 	public static Display		mDisplay;
 	
-	
 	private boolean 		mTranslucentBackground = false;
-	
-	
+	private boolean			mMoveEventHandled = false;
 	private TextureBank 	mBank;
 	private long			mUpTime;
 	private Vec2f 			mClickedPos = new Vec2f();
@@ -93,7 +91,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	        
 	        
 		}catch(Throwable t){
-			Log.e("Floating Image", "Uncaught exception caught!", t);
+			Log.e("Floating Image", "Unexpected exception caught!", t);
 		}
 	}
 	
@@ -120,14 +118,16 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	
 	public void onResume(){
 		mBank.start();
-		TextureSelector.startThread();
 		mFadeOffset = 0.0f;
 		mRenderer.onResume();
 	}
 	public void onPause(){
 		mRenderer.onPause();
 		mBank.stop();
-		TextureSelector.stopThread();
+	}
+	
+	public void setBackground(){
+		mRenderer.setBackground();
 	}
 	
 	public int[] getConfigSpec() {
@@ -188,18 +188,41 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 		}
 	}
 	
-	public void moveRelease(float speedX, float speedY){
+	public void move(float speedX, float speedY){
+		if(mMoveEventHandled){
+			return;
+		}
 		int orientation = mDisplay.getOrientation();
 		if(orientation == Display.UP_IS_UP){
-			mFadeOffset = speedX;
+			if(!(speedX > 0 ? mRenderer.slideRight(System.currentTimeMillis()) : mRenderer.slideLeft(System.currentTimeMillis()))){
+				mFadeOffset = speedX;
+			}else{
+				mMoveEventHandled = true;
+			}
 		}else if(orientation == Display.UP_IS_LEFT){
-			mFadeOffset = speedY;
+			if(!(speedY > 0 ? mRenderer.slideRight(System.currentTimeMillis()) : mRenderer.slideLeft(System.currentTimeMillis()))){
+				mFadeOffset = speedY;
+			}else{
+				mMoveEventHandled = true;
+			}
 		}else if(orientation == Display.UP_IS_RIGHT){
-			mFadeOffset = -speedY;
+			if(!(speedY < 0 ? mRenderer.slideRight(System.currentTimeMillis()) : mRenderer.slideLeft(System.currentTimeMillis()))){
+				mFadeOffset = -speedY;
+			}else{
+				mMoveEventHandled = true;
+			}
 		}else if(orientation == Display.UP_IS_DOWN){
-			mFadeOffset = -speedX;
+			if(!(speedX < 0 ? mRenderer.slideRight(System.currentTimeMillis()) : mRenderer.slideLeft(System.currentTimeMillis()))){
+				mFadeOffset = -speedX;
+			}else{
+				mMoveEventHandled = true;
+			}
 		}
 		mUpTime = System.currentTimeMillis();
+	}
+	
+	public void moveRelease(){
+		mMoveEventHandled = false;
 	}
 	
 	public void onClick(float x, float y){

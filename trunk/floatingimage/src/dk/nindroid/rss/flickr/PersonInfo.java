@@ -14,7 +14,6 @@ import org.xml.sax.XMLReader;
 
 import android.util.Log;
 import dk.nindroid.rss.HttpTools;
-import dk.nindroid.rss.data.FlickrUserInfo;
 import dk.nindroid.rss.parser.flickr.FlickrUserInfoParser;
 
 public class PersonInfo {

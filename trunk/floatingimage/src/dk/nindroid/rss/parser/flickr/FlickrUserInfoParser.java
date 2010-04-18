@@ -6,7 +6,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import dk.nindroid.rss.data.FlickrUserInfo;
+import dk.nindroid.rss.flickr.FlickrUserInfo;
 
 public class FlickrUserInfoParser extends DefaultHandler {
 	FlickrUserInfo curData;

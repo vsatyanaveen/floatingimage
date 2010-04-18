@@ -6,8 +6,8 @@ import java.util.List;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
-import dk.nindroid.rss.data.FlickrImage;
 import dk.nindroid.rss.data.ImageReference;
+import dk.nindroid.rss.flickr.FlickrImage;
 import dk.nindroid.rss.parser.FeedParser;
 
 public class FlickrParser extends FeedParser {

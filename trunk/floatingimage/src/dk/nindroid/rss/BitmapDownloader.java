@@ -48,6 +48,7 @@ public class BitmapDownloader implements Runnable {
 					ImageReference ir = mFeedController.getImageReference();
 					if(ir == null)
 						break;
+					Log.v("BitmapDownloader", "Adding image " + ir.getTitle());
 					if(ir instanceof LocalImage){
 						addLocalImage((LocalImage)ir);
 					}else {

@@ -16,9 +16,9 @@ public class ParserProvider {
 			try {
 				return parsers.get(type).newInstance();
 			} catch (IllegalAccessException e) {
-				Log.e("ParserProvider", "Cannot create parser instance", e);
+				Log.e("ParserProvider", "Cannot create parser instance of type " + type, e);
 			} catch (InstantiationException e) {
-				Log.e("ParserProvider", "Cannot create parser instance", e);
+				Log.e("ParserProvider", "Cannot create parser instance of type " + type, e);
 			}
 		}
 		return null;
