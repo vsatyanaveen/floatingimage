@@ -5,7 +5,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.Date;
 import java.util.Random;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -27,41 +26,44 @@ import dk.nindroid.rss.uiActivities.Toaster;
 
 public class Image implements ImagePlane {
 	private static int  ids = 0;
-	
+	private static int	largeTextureID = -1;
+	private static int	largeTextureSize = 0;
+	private static boolean	revivingTextureNulled = false; 
 	private static final int STATE_FLOATING =   0;
 	private static final int STATE_FOCUSING =   1;
 	private static final int STATE_FOCUSED =    2;
 	private static final int STATE_DEFOCUSING = 3;
-	private int			mState = STATE_FLOATING;
+	private int				mState = STATE_FLOATING;
 	
-	int					mID;
-	private IntBuffer   mVertexBuffer;
-	private ByteBuffer  mIndexBuffer;
-	private float  		maspect;
-	private Vec3f		mPos;
-	private int			mRotations;
-	private float		mRotation;
-	private float		mRotationSaved;
-	private Vec3f		mJitter = new Vec3f(0.0f, 0.0f, 0.0f);
-	private Random		mRand;
-	private TextureBank mbank;
+	int						mID;
+	private IntBuffer   	mVertexBuffer;
+	private ByteBuffer  	mIndexBuffer;
+	private float  			maspect;
+	private Vec3f			mPos;
+	private int				mRotations;
+	private float			mRotation;
+	private float			mRotationSaved;
+	private Vec3f			mJitter = new Vec3f(0.0f, 0.0f, 0.0f);
+	private Random			mRand;
+	private TextureBank 	mbank;
 	private final long		mStartTime;
-	private final long 	mTraversal;
-	private ImageReference mCurImage;
-	private ImageReference mLastImage;
-	private ImageReference mShowingImage;
-	private boolean		mRewinding = false;	
-	private Vec3f[]		mVertices;
+	private final long 		mTraversal;
+	private ImageReference 	mCurImage;
+	private ImageReference 	mLastImage;
+	private ImageReference 	mShowingImage;
+	private int				mLastTextureSize = 0;
+	private boolean			mRewinding = false;	
+	private Vec3f[]			mVertices;
 	
 	// Selected vars
-	private Vec3f		mSelectedPos = new Vec3f();
-	private float 		mYPos;
-	private Bitmap		mFocusBmp;
-	private float		mFocusWidth;
-	private float		mFocusHeight;
-	private boolean		mLargeTex = false;
-	private float[]		mModelviewMatrix = new float[16];
-	private boolean		mSetBackgroundWhenReady = false;
+	private Vec3f			mSelectedPos = new Vec3f();
+	private float 			mYPos;
+	private Bitmap			mFocusBmp;
+	private float			mFocusWidth;
+	private float			mFocusHeight;
+	private boolean			mLargeTex = false;
+	private float[]			mModelviewMatrix = new float[16];
+	private boolean			mSetBackgroundWhenReady = false;
 	
 	public enum Pos {
 		UP, MIDDLE, DOWN
@@ -105,6 +107,12 @@ public class Image implements ImagePlane {
 	}
 	
 	public void revive(GL10 gl, long time){
+		// Make sure the textures are redrawn after subactivity
+		if(!revivingTextureNulled){
+			revivingTextureNulled = true;
+			largeTextureSize = 0;
+		}
+		mLastTextureSize = 0;
 		// Revive textures
 		if(mState == STATE_FOCUSED && mFocusBmp != null){
 			setFocusTexture(gl);
@@ -166,7 +174,7 @@ public class Image implements ImagePlane {
 		this.mID = ids++;
 		mTraversal = traversal;
 		mbank = bank;
-		mRand = new Random(new Date().getTime());
+		mRand = new Random(startTime + mID);
 		switch(layer){
 			case UP: mYPos = 1.25f; break;
 			case MIDDLE: mYPos = 0.0f; break;
@@ -239,6 +247,7 @@ public class Image implements ImagePlane {
 	
 	public void draw(MatrixTrackingGL gl, long time, long realTime){
 		update(gl, time, realTime);
+		revivingTextureNulled = false;
 		
 		float x, y, z, szX, szY;
 		x = mPos.getX() + mJitter.getX();
@@ -256,7 +265,11 @@ public class Image implements ImagePlane {
 		gl.glEnable(GL10.GL_TEXTURE_2D);
 		
 		gl.glActiveTexture(GL10.GL_TEXTURE0);
-        gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
+		if(mFocusBmp != null){
+			gl.glBindTexture(GL10.GL_TEXTURE_2D, largeTextureID);
+		}else{
+			gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
+		}
         gl.glVertexPointer(3, GL10.GL_FIXED, 0, mVertexBuffer);
         
 		gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mTexBuffer);
@@ -270,14 +283,17 @@ public class Image implements ImagePlane {
 		
 		/*
 		// Try this on Nexus hardware!
+		gl.glDepthMask(false);
 		gl.glEnable(GL10.GL_BLEND);
+		gl.glEnable(GL10.GL_POINT_SMOOTH);
 		gl.glEnable(GL10.GL_LINE_SMOOTH);
 		gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
-		gl.glHint(GL10.GL_LINE_SMOOTH_HINT, GL10.GL_NICEST);
-		gl.glLineWidth(1.5f);
+		gl.glLineWidth(1.0f);
 		gl.glDrawElements(GL10.GL_LINE_STRIP, 4, GL10.GL_UNSIGNED_BYTE, mIndexBuffer);
-		gl.getMatrix(mModelviewMatrix, 0);
+		gl.glDepthMask(true);
         */
+		gl.getMatrix(mModelviewMatrix, 0);
+		
         gl.glPopMatrix();
         
         if(mState == STATE_FOCUSED && !mLargeTex){
@@ -382,6 +398,9 @@ public class Image implements ImagePlane {
 			mRewinding = false;
 			if(mCurImage != null){
 				setTexture(gl, mShowingImage);
+				if(mFocusBmp != null){
+					mFocusBmp.recycle();
+				}
 				mFocusBmp = null;
 			}
 			return;
@@ -468,15 +487,24 @@ public class Image implements ImagePlane {
 	}
 	
 	private void setFocusTexture(GL10 gl){
-		if(mFocusBmp == null){ // TODO: Handle graciously
+		if(mFocusBmp == null){
 			return;
 		}
 		float width = mFocusWidth;
 		float height = mFocusHeight;
 		
 		maspect = width / height;
-        
-        gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
+		boolean firstDraw = false;
+		if(largeTextureID == -1){
+			int[] textures = new int[1];
+			gl.glGenTextures(1, textures, 0);
+			largeTextureID = textures[0];
+		}
+		if(largeTextureSize != mFocusBmp.getWidth()){
+			largeTextureSize = mFocusBmp.getWidth();
+			firstDraw = true;
+		}
+		gl.glBindTexture(GL10.GL_TEXTURE_2D, largeTextureID);
 
         gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER,
                 GL10.GL_NEAREST);
@@ -493,7 +521,13 @@ public class Image implements ImagePlane {
                 GL10.GL_BLEND);
         
         try{
-        	GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, mFocusBmp, 0);
+        	if(firstDraw){
+    			GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, mFocusBmp, 0);
+    		}else{
+    			GLUtils.texSubImage2D(GL10.GL_TEXTURE_2D, 0, 0, 0, mFocusBmp);
+    		}
+        	
+        	
         	ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
             tbb.order(ByteOrder.nativeOrder());
             mTexBuffer = tbb.asFloatBuffer();
@@ -507,12 +541,11 @@ public class Image implements ImagePlane {
             mTexBuffer.put(tex);
             mTexBuffer.position(0);
         }catch(IllegalArgumentException e){ // TODO: Handle graciously
-        	Log.w("dk.nindroid.rss.Image", "Texture could not be shown", e);
+        	Log.w("Floating Image", "Image: Large texture could not be shown", e);
         	setTexture(gl, mShowingImage);
         	return;
         }
         setState(gl);
-        mFocusBmp.recycle();
 	}
 	
 	public void setTexture(GL10 gl, ImageReference ir) {
@@ -540,7 +573,12 @@ public class Image implements ImagePlane {
                 GL10.GL_BLEND);
         
         try{
-	        GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, ir.getBitmap(), 0);
+        	if(mLastTextureSize != ir.getBitmap().getWidth()){
+        		GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, ir.getBitmap(), 0);
+        		mLastTextureSize = ir.getBitmap().getWidth();
+        	}else{
+        		GLUtils.texSubImage2D(GL10.GL_TEXTURE_2D, 0, 0, 0, ir.getBitmap());
+        	}
 	        
 	        ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
 	        tbb.order(ByteOrder.nativeOrder());
@@ -555,7 +593,7 @@ public class Image implements ImagePlane {
 	        mTexBuffer.put(tex);
 	        mTexBuffer.position(0);
         }catch(IllegalArgumentException e){
-        	Log.e("dk.nindroid.rss.Image", "Error setting texture", e);
+        	Log.e("Floating Image", "Image: Error setting texture", e);
         }
         setState(gl);
 	}

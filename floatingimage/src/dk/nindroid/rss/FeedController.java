@@ -49,18 +49,19 @@ public class FeedController {
 	
 	public ImageReference getImageReference(){
 		ImageReference ir = null;
-		if(mReferences.size() == 0) return null;
-		//int thisFeed = (lastFeed + 1) % mReferences.size();
-		//lastFeed = thisFeed;
-		int thisFeed = getFeed();
-		List<ImageReference> feed = mReferences.get(thisFeed); 
-		int index = (mFeedIndex.get(thisFeed) + 1) % feed.size();
-		ir = feed.get(index);
-		Log.v("FeedController", "Showing [" + thisFeed + ", " + index + "/" + feed.size() + "]");
-		try{
-			mFeedIndex.set(thisFeed, index);
-		}catch(Exception e){
-			Log.v("FeedController", "Could not save position. FeedIndex size: " + mFeedIndex.size() + ", trying to set index: " + index, e);
+		synchronized (mFeeds) {
+			if(mReferences.size() == 0) return null;
+			//int thisFeed = (lastFeed + 1) % mReferences.size();
+			//lastFeed = thisFeed;
+			int thisFeed = getFeed();
+			List<ImageReference> feed = mReferences.get(thisFeed);
+			int index = (mFeedIndex.get(thisFeed) + 1) % feed.size();
+			ir = feed.get(index);
+			try{
+				mFeedIndex.set(thisFeed, index);
+			}catch(Exception e){
+				Log.v("FeedController", "Could not save position. FeedIndex size: " + mFeedIndex.size() + ", trying to set index: " + index, e);
+			}
 		}
 		return ir;
 	}
@@ -77,7 +78,6 @@ public class FeedController {
 		for(int i = 0; i < feeds; ++i){
 			fraction[i] /= total;
 			if(fraction[i] > rand){
-				Log.v("FeedController", "Fraction: " + fraction + ", selecting feed [" + i + "/" + feeds + "]");
 				return i;
 			}
 		}

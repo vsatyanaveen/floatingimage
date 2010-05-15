@@ -6,8 +6,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
-import android.util.Log;
-
 import dk.nindroid.rss.data.Progress;
 
 public class DownloadUtil {
@@ -66,7 +64,7 @@ public class DownloadUtil {
 			}
 			spaceLeft = CHUNKSIZE - chunkIndex;
 		}
-		Log.v("Download util", "Bytes read: " + totalRead);
+		//Log.v("Download util", "Bytes read: " + totalRead);
 		
 		if(progress != null){
 			progress.setPercentDone(100);

@@ -15,6 +15,7 @@ public class SourceSelector extends ListActivity {
 	public static final int 	LOCAL_ACTIVITY  = 13;
 	public static final int 	FLICKR_ACTIVITY = 14;
 	public static final int 	PICASA_ACTIVITY = 15;
+	public static final int 	FACEBOOK_ACTIVITY = 16;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -27,7 +28,8 @@ public class SourceSelector extends ListActivity {
 		String local = this.getResources().getString(R.string.local);
 		String flickr = this.getResources().getString(R.string.flickr);
 		String picasa = this.getResources().getString(R.string.picasa);
-		String[] options = new String[] {local, flickr, picasa};
+		String facebook = this.getResources().getString(R.string.facebook);
+		String[] options = new String[] {local, flickr, picasa, facebook};
 		setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, options));
 	}
 	
@@ -47,6 +49,10 @@ public class SourceSelector extends ListActivity {
 			Intent showPicasa = new Intent(this, PicasaBrowser.class);
 			startActivityForResult(showPicasa, PICASA_ACTIVITY);
 			break;
+		case 3: // Facebook
+			Intent showFacebook = new Intent(this, FacebookBrowser.class);
+			startActivityForResult(showFacebook, FACEBOOK_ACTIVITY);
+			break;
 		}
 	}
 	
@@ -65,6 +71,9 @@ public class SourceSelector extends ListActivity {
 				break;
 			case PICASA_ACTIVITY:
 				b.putInt("TYPE", Settings.TYPE_PICASA);
+				break;
+			case FACEBOOK_ACTIVITY:
+				b.putInt("TYPE", Settings.TYPE_FACEBOOK);
 				break;
 			}
 			intent.putExtras(b);

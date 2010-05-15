@@ -9,7 +9,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Bitmap.Config;
 import android.net.Uri;
-import android.util.Log;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.parser.flickr.data.ImageSizes;
 
@@ -132,11 +131,9 @@ public class FlickrImage implements ImageReference{
 			return null;
 		}
 		if(sizes.getMediumUrl() != null) {
-			Log.v("dk.nindroid.rss.data.FlickrImage", "\"" + title + "\" is available as Medium image.");
 			return sizes.getMediumUrl();
 		}
 		if(sizes.getSmallUrl() != null) {
-			Log.v("dk.nindroid.rss.data.FlickrImage", "\"" + title + "\" is available as Small image.");
 			return sizes.getSmallUrl();
 		}
 		return null;
@@ -150,18 +147,14 @@ public class FlickrImage implements ImageReference{
 			return null;
 		}
 		if(sizes.getOriginalUrl() != null) {
-			Log.v("dk.nindroid.rss.data.FlickrImage", "\"" + title + "\" is available as Original image.");
 			return sizes.getOriginalUrl();
 		}
 		if(sizes.getMediumUrl() != null) {
-			Log.v("dk.nindroid.rss.data.FlickrImage", "\"" + title + "\" is available as Medium image.");
 			return sizes.getMediumUrl();
 		}
 		if(sizes.getSmallUrl() != null) {
-			Log.v("dk.nindroid.rss.data.FlickrImage", "\"" + title + "\" is available as Small image.");
 			return sizes.getSmallUrl();
 		}
-		Log.v("dk.nindroid.rss.data.FlickrImage", "\"" + title + "\" is not available in any resonable resolution.");
 		return null;
 	}
 	

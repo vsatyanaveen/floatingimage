@@ -79,50 +79,6 @@ public class InfoBar {
         setTexture(gl, mInfoPainter.getBitmap());
 	}
 	
-	/*
-	public static void select(GL10 gl, ImageReference ir){
-		if(ir == null) return;
-		String title = ir.getTitle();
-		String author = ir.getAuthor();
-		
-		mInfoTitle2 = -1;
-		mInfoAuthor = -1;
-		if (mInfo != null) {
-            mInfo.shutdown(gl);
-        } else {
-            mInfo = new LabelMaker(true, 512, 128);
-        }
-		mInfo.initialize(gl);
-		mInfo.beginAdding(gl);
-		if(title.length() > 25);
-		int newline = title.lastIndexOf(" ", 25);
-		if(newline != -1){
-			mInfoTitle = mInfo.add(gl, title.substring(0, newline), mInfoPaint);
-			String title2 = title.substring(newline);
-			if(title2.length() > 30){
-				title2 = title2.substring(0, 28) + "...";
-			}
-			mInfoTitle2 = mInfo.add(gl, title2, mInfoPaint);
-		}else{
-			mInfoTitle = mInfo.add(gl, title, mInfoPaint);
-		}
-		
-		if(author != null){
-			mInfoPaint.setTextSize(18);
-	        mInfoPaint.setARGB(0xff, 0xC0, 0xC0, 0xC0);
-	        if(author.length() < 35){
-	        	mInfoAuthor = mInfo.add(gl, author, mInfoPaint);
-	        }else{
-	        	mInfoAuthor = mInfo.add(gl, author.substring(0, 32) + "...", mInfoPaint);
-	        }
-			mInfoPaint.setTextSize(22);
-	        mInfoPaint.setARGB(0xff, 0xF0, 0xF0, 0xF0);
-		}
-		
-		mInfo.endAdding(gl);
-	}
-	*/
-	
 	public static void select(GL10 gl, ImageReference ir){
 		mInfoPainter.setInfo(ir.getTitle(), ir.getAuthor(), 1024, 128);
 		mInfoPainter.paintCanvas(Math.min(RiverRenderer.mDisplay.getWidthPixels(), 1024), 80);
