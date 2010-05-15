@@ -1,10 +1,17 @@
 package dk.nindroid.rss.settings;
 
+import java.io.IOException;
+
+import oauth.signpost.exception.OAuthCommunicationException;
+import oauth.signpost.exception.OAuthExpectationFailedException;
+import oauth.signpost.exception.OAuthMessageSignerException;
+import oauth.signpost.exception.OAuthNotAuthorizedException;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
@@ -20,6 +27,7 @@ public class PicasaBrowser extends ListActivity {
 	// Positions
 	private static final int	SHOW_STREAM = 0;
 	private static final int	SEARCH 		= 1;
+	private static final int	SIGN_IN		= 2;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +38,8 @@ public class PicasaBrowser extends ListActivity {
 	private void fillMenu(){
 		String showStream = this.getResources().getString(R.string.picasaShowStream);
 		String search = this.getResources().getString(R.string.picasaSearch);
-		String[] options = new String[]{showStream, search};
+		String signin = this.getResources().getString(R.string.picasaSignin);
+		String[] options = new String[]{showStream, search, signin};
 		setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, options));
 	}
 	
@@ -81,7 +90,23 @@ public class PicasaBrowser extends ListActivity {
 			showKeyboard(searchDialog, input);
 			searchDialog.show();
 			break;
+		case SIGN_IN:
+			try {
+				PicasaFeeder.signIn();
+			} catch (OAuthMessageSignerException e) {
+				Log.e("Floating Image", "Picasa: Error signing in!", e);
+			} catch (OAuthExpectationFailedException e) {
+				Log.e("Floating Image", "Picasa: Error signing in!", e);
+			} catch (OAuthCommunicationException e) {
+				Log.e("Floating Image", "Picasa: Error signing in!", e);
+			} catch (OAuthNotAuthorizedException e) {
+				Log.e("Floating Image", "Picasa: Error signing in!", e);
+			} catch (IOException e) {
+				Log.e("Floating Image", "Picasa: Error signing in!", e);
+			}
+			break;
 		}
+		
 	}
 	
 	protected static void showKeyboard(final AlertDialog dialog, EditText editText){

@@ -72,7 +72,7 @@ public class ClickHandler extends TimerTask {
 				float diffX = x - lastX;
 				float diffY = y - lastY;
 				saveSpeed(diffX, diffY);
-				renderer.move((mLastSpeedX[0] + mLastSpeedX[1]) / 2, (mLastSpeedY[0] + mLastSpeedY[1]) / 2);
+				renderer.move(x, y, (mLastSpeedX[0] + mLastSpeedX[1]) / 2, (mLastSpeedY[0] + mLastSpeedY[1]) / 2);
 			}
 		}
 		if(action == MotionEvent.ACTION_UP){

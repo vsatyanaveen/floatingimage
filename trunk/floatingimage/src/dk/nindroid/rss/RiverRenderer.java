@@ -11,6 +11,7 @@ import android.util.Log;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.gfx.Vec2f;
 import dk.nindroid.rss.helpers.MatrixTrackingGL;
+import dk.nindroid.rss.renderers.OSD;
 import dk.nindroid.rss.renderers.Renderer;
 import dk.nindroid.rss.renderers.floating.BackgroundPainter;
 import dk.nindroid.rss.renderers.floating.GlowImage;
@@ -25,11 +26,14 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	private long			mUpTime;
 	private Vec2f 			mClickedPos = new Vec2f();
 	private boolean 		mClicked = false;
+	private boolean 		mShowOSD = false;
+	private boolean 		mHideOSD = false;
 	private long 			mOffset = 0;
 	private float			mFadeOffset = 0;
 	private static final float mSensitivityX = 70.0f;
 	
-	private Renderer  mRenderer;
+	private Renderer  		mRenderer;
+	private OSD				mOSD;
 	
 	static {
 		mDisplay = new Display();
@@ -38,6 +42,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	public RiverRenderer(boolean useTranslucentBackground, TextureBank textureBank){
 		mTranslucentBackground = useTranslucentBackground;
 		mBank = textureBank;
+		mOSD = new OSD();
 	}
 	
 	public void setRenderer(Renderer renderer){
@@ -50,6 +55,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	
 	@Override
 	public void onDrawFrame(GL10 gl10) {
+		
 		MatrixTrackingGL gl = new MatrixTrackingGL(gl10);
 		try{
 			gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE,
@@ -78,21 +84,30 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	        fadeOffset(realTime);
 	        long time = realTime + mOffset;
 	        mDisplay.setFrameTime(realTime);
-	        
-	        if(mClicked){
+	        if(mShowOSD){
+	        	mShowOSD = false;
+	        	mOSD.show(realTime);
+	        }else if(mHideOSD){
+	        	mHideOSD = false;
+	        	mOSD.hide(realTime);
+	        	
+	        }else if(mClicked){
 	        	mClicked = false;
 	        	mRenderer.click(gl, mClickedPos.getX(), mClickedPos.getY(), time, realTime);
 	        }
+	        
 	        mRenderer.update(gl, time, realTime);
 	        
-	        /********* DRAWING *********/
+	        ///////// DRAWING /////////
 	        gl.glRotatef(mDisplay.getRotation(), 0.0f, 0.0f, 1.0f);
 	        mRenderer.render(gl, time, realTime);
-	        
-	        
+	        if(!mDisplay.isTurning()){
+	        	mOSD.draw(gl, realTime);
+	        }
 		}catch(Throwable t){
 			Log.e("Floating Image", "Unexpected exception caught!", t);
 		}
+		
 	}
 	
 	private void fadeOffset(long time) {
@@ -188,37 +203,71 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 		}
 	}
 	
-	public void move(float speedX, float speedY){
+	private boolean showOSD(float x, float y, float speedX, float speedY){
+		if(y < 150){
+			if(speedY > 0){
+				mShowOSD = true;
+			}else{
+				mHideOSD = true;
+			}
+			mMoveEventHandled = true;
+			return true;
+		}else if(y > mDisplay.getHeightPixels() - 150){
+			if(speedY < 0){
+				mShowOSD = true;
+			}else{
+				mHideOSD = true;
+			}
+			mMoveEventHandled = true;
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean isVertical(float speedX, float speedY){
+		return Math.abs(speedY) > Math.abs(speedX);
+	}
+	
+	public void move(float x, float y, float speedX, float speedY){
 		if(mMoveEventHandled){
 			return;
 		}
+		// Transform event!
 		int orientation = mDisplay.getOrientation();
-		if(orientation == Display.UP_IS_UP){
+		float tmp;
+		switch(orientation){
+		case Display.UP_IS_UP:
+			// Do nothing
+			break;
+		case Display.UP_IS_LEFT:
+			tmp = x; x = y; y = tmp;
+			y = mDisplay.getHeightPixels() - y;
+			tmp = speedX; speedX = speedY; speedY = tmp;
+			speedY *= -1;
+			break;
+		case Display.UP_IS_RIGHT:
+			tmp = x; x = y; y = tmp;
+			x = mDisplay.getWidthPixels() - x;
+			tmp = speedX; speedX = speedY; speedY = tmp;
+			speedX *= -1;
+			break;
+		case Display.UP_IS_DOWN:
+			x = mDisplay.getWidthPixels() - x;
+			y = mDisplay.getHeightPixels() - y;
+			speedX *= -1;
+			speedY *= -1;
+		}
+		
+		if(isVertical(speedX, speedY)){
+			showOSD(x, y, speedX, speedY);
+		}else{
 			if(!(speedX > 0 ? mRenderer.slideRight(System.currentTimeMillis()) : mRenderer.slideLeft(System.currentTimeMillis()))){
 				mFadeOffset = speedX;
 			}else{
 				mMoveEventHandled = true;
 			}
-		}else if(orientation == Display.UP_IS_LEFT){
-			if(!(speedY > 0 ? mRenderer.slideRight(System.currentTimeMillis()) : mRenderer.slideLeft(System.currentTimeMillis()))){
-				mFadeOffset = speedY;
-			}else{
-				mMoveEventHandled = true;
-			}
-		}else if(orientation == Display.UP_IS_RIGHT){
-			if(!(speedY < 0 ? mRenderer.slideRight(System.currentTimeMillis()) : mRenderer.slideLeft(System.currentTimeMillis()))){
-				mFadeOffset = -speedY;
-			}else{
-				mMoveEventHandled = true;
-			}
-		}else if(orientation == Display.UP_IS_DOWN){
-			if(!(speedX < 0 ? mRenderer.slideRight(System.currentTimeMillis()) : mRenderer.slideLeft(System.currentTimeMillis()))){
-				mFadeOffset = -speedX;
-			}else{
-				mMoveEventHandled = true;
-			}
+			mUpTime = System.currentTimeMillis();
 		}
-		mUpTime = System.currentTimeMillis();
 	}
 	
 	public void moveRelease(){
@@ -226,16 +275,29 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	}
 	
 	public void onClick(float x, float y){
-		mClicked = true;
+		// Transform coordinates!
 		int orientation = mDisplay.getOrientation();
-		if(orientation == Display.UP_IS_UP){
+		float tmp;
+		switch(orientation){
+		case Display.UP_IS_UP:
+			// Do nothing
+			break;
+		case Display.UP_IS_LEFT:
+			tmp = x; x = y; y = tmp;
+			y = mDisplay.getHeightPixels() - y;
+			break;
+		case Display.UP_IS_RIGHT:
+			tmp = x; x = y; y = tmp;
+			x = mDisplay.getWidthPixels() - x;
+			break;
+		case Display.UP_IS_DOWN:
+			x = mDisplay.getWidthPixels() - x;
+			y = mDisplay.getHeightPixels() - y;
+		}
+		
+		if(!mOSD.click(x, y)){
+			mClicked = true;
 			mClickedPos = new Vec2f((x/mDisplay.getWidthPixels() * 2.0f - 1.0f) * mDisplay.getWidth() / 2.0f, -(y / mDisplay.getHeightPixels() * 2.0f - 1.0f) * mDisplay.getHeight() / 2.0f);
-		}else if(orientation == Display.UP_IS_LEFT){
-			mClickedPos = new Vec2f((y/mDisplay.getWidthPixels() * 2.0f - 1.0f) * mDisplay.getWidth() / 2.0f,  (x / mDisplay.getHeightPixels() * 2.0f - 1.0f) * mDisplay.getHeight() / 2.0f);
-		}else if(orientation == Display.UP_IS_RIGHT){
-			mClickedPos = new Vec2f(-(y/mDisplay.getWidthPixels() * 2.0f - 1.0f) * mDisplay.getWidth() / 2.0f,  -(x / mDisplay.getHeightPixels() * 2.0f - 1.0f) * mDisplay.getHeight() / 2.0f);
-		}else if(orientation == Display.UP_IS_DOWN){
-			mClickedPos = new Vec2f(-(x/mDisplay.getWidthPixels() * 2.0f - 1.0f) * mDisplay.getWidth() / 2.0f, (y / mDisplay.getHeightPixels() * 2.0f - 1.0f) * mDisplay.getHeight() / 2.0f);
 		}
 		
 		Log.v("RiverRenderer", "Clicked position: " + mClickedPos.toString());
@@ -247,7 +309,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 		gl.glLoadIdentity();
 		gl.glMatrixMode(GL10.GL_MODELVIEW);
 		mRenderer.init(gl, System.currentTimeMillis() + mOffset);
-		
+		mOSD.init(gl);
 		/*
          * By default, OpenGL enables features that improve quality
          * but reduce performance. One might want to tweak that
@@ -261,6 +323,9 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
          gl.glHint(GL10.GL_PERSPECTIVE_CORRECTION_HINT,
                  GL10.GL_FASTEST);
          gl.glEnable(GL10.GL_TEXTURE_2D);
+         
+         gl.glHint(GL10.GL_LINE_SMOOTH_HINT, GL10.GL_NICEST);
+ 		 gl.glHint(GL10.GL_POINT_SMOOTH_HINT, GL10.GL_NICEST);
          
 
          if (mTranslucentBackground) {

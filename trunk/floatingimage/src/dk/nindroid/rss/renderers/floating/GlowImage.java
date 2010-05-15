@@ -138,6 +138,7 @@ public class GlowImage {
 	 * @param szZ
 	 */
 	public static void draw(GL10 gl){
+		gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 		gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE);
 		// Draw glow
 		gl.glPushMatrix();
@@ -153,6 +154,7 @@ public class GlowImage {
 	public static void setState(GL10 gl){
 		gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
         gl.glEnable(GL10.GL_TEXTURE_2D);
+        gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_REPLACE);
 		gl.glFrontFace(GL10.GL_CCW);
 		gl.glEnable(GL10.GL_BLEND);
 	}

@@ -37,6 +37,7 @@ import dk.nindroid.rss.orientation.OrientationManager;
 import dk.nindroid.rss.parser.ParserProvider;
 import dk.nindroid.rss.parser.flickr.FlickrParser;
 import dk.nindroid.rss.parser.picasa.PicasaParser;
+import dk.nindroid.rss.renderers.OSD;
 import dk.nindroid.rss.renderers.Renderer;
 import dk.nindroid.rss.renderers.floating.BackgroundPainter;
 import dk.nindroid.rss.renderers.floating.FloatingRenderer;
@@ -45,6 +46,7 @@ import dk.nindroid.rss.renderers.floating.ShadowPainter;
 import dk.nindroid.rss.renderers.slideshow.SlideshowRenderer;
 import dk.nindroid.rss.settings.FeedsDbAdapter;
 import dk.nindroid.rss.settings.SourceSelector;
+import dk.nindroid.rss.uiActivities.Toaster;
 
 public class ShowStreams extends Activity {
 	public static final int 			ABOUT_ID 		= Menu.FIRST;
@@ -69,6 +71,7 @@ public class ShowStreams extends Activity {
 	private FeedController				mFeedController;
 	private ImageCache 					mImageCache;
 	private TextureBank					mTextureBank;
+	private MenuItem					mMenuItemShow;
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -89,9 +92,12 @@ public class ShowStreams extends Activity {
 			orientationManager = new OrientationManager(sensorManager);
 			cleanIfOld();
 			saveVersion(dataFile);
+			
 			GlowImage.init(this);
 			ShadowPainter.init(this);
 			BackgroundPainter.init(this);
+			OSD.init(this);
+			
 			this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 			PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 			wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "Floating Image");
@@ -101,6 +107,7 @@ public class ShowStreams extends Activity {
 			orientationManager.addSubscriber(RiverRenderer.mDisplay);
 			ClickHandler.init(renderer);
 			setContentView(R.layout.main);
+			
 			mGLSurfaceView = new GLSurfaceView(this);
 			mGLSurfaceView.setRenderer(renderer);
 			setContentView(mGLSurfaceView);
@@ -183,10 +190,23 @@ public class ShowStreams extends Activity {
 		super.onStop();
 	}
 	
+	@Override 
+	protected void onPause() {
+		Log.v("Floating image", "Pausing...");
+		mGLSurfaceView.onPause();
+		//renderer.onPause();
+		wl.release();
+		orientationManager.onPause();
+		Log.v("Floating image", "Paused!");
+		super.onPause();
+	}
+	
 	@Override
 	protected void onResume() {
+		Log.v("Floating Image", "Resuming main activity");
 		super.onResume();
 		dk.nindroid.rss.settings.Settings.readSettings(this);
+		
 		Renderer defaultRenderer = renderer.getRenderer();
 		if(dk.nindroid.rss.settings.Settings.mode == dk.nindroid.rss.settings.Settings.MODE_FLOATING_IMAGE){
 			if(!(defaultRenderer instanceof FloatingRenderer)){
@@ -201,8 +221,10 @@ public class ShowStreams extends Activity {
 		}
 		renderer.setRenderer(defaultRenderer);
 		renderer.onResume();
+		
 		wl.acquire();
 		orientationManager.onResume();
+		
 		mGLSurfaceView.onResume();
 		if(!mShowing){ // Feed is already loaded!
 			ReadFeeds.runAsync(mFeedController);
@@ -219,10 +241,9 @@ public class ShowStreams extends Activity {
 		}else{
 			menu.add(0, FULLSCREEN_ID, 0, R.string.fullscreen);
 		}
-		if(!mShowing){
-			menu.add(0, SHOW_FOLDER_ID, 0, R.string.show);
-		}else{
-			menu.add(0, SHOW_FOLDER_ID, 0, R.string.cancel_show);
+		mMenuItemShow = menu.add(0, SHOW_FOLDER_ID, 0, R.string.show);
+		if(mShowing){
+			mMenuItemShow.setTitle(R.string.cancel_show);
 		}
 		menu.add(0, SETTINGS_ID, 0, R.string.settings);
 		return res;
@@ -240,23 +261,32 @@ public class ShowStreams extends Activity {
 			dk.nindroid.rss.settings.Settings.setFullscreen(RiverRenderer.mDisplay.isFullscreen());
 			return true;
 		case SHOW_FOLDER_ID:
-			if(!mShowing){
-				Intent showFolder = new Intent(this, SourceSelector.class);
-				startActivityForResult(showFolder, SHOW_ACTIVITY);
-				selectedItem = item;
-			}else{
-				item.setTitle(R.string.show_folder);
-				mShowing = false;
-				mImageCache.resume();
-				ReadFeeds.runAsync(mFeedController);
-			}
+			showFolder();
 			return true;
 		case SETTINGS_ID:
-			Intent showSettings = new Intent(this, Settings.class);
-			startActivity(showSettings);
+			showSettings();
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
+	}
+	
+	public void showSettings(){
+		Intent showSettings = new Intent(this, Settings.class);
+		startActivity(showSettings);
+	}
+	
+	public void showFolder(){
+		if(!mShowing){
+			Intent showFolder = new Intent(this, SourceSelector.class);
+			startActivityForResult(showFolder, SHOW_ACTIVITY);
+			selectedItem = mMenuItemShow;
+		}else{
+			mMenuItemShow.setTitle(R.string.show_folder);
+			mShowing = false;
+			mImageCache.resume();
+			ReadFeeds.runAsync(mFeedController);
+			runOnUiThread(new Toaster("Cancelling show"));
+		}
 	}
 	
 	@Override
@@ -305,17 +335,6 @@ public class ShowStreams extends Activity {
 		return ClickHandler.onTouchEvent(ev);
 	}
 	
-	@Override 
-	protected void onPause() {
-		Log.v("Floating image", "Pausing...");
-		mGLSurfaceView.onPause();
-		renderer.onPause();
-		wl.release();
-		orientationManager.onPause();
-		Log.v("Floating image", "Paused!");
-		super.onPause();
-	}
-
 	void saveVersion(File dataFolder){
 		File ver = new File(dataFolder.getAbsolutePath() + "/version");
 		try {

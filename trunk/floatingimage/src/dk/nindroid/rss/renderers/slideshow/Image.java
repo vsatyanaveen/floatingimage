@@ -22,6 +22,9 @@ import dk.nindroid.rss.uiActivities.Toaster;
 public class Image implements ImagePlane {
 	private static final int 	VERTS = 4;
 	private int 				mTextureID;
+	private int 				mLargeTextureID;
+	private int					mLastLargeSize = 0;
+	private int					mLastSmallSize = 0;
 	private FloatBuffer 		mTexBuffer;
 	private Vec3f[]				mVertices;
 	private IntBuffer   		mVertexBuffer;
@@ -42,6 +45,11 @@ public class Image implements ImagePlane {
 		int[] textures = new int[1];
 		gl.glGenTextures(1, textures, 0);
 		mTextureID = textures[0];
+		gl.glGenTextures(1, textures, 0);
+		mLargeTextureID = textures[0];
+		mLastLargeSize = 0;
+		mLastSmallSize = 0;
+		mHasBitmap = false;
 	}
 	
 	public void clear(){
@@ -115,7 +123,7 @@ public class Image implements ImagePlane {
 		this.mBitmap = image.getBitmap();
 		this.mBitmapWidth = image.getWidth();
 		this.mBitmapHeight = image.getHeight();
-		setTexture(gl);
+		setTexture(gl, mTextureID, false);
 		mTextureSelector.selectImage(this, image);
 	}
 	
@@ -153,7 +161,7 @@ public class Image implements ImagePlane {
 	
 	public void render(GL10 gl){
 		if(this.mBitmap != null){
-			setTexture(gl);
+			setTexture(gl, mLargeTextureID, true);
 		}
 		
 		float x, y, z, szX, szY;
@@ -173,7 +181,11 @@ public class Image implements ImagePlane {
 		
 		gl.glColor4f(1.0f, 1.0f, 1.0f, mAlpha);
 		gl.glActiveTexture(GL10.GL_TEXTURE0);
-        gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
+		if(!mHasBitmap){
+			gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
+		}else{
+			gl.glBindTexture(GL10.GL_TEXTURE_2D, mLargeTextureID);
+		}
         gl.glVertexPointer(3, GL10.GL_FIXED, 0, mVertexBuffer);
         
 		gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mTexBuffer);
@@ -190,7 +202,7 @@ public class Image implements ImagePlane {
 		gl.glDisable(GL10.GL_BLEND);
     }
 	
-	public void setTexture(GL10 gl) {
+	public void setTexture(GL10 gl, int textureID, boolean isLarge) {
 		if(mBitmap == null){
 			return;
 		}
@@ -199,7 +211,7 @@ public class Image implements ImagePlane {
 		
 		mAspect = width / height;
         
-        gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
+        gl.glBindTexture(GL10.GL_TEXTURE_2D, textureID);
 
         gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER,
                 GL10.GL_NEAREST);
@@ -216,7 +228,18 @@ public class Image implements ImagePlane {
                 GL10.GL_BLEND);
         
         try{
-        	GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, mBitmap, 0);
+        	if((isLarge &&  mLastLargeSize != mBitmap.getWidth()) || (!isLarge && mLastSmallSize != mBitmap.getWidth())){
+        		GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, mBitmap, 0);
+        		if(isLarge){
+        			Log.v("Floating Image", "Replacing large texture texture: (" + mLastLargeSize + "," + mBitmap.getWidth() + ")");
+        			mLastLargeSize = mBitmap.getWidth();
+        		}else{
+        			Log.v("Floating Image", "Replacing small texture texture: (" + mLastSmallSize + "," + mBitmap.getWidth() + ")");
+        			mLastSmallSize = mBitmap.getWidth();
+        		}
+        	}else{
+        		GLUtils.texSubImage2D(GL10.GL_TEXTURE_2D, 0, 0, 0, mBitmap);
+        	}
         	ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
             tbb.order(ByteOrder.nativeOrder());
             mTexBuffer = tbb.asFloatBuffer();

@@ -8,6 +8,7 @@ public class Settings {
 	public static final int TYPE_LOCAL  = 1;
 	public static final int TYPE_FLICKR = 2;
 	public static final int TYPE_PICASA = 3;
+	public static final int TYPE_FACEBOOK = 4;
 	
 	public static final int MODE_NONE = 0;
 	public static final int MODE_SLIDE_RIGHT_TO_LEFT = 1;
@@ -93,6 +94,8 @@ public class Settings {
 			return "Flickr";
 		case TYPE_PICASA:
 			return "Picasa";
+		case TYPE_FACEBOOK:
+			return "Facebook";
 		default:
 			return "Unknown";
 		}

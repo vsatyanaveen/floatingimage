@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="dk.nindroid.rss"
-      android:versionName="2.3.15" android:versionCode="24">
+      android:versionCode="25" android:versionName="2.3.16">
       <uses-permission android:name="android.permission.INTERNET" />
-    <application android:icon="@drawable/icon" android:label="@string/app_name" android:debuggable="false" android:theme="@android:style/Theme.NoTitleBar">
+    <application android:icon="@drawable/icon" android:label="@string/app_name" android:theme="@android:style/Theme.NoTitleBar" android:debuggable="true">
         <activity android:name=".ShowStreams" android:screenOrientation="portrait">
         	<intent-filter>
         		<action android:name="android.intent.action.MAIN"></action>
@@ -19,6 +19,15 @@
 	<activity android:name=".settings.SourceSelector"></activity>
 <activity android:name=".settings.FlickrBrowser"></activity>
 <activity android:name=".settings.PicasaBrowser"></activity>
+<activity android:name=".parser.facebook.FacebookAuth">
+	<intent-filter>
+		 <action android:name="android.intent.action.VIEW" />
+         <category android:name="android.intent.category.DEFAULT" />
+         <category android:name="android.intent.category.BROWSABLE" />
+         <data android:scheme="floatingimage"/>
+	</intent-filter>
+</activity>
+<activity android:name=".settings.FacebookBrowser"></activity>
 </application>
     <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="4" />
 
@@ -30,4 +39,5 @@
 	</support-screens>
 <uses-permission android:name="android.permission.SET_WALLPAPER"></uses-permission>
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
+<uses-permission android:name="android.permission.WRITE_SETTINGS"></uses-permission>
 </manifest> 
