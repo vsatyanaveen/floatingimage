@@ -1,6 +1,5 @@
 package dk.nindroid.rss.renderers;
 
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -9,29 +8,23 @@ import java.nio.IntBuffer;
 import javax.microedition.khronos.opengles.GL10;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.opengl.GLUtils;
-import android.util.Log;
-import android.view.WindowManager;
 import dk.nindroid.rss.Display;
-import dk.nindroid.rss.R;
 import dk.nindroid.rss.RiverRenderer;
 import dk.nindroid.rss.ShowStreams;
 import dk.nindroid.rss.gfx.Vec3f;
+import dk.nindroid.rss.renderers.osd.About;
+import dk.nindroid.rss.renderers.osd.Brightness;
+import dk.nindroid.rss.renderers.osd.Button;
+import dk.nindroid.rss.renderers.osd.Fullscreen;
+import dk.nindroid.rss.renderers.osd.Images;
+import dk.nindroid.rss.renderers.osd.Play;
 import dk.nindroid.rss.uiActivities.ToggleNotificationBar;
 
 public class OSD {
 	private static final long 		FADE_TIME = 400;
 	private static final long 		SHOW_TIME = 4000;
-	private static final int		VERTS = 4;
-	private static final float		BRIGHTNESS_LOW  = 0.1f;
-	private static final float		BRIGHTNESS_MID  = 0.5f;
-	private static final float		BRIGHTNESS_HIGH = 1.0f;
-	private static final float[] 	BRIGHTNESS = new float[]{BRIGHTNESS_LOW, BRIGHTNESS_MID, BRIGHTNESS_HIGH};
 	
 	private boolean				mExtendDisplayTime = false;
-	private int 				mBrightnessIndex = 0; 
 	
 	long 						mInputTime;
 	float						mFraction = 0.0f;
@@ -43,17 +36,15 @@ public class OSD {
 	private static IntBuffer	mVertexBuffer;
 	private static ByteBuffer	mIndexBuffer;
 	
-	private static Bitmap 		mBrightness;
-	private static Bitmap 		mImages;
-	private static Bitmap 		mPause;
-	private static Bitmap 		mPlay;
-	private static Bitmap 		mSettings;
+	private static About		mAbout;
+	private static Brightness	mBrightness;
+	private static Fullscreen	mFullscreen;
+	private static Images		mImages;
+	private static Play			mPlay;
+	private static dk.nindroid.rss.renderers.osd.Settings mSettings;
 	
-	private static int 			mTexIdBrightness;
-	private static int 			mTexIdImages;
-	private static int 			mTexIdPause;
-	private static int 			mTexIdPlay;
-	private static int 			mTexIdSettings;
+	
+	private static Button[]		mButtons;
 	
 	private static FloatBuffer 	mTexBuffer;
 	
@@ -84,49 +75,65 @@ public class OSD {
 		mIndexBuffer = ByteBuffer.allocateDirect(indices.length);
 		mIndexBuffer.put(indices);
 		mIndexBuffer.position(0);
+		
+		ByteBuffer tbb = ByteBuffer.allocateDirect(4 * 2 * 4);
+        tbb.order(ByteOrder.nativeOrder());
+        mTexBuffer = tbb.asFloatBuffer();
+		float tex[] = {
+	        	0.0f,  0.0f,
+	        	0.0f,  1.0f,	
+	        	1.0f,  0.0f,
+	        	1.0f,  1.0f,
+	        };
+		
+        mTexBuffer.put(tex);
+        mTexBuffer.position(0);
 	}
 	
 	public static void init(Context context){
-		InputStream is = context.getResources().openRawResource(R.drawable.osd_brightness);
-		mBrightness = BitmapFactory.decodeStream(is);
-		is = context.getResources().openRawResource(R.drawable.osd_images);
-		mImages = BitmapFactory.decodeStream(is);
-		is = context.getResources().openRawResource(R.drawable.osd_pause);
-		mPause = BitmapFactory.decodeStream(is);
-		is = context.getResources().openRawResource(R.drawable.osd_play);
-		mPlay = BitmapFactory.decodeStream(is);
-		is = context.getResources().openRawResource(R.drawable.osd_settings);
-		mSettings = BitmapFactory.decodeStream(is);
+		mBrightness = new Brightness(context);
+		mAbout = new About(context);
+		mImages = new Images(context);
+		mSettings = new dk.nindroid.rss.renderers.osd.Settings(context);
+		mFullscreen = new Fullscreen(context);
+		mPlay = new Play(context);
 	}
 	
 	public void init(GL10 gl){
-		int[] textures = new int[5];
-		gl.glGenTextures(5, textures, 0);
-		mTexIdBrightness = textures[0];
-		mTexIdImages = textures[1];
-		mTexIdPause = textures[2];
-		mTexIdPlay = textures[3];
-		mTexIdSettings = textures[4];
-		
-		ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
-        tbb.order(ByteOrder.nativeOrder());
-        mTexBuffer = tbb.asFloatBuffer();
-        
-        float tex[] = {
-            	0.0f,  0.0f,
-            	0.0f,  1.0f,
-            	1.0f,  0.0f,
-            	1.0f,  1.0f,
-            };
-        mTexBuffer.put(tex);
-        mTexBuffer.position(0);
-        
-		setTexture(gl, mBrightness, mTexIdBrightness);
-		setTexture(gl, mImages, mTexIdImages);
-		setTexture(gl, mPause, mTexIdPause);
-		setTexture(gl, mPlay, mTexIdPlay);
-		setTexture(gl, mSettings, mTexIdSettings);
-		
+		mBrightness.init(gl);
+		mAbout.init(gl);
+		mImages.init(gl);
+		mSettings.init(gl);
+		mFullscreen.init(gl);
+		mPlay.init(gl);
+	}
+	
+	public boolean isShowing(){
+		return mFraction != 0.0f;
+	}
+	
+	public void setEnabled(boolean play, boolean fullscreen){
+		int amount = 4;
+		if(play) ++amount;
+		if(fullscreen) ++amount;
+		int index = 0;
+		mButtons = new Button[amount];
+		mButtons[index++] = mBrightness;
+		mButtons[index++] = mAbout;
+		// Ensure settings is always bottom right corner!
+		if(amount % 2 == 0){
+			mButtons[index++] = mImages;
+			mButtons[index++] = mSettings;
+		}else{
+			mButtons[index++] = mSettings;
+			mButtons[index++] = mImages;
+		}
+		if(play){
+			mButtons[index++] = mPlay;
+		}
+		if(fullscreen){
+			mButtons[index++] = mFullscreen;
+		}
 	}
 	
 	public void draw(GL10 gl, long realtime){
@@ -160,27 +167,26 @@ public class OSD {
 		gl.glDisable(GL10.GL_DEPTH_TEST);
 		gl.glDisable(GL10.GL_DEPTH_BITS);
 		gl.glEnable(GL10.GL_BLEND);
-		float barHeight = 80.0f / RiverRenderer.mDisplay.getHeightPixels() * RiverRenderer.mDisplay.getHeight();
-		boolean upsideDown = false;
+		float barHeight = toScreenHeight(80);
+		barHeight = (mButtons.length > 4 ? barHeight * 2 : barHeight);
 		if(RiverRenderer.mDisplay.getOrientation() == Display.UP_IS_DOWN){
-			float offset = 2 * (RiverRenderer.mDisplay.getHeight() - barHeight);
+			float offset = toScreenHeight(20);
 			gl.glTranslatef(0.0f, offset, 0.0f);
-			upsideDown = true;
 		}
 		gl.glColor4f(1.0f, 1.0f, 1.0f, mFraction * 0.5f);
 		drawBackBar(gl, barHeight);
 		gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-		drawIcons(gl, upsideDown);
+		drawIcons(gl);
 		gl.glDisable(GL10.GL_BLEND);
 		gl.glEnable(GL10.GL_DEPTH_BITS);
 		gl.glEnable(GL10.GL_DEPTH_TEST);
 		gl.glPopMatrix();
 	}
 	
-	private void drawIcons(GL10 gl, boolean upsideDown){
+	private void drawIcons(GL10 gl){
 		float width = 64.0f / RiverRenderer.mDisplay.getWidthPixels() * RiverRenderer.mDisplay.getWidth();
-		float height = 64.0f / RiverRenderer.mDisplay.getHeightPixels() * RiverRenderer.mDisplay.getHeight();
-		float yPos = -RiverRenderer.mDisplay.getHeight() + 40.0f / RiverRenderer.mDisplay.getHeightPixels() * RiverRenderer.mDisplay.getHeight() + height * 0.5f;
+		float height = toScreenHeight(64);
+		float yPos = -RiverRenderer.mDisplay.getHeight() + toScreenHeight(40) + height * 0.5f;
 		float dx = RiverRenderer.mDisplay.getWidth() * 0.5f;
 		gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
 		gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_MODULATE);
@@ -192,37 +198,90 @@ public class OSD {
         
         float outsideLeft = -RiverRenderer.mDisplay.getWidth() - width;
         float outsideBottom;
-        if(!upsideDown){
-        	outsideBottom = -RiverRenderer.mDisplay.getHeight() - height;
-        }else{
-        	outsideBottom = yPos + 2.4f * height; // Argh, magic variable! Should be 2!
-        }
+        outsideBottom = -RiverRenderer.mDisplay.getHeight() - height;
         float outsideRight = RiverRenderer.mDisplay.getWidth() + width;
         
-		gl.glPushMatrix();
-			gl.glTranslatef(getPos(outsideLeft, -1.5f * dx), yPos, -1.0f);	
-			gl.glScalef(width, height, 1.0f);	
-			drawIcon(gl, mTexIdBrightness, mTexBuffer);
+        int index = -1;
+        int buttons = mButtons.length;
+        
+		if(mButtons.length % 2 == 0){
+			gl.glPushMatrix();
+				gl.glTranslatef(getPos(outsideLeft, -1.5f * dx), yPos, -1.0f);	
+				gl.glScalef(width, height, 1.0f);	
+				drawIcon(gl, mButtons[++index].getTextureID(), mTexBuffer);
+			gl.glPopMatrix();
+			gl.glPushMatrix();
+				gl.glTranslatef(-0.5f * dx, getPos(outsideBottom, yPos), -1.0f);	
+				gl.glScalef(width, height, 1.0f);
+				drawIcon(gl, mButtons[++index].getTextureID(), mTexBuffer);
+			gl.glPopMatrix();
+			gl.glPushMatrix();
+				gl.glTranslatef(0.5f * dx, getPos(outsideBottom, yPos), -1.0f);
+				gl.glScalef(width, height, 1.0f);
+				drawIcon(gl, mButtons[++index].getTextureID(), mTexBuffer);
+			gl.glPopMatrix();
+			gl.glPushMatrix();
+				gl.glTranslatef(getPos(outsideRight, 1.5f * dx), yPos, -1.0f);
+				gl.glScalef(width, height, 1.0f);
+				drawIcon(gl, mButtons[++index].getTextureID(), mTexBuffer);
 		gl.glPopMatrix();
-		gl.glPushMatrix();
-			gl.glTranslatef(-0.5f * dx, getPos(outsideBottom, yPos), -1.0f);	
-			gl.glScalef(width, height, 1.0f);
-			drawIcon(gl, mTexIdImages, mTexBuffer);
-		gl.glPopMatrix();
-		gl.glPushMatrix();
-			gl.glTranslatef(0.5f * dx, getPos(outsideBottom, yPos), -1.0f);
-			gl.glScalef(width, height, 1.0f);
-			if(mPlaying){
-				drawIcon(gl, mTexIdPause, mTexBuffer);
-			}else{
-				drawIcon(gl, mTexIdPlay, mTexBuffer);
-			}
-		gl.glPopMatrix();
-		gl.glPushMatrix();
-			gl.glTranslatef(getPos(outsideRight, 1.5f * dx), yPos, -1.0f);
-			gl.glScalef(width, height, 1.0f);
-			drawIcon(gl, mTexIdSettings, mTexBuffer);
-		gl.glPopMatrix();
+		}else{
+			gl.glPushMatrix();
+				gl.glTranslatef(getPos(outsideLeft, -1.25f * dx), yPos, -1.0f);	
+				gl.glScalef(width, height, 1.0f);	
+				drawIcon(gl, mButtons[++index].getTextureID(), mTexBuffer);
+			gl.glPopMatrix();
+			gl.glPushMatrix();
+				gl.glTranslatef(0.0f, getPos(outsideBottom, yPos), -1.0f);	
+				gl.glScalef(width, height, 1.0f);
+				drawIcon(gl, mButtons[++index].getTextureID(), mTexBuffer);
+			gl.glPopMatrix();
+			gl.glPushMatrix();
+				gl.glTranslatef(getPos(outsideRight, 1.25f * dx), yPos, -1.0f);
+				gl.glScalef(width, height, 1.0f);
+				drawIcon(gl, mButtons[++index].getTextureID(), mTexBuffer);
+			gl.glPopMatrix();
+		}
+		yPos += toScreenHeight(160);
+		if(index + 3 == buttons){
+			// Two buttons on top, three bottom
+			gl.glPushMatrix();
+				gl.glTranslatef(getPos(outsideLeft, -0.75f * dx), yPos, -1.0f);
+				gl.glScalef(width, height, 1.0f);
+				drawIcon(gl, mButtons[++index].getTextureID(), mTexBuffer);
+			gl.glPopMatrix();
+			gl.glPushMatrix();
+				gl.glTranslatef(getPos(outsideRight, 0.75f * dx), yPos, -1.0f);
+				gl.glScalef(width, height, 1.0f);
+				drawIcon(gl, mButtons[++index].getTextureID(), mTexBuffer);
+			gl.glPopMatrix();
+		}else{
+			// Untested, at max capacity = 8
+			gl.glPushMatrix();
+				gl.glTranslatef(getPos(outsideLeft - dx, 1.5f * dx), yPos, -1.0f);
+				gl.glScalef(width, height, 1.0f);
+				drawIcon(gl, mButtons[++index].getTextureID(), mTexBuffer);
+			gl.glPopMatrix();
+			gl.glPushMatrix();
+				gl.glTranslatef(getPos(outsideLeft, -0.5f * dx), yPos, -1.0f);
+				gl.glScalef(width, height, 1.0f);
+				drawIcon(gl, mButtons[++index].getTextureID(), mTexBuffer);
+			gl.glPopMatrix();
+			gl.glPushMatrix();
+				gl.glTranslatef(getPos(outsideRight, 0.5f * dx), yPos, -1.0f);
+				gl.glScalef(width, height, 1.0f);
+				drawIcon(gl, mButtons[++index].getTextureID(), mTexBuffer);
+			gl.glPopMatrix();
+			gl.glPushMatrix();
+				gl.glTranslatef(getPos(outsideRight + dx, 1.5f * dx), yPos, -1.0f);
+				gl.glScalef(width, height, 1.0f);
+				drawIcon(gl, mButtons[++index].getTextureID(), mTexBuffer);
+			gl.glPopMatrix();
+		}
+	}
+	
+	private float toScreenHeight(int pixels){
+		return ((float)pixels) / RiverRenderer.mDisplay.getHeightPixels() * RiverRenderer.mDisplay.getHeight();
 	}
 	
 	private float getPos(float notShowing, float showing){
@@ -267,58 +326,29 @@ public class OSD {
 		}
 	}
 	
-	private void setBrightness() {
-		WindowManager.LayoutParams lp = ShowStreams.current.getWindow().getAttributes();
-		mBrightnessIndex = (mBrightnessIndex + 1) % BRIGHTNESS.length;
-		lp.screenBrightness = BRIGHTNESS[mBrightnessIndex];
-		ShowStreams.current.getWindow().setAttributes(lp);
-	}
-	
 	public boolean click(float x, float y){
 		boolean inButtonArea = false;
-		if(RiverRenderer.mDisplay.getOrientation() == Display.UP_IS_DOWN){
-			inButtonArea = y < 80;
-		}else{
-			inButtonArea = y > RiverRenderer.mDisplay.getHeightPixels() - 80;
-		}
+		int height = mButtons.length > 4 ? 160 : 80;
+		inButtonArea = y > RiverRenderer.mDisplay.getHeightPixels() - height;
 		if(mFraction != 0.0f && inButtonArea){
 			mExtendDisplayTime = true;
-			float xPos = x / RiverRenderer.mDisplay.getWidthPixels() * 4;
-			if(xPos < 1.0f){
-				Log.v("Floating Image", "Change brightness");
-				setBrightness();
-			}else if(xPos < 2.0f){
-				Log.v("Floating Image", "Choose pictures");
-				ShowStreams.current.showFolder();
-			}else if(xPos < 3.0f){
-				Log.v("Floating Image", "Play/Pause");
+			int buttons = mButtons.length;
+			if(y > RiverRenderer.mDisplay.getHeightPixels() - 80){
+				// Bottom
+				float xPos = x / RiverRenderer.mDisplay.getWidthPixels() * (4 - buttons % 2);
+				mButtons[(int)xPos].click();
 			}else{
-				Log.v("Floating Image", "Settings");
-				ShowStreams.current.showSettings();
+				int topButtons = buttons > 6 ? 4 : 2;
+				float xPos = x / RiverRenderer.mDisplay.getWidthPixels() * topButtons;
+				int buttonIndex = buttons - (topButtons - (int)xPos);
+				mButtons[buttonIndex].click();
 			}
 			return true;
 		}
 		return false;
 	}
 	
-	private void setTexture(GL10 gl, Bitmap bmp, int textureID){
-        gl.glBindTexture(GL10.GL_TEXTURE_2D, textureID);
-        try{
-        	gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
-            gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
-            gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S, GL10.GL_CLAMP_TO_EDGE);
-            gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_CLAMP_TO_EDGE);
-            gl.glTexEnvf(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_BLEND);
-            
-        	GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, bmp, 0);
-        }catch(IllegalArgumentException e){ // TODO: Handle graciously
-        	Log.w("Floating Image", "Could not set OSD texture", e);
-        }
-        //bmp.recycle();
-	}
-	
-	interface EventHandler{
-		void Play();
-		void Pause();
+	public void registerPlayListener(Play.EventHandler listener){
+		mPlay.registerEventListener(listener);
 	}
 }

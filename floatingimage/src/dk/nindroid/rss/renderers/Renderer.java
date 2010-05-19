@@ -9,7 +9,7 @@ import dk.nindroid.rss.helpers.MatrixTrackingGL;
 public interface Renderer {
 	void update(MatrixTrackingGL gl, long time, long realTime);
 	void render(MatrixTrackingGL gl, long frameTime, long realtime);
-	void init(GL10 gl, long time);
+	void init(GL10 gl, long time, OSD osd);
 	Intent followCurrent();
 	ImageReference getCurrent();
 	boolean back();

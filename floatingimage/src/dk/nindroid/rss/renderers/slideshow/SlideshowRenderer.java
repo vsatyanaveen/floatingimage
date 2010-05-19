@@ -9,6 +9,7 @@ import dk.nindroid.rss.TextureBank;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.gfx.Vec3f;
 import dk.nindroid.rss.helpers.MatrixTrackingGL;
+import dk.nindroid.rss.renderers.OSD;
 import dk.nindroid.rss.renderers.ProgressBar;
 import dk.nindroid.rss.renderers.Renderer;
 import dk.nindroid.rss.renderers.slideshow.transitions.CrossFade;
@@ -21,12 +22,14 @@ import dk.nindroid.rss.renderers.slideshow.transitions.SlideTopToBottom;
 import dk.nindroid.rss.renderers.slideshow.transitions.Transition;
 import dk.nindroid.rss.settings.Settings;
 
-public class SlideshowRenderer implements Renderer {
+public class SlideshowRenderer implements Renderer, dk.nindroid.rss.renderers.osd.Play.EventHandler {
 	Image 			mPrevious, mCurrent, mNext;
 	TextureBank 	mBank;
 	long			mSlideTime;
 	Transition 		mCurrentTransition;
-	
+	boolean			mPlaying = true;
+	boolean			mStartPlaying = false;
+	boolean			mNextSet = false;
 	
 	public SlideshowRenderer(TextureBank bank){
 		mPrevious = new Image();
@@ -110,7 +113,9 @@ public class SlideshowRenderer implements Renderer {
 	}
 
 	@Override
-	public void init(GL10 gl, long time) {
+	public void init(GL10 gl, long time, OSD osd) {
+		osd.setEnabled(true, false);
+		osd.registerPlayListener(this);
 		mPrevious.init(gl, time);
 		mCurrent.init(gl, time);
 		mNext.init(gl, time);
@@ -140,6 +145,11 @@ public class SlideshowRenderer implements Renderer {
 
 	@Override
 	public void update(MatrixTrackingGL gl, long time, long realTime) {
+		if(mStartPlaying){
+			mSlideTime = realTime;
+			mStartPlaying = false;
+		}
+		updateNext(gl, realTime);
 		// Read first image to be shown
 		if(mCurrent.getImage() == null){
 			mCurrent.setImage(gl, mBank.getTexture(null));
@@ -147,7 +157,7 @@ public class SlideshowRenderer implements Renderer {
 		}else if(mCurrent.hasBitmap() && mNext.getImage() == null){ // Load next image when first is done.
 				mNext.setImage(gl, mBank.getTexture(null));
 		}// Continue with normal slideshow
-		else if(realTime - mSlideTime > Settings.slideshowInterval + Settings.slideSpeed){
+		else if(realTime - mSlideTime > Settings.slideshowInterval + Settings.slideSpeed && mPlaying){
 			next(gl, realTime);
 		}
 		
@@ -161,11 +171,18 @@ public class SlideshowRenderer implements Renderer {
 		mCurrent = mNext;
 		mNext = mPrevious;
 		mPrevious = temp;
-		ImageReference oldImage = mNext.getImage();
-		mNext.clear(); // Clean slate
-		mNext.setImage(gl, mBank.getTexture(oldImage));
+		mNextSet = false;
 		mSlideTime = realTime;
 		mCurrentTransition.init(mPrevious, mCurrent, realTime, Settings.slideSpeed);
+	}
+	
+	private void updateNext(GL10 gl, long realTime){
+		if(!mNextSet && realTime - mSlideTime > Settings.slideSpeed){
+			ImageReference oldImage = mNext.getImage();
+			mNext.clear(); // Clean slate
+			mNext.setImage(gl, mBank.getTexture(oldImage));
+			mNextSet = true;
+		}
 	}
 	
 	@Override
@@ -182,5 +199,16 @@ public class SlideshowRenderer implements Renderer {
 	@Override
 	public void setBackground() {
 		mCurrent.setBackground();
+	}
+
+	@Override
+	public void Pause() {
+		mPlaying = false;
+	}
+
+	@Override
+	public void Play() {
+		mStartPlaying = true;
+		mPlaying = true;
 	}
 }

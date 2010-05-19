@@ -112,7 +112,7 @@ public class ShowStreams extends Activity {
 			mGLSurfaceView.setRenderer(renderer);
 			setContentView(mGLSurfaceView);
 		}catch(Throwable t){
-			Log.e("Floating Image", "Uncaught exception caught!", t);
+			Log.e("Floating Image", "Unexpected exception caught!", t);
 		}
 	}
 	
@@ -233,6 +233,9 @@ public class ShowStreams extends Activity {
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
+		renderer.toggleMenu();
+		return false;
+		/*
 		boolean res = super.onCreateOptionsMenu(menu);
 		menu.clear();
 		menu.add(0, ABOUT_ID, 0, R.string.about);
@@ -247,6 +250,7 @@ public class ShowStreams extends Activity {
 		}
 		menu.add(0, SETTINGS_ID, 0, R.string.settings);
 		return res;
+		*/
 	}
 	
 	@Override
@@ -281,7 +285,6 @@ public class ShowStreams extends Activity {
 			startActivityForResult(showFolder, SHOW_ACTIVITY);
 			selectedItem = mMenuItemShow;
 		}else{
-			mMenuItemShow.setTitle(R.string.show_folder);
 			mShowing = false;
 			mImageCache.resume();
 			ReadFeeds.runAsync(mFeedController);
@@ -322,7 +325,7 @@ public class ShowStreams extends Activity {
 		}
 	}
 	
-	private void showAbout(){
+	public void showAbout(){
 		Builder builder = new Builder(this);
 		builder.setTitle(R.string.about);
 		builder.setMessage(R.string.about_text);
