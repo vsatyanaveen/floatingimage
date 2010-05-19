@@ -16,6 +16,7 @@ import dk.nindroid.rss.data.Ray;
 import dk.nindroid.rss.gfx.Vec3f;
 import dk.nindroid.rss.helpers.MatrixTrackingGL;
 import dk.nindroid.rss.renderers.Dimmer;
+import dk.nindroid.rss.renderers.OSD;
 import dk.nindroid.rss.renderers.Renderer;
 import dk.nindroid.rss.renderers.floating.Image.Pos;
 import dk.nindroid.rss.settings.Settings;
@@ -217,7 +218,8 @@ public class FloatingRenderer implements Renderer {
 		return Math.min(((float)(realTime - mSelectedTime)) / mFocusDuration, 1.1f);
 	}
 	
-	public void init(GL10 gl, long time){
+	public void init(GL10 gl, long time, OSD osd){
+		osd.setEnabled(false, true);
 		for(int i = 0; i < mImgCnt; ++i){
 			mImgs[i].init(gl, time);
 		}

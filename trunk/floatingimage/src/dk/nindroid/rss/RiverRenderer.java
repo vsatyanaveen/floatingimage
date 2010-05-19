@@ -301,15 +301,24 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 		}
 		
 		Log.v("RiverRenderer", "Clicked position: " + mClickedPos.toString());
-	} 
+	}
+	
+	public void toggleMenu(){
+		if(mOSD.isShowing()){
+			mHideOSD = true;
+		}else{
+			mShowOSD = true;
+		}
+	}
  
 	@Override 
 	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 		gl.glMatrixMode(GL10.GL_TEXTURE);
 		gl.glLoadIdentity();
 		gl.glMatrixMode(GL10.GL_MODELVIEW);
-		mRenderer.init(gl, System.currentTimeMillis() + mOffset);
 		mOSD.init(gl);
+		mRenderer.init(gl, System.currentTimeMillis() + mOffset, mOSD);
+		
 		/*
          * By default, OpenGL enables features that improve quality
          * but reduce performance. One might want to tweak that

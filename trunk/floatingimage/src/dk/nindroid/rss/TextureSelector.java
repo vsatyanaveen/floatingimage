@@ -68,7 +68,7 @@ public class TextureSelector {
 					progress.setKey(mCurSelected);
 					progress.setPercentDone(5);
 					if(ref instanceof LocalImage){ // Special case, read from disk
-						Bitmap bmp = ImageFileReader.readImage(new File(url), Math.max(RiverRenderer.mDisplay.getHeightPixels(), RiverRenderer.mDisplay.getWidthPixels()), progress);
+						Bitmap bmp = ImageFileReader.readImage(new File(url), Math.max(RiverRenderer.mDisplay.getPortraitHeightPixels(), RiverRenderer.mDisplay.getPortraitWidthPixels()), progress);
 						if(bmp != null){
 							applyLarge(bmp);
 						}

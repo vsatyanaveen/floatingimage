@@ -91,15 +91,17 @@ public class TextureBank {
 		ImageReference ir = null;
 		synchronized (unseen) {
 			ir = unseen.poll();
+			// try again once
 			if(ir != null && mActiveBitmaps.containsKey(ir.getID())){
 				ir.getBitmap().recycle();
 				ir = unseen.poll();
 			}
-			unseen.notify();
-			
-			if(ir != null){
+			if(ir != null && !mActiveBitmaps.containsKey(ir.getID())){
 				mActiveBitmaps.put(ir.getID(), ir);
+			}else{
+				ir = null;
 			}
+			unseen.notify();
 		}
 		return ir;
 	}

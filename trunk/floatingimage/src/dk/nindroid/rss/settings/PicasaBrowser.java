@@ -39,7 +39,7 @@ public class PicasaBrowser extends ListActivity {
 		String showStream = this.getResources().getString(R.string.picasaShowStream);
 		String search = this.getResources().getString(R.string.picasaSearch);
 		String signin = this.getResources().getString(R.string.picasaSignin);
-		String[] options = new String[]{showStream, search, signin};
+		String[] options = new String[]{showStream, search};
 		setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, options));
 	}
 	

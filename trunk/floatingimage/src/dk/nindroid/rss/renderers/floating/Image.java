@@ -265,7 +265,7 @@ public class Image implements ImagePlane {
 		gl.glEnable(GL10.GL_TEXTURE_2D);
 		
 		gl.glActiveTexture(GL10.GL_TEXTURE0);
-		if(mFocusBmp != null){
+		if(mLargeTex){
 			gl.glBindTexture(GL10.GL_TEXTURE_2D, largeTextureID);
 		}else{
 			gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
@@ -400,8 +400,8 @@ public class Image implements ImagePlane {
 				setTexture(gl, mShowingImage);
 				if(mFocusBmp != null){
 					mFocusBmp.recycle();
+					mFocusBmp = null;
 				}
-				mFocusBmp = null;
 			}
 			return;
 		}
@@ -487,7 +487,7 @@ public class Image implements ImagePlane {
 	}
 	
 	private void setFocusTexture(GL10 gl){
-		if(mFocusBmp == null){
+		if(mFocusBmp == null || mState != STATE_FOCUSED){
 			return;
 		}
 		float width = mFocusWidth;

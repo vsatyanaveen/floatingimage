@@ -38,6 +38,8 @@ public class Image implements ImagePlane {
 	private float				mAlpha = 1.0f;
 	private TextureSelector		mTextureSelector;
 	private boolean				mSetBackgroundWhenReady = false;
+	private boolean				mRevive = false;
+	private boolean				mSetLargeTexture = false;
 	
 	private Vec3f				mPos;
 	
@@ -55,9 +57,6 @@ public class Image implements ImagePlane {
 	public void clear(){
 		if(this.mBitmap != null){
 			this.mBitmap.recycle();
-		}
-		if(this.mImage != null){
-			this.mImage.getBitmap().recycle();
 		}
 		this.mBitmap = null;
 		this.mImage = null;
@@ -118,7 +117,9 @@ public class Image implements ImagePlane {
 	public void setImage(GL10 gl, ImageReference image){
 		if(image == null)
 			return;
-		this.mHasBitmap = false; // No bitmap until it's large!
+		if(this.mBitmap != null){
+			this.mBitmap.recycle();
+		}
 		this.mImage = image;
 		this.mBitmap = image.getBitmap();
 		this.mBitmapWidth = image.getWidth();
@@ -153,6 +154,7 @@ public class Image implements ImagePlane {
 	
 	public void onResume(){
 		mTextureSelector.startThread();
+		mRevive = true;
 	}
 	
 	public void onPause(){
@@ -160,8 +162,13 @@ public class Image implements ImagePlane {
 	}
 	
 	public void render(GL10 gl){
-		if(this.mBitmap != null){
+		if(this.mSetLargeTexture){
 			setTexture(gl, mLargeTextureID, true);
+			mSetLargeTexture = false;
+		}
+		if(mRevive){
+			setTexture(gl, mTextureID, mHasBitmap);
+			mRevive = false;
 		}
 		
 		float x, y, z, szX, szY;
@@ -206,6 +213,7 @@ public class Image implements ImagePlane {
 		if(mBitmap == null){
 			return;
 		}
+		mHasBitmap = isLarge;
 		float width = mBitmapWidth;
 		float height = mBitmapHeight;
 		
@@ -255,7 +263,6 @@ public class Image implements ImagePlane {
         }catch(IllegalArgumentException e){
         	Log.w("dk.nindroid.rss.renderers.SlideshowRenderer.Image", "Texture could not be set", e);
         }
-        mBitmap = null;
         setState(gl);
 	}
 	
@@ -275,10 +282,13 @@ public class Image implements ImagePlane {
 
 	@Override
 	public void setFocusTexture(Bitmap texture, float width, float height) {
+		if(this.mBitmap != null){
+			this.mBitmap.recycle();
+		}
 		this.mBitmap = texture;
 		this.mBitmapWidth = width;
 		this.mBitmapHeight = height;
-		this.mHasBitmap = true;
+		this.mSetLargeTexture = true;
 		if(mSetBackgroundWhenReady){
 			setBackground();
 		}
