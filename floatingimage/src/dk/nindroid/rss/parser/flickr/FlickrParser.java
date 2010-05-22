@@ -8,9 +8,9 @@ import org.xml.sax.SAXException;
 
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.flickr.FlickrImage;
-import dk.nindroid.rss.parser.FeedParser;
+import dk.nindroid.rss.parser.XMLParser;
 
-public class FlickrParser extends FeedParser {
+public class FlickrParser extends XMLParser {
 	List<ImageReference> imgs;
 	StringBuilder data = new StringBuilder();
 	

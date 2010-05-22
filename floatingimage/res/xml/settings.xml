@@ -58,6 +58,11 @@
                 android:title="@string/fullscreenBlack"
                 android:summary="@string/fullscreenBlackSummary"
                 android:defaultValue="true" />
+            <CheckBoxPreference
+                android:key="imageDecorations"
+                android:title="@string/imageDecorations"
+                android:summary="@string/imageDecorationsSummary"
+                android:defaultValue="true" />
     </PreferenceCategory>
     <PreferenceCategory
             android:title="@string/internals">

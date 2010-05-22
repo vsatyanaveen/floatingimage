@@ -1,5 +1,7 @@
 package dk.nindroid.rss.renderers.floating;
 
+import java.util.Arrays;
+
 import javax.microedition.khronos.opengles.GL10;
 
 import android.content.Intent;
@@ -52,6 +54,7 @@ public class FloatingRenderer implements Renderer {
 	private long			mDefocusSplashTime;
 	private boolean			mSelectingNext;
 	private boolean			mSelectingPrev;
+	private ImageDepthComparator mDepthComparator;
 	
 	public FloatingRenderer(TextureBank bank){
 		mTextureSelector = new TextureSelector();
@@ -71,6 +74,8 @@ public class FloatingRenderer implements Renderer {
 	        	mCreateMiddle ^= true;
 	        	creationOffset += mInterval;
 		}
+		mDepthComparator = new ImageDepthComparator();
+		Arrays.sort(mImgs, mDepthComparator);
 	}
 		
 	public void click(MatrixTrackingGL gl, float x, float y, long frameTime, long realTime){
@@ -123,6 +128,7 @@ public class FloatingRenderer implements Renderer {
 		if(mDoUnselect){
 			mDoUnselect = false;
 			deselect(gl, frameTime, realTime);
+			Log.v("Floating Image", "Splash deselect");
 		}
 		// Defocus splash image after defined period.
         if(mSplashImg != null){
@@ -159,11 +165,27 @@ public class FloatingRenderer implements Renderer {
         		}
         	}
         }
+        boolean sortArray = false;
+        for(int i = 0; i < mImgCnt; ++i){
+        	if(mImgs[i].update(gl, frameTime, realTime)){
+        		sortArray = true;
+        	}
+        }
+        if(sortArray)
+        {
+        	Arrays.sort(mImgs, mDepthComparator);
+        }
 	}
 	
 	public void render(MatrixTrackingGL gl, long time, long realTime){
+		gl.glDepthMask(false);
+		gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+		gl.glEnable(GL10.GL_TEXTURE_2D);
+		gl.glDisable(GL10.GL_DEPTH_BITS);
+		gl.glDisable(GL10.GL_DEPTH_TEST);
+		// Background first, this is backmost
 		BackgroundPainter.draw(gl);
-        
+		
         Image.setState(gl);
         for(int i = 0; i < mImgCnt; ++i){
         	if(mImgs[i] != mSelected){
@@ -172,12 +194,6 @@ public class FloatingRenderer implements Renderer {
         }
         Image.unsetState(gl);
         
-        gl.glDepthMask(false);
-        GlowImage.setState(gl);
-        for(int i = 0; i < mImgCnt; ++i){
-        	mImgs[i].drawGlow(gl);
-        }
-        GlowImage.unsetState(gl);
         float fraction = getFraction(realTime);
         if(mSelected != null){
         	float dark = Settings.fullscreenBlack ? RiverRenderer.mDisplay.getFill() * RiverRenderer.mDisplay.getFill() : 0.8f;
@@ -199,15 +215,10 @@ public class FloatingRenderer implements Renderer {
     		}
         	
         	gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
-        	GlowImage.setState(gl);
-        	mSelected.drawGlow(gl);
-        	GlowImage.unsetState(gl);
         	Image.setState(gl);
         	mSelected.draw(gl, time, realTime);
         	Image.unsetState(gl);
         }
-        
-        gl.glDepthMask(true);
 	}
 	
 	public static float getFarRight(){

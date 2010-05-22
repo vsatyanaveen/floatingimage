@@ -34,10 +34,10 @@ public class TextureBank {
 		if(ir != null){
 			synchronized (unseen) {
 				unseen.add(ir);
-				// Don't cache local images.
-				if(Settings.useCache && !(ir instanceof LocalImage)){
-					ic.saveExploreImage(ir);
-				}
+			}
+			// Don't cache local images.
+			if(Settings.useCache && !(ir instanceof LocalImage)){
+				ic.saveExploreImage(ir);
 			}
 		}
 	}
@@ -67,11 +67,13 @@ public class TextureBank {
 		
 	public ImageReference getTexture(ImageReference previousImage){
 		ImageReference ir = getUnseen();
-		if(ir != null){
+		// How the hell do those bitmaps get recycled??!??!
+		if(ir != null && !ir.getBitmap().isRecycled()){
 			// Remove previous image, if any
 			if(previousImage != null){
 				mActiveBitmaps.remove(previousImage.getID());
 			}
+			mActiveBitmaps.put(ir.getID(), ir);
 			return ir;
 		}
 		// If no new pictures, try some old ones.
@@ -79,8 +81,11 @@ public class TextureBank {
 		if(Settings.useCache){
 			ir = getCached();
 			
-			if(ir != null && previousImage != null){
+			if(previousImage != null){
 				mActiveBitmaps.remove(previousImage.getID());
+			}
+			if(ir != null){
+				mActiveBitmaps.put(ir.getID(), ir);
 			}
 			return ir;
 		}else{
@@ -90,17 +95,20 @@ public class TextureBank {
 	private ImageReference getUnseen(){
 		ImageReference ir = null;
 		synchronized (unseen) {
-			ir = unseen.poll();
-			// try again once
-			if(ir != null && mActiveBitmaps.containsKey(ir.getID())){
-				ir.getBitmap().recycle();
+			int attempts = 0;
+			do{
+				if(ir != null && !ir.getBitmap().isRecycled()){
+					ir.getBitmap().recycle();
+				}
+				
+				if(++attempts == 5){
+					ir = null;
+					break;
+				}
+				
 				ir = unseen.poll();
-			}
-			if(ir != null && !mActiveBitmaps.containsKey(ir.getID())){
-				mActiveBitmaps.put(ir.getID(), ir);
-			}else{
-				ir = null;
-			}
+				
+			}while(ir != null && mActiveBitmaps.containsKey(ir.getID()));
 			unseen.notify();
 		}
 		return ir;
@@ -113,14 +121,15 @@ public class TextureBank {
 				if(ir != null){
 					ir.getBitmap().recycle();
 				}
-				ir = cached.poll();
-				cached.notify();
-				if(ir == null) return null;
+				
 				if(++attempts == 5){
-					return null;
+					ir = null;
+					break;
 				}
-			}while(mActiveBitmaps.containsKey(ir.getID()));
-			mActiveBitmaps.put(ir.getID(), ir);
+				
+				ir = cached.poll();
+			}while(ir != null && mActiveBitmaps.containsKey(ir.getID()));
+			cached.notify();
 		}
 		return ir;
 	}

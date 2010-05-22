@@ -21,7 +21,7 @@ public class FacebookFeeder {
 	private static final String AUTHORIZATION_URL = "https://graph.facebook.com/oauth/authorize?client_id=" + APP_ID + "&scope=user_photos,read_friendlists,friends_photos,offline_access,user_photo_video_tags&redirect_uri=" + CALLBACK_URL + "&display=touch";
 	private static final String ACCESS_TOKEN_URL = "https://graph.facebook.com/oauth/access_token?client_id=" + APP_ID + "&redirect_uri=" + CALLBACK_URL + "&client_secret=" + APP_SECRET + "&code=";
 	
-	private static final String MY_PHOTOS_URL = "http://graph.facebook.com/me/photos";
+	private static final String MY_PHOTOS_URL = "https://graph.facebook.com/me/photos";
 		
 	private static String accessToken = null;
 	private static String code = null;
@@ -42,11 +42,16 @@ public class FacebookFeeder {
         c.startActivity(homeIntent);
 	}
 	
-	public static boolean initCode(Context context) throws MalformedURLException, IOException{
+	public static void initCode(Context context) throws MalformedURLException, IOException{
 		if(code == null){
 			getCode(context);
 		}
-		return code != null;
+	}
+	
+	public static boolean needsAuthorization(Context context){
+		SharedPreferences sp = context.getSharedPreferences("dk.nindroid.rss_preferences", 0);
+		code = sp.getString("FACEBOOK_CODE", null);
+		return code == null;
 	}
 	
 	private static String constructFeed(String baseURL) throws MalformedURLException, IOException{
@@ -55,7 +60,7 @@ public class FacebookFeeder {
 		}else{
 			getAccessToken(code);
 		}
-		return baseURL + "?access_token=" + accessToken;
+		return baseURL + "?access_token=" + accessToken + "&limit=500";
 	}
 	
 	private static String getAccessToken(String code) throws MalformedURLException, IOException{
@@ -76,9 +81,6 @@ public class FacebookFeeder {
 	}
 	
 	private static void getCode(Context context) throws MalformedURLException, IOException{
-		SharedPreferences sp = context.getSharedPreferences("dk.nindroid.rss_preferences", 0);
-		code = sp.getString("FACEBOOK_CODE", null);
-		code = null;
 		if(code == null){
 			lastContext = context;
 			Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(AUTHORIZATION_URL));

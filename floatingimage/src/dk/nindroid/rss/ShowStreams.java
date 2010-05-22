@@ -35,6 +35,7 @@ import dk.nindroid.rss.launchers.ReadFeeds;
 import dk.nindroid.rss.menu.Settings;
 import dk.nindroid.rss.orientation.OrientationManager;
 import dk.nindroid.rss.parser.ParserProvider;
+import dk.nindroid.rss.parser.facebook.FacebookParser;
 import dk.nindroid.rss.parser.flickr.FlickrParser;
 import dk.nindroid.rss.parser.picasa.PicasaParser;
 import dk.nindroid.rss.renderers.OSD;
@@ -119,6 +120,7 @@ public class ShowStreams extends Activity {
 	void registerParsers(){
 		ParserProvider.registerParser(dk.nindroid.rss.settings.Settings.TYPE_FLICKR, FlickrParser.class);
 		ParserProvider.registerParser(dk.nindroid.rss.settings.Settings.TYPE_PICASA, PicasaParser.class);
+		ParserProvider.registerParser(dk.nindroid.rss.settings.Settings.TYPE_FACEBOOK, FacebookParser.class);
 	}
 	
 	TextureBank setupFeeders(){

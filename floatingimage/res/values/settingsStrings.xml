@@ -12,6 +12,8 @@
 	<string name="rotateImagesSummary">Tilt images for a slightly more messed up effect</string>
 	<string name="fullscreenBlack">Fade to black when fullscreen</string>
 	<string name="fullscreenBlackSummary">Fade background to all black when in fullscreen mode</string>
+	<string name="imageDecorations">Decorate images</string>
+	<string name="imageDecorationsSummary">Show shadows and glow behind images</string>
 	<string name="internals">Internals</string>
 	<string name="random">Use random images</string>
 	<string name="randomSummary">Use Flickr explore feed</string>

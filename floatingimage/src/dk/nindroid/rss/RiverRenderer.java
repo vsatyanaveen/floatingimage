@@ -206,7 +206,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	private boolean showOSD(float x, float y, float speedX, float speedY){
 		if(y < 150){
 			if(speedY > 0){
-				mShowOSD = true;
+				//mShowOSD = true;
 			}else{
 				mHideOSD = true;
 			}
@@ -214,7 +214,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 			return true;
 		}else if(y > mDisplay.getHeightPixels() - 150){
 			if(speedY < 0){
-				mShowOSD = true;
+				//mShowOSD = true;
 			}else{
 				mHideOSD = true;
 			}

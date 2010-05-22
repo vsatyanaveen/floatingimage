@@ -29,6 +29,7 @@ public class Settings {
 	public static int 		mode;
 	public static long 		slideshowInterval;
 	public static long	 	slideSpeed;
+	public static boolean	imageDecorations;
 	
 	public static boolean fullscreen;
 
@@ -46,6 +47,7 @@ public class Settings {
 		slideshowInterval = Long.parseLong(sp.getString("slideInterval", "5000"));
 		slideSpeed = Long.parseLong(sp.getString("slideSpeed", "300"));
 		fullscreenBlack = sp.getBoolean("fullscreenBlack", true);
+		imageDecorations = sp.getBoolean("imageDecorations", true);
 
 		Log.v("Settings", "useRandom: " + (useRandom ? "true" : "false"));
 		Log.v("Settings", "useCache: " + (useCache ? "true" : "false"));

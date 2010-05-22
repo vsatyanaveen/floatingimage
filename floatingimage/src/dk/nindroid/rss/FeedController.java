@@ -11,12 +11,8 @@ import java.util.Random;
 
 import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
 
 import android.database.Cursor;
 import android.util.Log;
@@ -191,7 +187,7 @@ public class FeedController {
 		try {
 			InputStream stream = HttpTools.openHttpConnection(feed.getFeedLocation());
 			Log.v("FeedController", "Fetching stream: " + feed.getFeedLocation());
-			return parseStream(stream, feed.getParser());
+			return feed.getParser().parseStream(stream);
 		} catch (IOException e) {
 			Log.e("FeedController", "Unexpected exception caught", e);
 		} catch (ParserConfigurationException e) {
@@ -202,21 +198,6 @@ public class FeedController {
 			Log.e("FeedController", "Unexpected exception caught", e);
 		}
 		return null;
-	}
-	
-	private static List<ImageReference> parseStream(InputStream stream, FeedParser feedParser) throws ParserConfigurationException, SAXException, FactoryConfigurationError, IOException{
-		SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
-		XMLReader xmlReader = parser.getXMLReader();
-		xmlReader.setContentHandler(feedParser);
-		xmlReader.parse(new InputSource(stream));
-		List<ImageReference> list = feedParser.getData();
-		if(list != null){
-			if(list.isEmpty()){
-				return null;
-			}
-			Log.v("FeedController", list.size() + " photos found.");
-		}
-		return list;
 	}
 	
 	// LOCAL

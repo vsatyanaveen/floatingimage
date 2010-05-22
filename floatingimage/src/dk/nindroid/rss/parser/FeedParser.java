@@ -1,11 +1,16 @@
 package dk.nindroid.rss.parser;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
-import org.xml.sax.helpers.DefaultHandler;
+import javax.xml.parsers.FactoryConfigurationError;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
 
 import dk.nindroid.rss.data.ImageReference;
 
-public abstract class FeedParser extends DefaultHandler{
-	public abstract List<ImageReference> getData();
+public interface FeedParser {
+	List<ImageReference> parseStream(InputStream stream) throws ParserConfigurationException, SAXException, FactoryConfigurationError, IOException;
 }

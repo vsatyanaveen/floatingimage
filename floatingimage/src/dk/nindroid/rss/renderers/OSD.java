@@ -146,9 +146,11 @@ public class OSD {
 			// Fade in
 			mFraction = ((float)t) / FADE_TIME;
 		}else if(t < FADE_TIME + SHOW_TIME){
-			ShowStreams.current.runOnUiThread(new ToggleNotificationBar(true));
-			mShowing = true;
-			mFraction = 1.0f;
+			if(!mShowing){
+				ShowStreams.current.runOnUiThread(new ToggleNotificationBar(true));
+				mShowing = true;
+				mFraction = 1.0f;
+			}
 		}else if(t < 2 * FADE_TIME + SHOW_TIME){
 			// Fade out
 			mFraction = 1.0f - (((float)t - FADE_TIME - SHOW_TIME)) / FADE_TIME;
@@ -159,7 +161,9 @@ public class OSD {
 				ShowStreams.current.runOnUiThread(new ToggleNotificationBar(false));
 			}
 		}
-		drawOSD(gl);
+		if(isShowing()){
+			drawOSD(gl);
+		}
 	}
 	
 	private void drawOSD(GL10 gl){
