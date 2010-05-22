@@ -38,6 +38,7 @@ public class Image implements ImagePlane {
 	int						mID;
 	private IntBuffer   	mVertexBuffer;
 	private ByteBuffer  	mIndexBuffer;
+	private ByteBuffer  	mLineIndexBuffer;
 	private float  			maspect;
 	private Vec3f			mPos;
 	private int				mRotations;
@@ -51,9 +52,9 @@ public class Image implements ImagePlane {
 	private ImageReference 	mCurImage;
 	private ImageReference 	mLastImage;
 	private ImageReference 	mShowingImage;
-	private int				mLastTextureSize = 0;
 	private boolean			mRewinding = false;	
 	private Vec3f[]			mVertices;
+	private int				mLastTextureSize;
 	
 	// Selected vars
 	private Vec3f			mSelectedPos = new Vec3f();
@@ -88,6 +89,10 @@ public class Image implements ImagePlane {
 		return mState == STATE_FOCUSED;
 	}
 	
+	public float getDepth(){
+		return mJitter.getZ() + mPos.getZ();
+	}
+	
 	public void setBackground(){
 		if(mLargeTex){
 			try {
@@ -112,7 +117,6 @@ public class Image implements ImagePlane {
 			revivingTextureNulled = true;
 			largeTextureSize = 0;
 		}
-		mLastTextureSize = 0;
 		// Revive textures
 		if(mState == STATE_FOCUSED && mFocusBmp != null){
 			setFocusTexture(gl);
@@ -195,8 +199,7 @@ public class Image implements ImagePlane {
         	0.0f,  0.0f,
         };
         mTexBuffer.put(tex);
-        mTexBuffer.position(0);
-		
+        mTexBuffer.position(0);	
 		
 		int one = 0x10000;
 		int vertices[] = {
@@ -207,7 +210,12 @@ public class Image implements ImagePlane {
 			  };
 		
 		byte indices[] = {
-				 0, 1, 2, 3
+			0, 1, 2, 3
+		};
+		
+		// Outer square
+		byte lineIndices[] = {
+			0, 1, 3, 2, 0
 		};
 		
 		mVertices = new Vec3f[4];
@@ -225,29 +233,21 @@ public class Image implements ImagePlane {
 		mIndexBuffer = ByteBuffer.allocateDirect(indices.length);
 		mIndexBuffer.put(indices);
 		mIndexBuffer.position(0);
+		
+		mLineIndexBuffer = ByteBuffer.allocateDirect(indices.length + 1);
+		mLineIndexBuffer.put(lineIndices);
+		mLineIndexBuffer.position(0);
 	}
-	
-	// Draw this after draw.
-	public void drawGlow(GL10 gl){
-		gl.glPushMatrix();
-		gl.glLoadMatrixf(mModelviewMatrix, 0);
-		if(mCurImage != null && mCurImage.isNew()){
-			GlowImage.draw(gl);
-		}
-		else{
-			ShadowPainter.draw(gl);
-		}
-		gl.glPopMatrix();
-	}
-	
+
 	private boolean isTall(){
 		boolean tall = maspect < RiverRenderer.mDisplay.getWidth() / RiverRenderer.mDisplay.getFocusedHeight();
 		return tall;	
 	}
 	
 	public void draw(MatrixTrackingGL gl, long time, long realTime){
-		update(gl, time, realTime);
-		revivingTextureNulled = false;
+		if(mCurImage == null && mFocusBmp == null){
+			return;
+		}
 		
 		float x, y, z, szX, szY;
 		x = mPos.getX() + mJitter.getX();
@@ -260,10 +260,27 @@ public class Image implements ImagePlane {
 			szX = RiverRenderer.mDisplay.getWidth() * RiverRenderer.mDisplay.getFill();
 			szY = szX / maspect;
 		}
-		gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_REPLACE);
 		gl.glFrontFace(GL10.GL_CCW);
 		gl.glEnable(GL10.GL_TEXTURE_2D);
 		
+		gl.glPushMatrix();
+				
+		gl.glTranslatef(x, y, z);
+		gl.glRotatef(mRotation, 0, 0, 1);
+		gl.glScalef(szX, szY, 1);
+		gl.glEnable(GL10.GL_BLEND);
+		
+		if(Settings.imageDecorations){
+			if(mCurImage != null && mCurImage.isNew()){
+				GlowImage.draw(gl);
+			}
+			else{
+				ShadowPainter.draw(gl);
+			}
+		}
+		gl.glDisable(GL10.GL_BLEND);
+		// Draw image
+		gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_REPLACE);
 		gl.glActiveTexture(GL10.GL_TEXTURE0);
 		if(mLargeTex){
 			gl.glBindTexture(GL10.GL_TEXTURE_2D, largeTextureID);
@@ -274,24 +291,16 @@ public class Image implements ImagePlane {
         
 		gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mTexBuffer);
 		
-		gl.glPushMatrix();
-				
-		gl.glTranslatef(x, y, z);
-		gl.glRotatef(mRotation, 0, 0, 1);
-		gl.glScalef(szX, szY, 1);
 		gl.glDrawElements(GL10.GL_TRIANGLE_STRIP, 4, GL10.GL_UNSIGNED_BYTE, mIndexBuffer);
 		
-		/*
-		// Try this on Nexus hardware!
-		gl.glDepthMask(false);
+		// Smooth images
 		gl.glEnable(GL10.GL_BLEND);
 		gl.glEnable(GL10.GL_POINT_SMOOTH);
 		gl.glEnable(GL10.GL_LINE_SMOOTH);
 		gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
 		gl.glLineWidth(1.0f);
-		gl.glDrawElements(GL10.GL_LINE_STRIP, 4, GL10.GL_UNSIGNED_BYTE, mIndexBuffer);
-		gl.glDepthMask(true);
-        */
+		gl.glDrawElements(GL10.GL_LINE_STRIP, 5, GL10.GL_UNSIGNED_BYTE, mLineIndexBuffer);
+
 		gl.getMatrix(mModelviewMatrix, 0);
 		
         gl.glPopMatrix();
@@ -329,7 +338,8 @@ public class Image implements ImagePlane {
 		return -FloatingRenderer.getFarRight() + (((float)(relativeTime % mTraversal) / mTraversal) * FloatingRenderer.getFarRight() * 2);
 	}
 	
-	private void updateFloating(GL10 gl, long time){
+	private boolean updateFloating(GL10 gl, long time){
+		boolean depthChanged = false;
 		long totalTime = time - mStartTime;
 		
 		mPos.setZ(FloatingRenderer.mFloatZ);
@@ -339,12 +349,14 @@ public class Image implements ImagePlane {
 		// Get new texture...
 		if(totalTime > mTraversal * mRotations && !isInRewind){
         	reJitter();
+        	depthChanged = true;
         	resetTexture(gl);
         	++mRotations;
         }
 		// Read last texture (Rewind)
 		if(isInRewind && mLastImage != null && !mRewinding){
 			reJitter();
+			depthChanged = true;
         	setTexture(gl, mLastImage);
         	mShowingImage = mLastImage;
         	mRewinding = true;
@@ -357,6 +369,7 @@ public class Image implements ImagePlane {
 		if(mShowingImage == null & mPos.getX() < -5.0f){
 			resetTexture(gl);
 		}
+		return depthChanged;
 	}
 	
 	private float smoothstep(float val){
@@ -396,12 +409,13 @@ public class Image implements ImagePlane {
 			mRotations = (int)(totalTime / mTraversal) + 1;
 			mState = STATE_FLOATING;
 			mRewinding = false;
-			if(mCurImage != null){
+			if(mShowingImage != null){
 				setTexture(gl, mShowingImage);
 				if(mFocusBmp != null){
 					mFocusBmp.recycle();
 					mFocusBmp = null;
 				}
+				mLargeTex = false;
 			}
 			return;
 		}
@@ -426,9 +440,10 @@ public class Image implements ImagePlane {
 		mPos.setZ(distZ * fraction + selectedZ);
 	}
 	
-	private void update(GL10 gl, long time, long realTime){
+	public boolean update(GL10 gl, long time, long realTime){
+		boolean depthChanged = false;
 		if(mState == STATE_FLOATING){
-			updateFloating(gl, time);		
+			depthChanged = updateFloating(gl, time);		
 		}else{
 			if(mState == STATE_FOCUSING){
 				moveToFocus(gl, realTime);
@@ -447,6 +462,8 @@ public class Image implements ImagePlane {
 				moveToFloat(gl, time, realTime);
 			}
 		}
+		revivingTextureNulled = false;
+		return depthChanged;
 	}
 	
 	private void setFocusedPosition(){
@@ -470,7 +487,10 @@ public class Image implements ImagePlane {
 				mLastImage.getBitmap().recycle();
 			}
 			mLastImage = mCurImage;
-			mCurImage = mbank.getTexture(mCurImage);
+			ImageReference ir = mbank.getTexture(mCurImage);
+			if(ir != null){
+				mCurImage = ir;
+			}
 		}	
     	if(mCurImage != null){
     		setTexture(gl, mCurImage);
@@ -534,13 +554,13 @@ public class Image implements ImagePlane {
             
             float tex[] = {
             	0.0f,  0.0f,
-            	0.0f,  height,
-            	width,  0.0f,
-            	width,  height,
+            	0.0f,  height - 0.005f,
+            	width - 0.005f,  0.0f,
+            	width - 0.005f,  height - 0.005f,
             };
             mTexBuffer.put(tex);
             mTexBuffer.position(0);
-        }catch(IllegalArgumentException e){ // TODO: Handle graciously
+        }catch(IllegalArgumentException e){
         	Log.w("Floating Image", "Image: Large texture could not be shown", e);
         	setTexture(gl, mShowingImage);
         	return;
@@ -557,20 +577,11 @@ public class Image implements ImagePlane {
 		maspect = width / height;
 		
 		gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
-
-        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER,
-                GL10.GL_NEAREST);
-        gl.glTexParameterf(GL10.GL_TEXTURE_2D,
-                GL10.GL_TEXTURE_MAG_FILTER,
-                GL10.GL_LINEAR);
-
-        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S,
-                GL10.GL_CLAMP_TO_EDGE);
-        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T,
-                GL10.GL_CLAMP_TO_EDGE);
-
-        gl.glTexEnvf(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE,
-                GL10.GL_BLEND);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S, GL10.GL_CLAMP_TO_EDGE);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_CLAMP_TO_EDGE);
+        gl.glTexEnvf(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_BLEND);
         
         try{
         	if(mLastTextureSize != ir.getBitmap().getWidth()){
@@ -586,9 +597,9 @@ public class Image implements ImagePlane {
 	        
 	        float tex[] = {
 	        	0.0f,  0.0f,
-	        	0.0f,  height,	
-	        	width,  0.0f,
-	        	width,  height,
+	        	0.0f,  height - 0.005f,	
+	        	width - 0.005f,  0.0f,
+	        	width - 0.005f,  height - 0.005f,
 	        };
 	        mTexBuffer.put(tex);
 	        mTexBuffer.position(0);

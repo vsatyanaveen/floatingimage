@@ -135,6 +135,7 @@ public class BackgroundPainter {
 	 * @param szZ
 	 */
 	public static void draw(GL10 gl){
+		gl.glDisable(GL10.GL_BLEND);
 		// Draw background
 		gl.glPushMatrix();
 			gl.glLoadIdentity();

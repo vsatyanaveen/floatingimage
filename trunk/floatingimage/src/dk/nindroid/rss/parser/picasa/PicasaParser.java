@@ -8,10 +8,10 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
 import dk.nindroid.rss.data.ImageReference;
-import dk.nindroid.rss.parser.FeedParser;
+import dk.nindroid.rss.parser.XMLParser;
 import dk.nindroid.rss.picasa.PicasaImage;
 
-public class PicasaParser extends FeedParser {
+public class PicasaParser extends XMLParser {
 		List<ImageReference> imgs;
 		PicasaImage image;
 		StringBuilder sb;

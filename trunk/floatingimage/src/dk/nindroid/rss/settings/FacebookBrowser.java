@@ -16,37 +16,36 @@ import android.widget.ListView;
 import android.widget.Toast;
 import dk.nindroid.rss.R;
 import dk.nindroid.rss.parser.facebook.FacebookFeeder;
-import dk.nindroid.rss.parser.facebook.FeedCallback;
 
 public class FacebookBrowser extends ListActivity {
 	// Positions
+	private static final int	AUTHORIZE				= 0;
 	private static final int	PHOTOS_OF_ME		 	= 0;
 	private static final int	MY_ALBUMS				= 1;
 	private static final int	FRIENDS					= 2;
 	private static final int	FRIENDS_PHOTOS_OF		= 0;
 	private static final int	FRIENDS_ALBUMS			= 1;
 		
+	boolean showAuthorize;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		try {
-			if(FacebookFeeder.initCode(this)){
-				fillMenu();
-				return;
-			}
-		} catch (MalformedURLException e) {
-			Log.e("Floating Image", "Error getting facebook code!", e);
-		} catch (IOException e) {
-			Log.e("Floating Image", "IO Error getting facebook code!", e);
-		}
-		Toast.makeText(this, "Facebook authorization failed!", Toast.LENGTH_LONG).show();
-		finish();
+		fillMenu();
 	}
 	
 	private void fillMenu(){
-		String photosOfMe = this.getResources().getString(R.string.facebookPhotosOfMe);
-		String[] options = new String[]{photosOfMe};
-		setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, options));
+		if(FacebookFeeder.needsAuthorization(this)){
+			showAuthorize = true;
+			String authorize = this.getResources().getString(R.string.authorize);
+			String[] options = new String[]{authorize};
+			setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, options));
+		}else{
+			showAuthorize = false;
+			String photosOfMe = this.getResources().getString(R.string.facebookPhotosOfMe);
+			String[] options = new String[]{photosOfMe};
+			setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, options));
+		}
 	}
 	
 	@Override
@@ -57,10 +56,31 @@ public class FacebookBrowser extends ListActivity {
 
 		fl.addView(input, FrameLayout.LayoutParams.FILL_PARENT);
 		input.setGravity(Gravity.CENTER);
-		switch(position){
-		case PHOTOS_OF_ME:
-			returnPhotosOfMe();
-			break;
+		if(showAuthorize){
+			if(position == AUTHORIZE){
+				authorize();
+			}
+		}else{
+			switch(position){
+			case PHOTOS_OF_ME:
+				returnPhotosOfMe();
+				break;
+			}
+		}
+	}
+	
+	private void authorize(){
+		try {
+			FacebookFeeder.initCode(this);
+		} catch (MalformedURLException e) {
+			Log.e("Floating Image", "Error getting facebook code!", e);
+		} catch (IOException e) {
+			Log.e("Floating Image", "IO Error getting facebook code!", e);
+		}
+		if(FacebookFeeder.needsAuthorization(this)){
+			Toast.makeText(this, "Facebook authorization failed!", Toast.LENGTH_LONG).show();
+		}else{
+			fillMenu();
 		}
 	}
 	

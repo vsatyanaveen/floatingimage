@@ -29,7 +29,7 @@ public class SourceSelector extends ListActivity {
 		String flickr = this.getResources().getString(R.string.flickr);
 		String picasa = this.getResources().getString(R.string.picasa);
 		String facebook = this.getResources().getString(R.string.facebook);
-		String[] options = new String[] {local, flickr, picasa};
+		String[] options = new String[] {local, flickr, picasa, facebook};
 		setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, options));
 	}
 	
