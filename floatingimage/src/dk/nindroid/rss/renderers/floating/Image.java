@@ -117,6 +117,7 @@ public class Image implements ImagePlane {
 			revivingTextureNulled = true;
 			largeTextureSize = 0;
 		}
+		mLastTextureSize = 0;
 		// Revive textures
 		if(mState == STATE_FOCUSED && mFocusBmp != null){
 			setFocusTexture(gl);
@@ -264,7 +265,7 @@ public class Image implements ImagePlane {
 		gl.glEnable(GL10.GL_TEXTURE_2D);
 		
 		gl.glPushMatrix();
-				
+		
 		gl.glTranslatef(x, y, z);
 		gl.glRotatef(mRotation, 0, 0, 1);
 		gl.glScalef(szX, szY, 1);

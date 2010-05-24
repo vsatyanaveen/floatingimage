@@ -324,10 +324,12 @@ public class OSD {
 		}
 	}
 	
-	public void hide(long realtime){
+	public boolean hide(long realtime){
 		if(mFraction != 0){
 			mInputTime = realtime - FADE_TIME - SHOW_TIME;
+			return true;
 		}
+		return false;
 	}
 	
 	public boolean click(float x, float y){

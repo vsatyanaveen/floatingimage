@@ -16,6 +16,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 import dk.nindroid.rss.R;
 import dk.nindroid.rss.parser.facebook.FacebookFeeder;
+import dk.nindroid.rss.parser.facebook.FacebookMyAlbumBrowser;
 
 public class FacebookBrowser extends ListActivity {
 	// Positions
@@ -23,19 +24,28 @@ public class FacebookBrowser extends ListActivity {
 	private static final int	PHOTOS_OF_ME		 	= 0;
 	private static final int	MY_ALBUMS				= 1;
 	private static final int	FRIENDS					= 2;
-	private static final int	FRIENDS_PHOTOS_OF		= 0;
-	private static final int	FRIENDS_ALBUMS			= 1;
-		
+	boolean authorizing = false;
 	boolean showAuthorize;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		FacebookFeeder.readCode(this);
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		if(authorizing){
+			if(FacebookFeeder.needsAuthorization()){
+				Toast.makeText(this, "Facebook authorization failed!", Toast.LENGTH_LONG).show();
+			}
+		}
 		fillMenu();
 	}
 	
 	private void fillMenu(){
-		if(FacebookFeeder.needsAuthorization(this)){
+		if(FacebookFeeder.needsAuthorization()){
 			showAuthorize = true;
 			String authorize = this.getResources().getString(R.string.authorize);
 			String[] options = new String[]{authorize};
@@ -43,7 +53,9 @@ public class FacebookBrowser extends ListActivity {
 		}else{
 			showAuthorize = false;
 			String photosOfMe = this.getResources().getString(R.string.facebookPhotosOfMe);
-			String[] options = new String[]{photosOfMe};
+			String albums = this.getResources().getString(R.string.facebookMyAlbums);
+			String friends = this.getResources().getString(R.string.facebookFriends);
+			String[] options = new String[]{photosOfMe, albums};
 			setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, options));
 		}
 	}
@@ -65,6 +77,12 @@ public class FacebookBrowser extends ListActivity {
 			case PHOTOS_OF_ME:
 				returnPhotosOfMe();
 				break;
+			case MY_ALBUMS:
+				showMyAlbums();
+				break;
+			case FRIENDS:
+				showFriends();
+				break;
 			}
 		}
 	}
@@ -77,17 +95,20 @@ public class FacebookBrowser extends ListActivity {
 		} catch (IOException e) {
 			Log.e("Floating Image", "IO Error getting facebook code!", e);
 		}
-		if(FacebookFeeder.needsAuthorization(this)){
-			Toast.makeText(this, "Facebook authorization failed!", Toast.LENGTH_LONG).show();
-		}else{
-			fillMenu();
-		}
 	}
 	
 	private void returnPhotosOfMe(){
 		String url = null;
+		url = FacebookFeeder.getPhotosOfMeUrl();
+		if(url != null){
+			returnResult(url, "Photos of me");
+		}
+	}
+	
+	private void showMyAlbums(){
+		String url = null;
 		try {
-			url = FacebookFeeder.getPhotosOfMeUrl();
+			url = FacebookFeeder.getMyAlbumsUrl();
 		} catch (MalformedURLException e) {
 			Log.e("Floating Image", "Internal error. URL incorrect!", e);
 			Toast.makeText(this, "Internal error detected. Please contact developer!", 2).show();
@@ -97,7 +118,25 @@ public class FacebookBrowser extends ListActivity {
 			return;
 		}
 		if(url != null){
-			returnResult(url, "Photos of me");
+			Intent intent = new Intent(this, FacebookMyAlbumBrowser.class);
+			startActivityForResult(intent, MY_ALBUMS);
+		}
+	}
+	
+	private void showFriends(){
+		
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if(resultCode == RESULT_OK){
+			switch(requestCode){
+			case MY_ALBUMS:
+				setResult(RESULT_OK, data);
+				finish();
+				break;
+			}
 		}
 	}
 	

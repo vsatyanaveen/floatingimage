@@ -2,7 +2,6 @@ package dk.nindroid.rss;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -47,8 +46,6 @@ public class FeedController {
 		ImageReference ir = null;
 		synchronized (mFeeds) {
 			if(mReferences.size() == 0) return null;
-			//int thisFeed = (lastFeed + 1) % mReferences.size();
-			//lastFeed = thisFeed;
 			int thisFeed = getFeed();
 			List<ImageReference> feed = mReferences.get(thisFeed);
 			int index = (mFeedIndex.get(thisFeed) + 1) % feed.size();
@@ -185,9 +182,8 @@ public class FeedController {
 	
 	private static List<ImageReference> parseFeed(FeedReference feed){
 		try {
-			InputStream stream = HttpTools.openHttpConnection(feed.getFeedLocation());
 			Log.v("FeedController", "Fetching stream: " + feed.getFeedLocation());
-			return feed.getParser().parseStream(stream);
+			return feed.getParser().parseFeed(feed);
 		} catch (IOException e) {
 			Log.e("FeedController", "Unexpected exception caught", e);
 		} catch (ParserConfigurationException e) {

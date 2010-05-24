@@ -15,6 +15,9 @@ import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
 import android.util.Log;
+import dk.nindroid.rss.HttpTools;
+import dk.nindroid.rss.ShowStreams;
+import dk.nindroid.rss.data.FeedReference;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.facebook.FacebookImage;
 import dk.nindroid.rss.parser.FeedParser;
@@ -23,9 +26,15 @@ public class FacebookParser implements FeedParser {
 	List<ImageReference> images;
 	
 	@Override
-	public List<ImageReference> parseStream(InputStream stream)
+	public List<ImageReference> parseFeed(FeedReference feed)
 			throws ParserConfigurationException, SAXException,
 			FactoryConfigurationError, IOException {
+		FacebookFeeder.readCode(ShowStreams.current);
+		String url = FacebookFeeder.constructFeed(feed.getFeedLocation()); // Do this to always use updated access token
+		if (url == null){
+			return null;
+		}
+		InputStream stream = HttpTools.openHttpConnection(url);
 		BufferedInputStream bis = new BufferedInputStream(stream);
 		byte[] buffer = new byte[8192];
 		StringBuilder sb = new StringBuilder();

@@ -13,7 +13,7 @@ import dk.nindroid.rss.data.ImageReference;
 
 public class FacebookImage implements ImageReference {
 
-	private final static String imageType = "facebook";
+	public final static String imageType = "facebook";
 	private final static Paint paint = new Paint();
 	String imgID;
 	String owner;
