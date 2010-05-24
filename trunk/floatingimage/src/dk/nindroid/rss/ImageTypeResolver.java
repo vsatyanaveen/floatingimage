@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import dk.nindroid.rss.data.ImageReference;
+import dk.nindroid.rss.facebook.FacebookImage;
 import dk.nindroid.rss.flickr.FlickrImage;
 import dk.nindroid.rss.picasa.PicasaImage;
 
@@ -14,6 +15,8 @@ public class ImageTypeResolver {
 			return new FlickrImage();
 		}else if(type.equals("picasaInternal")){
 			return new PicasaImage();
+		}else if(type.equals(FacebookImage.imageType)){
+			return new FacebookImage();
 		}
 		return null;
 	}

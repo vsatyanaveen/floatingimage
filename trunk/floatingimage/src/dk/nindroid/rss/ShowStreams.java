@@ -78,6 +78,7 @@ public class ShowStreams extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
 		registerParsers();
 		String dataFolder = getString(R.string.dataFolder);
 		File sdDir = Environment.getExternalStorageDirectory();
@@ -93,12 +94,10 @@ public class ShowStreams extends Activity {
 			orientationManager = new OrientationManager(sensorManager);
 			cleanIfOld();
 			saveVersion(dataFile);
-			
 			GlowImage.init(this);
 			ShadowPainter.init(this);
 			BackgroundPainter.init(this);
 			OSD.init(this);
-			
 			this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 			PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 			wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "Floating Image");
@@ -108,7 +107,6 @@ public class ShowStreams extends Activity {
 			orientationManager.addSubscriber(RiverRenderer.mDisplay);
 			ClickHandler.init(renderer);
 			setContentView(R.layout.main);
-			
 			mGLSurfaceView = new GLSurfaceView(this);
 			mGLSurfaceView.setRenderer(renderer);
 			setContentView(mGLSurfaceView);
@@ -146,8 +144,8 @@ public class ShowStreams extends Activity {
 		if(ir != null){
 			super.onCreateContextMenu(menu, v, menuInfo);
 			menu.add(0, CONTEXT_GO_TO_SOURCE, 0, R.string.go_to_source);
+			menu.add(0, CONTEXT_BACKGROUND, 0, R.string.set_as_background);
 			if(!(ir instanceof LocalImage)){
-				menu.add(0, CONTEXT_BACKGROUND, 0, R.string.set_as_background);
 				menu.add(0, CONTEXT_SAVE, 0, R.string.save_image);
 			}
 		}else{
@@ -170,7 +168,7 @@ public class ShowStreams extends Activity {
 				//renderer.setBackground();
 				ir = renderer.getSelected();
 				Toast.makeText(this, "Setting background, please be patient...", Toast.LENGTH_LONG).show();
-				ImageDownloader.setWallpaper(ir.getOriginalImageUrl(), ir.getTitle());
+				ImageDownloader.setWallpaper(ir.getOriginalImageUrl(), ir.getTitle(), ir instanceof LocalImage);
 				return true;
 			case CONTEXT_SAVE:
 				ir = renderer.getSelected();
@@ -196,7 +194,7 @@ public class ShowStreams extends Activity {
 	protected void onPause() {
 		Log.v("Floating image", "Pausing...");
 		mGLSurfaceView.onPause();
-		//renderer.onPause();
+		renderer.onPause();
 		wl.release();
 		orientationManager.onPause();
 		Log.v("Floating image", "Paused!");
@@ -209,6 +207,7 @@ public class ShowStreams extends Activity {
 		super.onResume();
 		dk.nindroid.rss.settings.Settings.readSettings(this);
 		
+		Log.v("Floating Image", "Begin resume...");
 		Renderer defaultRenderer = renderer.getRenderer();
 		if(dk.nindroid.rss.settings.Settings.mode == dk.nindroid.rss.settings.Settings.MODE_FLOATING_IMAGE){
 			if(!(defaultRenderer instanceof FloatingRenderer)){
@@ -221,6 +220,8 @@ public class ShowStreams extends Activity {
 				defaultRenderer = new SlideshowRenderer(mTextureBank);
 			}
 		}
+		Log.v("Floating Image", "Resume texture bank done...");
+		
 		renderer.setRenderer(defaultRenderer);
 		renderer.onResume();
 		
@@ -231,6 +232,7 @@ public class ShowStreams extends Activity {
 		if(!mShowing){ // Feed is already loaded!
 			ReadFeeds.runAsync(mFeedController);
 		}
+		Log.v("Floating Image", "End resume...");
 	}
 	
 	@Override

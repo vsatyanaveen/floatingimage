@@ -52,6 +52,7 @@ public class ImageCache implements Runnable {
 		if(exploreInfoArray == null) return;
 		mExploreFiles = new ArrayList<File>(exploreInfoArray.length);
 		mCached = new HashMap<String, Integer>(exploreInfoArray.length);
+		Log.v("Floating Image", exploreInfoArray.length + " files in cache.");
 		for(int i = 0; i < exploreInfoArray.length; ++i){
 			File f = exploreInfoArray[i];
 			if(f == null) break;
@@ -192,7 +193,9 @@ public class ImageCache implements Runnable {
 			
 			// Get image reference
 			ImageReference ir = ImageTypeResolver.getReference(dis);
-			ir.parseInfo(dis, bmp);
+			if(ir != null){
+				ir.parseInfo(dis, bmp);
+			}
 			
 			// Clean up
 			dis.close();

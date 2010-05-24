@@ -15,7 +15,7 @@ public class TextureBank {
 	Queue<ImageReference> 					unseen   = new LinkedList<ImageReference>();
 	Vector<String> 							streams  = new Vector<String>();
 	Queue<ImageReference> 					cached   = new LinkedList<ImageReference>();
-	ImageCache 								ic = new ImageCache(this);
+	ImageCache 								ic;
 	BitmapDownloader						bitmapDownloader; 
 	private Map<String, ImageReference> 	mActiveBitmaps = new HashMap<String, ImageReference>();
 	int 									textureCache;
@@ -67,8 +67,8 @@ public class TextureBank {
 		
 	public ImageReference getTexture(ImageReference previousImage){
 		ImageReference ir = getUnseen();
-		// How the hell do those bitmaps get recycled??!??!
-		if(ir != null && !ir.getBitmap().isRecycled()){
+		
+		if(ir != null){
 			// Remove previous image, if any
 			if(previousImage != null){
 				mActiveBitmaps.remove(previousImage.getID());
@@ -101,14 +101,14 @@ public class TextureBank {
 					ir.getBitmap().recycle();
 				}
 				
-				if(++attempts == 5){
+				if(++attempts == 3){
 					ir = null;
 					break;
 				}
 				
 				ir = unseen.poll();
-				
-			}while(ir != null && mActiveBitmaps.containsKey(ir.getID()));
+				// How the hell do those bitmaps get recycled??!??!
+			}while(ir != null && (mActiveBitmaps.containsKey(ir.getID()) || ir.getBitmap().isRecycled()));
 			unseen.notify();
 		}
 		return ir;
@@ -122,7 +122,7 @@ public class TextureBank {
 					ir.getBitmap().recycle();
 				}
 				
-				if(++attempts == 5){
+				if(++attempts == 3){
 					ir = null;
 					break;
 				}

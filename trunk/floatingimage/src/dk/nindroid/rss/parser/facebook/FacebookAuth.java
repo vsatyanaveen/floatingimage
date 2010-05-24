@@ -14,13 +14,9 @@ public class FacebookAuth extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Log.v("Floating Image", "FacebookAuth: onCreate");
 		Intent i = getIntent();
-		Log.v("Floating Image", "intent");
 		Uri uri = i.getData();
-		Log.v("Floating Image", "uri");
 		String code = uri.getQueryParameter("code");
-		Log.v("Floating Image", "code");
 		try {
 			FacebookFeeder.setCodeToken(code, this);
 		} catch (MalformedURLException e) {
@@ -28,6 +24,7 @@ public class FacebookAuth extends Activity {
 		} catch (IOException e) {
 			Log.e("Floating Image", "Cannot get Access token! Code: " + code, e);
 		}
+		this.finish();
 	}
 	
 	@Override

@@ -32,7 +32,7 @@ public class FlickrImage implements ImageReference{
 	public String getID(){
 		return imgID;
 	}
-	// Always POT!
+	
 	public Bitmap getBitmap(){
 		return bitmap;
 	}

@@ -15,10 +15,13 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
 import android.util.Log;
+import dk.nindroid.rss.HttpTools;
+import dk.nindroid.rss.data.FeedReference;
 import dk.nindroid.rss.data.ImageReference;
 
 public abstract class XMLParser extends DefaultHandler implements FeedParser {
-	public List<ImageReference> parseStream(InputStream stream) throws ParserConfigurationException, SAXException, FactoryConfigurationError, IOException {
+	public List<ImageReference> parseFeed(FeedReference feed) throws ParserConfigurationException, SAXException, FactoryConfigurationError, IOException {
+		InputStream stream = HttpTools.openHttpConnection(feed.getFeedLocation());
 		SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
 		XMLReader xmlReader = parser.getXMLReader();
 		xmlReader.setContentHandler(this);

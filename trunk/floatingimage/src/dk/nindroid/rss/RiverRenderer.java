@@ -34,6 +34,8 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	
 	private Renderer  		mRenderer;
 	private OSD				mOSD;
+	private long			mLastFrameTime = 0;
+	private int				mFrames = 0;
 	
 	static {
 		mDisplay = new Display();
@@ -77,10 +79,18 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	                GL10.GL_FASTEST);
 	        //EGL10 egl = (EGL10)EGLContext.getEGL();
 	        //egl.eglGetConfigs(egl.eglGetCurrentDisplay(), egl.eglg, config_size, num_config)
-	        gl.glEnable(GL10.GL_MULTISAMPLE);
+	        //gl.glEnable(GL10.GL_MULTISAMPLE);
 	        
 	        //gl.glScalef(0.25f, 0.25f, 1.0f);
 	        long realTime = System.currentTimeMillis();
+	        /*
+	        ++mFrames;
+	        if(realTime - mLastFrameTime > 1000){
+	        	Log.v("Floating Image", "Framerate is " + mFrames + " frames per second");
+	        	mFrames = 0;
+	        	mLastFrameTime = realTime;
+	        }
+	        */
 	        fadeOffset(realTime);
 	        long time = realTime + mOffset;
 	        mDisplay.setFrameTime(realTime);
@@ -89,8 +99,9 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	        	mOSD.show(realTime);
 	        }else if(mHideOSD){
 	        	mHideOSD = false;
-	        	mOSD.hide(realTime);
-	        	
+	        	if(mOSD.hide(realTime)){
+	        		mMoveEventHandled = true;
+	        	}
 	        }else if(mClicked){
 	        	mClicked = false;
 	        	mRenderer.click(gl, mClickedPos.getX(), mClickedPos.getY(), time, realTime);
@@ -210,7 +221,6 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 			}else{
 				mHideOSD = true;
 			}
-			mMoveEventHandled = true;
 			return true;
 		}else if(y > mDisplay.getHeightPixels() - 150){
 			if(speedY < 0){
@@ -218,7 +228,6 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 			}else{
 				mHideOSD = true;
 			}
-			mMoveEventHandled = true;
 			return true;
 		}
 		return false;
