@@ -1,5 +1,3 @@
-=Changelog=
-
 _24/05-2010: 3.4.3_
   * Anti-aliasing!! (Requires Nexus One style hardware - Won't work on Magic)
   * Facebook support
