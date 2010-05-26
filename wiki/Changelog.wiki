@@ -1,0 +1,139 @@
+=Changelog=
+
+_24/05-2010: 3.4.3_
+  * Anti-aliasing!! (Requires Nexus One style hardware - Won't work on Magic)
+  * Facebook support
+  * Strange image swapping fixed
+  * Samsung moment/spica bugfix
+
+_19/05-2010: 3.4.2_
+  * More bugfixes
+
+_18/05-2010: 3.4.1_
+  * Bugfixes
+
+_17/05-2010: 3.4.0_
+  * New On Screen Display
+  * Optimizations for large display devices (Nexus One, etc)
+  * General bugfixes
+  * Somehow I broke Samsung support again. :(
+
+_18/04-2010: 2.3.16_
+  * Basic Picasa support added.
+  * Swipe to move to next image added.
+
+_10/04-2010: 2.3.15_
+  * Larger images are used, scaled to screen size.
+  * Shuffle is now actually used.
+  * Changed settings strings.
+  * Not adding local images to image cache (though this might be a good idea?)
+  * Not restarting renderer every time you return from sub-activity.
+  * More images can be set as background.
+
+_09/04-2010: 2.3.13, 2.3.14_
+  * Fixed rather nasty bugs, among which: 
+
+  - Splash screen time dependant on how stream search.
+
+  - Image feeding bugs fixed.
+
+_07/04-2010: 2.3.12_
+  * Bug where no images appear fixed. You really should mail me about this, I cannot contact you if you just write something in the comments! :(
+
+_07/04-2010: 2.3.11_
+  * Minor restructuring to allow for different display modes.
+  * Basic slideshow transitions implemented (still none for floating image)
+  * You can now choose if your images should be shuffled or not.
+
+_29/03-2010: 2.3.10_
+  * Major restructuring of code to allow for more dynamic content.
+  * Specific Flickr feeds supported.
+  * 2MB+ images now supported (artificial cap removed)
+  * Infobar etc now also fade out, not only in.
+
+_21/03-2010: 2.3.9_
+
+  * Per request the fullscreen option is now saved across sessions, so you no longer have to set it every time.
+
+_21/03-2010: 2.3.8_
+
+  * Fixed bug where info bar was repeated, when it spanned more than 512 pixels.
+  * Fixed "show local folder" bug.
+
+_24/02-2010: 2.3.7_
+
+  * Nasty bug filling up the feeds fixed. Sorry about that.
+  * Clear all button added to local feeds (This should have a warning - nothing now).
+
+_16/02-2010: 2.3.6_
+
+In the spirit of release early, release very very often:
+  * Back button will deselect selected image. If no image is selected, default behavior (quit program).
+
+_15/02-2010: 2.3.5_
+  * Hopefully I have fixed some of the problems writing to a perfectly fine sd-card.
+  * Version is now saved in preferences, so even if there's no sd-card the program should stop resetting constantly.
+
+_14/02-2010: 2.3.4_
+
+My brother insisted I enabled four axis rotation, so there you go...
+  * Four axis rotation added. :)
+
+_14/02-2010: 2.3.3_
+
+I finally sqeezed in a small update. Oh, and Floating Image just reached 10.000 downloads!
+  * Ability to save image to disk added.
+  * Ability to set flickr image as background added. The same will happen for local images eventually.
+  * (Hopefully) Better scrolling
+  * Some performance adjustments.
+  * Delay before rotating screen removed.
+
+_06/01-2010: 2.3.2_
+
+Bugfixes:
+ * Image picking is now correct
+ * Picking bug when resuming from viewing an image in horizontal mode.
+
+_05/01-2010: 2.3.1_
+  * Fixed fullscreen bug.
+
+_05/01-2010: 2.3.0_
+
+Happy New Year!
+  * Full screen option added
+  * Show folder option added (Show only folder, it will take a while for the folder to fill the entire stream)
+  * Randomizing random photo stream.
+
+_30/12-2009: 2.2.0_
+  * Live rotation.
+  * New splash screen and icon, courtesy Mikkel Gjøl (Same goes for creative input, shadows and background).
+  * Support for running with no SD-card (Previously it crashed hard, now it warns the user, and is flaky).
+
+_28/12-2009: 2.1.1_
+
+Yeck! Another bug! I suck!
+  * Control locks under certain circumstances when selecting an image.
+
+_28/12-2009: 2.1.0_
+
+Yeck! A bug:
+  * Bug where images are displayed badly at startup removed.
+  * Progress bar for loading images added.
+  * Minor UI changes
+
+_28/12-2009: 2.0.0_
+
+I found time to do a little coding over a weekend, so finally some updates:
+  * Multiple display sizes support, also horizontal mode.
+  * Background changed from black.
+  * Stream fades out when an image is selected.
+  * Image information fades in.
+  * Images now have shadows (Except for new images, they still glow).
+  * Images are by default slighly more messy, by being rotated.
+  * Images brought to focus using smoothstep rather than linear motion.
+  * Local feeds (images on the phone) are now user definable.
+  * General optimizations.
+
+_Some time in early December_
+
+Google/code page is up! This, after a month or two with no development (Travel / Lots of work). Hopefully this will change soon.
