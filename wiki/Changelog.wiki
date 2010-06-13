@@ -1,16 +1,16 @@
-_24/05-2010: 3.4.3_
+_24/05-2010: 2.4.3_
   * Anti-aliasing!! (Requires Nexus One style hardware - Won't work on Magic)
   * Facebook support
   * Strange image swapping fixed
   * Samsung moment/spica bugfix
 
-_19/05-2010: 3.4.2_
+_19/05-2010: 2.4.2_
   * More bugfixes
 
-_18/05-2010: 3.4.1_
+_18/05-2010: 2.4.1_
   * Bugfixes
 
-_17/05-2010: 3.4.0_
+_17/05-2010: 2.4.0_
   * New On Screen Display
   * Optimizations for large display devices (Nexus One, etc)
   * General bugfixes
