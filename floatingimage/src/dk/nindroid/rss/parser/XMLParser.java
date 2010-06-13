@@ -21,6 +21,8 @@ import dk.nindroid.rss.data.ImageReference;
 
 public abstract class XMLParser extends DefaultHandler implements FeedParser {
 	public List<ImageReference> parseFeed(FeedReference feed) throws ParserConfigurationException, SAXException, FactoryConfigurationError, IOException {
+		String url = feed.getFeedLocation();
+		url = extendURL(url);
 		InputStream stream = HttpTools.openHttpConnection(feed.getFeedLocation());
 		SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
 		XMLReader xmlReader = parser.getXMLReader();
@@ -36,6 +38,6 @@ public abstract class XMLParser extends DefaultHandler implements FeedParser {
 		}
 		return list;
 	}
-	
+	protected String extendURL(String url){return url;}
 	protected abstract List<ImageReference> getData();
 }

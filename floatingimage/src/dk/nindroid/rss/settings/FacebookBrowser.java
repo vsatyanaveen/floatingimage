@@ -16,7 +16,8 @@ import android.widget.ListView;
 import android.widget.Toast;
 import dk.nindroid.rss.R;
 import dk.nindroid.rss.parser.facebook.FacebookFeeder;
-import dk.nindroid.rss.parser.facebook.FacebookMyAlbumBrowser;
+import dk.nindroid.rss.parser.facebook.FacebookAlbumBrowser;
+import dk.nindroid.rss.parser.facebook.FacebookFriendsBrowser;
 
 public class FacebookBrowser extends ListActivity {
 	// Positions
@@ -24,6 +25,7 @@ public class FacebookBrowser extends ListActivity {
 	private static final int	PHOTOS_OF_ME		 	= 0;
 	private static final int	MY_ALBUMS				= 1;
 	private static final int	FRIENDS					= 2;
+	private static final int	UNAUTHORIZE				= 3;
 	boolean authorizing = false;
 	boolean showAuthorize;
 	
@@ -55,7 +57,8 @@ public class FacebookBrowser extends ListActivity {
 			String photosOfMe = this.getResources().getString(R.string.facebookPhotosOfMe);
 			String albums = this.getResources().getString(R.string.facebookMyAlbums);
 			String friends = this.getResources().getString(R.string.facebookFriends);
-			String[] options = new String[]{photosOfMe, albums};
+			String unauthorize = this.getResources().getString(R.string.unauthorize);
+			String[] options = new String[]{photosOfMe, albums, friends, unauthorize};
 			setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, options));
 		}
 	}
@@ -83,6 +86,8 @@ public class FacebookBrowser extends ListActivity {
 			case FRIENDS:
 				showFriends();
 				break;
+			case UNAUTHORIZE:
+				
 			}
 		}
 	}
@@ -106,25 +111,14 @@ public class FacebookBrowser extends ListActivity {
 	}
 	
 	private void showMyAlbums(){
-		String url = null;
-		try {
-			url = FacebookFeeder.getMyAlbumsUrl();
-		} catch (MalformedURLException e) {
-			Log.e("Floating Image", "Internal error. URL incorrect!", e);
-			Toast.makeText(this, "Internal error detected. Please contact developer!", 2).show();
-		} catch (IOException e) {
-			Log.w("Floating Image", "Could not get url for the photos of me.", e);
-			Toast.makeText(this, "Error getting stream. Please try again.", 2).show();
-			return;
-		}
-		if(url != null){
-			Intent intent = new Intent(this, FacebookMyAlbumBrowser.class);
-			startActivityForResult(intent, MY_ALBUMS);
-		}
+		Intent intent = new Intent(this, FacebookAlbumBrowser.class);
+		intent.putExtra("ID", "me");
+		startActivityForResult(intent, MY_ALBUMS);
 	}
 	
 	private void showFriends(){
-		
+		Intent intent = new Intent(this, FacebookFriendsBrowser.class);
+		startActivityForResult(intent, FRIENDS);
 	}
 	
 	@Override
@@ -133,6 +127,7 @@ public class FacebookBrowser extends ListActivity {
 		if(resultCode == RESULT_OK){
 			switch(requestCode){
 			case MY_ALBUMS:
+			case FRIENDS:
 				setResult(RESULT_OK, data);
 				finish();
 				break;

@@ -1,10 +1,13 @@
 package dk.nindroid.rss.settings;
 
+import java.io.IOException;
+
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
@@ -20,18 +23,34 @@ public class FlickrBrowser extends ListActivity {
 	// Positions
 	private static final int	SHOW_STREAM = 0;
 	private static final int	SEARCH 		= 1;
+	private static final int	AUTHORIZE   = 2;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		FlickrFeeder.readCode(this);
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
 		fillMenu();
 	}
 	
 	private void fillMenu(){
-		String showStream = this.getResources().getString(R.string.flickrShowStream);
-		String search = this.getResources().getString(R.string.flickrSearch);
-		String[] options = new String[]{showStream, search};
-		setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, options));
+		if(FlickrFeeder.needsAuthorization()){
+			String showStream = this.getResources().getString(R.string.flickrShowStream);
+			String search = this.getResources().getString(R.string.flickrSearch);
+			String authorize = this.getResources().getString(R.string.authorize);
+			String[] options = new String[]{showStream, search, authorize};
+			setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, options));
+		}else{
+			String showStream = this.getResources().getString(R.string.flickrShowStream);
+			String search = this.getResources().getString(R.string.flickrSearch);
+			String unauthorize = this.getResources().getString(R.string.unauthorize);
+			String[] options = new String[]{showStream, search, unauthorize};
+			setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, options));
+		}
 	}
 	
 	@Override
@@ -80,6 +99,18 @@ public class FlickrBrowser extends ListActivity {
 			}).create();
 			showKeyboard(searchDialog, input);
 			searchDialog.show();
+			break;
+		case AUTHORIZE:
+			try {
+				if(FlickrFeeder.needsAuthorization()){
+					FlickrFeeder.authorize(this);
+				}else{
+					FlickrFeeder.unauthorize(this);
+				}
+			} catch (IOException e) {
+				Toast.makeText(this, "Something strange happened when authorizing... Please try again!", Toast.LENGTH_LONG);
+				Log.w("Floating Image", "Exception thrown authorizing flickr", e);
+			}
 			break;
 		}
 	}

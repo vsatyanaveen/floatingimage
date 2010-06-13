@@ -30,7 +30,10 @@
 <activity android:name=".settings.FacebookBrowser">
 </activity>
 <activity android:name=".parser.facebook.WebAuth"></activity>
-<activity android:name=".parser.facebook.FacebookMyAlbumBrowser"></activity>
+<activity android:name=".parser.facebook.FacebookAlbumBrowser"></activity>
+<activity android:name=".parser.facebook.FacebookFriendsBrowser"></activity>
+<activity android:name=".parser.facebook.FacebookFriendView"></activity>
+<activity android:name=".flickr.WebAuth"></activity>
 </application>
     <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="4" />
 

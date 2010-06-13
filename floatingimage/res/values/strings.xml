@@ -20,5 +20,6 @@
 	<string name="share_image">Share image</string>
 	<string name="user_agent">Floating image/Android</string>
 	<string name="empty_feed">No pictures found in feed</string>
-	<string name="authorize">Authorize</string>
+	<string name="authorize">Sign in</string>
+	<string name="unauthorize">Sign out</string>
 </resources>

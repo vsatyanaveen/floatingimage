@@ -37,6 +37,11 @@ public class PicasaFeeder {
 	
 	public static boolean signIn() throws IOException, OAuthMessageSignerException, OAuthExpectationFailedException, OAuthCommunicationException, OAuthNotAuthorizedException{
 		OAuthConsumer consumer = new DefaultOAuthConsumer(	KEY, SECRET);
+		/*
+		OAuthProvider provider = new DefaultOAuthProvider(	"https://www.google.com/accounts/OAuthGetRequestToken?scope=" + URLEncoder.encode(SCOPE, "utf-8"), 
+															"https://www.google.com/accounts/OAuthGetAccessToken", 
+															"https://www.google.com/accounts/OAuthAuthorizeToken?hd=default");
+		 */
 		OAuthProvider provider = new DefaultOAuthProvider(	"https://www.google.com/accounts/OAuthGetRequestToken?scope=" + URLEncoder.encode(SCOPE, "utf-8"), 
 															"https://www.google.com/accounts/OAuthGetAccessToken", 
 															"https://www.google.com/accounts/OAuthAuthorizeToken?hd=default");

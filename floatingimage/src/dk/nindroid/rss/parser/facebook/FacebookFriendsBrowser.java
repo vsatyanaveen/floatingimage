@@ -1,10 +1,10 @@
 package dk.nindroid.rss.parser.facebook;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -19,10 +19,10 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
-import dk.nindroid.rss.HttpTools;
+import dk.nindroid.rss.DownloadUtil;
 
-public class FacebookMyAlbumBrowser extends ListActivity {
-	private List<Album> albums = null; 
+public class FacebookFriendsBrowser extends ListActivity {
+	private List<Friend> friends = null;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -31,12 +31,13 @@ public class FacebookMyAlbumBrowser extends ListActivity {
 	}
 	
 	private void fillMenu(){
-		albums = getAlbums();
-		if(albums == null) return;
+		friends = getFriends();
+		if(friends == null) return;
 		
-		String[] options = new String[albums.size()];
-		for(int i = 0; i < albums.size(); ++i){
-			options[i] = albums.get(i).name;
+		Collections.sort(friends);
+		String[] options = new String[friends.size()];
+		for(int i = 0; i < friends.size(); ++i){
+			options[i] = friends.get(i).name;
 		}
 		setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, options));
 	}
@@ -44,20 +45,17 @@ public class FacebookMyAlbumBrowser extends ListActivity {
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
-		Intent intent = new Intent();
-		Bundle b = new Bundle();
-		String url = FacebookFeeder.getPhotos(albums.get(position).getId());
-		b.putString("PATH", url);
-		b.putString("NAME", albums.get(position).getName());
-		intent.putExtras(b);
-		setResult(RESULT_OK, intent);
-		finish();
+		Intent intent = new Intent(this, FacebookFriendView.class);
+		Friend friend = friends.get(position);
+		intent.putExtra("ID", friend.getId());
+		intent.putExtra("Name", friend.getName());
+		this.startActivityForResult(intent, 0);
 	}
 	
-	private List<Album> getAlbums(){
+	private List<Friend> getFriends(){
 		String url = null;
 		try {
-			url = FacebookFeeder.getMyAlbumsUrl();
+			url = FacebookFeeder.getMyFriendsUrl();
 		} catch (MalformedURLException e) {
 			Log.e("Floating Image", "Internal error. URL incorrect!", e);
 			Toast.makeText(this, "Internal error detected. Please contact developer!", 2).show();
@@ -71,16 +69,16 @@ public class FacebookMyAlbumBrowser extends ListActivity {
 		}else{
 			try {
 				
-				String content = readStreamToEnd(url);
+				String content = DownloadUtil.readStreamToEnd(url);
 				JSONObject json = new JSONObject(content);
 				
 				JSONArray data = json.getJSONArray(FacebookTags.DATA);
-				List<Album> albums = new ArrayList<Album>(data.length());
+				List<Friend> albums = new ArrayList<Friend>(data.length());
 				for(int i = 0; i < data.length(); ++i){
 					JSONObject obj = data.getJSONObject(i);
 					String name = obj.getString(FacebookTags.NAME);
 					String id = obj.getString(FacebookTags.ID);
-					albums.add(new Album(name, id));
+					albums.add(new Friend(name, id));
 				}
 				
 				return albums;
@@ -96,23 +94,27 @@ public class FacebookMyAlbumBrowser extends ListActivity {
 		return null;
 	}
 	
-	private String readStreamToEnd(String url) throws IOException{
-		InputStream stream = HttpTools.openHttpConnection(url);
-		BufferedInputStream bis = new BufferedInputStream(stream);
-		byte[] buffer = new byte[8192];
-		StringBuilder sb = new StringBuilder();
-		int read = 0;
-		while((read = bis.read(buffer)) != -1){
-			sb.append(new String(buffer, 0, read));
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if(resultCode == RESULT_OK){
+			setResult(RESULT_OK, data);
+			finish();
 		}
-		return sb.toString();
 	}
 	
-	private class Album{
+	class Friend implements Comparable<Friend> {
 		private String name;
 		private String id;
 		
-		Album(String name, String id){
+		public class FriendComparator implements Comparator<Friend>{
+			@Override
+			public int compare(Friend f1, Friend f2) {
+				return f1.compareTo(f2);
+			}
+		}
+		
+		Friend(String name, String id){
 			this.name = name;
 			this.id = id;
 		}
@@ -123,6 +125,11 @@ public class FacebookMyAlbumBrowser extends ListActivity {
 		
 		public String getId(){
 			return id;
+		}
+
+		@Override
+		public int compareTo(Friend another) {
+			return name.compareTo(another.name);
 		}
 	}
 }
