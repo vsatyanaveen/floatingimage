@@ -25,9 +25,9 @@ import dk.nindroid.rss.parser.picasa.PicasaFeeder;
 
 public class PicasaBrowser extends ListActivity {
 	// Positions
-	private static final int	SHOW_STREAM = 1;
-	private static final int	SEARCH 		= 2;
-	private static final int	SIGN_IN		= 0;
+	private static final int	SHOW_STREAM = 0;
+	private static final int	SEARCH 		= 1;
+	private static final int	SIGN_IN		= 2;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +39,7 @@ public class PicasaBrowser extends ListActivity {
 		String showStream = this.getResources().getString(R.string.picasaShowStream);
 		String search = this.getResources().getString(R.string.picasaSearch);
 		String signin = this.getResources().getString(R.string.authorize);
-		String[] options = new String[]{signin, showStream, search};
+		String[] options = new String[]{showStream, search};
 		setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, options));
 	}
 	

@@ -170,7 +170,7 @@ public class FeedController {
 						Collections.shuffle(references);
 					}
 					mReferences.add(references); // These two 
-					mFeedIndex.add(0);			// are in sync!
+					mFeedIndex.add(-1);			// are in sync!
 				}else{
 					Log.w("FeedController", "Reading feed failed too many times, giving up!");
 				}
@@ -182,7 +182,6 @@ public class FeedController {
 	
 	private static List<ImageReference> parseFeed(FeedReference feed){
 		try {
-			Log.v("FeedController", "Fetching stream: " + feed.getFeedLocation());
 			return feed.getParser().parseFeed(feed);
 		} catch (IOException e) {
 			Log.e("FeedController", "Unexpected exception caught", e);

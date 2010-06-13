@@ -1,11 +1,13 @@
 package dk.nindroid.rss.parser.flickr;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
+import dk.nindroid.rss.ShowStreams;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.flickr.FlickrFeeder;
 import dk.nindroid.rss.flickr.FlickrImage;
@@ -35,6 +37,7 @@ public class FlickrParser extends XMLParser {
 	
 	@Override
 	protected String extendURL(String url) {
+		FlickrFeeder.readCode(ShowStreams.current);
 		return FlickrFeeder.signUrl(url);
 	}
 	
