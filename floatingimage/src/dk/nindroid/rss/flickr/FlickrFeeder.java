@@ -95,6 +95,7 @@ public class FlickrFeeder {
 	
 	public static String signUrl(String url){
 		if(token != null){
+			url = url.replace("method=flickr.people.getPublicPhotos", "method=flickr.people.getPhotos");
 			int authPos = url.indexOf("&");
 			url = url.substring(0, authPos) + "&auth_token=" + token + url.substring(authPos);
 			String signature = SECRET + url.substring(url.indexOf('?') + 1).replace("=", "").replace("&", "");

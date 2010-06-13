@@ -23,7 +23,7 @@ public abstract class XMLParser extends DefaultHandler implements FeedParser {
 	public List<ImageReference> parseFeed(FeedReference feed) throws ParserConfigurationException, SAXException, FactoryConfigurationError, IOException {
 		String url = feed.getFeedLocation();
 		url = extendURL(url);
-		InputStream stream = HttpTools.openHttpConnection(feed.getFeedLocation());
+		InputStream stream = HttpTools.openHttpConnection(url);
 		SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
 		XMLReader xmlReader = parser.getXMLReader();
 		xmlReader.setContentHandler(this);
