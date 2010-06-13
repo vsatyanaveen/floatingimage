@@ -1,3 +1,8 @@
+_13/06-2010: 2.4.4_
+  * Friend facebook support
+  * Flickr authentication
+  * Ability to sign out of facebook
+
 _24/05-2010: 2.4.3_
   * Anti-aliasing!! (Requires Nexus One style hardware - Won't work on Magic)
   * Facebook support
