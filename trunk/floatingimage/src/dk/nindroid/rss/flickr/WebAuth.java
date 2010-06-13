@@ -1,4 +1,4 @@
-package dk.nindroid.rss.parser.facebook;
+package dk.nindroid.rss.flickr;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -42,9 +42,9 @@ public class WebAuth extends Activity {
 		        return true;
 	    	}
 	    	Uri uri = Uri.parse(url);
-	    	String code = uri.getQueryParameter("code");
+	    	String code = uri.getQueryParameter("frob");
 	    	try {
-				FacebookFeeder.setCodeToken(code, context);
+				FlickrFeeder.setFrob(code, context);
 			} catch (MalformedURLException e) {
 				Log.e("Floating Image", "Error parsing URL from Facebook", e);
 			} catch (IOException e) {

@@ -1,7 +1,9 @@
 package dk.nindroid.rss;
 
+import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -87,5 +89,17 @@ public class DownloadUtil {
 		System.arraycopy(fixedChunk, 0, responseBody, index, chunkIndex);
 
 		return responseBody;
+	}
+	
+	public static String readStreamToEnd(String url) throws IOException{
+		InputStream stream = HttpTools.openHttpConnection(url);
+		BufferedInputStream bis = new BufferedInputStream(stream);
+		byte[] buffer = new byte[8192];
+		StringBuilder sb = new StringBuilder();
+		int read = 0;
+		while((read = bis.read(buffer)) != -1){
+			sb.append(new String(buffer, 0, read));
+		}
+		return sb.toString();
 	}
 }

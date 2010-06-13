@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -17,13 +18,14 @@ public class FacebookFeeder {
 	private static final String APP_SECRET = "085182d54361333699c436f5e0e45f71";
 	
 	private static final String CALLBACK_URL = "http://floating-image.appspot.com/facebookauthorization";
-	private static final String AUTHORIZATION_URL = "https://graph.facebook.com/oauth/authorize?client_id=" + APP_ID + "&scope=user_photos,read_friendlists,friends_photos,offline_access,user_photo_video_tags&redirect_uri=" + CALLBACK_URL + "&display=touch";
+	private static final String AUTHORIZATION_URL = "https://graph.facebook.com/oauth/authorize?client_id=" + APP_ID + "&scope=user_photos,read_friendlists,friends_photos,offline_access,user_photo_video_tags&redirect_uri=" + CALLBACK_URL;// + "&display=touch";
 	private static final String ACCESS_TOKEN_URL = "https://graph.facebook.com/oauth/access_token?client_id=" + APP_ID + "&redirect_uri=" + CALLBACK_URL + "&client_secret=" + APP_SECRET + "&code=";
 	
-	private static final String BASEURL		  = "https://graph.facebook.com/";
-	private static final String MY_PHOTOS_URL = "https://graph.facebook.com/me/photos";
-	private static final String MY_ALBUMS_URL = "https://graph.facebook.com/me/albums";
-	private static final String MY_FRIENDS_URL = "https://graph.facebook.com/me/friends";
+	private static final String BASEURL		  	= "https://graph.facebook.com/";
+	private static final String ME				= "me/";
+	private static final String PHOTOS_URL 		= "photos";
+	private static final String ALBUMS_URL 		= "albums";
+	private static final String FRIENDS_URL 	= "friends";
 		
 	private static String accessToken = null;
 	private static String code = null;
@@ -34,6 +36,14 @@ public class FacebookFeeder {
 		SharedPreferences sp = c.getSharedPreferences("dk.nindroid.rss_preferences", 0);
 		SharedPreferences.Editor e = sp.edit();
 		e.putString("FACEBOOK_CODE", code);
+		e.commit();
+	}
+	
+	public static void unauthorize(Context context){
+		code = null;
+		SharedPreferences sp = context.getSharedPreferences("dk.nindroid.rss_preferences", 0);
+		SharedPreferences.Editor e = sp.edit();
+		e.remove("FACEBOOK_CODE");
 		e.commit();
 	}
 	
@@ -89,18 +99,22 @@ public class FacebookFeeder {
 	}
 	
 	public static String getPhotosOfMeUrl() {
-		return MY_PHOTOS_URL;
+		return BASEURL + ME + PHOTOS_URL;
 	}
 	
 	public static String getMyAlbumsUrl() throws MalformedURLException, IOException{
-		return constructFeed(MY_ALBUMS_URL);
+		return constructFeed(BASEURL + ME + ALBUMS_URL);
+	}
+	
+	public static String getAlbumsUrl(String id) throws MalformedURLException, IOException{
+		return constructFeed(BASEURL + id + "/" + ALBUMS_URL);
 	}
 	
 	public static String getPhotos(String id){
-		return BASEURL + id + "/photos"; 
+		return BASEURL + id + "/" + PHOTOS_URL; 
 	}
 	
 	public static String getMyFriendsUrl() throws MalformedURLException, IOException{
-		return constructFeed(MY_FRIENDS_URL);
+		return constructFeed(BASEURL + ME + FRIENDS_URL);
 	}
 }

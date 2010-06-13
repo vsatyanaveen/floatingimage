@@ -7,6 +7,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
 import dk.nindroid.rss.data.ImageReference;
+import dk.nindroid.rss.flickr.FlickrFeeder;
 import dk.nindroid.rss.flickr.FlickrImage;
 import dk.nindroid.rss.parser.XMLParser;
 
@@ -30,6 +31,11 @@ public class FlickrParser extends XMLParser {
 			String farm = attributes.getValue(ExploreTags.PHOTO_FARM);
 			imgs.add(new FlickrImage(farm, server, id, secret, title, owner, true, false));
 		}
+	}
+	
+	@Override
+	protected String extendURL(String url) {
+		return FlickrFeeder.signUrl(url);
 	}
 	
 	public List<ImageReference> getData(){
