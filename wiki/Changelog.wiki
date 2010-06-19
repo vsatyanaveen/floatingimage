@@ -1,3 +1,6 @@
+_19/06-2010 (30 minutes later): 2.4.6_
+  * Thinking about it, the fix from the previous version introduced different bugs. Should be fixed now.
+
 _19/06-2010: 2.4.5_
   * Strange image swapping bug fixed. Should also remove some memory leaks. Fun stuff!
   * Option whether details are shown is once again remembered. 
