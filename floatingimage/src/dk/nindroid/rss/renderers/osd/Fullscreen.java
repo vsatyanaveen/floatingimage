@@ -35,7 +35,6 @@ public class Fullscreen  extends Button {
 		gl.glGenTextures(1, textures, 0);
 		mFullscreenTex = textures[0];
 		setTexture(gl, mFullscreen, mFullscreenTex);
-		
 	}
 
 }

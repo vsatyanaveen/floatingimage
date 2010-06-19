@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Vector;
 
-import android.util.Log;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.LocalImage;
 import dk.nindroid.rss.settings.Settings;
@@ -45,7 +44,6 @@ public class TextureBank {
 		if(ir != null){
 			synchronized (cached) {
 				cached.add(ir);
-				Log.v("Texture bank", cached.size() + " old images.");
 			}
 		}
 	}
@@ -88,16 +86,15 @@ public class TextureBank {
 				mActiveBitmaps.put(ir.getID(), ir);
 			}
 			return ir;
-		}else{
-			return null;
 		}
+		return null;
 	}
 	private ImageReference getUnseen(){
 		ImageReference ir = null;
 		synchronized (unseen) {
 			int attempts = 0;
 			do{
-				if(ir != null && !ir.getBitmap().isRecycled()){
+				if(ir != null){
 					ir.getBitmap().recycle();
 				}
 				
@@ -107,8 +104,7 @@ public class TextureBank {
 				}
 				
 				ir = unseen.poll();
-				// How the hell do those bitmaps get recycled??!??!
-			}while(ir != null && (mActiveBitmaps.containsKey(ir.getID()) || ir.getBitmap().isRecycled()));
+			}while(ir != null && mActiveBitmaps.containsKey(ir.getID()));
 			unseen.notify();
 		}
 		return ir;
@@ -121,7 +117,6 @@ public class TextureBank {
 				if(ir != null){
 					ir.getBitmap().recycle();
 				}
-				
 				if(++attempts == 3){
 					ir = null;
 					break;

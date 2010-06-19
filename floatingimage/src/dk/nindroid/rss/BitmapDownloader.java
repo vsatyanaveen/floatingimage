@@ -48,7 +48,9 @@ public class BitmapDownloader implements Runnable {
 					ImageReference ir = mFeedController.getImageReference();
 					if(ir == null)
 						break;
-					if(ir instanceof LocalImage){
+					if(ir.getBitmap() != null){ // Image has been shown before, DO NOT reread bitmap!
+						bank.addNewBitmap(ir);
+					}else if(ir instanceof LocalImage){
 						addLocalImage((LocalImage)ir);
 					}else {
 						addExternalImage(ir);

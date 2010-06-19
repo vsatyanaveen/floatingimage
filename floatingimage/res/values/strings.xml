@@ -22,4 +22,5 @@
 	<string name="empty_feed">No pictures found in feed</string>
 	<string name="authorize">Sign in</string>
 	<string name="unauthorize">Sign out</string>
+	<string name="please_wait">The gears are grinding... Please wait</string>
 </resources>

@@ -20,11 +20,12 @@ import android.widget.Toast;
 import dk.nindroid.rss.DownloadUtil;
 
 public class FacebookAlbumBrowser extends ListActivity {
-	private List<Album> albums = null; 
+	private List<Album> albums = null;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
 		fillMenu();
 	}
 	

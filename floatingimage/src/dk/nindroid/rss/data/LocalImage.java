@@ -26,17 +26,6 @@ public class LocalImage implements ImageReference{
 		mHeight = 0;
 	}
 	
-	public LocalImage(File file, Bitmap bmp, int rotation){
-		this.mRotation = rotation;
-		this.mFile = file;
-		this.mBitmap = Bitmap.createBitmap(128, 128, Config.RGB_565);
-		Canvas cvs = new Canvas(this.mBitmap);
-		cvs.drawBitmap(bmp, 0, 0, paint);
-		this.mWidth = bmp.getWidth() / 128.0f;
-		this.mHeight = bmp.getHeight() / 128.0f;
-		bmp.recycle();
-	}
-	
 	@Override
 	public String getAuthor() {
 		return mFile.getAbsolutePath();
