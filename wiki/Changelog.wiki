@@ -1,3 +1,7 @@
+_19/06-2010: 2.4.5_
+  * Strange image swapping bug fixed. Should also remove some memory leaks. Fun stuff!
+  * Option whether details are shown is once again remembered. 
+
 _13/06-2010: 2.4.4_
   * Friend facebook support
   * Flickr authentication
