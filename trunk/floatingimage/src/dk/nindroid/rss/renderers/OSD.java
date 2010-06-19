@@ -342,7 +342,9 @@ public class OSD {
 			if(y > RiverRenderer.mDisplay.getHeightPixels() - 80){
 				// Bottom
 				float xPos = x / RiverRenderer.mDisplay.getWidthPixels() * (4 - buttons % 2);
-				mButtons[(int)xPos].click();
+				if(xPos < mButtons.length){
+					mButtons[(int)xPos].click();
+				}
 			}else{
 				int topButtons = buttons > 6 ? 4 : 2;
 				float xPos = x / RiverRenderer.mDisplay.getWidthPixels() * topButtons;

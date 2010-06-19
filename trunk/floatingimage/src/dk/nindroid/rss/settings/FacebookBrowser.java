@@ -15,8 +15,8 @@ import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 import dk.nindroid.rss.R;
-import dk.nindroid.rss.parser.facebook.FacebookFeeder;
 import dk.nindroid.rss.parser.facebook.FacebookAlbumBrowser;
+import dk.nindroid.rss.parser.facebook.FacebookFeeder;
 import dk.nindroid.rss.parser.facebook.FacebookFriendsBrowser;
 
 public class FacebookBrowser extends ListActivity {

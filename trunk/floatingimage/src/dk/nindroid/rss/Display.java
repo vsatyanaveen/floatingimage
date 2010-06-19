@@ -27,6 +27,7 @@ public class Display implements OrientationSubscriber {
 		mPreviousFill = mFill;
 		mTargetInfoBarHeight = mFullscreen ? 0 : INFOBAR_HEIGHT;
 		mTargetFill = mFullscreen ? 1.0f : NORMAL_FILL;
+		Settings.setFullscreen(mFullscreen);
 		Log.v("Display", "Fullscreen is " + mFullscreen);
 	}
 	

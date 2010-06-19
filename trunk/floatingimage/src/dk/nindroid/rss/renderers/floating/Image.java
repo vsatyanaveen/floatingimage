@@ -483,14 +483,15 @@ public class Image implements ImagePlane {
 	
 	private void resetTexture(GL10 gl){
 		mFocusBmp = null;
+		ImageReference deprecatedImage = mLastImage;
 		if(!mRewinding){
-			if(mLastImage != null){
-				mLastImage.getBitmap().recycle();
-			}
-			mLastImage = mCurImage;
 			ImageReference ir = mbank.getTexture(mCurImage);
 			if(ir != null){
+				mLastImage = mCurImage;
 				mCurImage = ir;
+				if(deprecatedImage != null){
+					deprecatedImage.getBitmap().recycle();
+				}
 			}
 		}	
     	if(mCurImage != null){

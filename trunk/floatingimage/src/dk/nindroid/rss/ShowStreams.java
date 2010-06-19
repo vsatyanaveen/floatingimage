@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.Intent;
@@ -205,6 +206,9 @@ public class ShowStreams extends Activity {
 	protected void onResume() {
 		Log.v("Floating Image", "Resuming main activity");
 		super.onResume();
+		
+		String loading = this.getString(dk.nindroid.rss.R.string.please_wait);
+		ProgressDialog dialog = ProgressDialog.show(this, "", loading, true);
 		dk.nindroid.rss.settings.Settings.readSettings(this);
 		
 		Log.v("Floating Image", "Begin resume...");
@@ -232,6 +236,7 @@ public class ShowStreams extends Activity {
 		if(!mShowing){ // Feed is already loaded!
 			ReadFeeds.runAsync(mFeedController);
 		}
+		dialog.dismiss();
 		Log.v("Floating Image", "End resume...");
 	}
 	
@@ -307,7 +312,7 @@ public class ShowStreams extends Activity {
 			
 			FeedReference feed = mFeedController.getFeedReference(path, type, name);
 			if(!mFeedController.showFeed(feed)){
-				String error = this.getResources().getString(R.string.empty_feed) + feed.getName();
+				String error = this.getResources().getString(R.string.empty_feed) + " " + feed.getName();
 				Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
 			}else{
 				mShowing = true;
