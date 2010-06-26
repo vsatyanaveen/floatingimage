@@ -19,28 +19,42 @@ import org.xml.sax.XMLReader;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.Location;
+import android.location.LocationManager;
 import android.util.Log;
 import dk.nindroid.rss.DownloadUtil;
 import dk.nindroid.rss.HttpTools;
 import dk.nindroid.rss.data.ImageReference;
+import dk.nindroid.rss.parser.flickr.CheckTokenParser;
 import dk.nindroid.rss.parser.flickr.FindByUsernameParser;
+import dk.nindroid.rss.parser.flickr.FlickrAlbum;
 import dk.nindroid.rss.parser.flickr.FlickrParser;
+import dk.nindroid.rss.parser.flickr.FlickrUser;
+import dk.nindroid.rss.parser.flickr.GetAlbumsParser;
 import dk.nindroid.rss.parser.flickr.ImageSizesParser;
 import dk.nindroid.rss.parser.flickr.data.ImageSizes;
 
 public class FlickrFeeder {
+	private static final String PHOTOS_FROM_HERE_CONST = "HERE";
+	
 	private static final String API_KEY = "f6fdb5a636863d148afa8e7bb056bf1b";
 	private static final String SECRET = "3358b4c1619e1c98";
-	private static final String EXPLORE = "http://api.flickr.com/services/rest/?api_key=" + API_KEY + "&method=flickr.interestingness.getList&per_page=500";
-	private static final String FIND_BY_USERNAME = "http://api.flickr.com/services/rest/?api_key=" + API_KEY + "&method=flickr.people.findByUsername&username=";
-	private static final String GET_PUBLIC_PHOTOS = "http://api.flickr.com/services/rest/?api_key=" + API_KEY + "&method=flickr.people.getPublicPhotos&per_page=500&user_id=";
-	private static final String SEARCH = "http://api.flickr.com/services/rest/?api_key=" + API_KEY + "&method=flickr.photos.search&per_page=500&safe_search=2&tags=";
+	private static final String EXPLORE = "http://api.flickr.com/services/rest/?api_key=" + API_KEY + "&auth_token=&method=flickr.interestingness.getList&per_page=500";
+	private static final String FIND_BY_USERNAME = "http://api.flickr.com/services/rest/?api_key=" + API_KEY + "&auth_token=&method=flickr.people.findByUsername&username=";
+	private static final String GET_PUBLIC_PHOTOS = "http://api.flickr.com/services/rest/?api_key=" + API_KEY + "&auth_token=&method=flickr.people.getPublicPhotos&per_page=500&user_id=";
+	private static final String SEARCH = "http://api.flickr.com/services/rest/?api_key=" + API_KEY + "&auth_token=&method=flickr.photos.search&per_page=500&safe_search=2&tags=";
 	private static final String IMAGE_SIZES = "http://api.flickr.com/services/rest/?api_key=" + API_KEY + "&method=flickr.photos.getSizes&photo_id=";
+	private static final String CONTACTS_PHOTOS = "http://api.flickr.com/services/rest/?api_key=" + API_KEY + "&auth_token=&count=500&method=flickr.photos.getContactsPhotos";
+	private static final String PHOTOS_FROM_HERE = "http://api.flickr.com/services/rest/?accuracy=8&api_key=" + API_KEY + "&auth_token=&lat=&lon=&method=flickr.photos.search&per_page=500&radius=5";	
+	private static final String ALBUMS = "http://api.flickr.com/services/rest/?api_key=" + API_KEY + "&auth_token=&method=flickr.photosets.getList";
+	private static final String ALBUM_PHOTOS = "http://api.flickr.com/services/rest/?api_key=" + API_KEY + "&auth_token=&method=flickr.photosets.getPhotos&photoset_id=";
 	
 	/*  Authentication */
 	private static final String AUTHENTICATION_URL = "http://flickr.com/services/auth/?api_key=" + API_KEY + "&perms=read&api_sig=";
 	private static final String GET_TOKEN_URL = "http://flickr.com/services/rest/?method=flickr.auth.getToken&api_key=" + API_KEY + "&frob=";
 	/* /Authentication */
+	
+	private static final String CHECK_TOKEN = "http://api.flickr.com/services/rest/?api_key=" + API_KEY + "&auth_token=&method=flickr.auth.checkToken";
 	
 	static String token = null;
 	
@@ -96,11 +110,12 @@ public class FlickrFeeder {
 	public static String signUrl(String url){
 		if(token != null){
 			url = url.replace("method=flickr.people.getPublicPhotos", "method=flickr.people.getPhotos");
-			int authPos = url.indexOf("&");
-			url = url.substring(0, authPos) + "&auth_token=" + token + url.substring(authPos);
+			url = url.replace("&auth_token=", "&auth_token=" + token);
 			String signature = SECRET + url.substring(url.indexOf('?') + 1).replace("=", "").replace("&", "");
 			signature = getMD5(signature);
 			return url + "&api_sig=" + signature;
+		}else{
+			url = url.replace("&auth_token=", "&");
 		}
 		return url;
 	}
@@ -160,6 +175,100 @@ public class FlickrFeeder {
 	
 	public static String getSearch(String criteria){
 		return SEARCH + criteria;
+	}
+	
+	public static String getContactsPhotos(){
+		return CONTACTS_PHOTOS;
+	}
+	
+	public static String getPhotosFromHere(){
+		return PHOTOS_FROM_HERE_CONST;
+	}
+	
+	public static String getAlbumPhotos(String id){
+		return ALBUM_PHOTOS + id;
+	}
+	
+	public static String finalizeUrl(Context context, String url){
+		readCode(context);
+		if(url.equals(PHOTOS_FROM_HERE_CONST)){
+			LocationManager locManager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
+			List<String> providers = locManager.getAllProviders();
+			Location location = null;
+			for(String p : providers){
+				 location = locManager.getLastKnownLocation(p);
+				 if(location != null){
+					 break;
+				 }
+			}
+			if(location != null){
+				String lat = "" + location.getLatitude();
+				String lon = "" + location.getLongitude();
+				url = PHOTOS_FROM_HERE.replace("&lat=", "&lat=" + lat).replace("&lon=", "&lon=" + lon);
+			}else{
+				return null;
+			}
+		}
+		return signUrl(url);
+	}
+	
+	public static FlickrUser getAuthorizedUser(){
+		String url = CHECK_TOKEN;
+		url = signUrl(url);
+		InputStream stream;
+		try {
+			stream = HttpTools.openHttpConnection(url);
+			return parseCheckToken(stream);
+		} catch (IOException e) {
+			Log.e("FlickrFeeder", "Unexpected exception caught", e);
+		} catch (ParserConfigurationException e) {
+			Log.e("FlickrFeeder", "Unexpected exception caught", e);
+		} catch (SAXException e) {
+			Log.e("FlickrFeeder", "Unexpected exception caught", e);
+		} catch (FactoryConfigurationError e) {
+			Log.e("FlickrFeeder", "Unexpected exception caught", e);
+		}
+		return null;
+	}
+	
+	public static FlickrUser parseCheckToken(InputStream stream) throws ParserConfigurationException, SAXException, FactoryConfigurationError, IOException{
+		SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
+		XMLReader xmlReader = parser.getXMLReader();
+		CheckTokenParser contentHandler = new CheckTokenParser();
+		xmlReader.setContentHandler(contentHandler);
+		xmlReader.parse(new InputSource(stream));
+		return contentHandler.getUser();
+	}
+	
+	public static List<FlickrAlbum> getAlbums(String userID){
+		String url = ALBUMS;
+		if(userID != null){
+			url += "&user_id=" + userID;
+		}
+		url = signUrl(url);
+		InputStream stream;
+		try {
+			stream = HttpTools.openHttpConnection(url);
+			return parseGetAlbums(stream);
+		} catch (IOException e) {
+			Log.e("FlickrFeeder", "Unexpected exception caught", e);
+		} catch (ParserConfigurationException e) {
+			Log.e("FlickrFeeder", "Unexpected exception caught", e);
+		} catch (SAXException e) {
+			Log.e("FlickrFeeder", "Unexpected exception caught", e);
+		} catch (FactoryConfigurationError e) {
+			Log.e("FlickrFeeder", "Unexpected exception caught", e);
+		}
+		return null;
+	}
+	
+	public static List<FlickrAlbum> parseGetAlbums(InputStream stream) throws ParserConfigurationException, SAXException, FactoryConfigurationError, IOException{
+		SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
+		XMLReader xmlReader = parser.getXMLReader();
+		GetAlbumsParser contentHandler = new GetAlbumsParser();
+		xmlReader.setContentHandler(contentHandler);
+		xmlReader.parse(new InputSource(stream));
+		return contentHandler.getData();
 	}
 	
 	public static String findByUsername(String username){

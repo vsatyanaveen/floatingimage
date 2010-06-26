@@ -1,6 +1,5 @@
 package dk.nindroid.rss.parser.flickr;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +15,7 @@ import dk.nindroid.rss.parser.XMLParser;
 public class FlickrParser extends XMLParser {
 	List<ImageReference> imgs;
 	StringBuilder data = new StringBuilder();
+	String owner = null;
 	
 	@Override
 	public void startElement(String uri, String localName, String name,
@@ -23,10 +23,18 @@ public class FlickrParser extends XMLParser {
 		super.startElement(uri, localName, name, attributes);
 		if(localName.equals(ExploreTags.PHOTOS)){
 			imgs = new ArrayList<ImageReference>(); 
+		}if(localName.equals(GetAlbumsTags.PHOTOSET)){
+			imgs = new ArrayList<ImageReference>();
+			owner = attributes.getValue(ExploreTags.PHOTO_OWNER);
 		}
 		else if(localName.equals(ExploreTags.PHOTO)){
 			String id = attributes.getValue(ExploreTags.PHOTO_ID);
-			String owner = attributes.getValue(ExploreTags.PHOTO_OWNER);
+			String owner = null;
+			if(this.owner != null){
+				owner = this.owner;
+			}else{
+				owner = attributes.getValue(ExploreTags.PHOTO_OWNER);
+			}
 			String secret = attributes.getValue(ExploreTags.PHOTO_SECRET);
 			String server = attributes.getValue(ExploreTags.PHOTO_SERVER);
 			String title = attributes.getValue(ExploreTags.PHOTO_TITLE);
@@ -37,8 +45,7 @@ public class FlickrParser extends XMLParser {
 	
 	@Override
 	protected String extendURL(String url) {
-		FlickrFeeder.readCode(ShowStreams.current);
-		return FlickrFeeder.signUrl(url);
+		return FlickrFeeder.finalizeUrl(ShowStreams.current, url);
 	}
 	
 	public List<ImageReference> getData(){

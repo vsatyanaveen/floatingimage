@@ -47,6 +47,10 @@
 	<string name="flickrSearch">Search for tags</string>
 	<string name="flickrSearchTerm">Search, separate search terms with a comma (,)</string>
 	<string name="flickrSearchNoText">Please search for something.</string>
+	<string name="flickrMyPhotos">My photos</string>
+	<string name="flickrMyAlbums">My albums</string>
+	<string name="flickrMyContactsPhotos">Photos by my Contacts</string>
+	<string name="flickrPhotosFromHere">Photos from here</string>
 	<string name="picasa">Picasa</string>
 	<string name="picasaShowStream">Show stream</string>
 	<string name="picasaShowStreamUsername">Please enter the stream username</string>
@@ -55,7 +59,7 @@
 	<string name="picasaSearch">Search for keywords</string>
 	<string name="picasaSearchTerm">Search, separate search terms with a comma (,)</string>
 	<string name="picasaSearchNoText">Please search for something.</string>
-	<string name="local">Local</string>
+	<string name="local">Phone</string>
 	<string name="facebook">Facebook</string>
 	<string name="facebookPhotosOfMe">Show photos of me</string>
 	<string name="facebookMyAlbums">My albums</string>
