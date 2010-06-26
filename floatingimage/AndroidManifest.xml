@@ -34,6 +34,7 @@
 <activity android:name=".parser.facebook.FacebookFriendsBrowser"></activity>
 <activity android:name=".parser.facebook.FacebookFriendView"></activity>
 <activity android:name=".flickr.WebAuth"></activity>
+<activity android:name=".parser.flickr.FlickrAlbumBrowser"></activity>
 </application>
     <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="4" />
 
@@ -47,4 +48,5 @@
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
 <uses-permission android:name="android.permission.WRITE_SETTINGS"></uses-permission>
 
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"></uses-permission>
 </manifest> 
