@@ -48,8 +48,8 @@ public class BitmapDownloader implements Runnable {
 					ImageReference ir = mFeedController.getImageReference();
 					if(ir == null)
 						break;
-					if(ir.getBitmap() != null){ // Image has been shown before, DO NOT reread bitmap!
-						bank.addNewBitmap(ir);
+					if(ir.getBitmap() != null && !ir.getBitmap().isRecycled()){ // Image is being shown, ignore!
+						break;
 					}else if(ir instanceof LocalImage){
 						addLocalImage((LocalImage)ir);
 					}else {
