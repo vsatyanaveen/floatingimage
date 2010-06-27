@@ -8,7 +8,7 @@ import java.nio.IntBuffer;
 import javax.microedition.khronos.opengles.GL10;
 
 import android.content.Context;
-import dk.nindroid.rss.Display;
+import android.view.Surface;
 import dk.nindroid.rss.RiverRenderer;
 import dk.nindroid.rss.ShowStreams;
 import dk.nindroid.rss.gfx.Vec3f;
@@ -173,7 +173,7 @@ public class OSD {
 		gl.glEnable(GL10.GL_BLEND);
 		float barHeight = toScreenHeight(80);
 		barHeight = (mButtons.length > 4 ? barHeight * 2 : barHeight);
-		if(RiverRenderer.mDisplay.getOrientation() == Display.UP_IS_DOWN){
+		if(RiverRenderer.mDisplay.getOrientation() == Surface.ROTATION_180){
 			float offset = toScreenHeight(20);
 			gl.glTranslatef(0.0f, offset, 0.0f);
 		}

@@ -1,17 +1,10 @@
 package dk.nindroid.rss.settings;
 
-import java.io.IOException;
-
-import oauth.signpost.exception.OAuthCommunicationException;
-import oauth.signpost.exception.OAuthExpectationFailedException;
-import oauth.signpost.exception.OAuthMessageSignerException;
-import oauth.signpost.exception.OAuthNotAuthorizedException;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
@@ -91,19 +84,7 @@ public class PicasaBrowser extends ListActivity {
 			searchDialog.show();
 			break;
 		case SIGN_IN:
-			try {
-				PicasaFeeder.signIn();
-			} catch (OAuthMessageSignerException e) {
-				Log.e("Floating Image", "Picasa: Error signing in!", e);
-			} catch (OAuthExpectationFailedException e) {
-				Log.e("Floating Image", "Picasa: Error signing in!", e);
-			} catch (OAuthCommunicationException e) {
-				Log.e("Floating Image", "Picasa: Error signing in!", e);
-			} catch (OAuthNotAuthorizedException e) {
-				Log.e("Floating Image", "Picasa: Error signing in!", e);
-			} catch (IOException e) {
-				Log.e("Floating Image", "Picasa: Error signing in!", e);
-			}
+			PicasaFeeder.signIn();
 			break;
 		}
 		
