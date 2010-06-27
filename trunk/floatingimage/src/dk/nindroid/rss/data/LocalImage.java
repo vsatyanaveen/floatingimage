@@ -126,6 +126,15 @@ public class LocalImage implements ImageReference{
 	public void set512Bitmap(Bitmap bitmap) {
 		// No can do
 	}
+	
+	public void set1024Bitmap(Bitmap bmp){
+		this.mBitmap = Bitmap.createBitmap(1024, 1024, Config.RGB_565);
+		Canvas cvs = new Canvas(this.mBitmap);
+		cvs.drawBitmap(bmp, 0, 0, paint);
+		this.mWidth = bmp.getWidth() / 1024.0f;
+		this.mHeight = bmp.getHeight() / 1024.0f;
+		bmp.recycle();
+	}
 
 	@Override
 	public void setOld() {

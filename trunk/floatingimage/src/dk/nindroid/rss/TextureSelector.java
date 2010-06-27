@@ -73,7 +73,7 @@ public class TextureSelector {
 							applyLarge(bmp);
 						}
 					}else{ // Download from web
-						// Retry 5 times.. Why do I have to do this?! This should just WORK!!
+						// Retry max 5 times in case we time out.
 						for(int i = 0; i < 5; ++i){
 							Bitmap bmp = BitmapDownloader.downloadImage(url, progress);
 							if(bmp != null){

@@ -8,6 +8,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
+import android.view.Surface;
 
 public class OrientationManager implements SensorEventListener {
 	private SensorManager				mSensorManager;
@@ -55,15 +56,15 @@ public class OrientationManager implements SensorEventListener {
 		int orientation = -1;
 		if(absY > absX && absY > absZ / 4.0f){
 			if(y > 0){
-				orientation = OrientationSubscriber.UP_IS_UP;
+				orientation = Surface.ROTATION_0;
 			}else{
-				orientation = OrientationSubscriber.UP_IS_DOWN;
+				orientation = Surface.ROTATION_180;
 			}
 		}else if(absX > absY && absX > absZ / 4.0f){
 			if(x > 0){
-				orientation = OrientationSubscriber.UP_IS_LEFT;
+				orientation = Surface.ROTATION_270;
 			}else{
-				orientation = OrientationSubscriber.UP_IS_RIGHT;
+				orientation = Surface.ROTATION_90;
 			}
 		}
 		if(orientation != -1 && orientation != settingOrientation){

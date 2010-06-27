@@ -1,6 +1,7 @@
 package dk.nindroid.rss;
 
 import android.util.Log;
+import android.view.Surface;
 import dk.nindroid.rss.orientation.OrientationSubscriber;
 import dk.nindroid.rss.settings.Settings;
 
@@ -157,7 +158,7 @@ public class Display implements OrientationSubscriber {
 	}
 	
 	public Display(){
-		this.mOrientation = UP_IS_UP;
+		this.mOrientation = Surface.ROTATION_0;
 	}
 	
 	public void onSurfaceChanged(int width, int height){
@@ -198,14 +199,14 @@ public class Display implements OrientationSubscriber {
 			mPreviousHeightPixels = mHeightPixels;
 			mPreviousFocusedHeight = mFocusedHeight;
 			mPreviousRotation = mRotation;
-			if(orientation == UP_IS_UP){
+			if(orientation == Surface.ROTATION_0){
 				mTargetWidth = mPortraitWidth;
 				mTargetHeight = mPortraitHeight;
 				mTargetWidthPixels  = mPortraitWidthPixels;
 				mTargetHeightPixels = mPortraitHeightPixels;
 				mTargetFocusedHeight = calcFocusedHeight(mPortraitHeight, mPortraitHeightPixels);
 				mTargetRotation = 0;
-			}else if(orientation == UP_IS_LEFT){
+			}else if(orientation == Surface.ROTATION_270){
 				mTargetWidth = mPortraitHeight;
 				mTargetHeight = mPortraitWidth;
 				mTargetWidthPixels  = mPortraitHeightPixels;
@@ -216,14 +217,14 @@ public class Display implements OrientationSubscriber {
 					mRotation -= 360;
 					mPreviousRotation = mRotation;
 				}
-			}else if(orientation == UP_IS_RIGHT){
+			}else if(orientation == Surface.ROTATION_90){
 				mTargetWidth = mPortraitHeight;
 				mTargetHeight = mPortraitWidth;
 				mTargetWidthPixels  = mPortraitHeightPixels;
 				mTargetHeightPixels = mPortraitWidthPixels;
 				mTargetFocusedHeight = calcFocusedHeight(mPortraitWidth, mPortraitWidthPixels);
 				mTargetRotation = 90;
-			}else if(orientation == UP_IS_DOWN){
+			}else if(orientation == Surface.ROTATION_180){
 				mTargetWidth = mPortraitWidth;
 				mTargetHeight = mPortraitHeight;
 				mTargetWidthPixels  = mPortraitWidthPixels;

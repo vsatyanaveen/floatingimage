@@ -26,6 +26,7 @@ import dk.nindroid.rss.data.RssElement;
 import dk.nindroid.rss.parser.RSSParser;
 
 public class BitmapDownloader implements Runnable {
+	public static final boolean SCREEN_SIZE_THUMBNAILS = false;
 	TextureBank bank;
 	FeedController mFeedController; 
 	public BitmapDownloader(TextureBank bank, FeedController feedController){
@@ -93,9 +94,20 @@ public class BitmapDownloader implements Runnable {
 	
 	public void addLocalImage(LocalImage image){
 		File file = image.getFile();
-		Bitmap bmp = ImageFileReader.readImage(file, 128, null);
+		Bitmap bmp;
+		if(SCREEN_SIZE_THUMBNAILS){
+			Log.v("Floating Image", "Reading full size thumbnail...");
+			int size = Math.max(RiverRenderer.mDisplay.getPortraitHeightPixels(), RiverRenderer.mDisplay.getPortraitWidthPixels());
+			bmp = ImageFileReader.readImage(file, size, null);
+		}else{
+			bmp = ImageFileReader.readImage(file, 128, null);
+		}
 		if(bmp != null){
-			image.set128Bitmap(bmp);
+			if(SCREEN_SIZE_THUMBNAILS){
+				image.set1024Bitmap(bmp);
+			}else{
+				image.set128Bitmap(bmp);
+			}
 			bank.addNewBitmap(image);
 		}
 	}

@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLU;
 import android.util.Log;
+import android.view.Surface;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.gfx.Vec2f;
 import dk.nindroid.rss.helpers.MatrixTrackingGL;
@@ -199,17 +200,17 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	}
 	
 	public void xChanged(float amount){
-		if(mDisplay.getOrientation() == Display.UP_IS_UP){
+		if(mDisplay.getOrientation() == Surface.ROTATION_0){
 			mOffset += amount * mSensitivityX;
-		}else if(mDisplay.getOrientation() == Display.UP_IS_DOWN){
+		}else if(mDisplay.getOrientation() == Surface.ROTATION_180){
 			mOffset -= amount * mSensitivityX;
 		}
 	}
 	
 	public void yChanged(float amount){
-		if(mDisplay.getOrientation() == Display.UP_IS_LEFT){
+		if(mDisplay.getOrientation() == Surface.ROTATION_270){
 			mOffset += amount * mSensitivityX;
-		}else if(mDisplay.getOrientation() == Display.UP_IS_RIGHT){
+		}else if(mDisplay.getOrientation() == Surface.ROTATION_90){
 			mOffset -= amount * mSensitivityX;
 		}
 	}
@@ -245,22 +246,22 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 		int orientation = mDisplay.getOrientation();
 		float tmp;
 		switch(orientation){
-		case Display.UP_IS_UP:
+		case Surface.ROTATION_0:
 			// Do nothing
 			break;
-		case Display.UP_IS_LEFT:
+		case Surface.ROTATION_270:
 			tmp = x; x = y; y = tmp;
 			y = mDisplay.getHeightPixels() - y;
 			tmp = speedX; speedX = speedY; speedY = tmp;
 			speedY *= -1;
 			break;
-		case Display.UP_IS_RIGHT:
+		case Surface.ROTATION_90:
 			tmp = x; x = y; y = tmp;
 			x = mDisplay.getWidthPixels() - x;
 			tmp = speedX; speedX = speedY; speedY = tmp;
 			speedX *= -1;
 			break;
-		case Display.UP_IS_DOWN:
+		case Surface.ROTATION_180:
 			x = mDisplay.getWidthPixels() - x;
 			y = mDisplay.getHeightPixels() - y;
 			speedX *= -1;
@@ -288,18 +289,18 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 		int orientation = mDisplay.getOrientation();
 		float tmp;
 		switch(orientation){
-		case Display.UP_IS_UP:
+		case Surface.ROTATION_0:
 			// Do nothing
 			break;
-		case Display.UP_IS_LEFT:
+		case Surface.ROTATION_270:
 			tmp = x; x = y; y = tmp;
 			y = mDisplay.getHeightPixels() - y;
 			break;
-		case Display.UP_IS_RIGHT:
+		case Surface.ROTATION_90:
 			tmp = x; x = y; y = tmp;
 			x = mDisplay.getWidthPixels() - x;
 			break;
-		case Display.UP_IS_DOWN:
+		case Surface.ROTATION_180:
 			x = mDisplay.getWidthPixels() - x;
 			y = mDisplay.getHeightPixels() - y;
 		}

@@ -25,6 +25,7 @@ import android.util.Log;
 import dk.nindroid.rss.DownloadUtil;
 import dk.nindroid.rss.HttpTools;
 import dk.nindroid.rss.data.ImageReference;
+import dk.nindroid.rss.parser.Crypto;
 import dk.nindroid.rss.parser.flickr.CheckTokenParser;
 import dk.nindroid.rss.parser.flickr.FindByUsernameParser;
 import dk.nindroid.rss.parser.flickr.FlickrAlbum;
@@ -124,11 +125,7 @@ public class FlickrFeeder {
 		byte[] digest ;
 		try {
 			digest = MessageDigest.getInstance("MD5").digest(s.getBytes());
-			StringBuilder sb = new StringBuilder();
-			for (int i=0; i < digest.length; i++) {
-			    sb.append(Integer.toString( ( digest[i] & 0xff ) + 0x100, 16).substring( 1 ));
-			}
-			return sb.toString();
+			return Crypto.toHex(digest);
 		} catch (NoSuchAlgorithmException e) {}
 		return null;
 	}
