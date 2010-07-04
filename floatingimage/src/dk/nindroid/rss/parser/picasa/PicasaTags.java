@@ -3,7 +3,7 @@ package dk.nindroid.rss.parser.picasa;
 public interface PicasaTags {
 	public static final String ENTRY 					= "entry";
 	public static final String KEY	 					= "id";
-	public static final String TITLE 					= "summary";
+	public static final String TITLE 					= "title";
 	public static final String CONTENT 					= "content";
 	public static final String CONTENT_SRC				= "src";
 	public static final String LINK 					= "link";
@@ -22,4 +22,7 @@ public interface PicasaTags {
 	
 	public static final String NS_GPHOTO				= "http://schemas.google.com/photos/2007";
 	public static final String NS_MEDIA					= "http://search.yahoo.com/mrss/";
+	
+	public static final String ALBUM_ID					= "id";
+	public static final String ALBUM_SUMMARY			= "summary";
 }

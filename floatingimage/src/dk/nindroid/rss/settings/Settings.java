@@ -22,6 +22,7 @@ public class Settings {
 	
 	public static boolean 	useRandom;
 	public static boolean 	useCache;
+	public static boolean 	showingStream;
 	public static boolean 	shuffleImages;
 	public static boolean 	rotateImages;
 	public static boolean 	fullscreenBlack;

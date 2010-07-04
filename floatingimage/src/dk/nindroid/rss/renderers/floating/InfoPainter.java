@@ -90,6 +90,7 @@ public class InfoPainter {
 	
 	protected void drawAuthor(Canvas canvas, int textWidth, int textHeight){
 		String author = mAuthor;
+		if(author == null) return;
 		int authorWidth = (int)Math.ceil(mPainter.measureText(author));
 		if(authorWidth > textWidth){
 			int lastSpace = 50;

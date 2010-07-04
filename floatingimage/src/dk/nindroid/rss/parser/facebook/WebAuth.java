@@ -13,7 +13,6 @@ import dk.nindroid.rss.R;
 
 public class WebAuth extends Activity {
 	WebView webView;
-	boolean dismiss = false;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
