@@ -7,6 +7,7 @@ import java.util.Stack;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
+import dk.nindroid.rss.ShowStreams;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.parser.XMLParser;
 import dk.nindroid.rss.picasa.PicasaImage;
@@ -16,10 +17,16 @@ public class PicasaParser extends XMLParser {
 		PicasaImage image;
 		StringBuilder sb;
 		Stack<String> stack;
+		String author = null;
 		
 		public PicasaParser(){
 			imgs = new ArrayList<ImageReference>();
 			stack = new Stack<String>();
+		}
+		
+		@Override
+		protected String extendURL(String url) {
+			return PicasaFeeder.signUrl(url, ShowStreams.current);
 		}
 		
 		@Override
@@ -31,11 +38,13 @@ public class PicasaParser extends XMLParser {
 				stack.push(localName);
 			}
 			else if(localName.equals(PicasaTags.AUTHOR)){
-				if(stack.peek().equals(PicasaTags.ENTRY)){
+				if(stack.size() == 0){
+					stack.push(PicasaTags.AUTHOR);
+				}else if(stack.peek().equals(PicasaTags.ENTRY)){
 					stack.push(PicasaTags.AUTHOR);
 				}
 			}else if(localName.equals(PicasaTags.TITLE)){
-				if(stack.peek().equals(PicasaTags.ENTRY)){
+				if(!stack.empty() && stack.peek().equals(PicasaTags.ENTRY)){
 					sb = new StringBuilder();
 				}
 			}else if(localName.equals(PicasaTags.AUTHOR_NAME)){
@@ -55,7 +64,7 @@ public class PicasaParser extends XMLParser {
 					image.setImageURL(attributes.getValue(PicasaTags.HREF));
 				}
 			}else if(localName.equals(PicasaTags.KEY) && uri.equals(PicasaTags.NS_GPHOTO)){
-				if(stack.peek().equals(PicasaTags.ENTRY)){
+				if(!stack.empty() && stack.peek().equals(PicasaTags.ENTRY)){
 					sb = new StringBuilder();
 				}
 			}else if(localName.equals(PicasaTags.GROUP) && uri.equals(PicasaTags.NS_MEDIA)){
@@ -80,10 +89,13 @@ public class PicasaParser extends XMLParser {
 			throws SAXException {
 			if(localName.equals(PicasaTags.ENTRY)){
 				stack.pop();
+				if(image.getAuthor() == null){
+					image.setOwner(author);
+				}
 				imgs.add(image);
 				image = null;
 			}
-			else if(localName.equals(PicasaTags.TITLE)){
+			else if(localName.equals(PicasaTags.TITLE) && image != null && sb != null){
 				image.setTitle(sb.toString());
 				sb = null;
 			}else if(localName.equals(PicasaTags.GROUP)){
@@ -91,13 +103,17 @@ public class PicasaParser extends XMLParser {
 			}else if(localName.equals(PicasaTags.AUTHOR)){
 				stack.pop();
 			}else if(localName.equals(PicasaTags.AUTHOR_NAME)){
-				image.setOwner(sb.toString());
+				if(image != null){
+					image.setOwner(sb.toString());
+				}else{
+					author = sb.toString();
+				}
 				sb = null;
 			}else if(localName.equals(PicasaTags.AUTHOR_URI)){
 				sb = null; // We don't use this.
 			}else if(localName.equals(PicasaTags.AUTHOR)){
 				stack.pop();
-			}else if(localName.equals(PicasaTags.KEY) && uri.equals(PicasaTags.NS_GPHOTO)){
+			}else if(localName.equals(PicasaTags.KEY) && uri.equals(PicasaTags.NS_GPHOTO) && image != null){
 				image.setImageID(sb.toString());
 				sb = null;
 			}

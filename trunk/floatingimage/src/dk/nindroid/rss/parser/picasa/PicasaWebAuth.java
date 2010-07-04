@@ -1,7 +1,4 @@
-package dk.nindroid.rss.flickr;
-
-import java.io.IOException;
-import java.net.MalformedURLException;
+package dk.nindroid.rss.parser.picasa;
 
 import android.app.Activity;
 import android.net.Uri;
@@ -11,7 +8,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import dk.nindroid.rss.R;
 
-public class WebAuth extends Activity {
+public class PicasaWebAuth extends Activity {
 	WebView webView;
 	
 	@Override
@@ -41,14 +38,13 @@ public class WebAuth extends Activity {
 		        return true;
 	    	}
 	    	Uri uri = Uri.parse(url);
-	    	String code = uri.getQueryParameter("frob");
-	    	try {
-				FlickrFeeder.setFrob(code, context);
-			} catch (MalformedURLException e) {
-				Log.e("Floating Image", "Error parsing URL from Facebook", e);
-			} catch (IOException e) {
-				Log.e("Floating Image", "Error parsing URL from Facebook", e);
-			}
+	    	String verifier = uri.getQueryParameter("oauth_verifier");
+	    	String token = uri.getQueryParameter("oauth_token");
+	    	if(verifier == null || token == null){
+	    		Log.w("Floating Image", "Invalid response from Google auth: " + url);
+	    	}else{
+	    		PicasaFeeder.setAuth(verifier, token, context);
+	    	}
 			context.finish();
 	    	return true;
 	    }

@@ -64,7 +64,6 @@ public class ShowStreams extends Activity {
 	public static final int				MISC_ROW_ID		= 201;
 	public static final String 			version 		= "2.2.13";
 	public static ShowStreams 			current;
-	private boolean 					mShowing = false;
 	private GLSurfaceView 				mGLSurfaceView;
 	private RiverRenderer 				renderer;
 	private PowerManager.WakeLock 		wl;
@@ -168,6 +167,10 @@ public class ShowStreams extends Activity {
 			case CONTEXT_BACKGROUND:
 				//renderer.setBackground();
 				ir = renderer.getSelected();
+				if(ir == null) {
+					Toast.makeText(this, "Something strange happened, please try again...", Toast.LENGTH_LONG).show();
+					return super.onContextItemSelected(item);
+				}
 				Toast.makeText(this, "Setting background, please be patient...", Toast.LENGTH_LONG).show();
 				ImageDownloader.setWallpaper(ir.getOriginalImageUrl(), ir.getTitle(), ir instanceof LocalImage);
 				return true;
@@ -233,7 +236,7 @@ public class ShowStreams extends Activity {
 		orientationManager.onResume();
 		
 		mGLSurfaceView.onResume();
-		if(!mShowing){ // Feed is already loaded!
+		if(!dk.nindroid.rss.settings.Settings.showingStream){ // Feed is already loaded!
 			ReadFeeds.runAsync(mFeedController);
 		}
 		dialog.dismiss();
@@ -289,12 +292,12 @@ public class ShowStreams extends Activity {
 	}
 	
 	public void showFolder(){
-		if(!mShowing){
+		if(!dk.nindroid.rss.settings.Settings.showingStream){
 			Intent showFolder = new Intent(this, SourceSelector.class);
 			startActivityForResult(showFolder, SHOW_ACTIVITY);
 			selectedItem = mMenuItemShow;
 		}else{
-			mShowing = false;
+			dk.nindroid.rss.settings.Settings.showingStream = false;
 			mImageCache.resume();
 			ReadFeeds.runAsync(mFeedController);
 			runOnUiThread(new Toaster("Cancelling show"));
@@ -314,9 +317,9 @@ public class ShowStreams extends Activity {
 			if(!mFeedController.showFeed(feed)){
 				String error = this.getResources().getString(R.string.empty_feed) + " " + feed.getName();
 				Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
+				dk.nindroid.rss.settings.Settings.showingStream = false;
 			}else{
-				mShowing = true;
-				mImageCache.pause();
+				dk.nindroid.rss.settings.Settings.showingStream = true;
 				Toast.makeText(this, "Showing " + mFeedController.getShowing() + " images from " + path, Toast.LENGTH_SHORT).show();
 				if(selectedItem != null){
 					selectedItem.setTitle(R.string.cancel_show);

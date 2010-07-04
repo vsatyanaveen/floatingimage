@@ -35,7 +35,6 @@ public class Images  extends Button {
 		gl.glGenTextures(1, textures, 0);
 		mImagesTex = textures[0];
 		setTexture(gl, mImages, mImagesTex);
-		
 	}
 
 }

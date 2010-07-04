@@ -53,9 +53,13 @@
 	<string name="flickrPhotosFromHere">Photos from here</string>
 	<string name="picasa">Picasa</string>
 	<string name="picasaShowStream">Show stream</string>
-	<string name="picasaShowStreamUsername">Please enter the stream username</string>
+	<string name="picasaShowUserUsername">Please enter the username of the desired user</string>
 	<string name="picasaShowStreamBadUsername">Sorry, Picasa user not found.</string>
 	<string name="picasaShowStreamNoUsername">Please fill in a username.</string>
+	<string name="picasaShowAlbums">Show albums</string>
+	<string name="picasaShowUser">Show user</string>
+	<string name="picasaShowMyStream">Show my stream</string>
+	<string name="picasaShowMyAlbums">Show my albums</string>
 	<string name="picasaSearch">Search for keywords</string>
 	<string name="picasaSearchTerm">Search, separate search terms with a comma (,)</string>
 	<string name="picasaSearchNoText">Please search for something.</string>
