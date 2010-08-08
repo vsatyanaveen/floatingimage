@@ -10,12 +10,7 @@
 			android:action="android.intent.action.MAIN" 
 			android:targetClass="dk.nindroid.rss.settings.ManageFeeds" 
 			android:targetPackage="dk.nindroid.rss" />
-        </PreferenceScreen>
-        <CheckBoxPreference
-                android:key="randomImages"
-                android:title="@string/random"
-                android:summary="@string/randomSummary" 
-                android:defaultValue="true" />
+        </PreferenceScreen>        
         <CheckBoxPreference
                 android:key="shuffleImages"
                 android:title="@string/shuffle"
@@ -63,6 +58,11 @@
                 android:title="@string/imageDecorations"
                 android:summary="@string/imageDecorationsSummary"
                 android:defaultValue="true" />
+            <CheckBoxPreference
+            	android:key="highResThumbs"
+            	android:title="@string/useHighResThumbs"
+            	android:summary="@string/useHighResThumbsSummary"
+            	android:defaultValue="false" />
     </PreferenceCategory>
     <PreferenceCategory
             android:title="@string/internals">

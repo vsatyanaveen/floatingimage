@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
@@ -13,12 +14,12 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.util.Log;
 import dk.nindroid.rss.data.FeedReference;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.LocalImage;
-import dk.nindroid.rss.flickr.FlickrFeeder;
 import dk.nindroid.rss.parser.FeedParser;
 import dk.nindroid.rss.parser.ParserProvider;
 import dk.nindroid.rss.settings.FeedsDbAdapter;
@@ -30,7 +31,7 @@ public class FeedController {
 	private List<FeedReference>				mFeeds;
 	private boolean 						showing = false;
 	private Random 							mRand = new Random(System.currentTimeMillis());
-	//private int lastFeed = -1;
+	private RiverRenderer					mRenderer;
 	
 	public boolean isShowing(){
 		return showing;
@@ -40,6 +41,10 @@ public class FeedController {
 		mFeeds = new ArrayList<FeedReference>();
 		mFeedIndex = new ArrayList<Integer>();
 		mReferences = new ArrayList<List<ImageReference>>();
+	}
+	
+	public void setRenderer(RiverRenderer renderer){
+		this.mRenderer = renderer;
 	}
 	
 	public ImageReference getImageReference(){
@@ -79,40 +84,60 @@ public class FeedController {
 	}
 	
 	public void readFeeds(){
-		synchronized(mFeeds){
-			mFeeds.clear();
-			mFeedIndex.clear();
-			if(Settings.useRandom){
-				Log.v("FeedController", "Adding flickr explore feed");
-				mFeeds.add(getFeedReference(FlickrFeeder.getExplore(), Settings.TYPE_FLICKR, "Explore"));
+		List<FeedReference> newFeeds = new ArrayList<FeedReference>();
+		FeedsDbAdapter mDbHelper = new FeedsDbAdapter(ShowStreams.current);
+		SharedPreferences sp = ShowStreams.current.getSharedPreferences("dk.nindroid.rss_preferences", 0);
+		mDbHelper.open();
+		Cursor c = null;
+		try{
+			c = mDbHelper.fetchAllFeeds();
+			int typei = c.getColumnIndex(FeedsDbAdapter.KEY_TYPE);
+			int feedi = c.getColumnIndex(FeedsDbAdapter.KEY_URI);
+			int namei = c.getColumnIndex(FeedsDbAdapter.KEY_TITLE);
+			int idi   = c.getColumnIndex(FeedsDbAdapter.KEY_ROWID);
+			while(c.moveToNext()){
+				int type = c.getInt(typei); 
+				String feed = c.getString(feedi);
+				String name = c.getString(namei);
+				int id = c.getInt(idi);
+				boolean enabled = sp.getBoolean("feed_" + Integer.toString(id), true);
+				// Only add a single feed once!
+				if(enabled && !newFeeds.contains(feed)){
+					newFeeds.add(getFeedReference(feed, type, name));
+				}
 			}
-			FeedsDbAdapter mDbHelper = new FeedsDbAdapter(ShowStreams.current);
-			
-			mDbHelper.open();
-			Cursor c = null;
-			try{
-				c = mDbHelper.fetchAllFeeds();
-				while(c.moveToNext()){
-					int type = c.getInt(3); 
-					String feed = c.getString(2);
-					String name = c.getString(1);
-					
-					// Only add a single feed once!
-					if(!mFeeds.contains(feed)){
-						mFeeds.add(getFeedReference(feed, type, name));
+		}catch(Exception e){
+			Log.e("FeedController", "Unhandled exception caught", e);
+		}finally{
+			if(c != null){
+				ShowStreams.current.stopManagingCursor(c);
+				c.close();
+			}
+			mDbHelper.close();
+		}
+		
+		showing = false;
+		synchronized(mFeeds){
+			if(mFeeds.size() != newFeeds.size()){
+				feedsChanged();
+			}else{
+				for(int i = 0; i < mFeeds.size(); ++i){
+					if(!(mFeeds.get(i).equals(newFeeds.get(i)))){
+						feedsChanged();
+						break;
 					}
 				}
-			}catch(Exception e){
-				Log.e("FeedController", "Unhandled exception caught", e);
-			}finally{
-				if(c != null){
-					c.close();
-					mDbHelper.close();
-				}
 			}
-			showing = false;
 			
+			mFeeds = newFeeds;
+			mFeedIndex.clear();
 			parseFeeds();
+		}
+	}
+	
+	private void feedsChanged(){
+		if(mRenderer != null){
+			mRenderer.resetImages();
 		}
 	}
 	
@@ -129,16 +154,6 @@ public class FeedController {
 			count += list.size();
 		}
 		return count;
-	}
-	
-	public boolean showFeed(FeedReference feed){
-		synchronized(mFeeds){
-			mFeeds.clear();
-			mFeeds.add(feed);
-			showing = true;
-			//lastFeed = -1;
-			return parseFeeds();
-		}
 	}
 	
 	public FeedReference getFeedReference(String path, int type, String name){
@@ -208,7 +223,7 @@ public class FeedController {
 	private static void buildImageIndex(List<ImageReference> images, File dir, int level){
 		File[] files = dir.listFiles();
 		if(!Settings.shuffleImages){
-			Arrays.sort(files);
+			Arrays.sort(files, new InverseComparator()); // Show last items first
 		}
 		for(File f : files){
 			if(f.getName().charAt(0) == '.') continue; // Drop hidden files.
@@ -221,6 +236,15 @@ public class FeedController {
 				}
 			}
 		}
+	}
+	
+	private static class InverseComparator implements Comparator<File>{
+
+		@Override
+		public int compare(File arg0, File arg1) {
+			return arg1.compareTo(arg0);
+		}
+		
 	}
 	
 	private static boolean isImage(File f){

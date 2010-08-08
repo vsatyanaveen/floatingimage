@@ -28,7 +28,7 @@ public class Brightness extends Button {
 	}
 
 	@Override
-	public void click() {
+	public void click(long time) {
 		WindowManager.LayoutParams lp = ShowStreams.current.getWindow().getAttributes();
 		mBrightnessIndex = (mBrightnessIndex + 1) % BRIGHTNESS.length;
 		lp.screenBrightness = BRIGHTNESS[mBrightnessIndex];

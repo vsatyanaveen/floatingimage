@@ -12,6 +12,7 @@ import dk.nindroid.rss.helpers.MatrixTrackingGL;
 import dk.nindroid.rss.renderers.OSD;
 import dk.nindroid.rss.renderers.ProgressBar;
 import dk.nindroid.rss.renderers.Renderer;
+import dk.nindroid.rss.renderers.slideshow.Image;
 import dk.nindroid.rss.renderers.slideshow.transitions.CrossFade;
 import dk.nindroid.rss.renderers.slideshow.transitions.FadeToBlack;
 import dk.nindroid.rss.renderers.slideshow.transitions.FadeToWhite;
@@ -30,6 +31,7 @@ public class SlideshowRenderer implements Renderer, dk.nindroid.rss.renderers.os
 	boolean			mPlaying = true;
 	boolean			mStartPlaying = false;
 	boolean			mNextSet = false;
+	boolean			mResetImages = false;
 	
 	public SlideshowRenderer(TextureBank bank){
 		mPrevious = new Image();
@@ -114,7 +116,7 @@ public class SlideshowRenderer implements Renderer, dk.nindroid.rss.renderers.os
 
 	@Override
 	public void init(GL10 gl, long time, OSD osd) {
-		osd.setEnabled(true, false);
+		osd.setEnabled(true, false, true);
 		osd.registerPlayListener(this);
 		mPrevious.init(gl, time);
 		mCurrent.init(gl, time);
@@ -131,8 +133,8 @@ public class SlideshowRenderer implements Renderer, dk.nindroid.rss.renderers.os
 		if(!mCurrentTransition.isFinished()){
 			mCurrentTransition.preRender(gl, frameTime);
 		}
-		mPrevious.render(gl);
-		mCurrent.render(gl);
+		mPrevious.render(gl, realtime);
+		mCurrent.render(gl, realtime);
 		if(!mCurrent.hasBitmap()){
 			ProgressBar.draw(gl, mCurrent.getProgress());
 		}
@@ -145,6 +147,9 @@ public class SlideshowRenderer implements Renderer, dk.nindroid.rss.renderers.os
 
 	@Override
 	public void update(MatrixTrackingGL gl, long time, long realTime) {
+		if (mResetImages){
+			resetImages(gl);
+		}
 		if(mStartPlaying){
 			mSlideTime = realTime;
 			mStartPlaying = false;
@@ -210,5 +215,17 @@ public class SlideshowRenderer implements Renderer, dk.nindroid.rss.renderers.os
 	public void Play() {
 		mStartPlaying = true;
 		mPlaying = true;
+	}
+	
+	@Override
+	public void resetImages() {
+		mResetImages = true;
+	}
+	
+	public void resetImages(GL10 gl) {
+		mResetImages = false;
+		mBank.reset();
+		mCurrent.clear();
+		mNext.clear();
 	}
 }

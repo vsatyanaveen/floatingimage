@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+	<string name="cancel">Cancel</string>
 	<string name="settings">Settings</string>
 	<string name="feeds">Feeds</string>
 	<!--  <string name="manageFeeds">Manage feeds</string> 
@@ -15,8 +16,6 @@
 	<string name="imageDecorations">Decorate images</string>
 	<string name="imageDecorationsSummary">Show shadows and glow behind images</string>
 	<string name="internals">Internals</string>
-	<string name="random">Use random images</string>
-	<string name="randomSummary">Use Flickr explore feed</string>
 	<string name="shuffle">Shuffle images</string>
 	<string name="shuffleSummary">Show images in random order</string>
 	<string name="modeTitle">Select display mode</string>
@@ -31,11 +30,12 @@
 	<string name="slideSpeedTitle">Select transition speed</string>
 	<string name="useCache">Cache images</string>
 	<string name="useCacheSummary">This gives a steadier flow when streaming</string>
+	<string name="useHighResThumbs">Use high res tumbnails</string>
+	<string name="useHighResThumbsSummary">This will use significantly more data and require more bandwidth</string>
 	<string name="clearCache">Clear cache</string>
 	<string name="clearCacheSummary">Erase entire image cache</string>
-	<string name="noFeeds">No directories selected. Press menu to add one now</string>
 	<string name="feedMenuAdd">Add new feed</string>
-	<string name="feedMenuClearAll">Clear all</string>
+	<string name="feedMenuAddSummary">Add a new source of images</string>
 	<string name="feedMenuRemove">Remove feed</string>
 	<string name="selectFolder">Select folder</string>
 	<string name="selectCurrentFolder">Select current folder</string>
@@ -50,6 +50,7 @@
 	<string name="flickrMyPhotos">My photos</string>
 	<string name="flickrMyAlbums">My albums</string>
 	<string name="flickrMyContactsPhotos">Photos by my Contacts</string>
+	<string name="flickrExplore">Top 500 (Explore)</string>
 	<string name="flickrPhotosFromHere">Photos from here</string>
 	<string name="picasa">Picasa</string>
 	<string name="picasaShowStream">Show stream</string>

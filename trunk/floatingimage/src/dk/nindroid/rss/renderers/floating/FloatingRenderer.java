@@ -45,6 +45,7 @@ public class FloatingRenderer implements Renderer {
 	private int 			mImgCnt = 0;
 	private boolean 		mCreateMiddle = true;
 	private boolean			mDoUnselect = false;
+	private boolean			mResetImages = false;
 	
 	
 	private static final Vec3f mCamPos = new Vec3f(0,0,0);
@@ -117,6 +118,9 @@ public class FloatingRenderer implements Renderer {
 	}
 	
 	public void update(MatrixTrackingGL gl, long frameTime, long realTime){
+		if(mResetImages){
+			resetImages(gl, frameTime);
+		}
 		// If new start, show splash!
 		if(mNewStart){
 			mSplashImg = mImgs[4];
@@ -230,7 +234,7 @@ public class FloatingRenderer implements Renderer {
 	}
 	
 	public void init(GL10 gl, long time, OSD osd){
-		osd.setEnabled(false, true);
+		osd.setEnabled(false, true, true);
 		for(int i = 0; i < mImgCnt; ++i){
 			mImgs[i].init(gl, time);
 		}
@@ -298,5 +302,18 @@ public class FloatingRenderer implements Renderer {
 		if(mSelected != null){
 			mSelected.setBackground();
 		}
+	}
+	
+	@Override
+	public void resetImages() {
+		mResetImages = true;
+	}
+	
+	public void resetImages(GL10 gl, long time) {
+		mResetImages = false;
+		mBank.reset();
+		for(Image i : mImgs){
+			i.reset(gl, time);
+		}	
 	}
 }

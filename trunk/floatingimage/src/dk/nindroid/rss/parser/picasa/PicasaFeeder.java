@@ -29,9 +29,9 @@ import dk.nindroid.rss.HttpTools;
 public class PicasaFeeder {
 	private static final String BASE_URL = "http://picasaweb.google.com/data/feed/api/";
 	private static final String USER_URL = BASE_URL + "user/";
-	private static final String MY_URL = USER_URL + "default";
-	private static final String SEARCH   = "all?max-results=500&q=";
-	private static final String POST_RECENT   = "?kind=photo&max-results=500";
+	private static final String MY_URL = USER_URL + "default?imgmax=1024&";
+	private static final String SEARCH   = "all?imgmax=1024&max-results=500&q=";
+	private static final String POST_RECENT   = "?imgmax=1024&kind=photo&max-results=500";
 	
 	private static final String SECRET   		= "1gIH0qT3ywaVuLWzSsbBChjj";
 	private static final String KEY		 		= "floating-image.appspot.com";

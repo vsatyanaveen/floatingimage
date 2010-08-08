@@ -20,7 +20,7 @@ public class Images  extends Button {
 	}
 
 	@Override
-	public void click() {
+	public void click(long time) {
 		ShowStreams.current.showFolder();
 	}
 

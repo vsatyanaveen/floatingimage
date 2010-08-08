@@ -2,7 +2,6 @@ package dk.nindroid.rss.settings;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 public class Settings {
 	public static final int TYPE_LOCAL  = 1;
@@ -20,9 +19,7 @@ public class Settings {
 	public static final int MODE_FLOATING_IMAGE = 7;
 	
 	
-	public static boolean 	useRandom;
 	public static boolean 	useCache;
-	public static boolean 	showingStream;
 	public static boolean 	shuffleImages;
 	public static boolean 	rotateImages;
 	public static boolean 	fullscreenBlack;
@@ -31,6 +28,7 @@ public class Settings {
 	public static long 		slideshowInterval;
 	public static long	 	slideSpeed;
 	public static boolean	imageDecorations;
+	public static boolean	highResThumbs;
 	
 	public static boolean fullscreen;
 
@@ -38,7 +36,6 @@ public class Settings {
 	
 	public static void readSettings(Context context) {
 		Settings.sp = context.getSharedPreferences("dk.nindroid.rss_preferences", 0);
-		useRandom = sp.getBoolean("randomImages", true);
 		shuffleImages = sp.getBoolean("shuffleImages", true);
 		useCache = sp.getBoolean("useCache", false);
 		rotateImages = sp.getBoolean("rotateImages", true);
@@ -49,10 +46,7 @@ public class Settings {
 		slideSpeed = Long.parseLong(sp.getString("slideSpeed", "300"));
 		fullscreenBlack = sp.getBoolean("fullscreenBlack", true);
 		imageDecorations = sp.getBoolean("imageDecorations", true);
-
-		Log.v("Settings", "useRandom: " + (useRandom ? "true" : "false"));
-		Log.v("Settings", "useCache: " + (useCache ? "true" : "false"));
-		Log.v("Settings", "rotateImages: " + (rotateImages ? "true" : "false"));
+		highResThumbs = sp.getBoolean("highResThumbs", false);
 	}
 
 	private static int parseMode(String mode){

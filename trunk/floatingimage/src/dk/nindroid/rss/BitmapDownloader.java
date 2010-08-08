@@ -24,9 +24,9 @@ import dk.nindroid.rss.data.LocalImage;
 import dk.nindroid.rss.data.Progress;
 import dk.nindroid.rss.data.RssElement;
 import dk.nindroid.rss.parser.RSSParser;
+import dk.nindroid.rss.settings.Settings;
 
 public class BitmapDownloader implements Runnable {
-	public static final boolean SCREEN_SIZE_THUMBNAILS = false;
 	TextureBank bank;
 	FeedController mFeedController; 
 	public BitmapDownloader(TextureBank bank, FeedController feedController){
@@ -75,14 +75,32 @@ public class BitmapDownloader implements Runnable {
 		}
 	}
 	
-	public void addExternalImage(ImageReference ir){
-		String url = ir.getSmallImageUrl();
+	public void addExternalImage(ImageReference ir){ 
+		String url = Settings.highResThumbs ? ir.get256ImageUrl() : ir.get128ImageUrl();
 		if(bank.doDownload(ir.getImageID())){
 			Bitmap bmp = downloadImage(url, null);
 			if(bmp == null){
 				return;
 			}
-			ir.set128Bitmap(bmp);
+			if(Settings.highResThumbs){
+				int max = Math.max(bmp.getHeight(), bmp.getWidth());
+				if(max > 256){
+					float scale = (float)256 / max;
+					Bitmap tmp = Bitmap.createScaledBitmap(bmp, (int)(bmp.getWidth() * scale), (int)(bmp.getHeight() * scale), true);
+					bmp.recycle();
+					bmp = tmp;
+				}
+				ir.set256Bitmap(bmp);
+			}else{
+				int max = Math.max(bmp.getHeight(), bmp.getWidth());
+				if(max > 128){
+					float scale = (float)128 / max;
+					Bitmap tmp = Bitmap.createScaledBitmap(bmp, (int)(bmp.getWidth() * scale), (int)(bmp.getHeight() * scale), true);
+					bmp.recycle();
+					bmp = tmp;
+				}
+				ir.set128Bitmap(bmp);
+			}
 			ir.getExtended();
 			bank.addNewBitmap(ir);
 		}else{
@@ -94,17 +112,11 @@ public class BitmapDownloader implements Runnable {
 	
 	public void addLocalImage(LocalImage image){
 		File file = image.getFile();
-		Bitmap bmp;
-		if(SCREEN_SIZE_THUMBNAILS){
-			Log.v("Floating Image", "Reading full size thumbnail...");
-			int size = Math.max(RiverRenderer.mDisplay.getPortraitHeightPixels(), RiverRenderer.mDisplay.getPortraitWidthPixels());
-			bmp = ImageFileReader.readImage(file, size, null);
-		}else{
-			bmp = ImageFileReader.readImage(file, 128, null);
-		}
+		int size = Settings.highResThumbs ? 256 : 128;
+		Bitmap bmp = ImageFileReader.readImage(file, size, null);
 		if(bmp != null){
-			if(SCREEN_SIZE_THUMBNAILS){
-				image.set1024Bitmap(bmp);
+			if(Settings.highResThumbs){
+				image.set256Bitmap(bmp);
 			}else{
 				image.set128Bitmap(bmp);
 			}

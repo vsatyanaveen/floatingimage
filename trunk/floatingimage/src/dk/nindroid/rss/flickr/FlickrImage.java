@@ -12,7 +12,7 @@ import android.net.Uri;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.parser.flickr.data.ImageSizes;
 
-public class FlickrImage implements ImageReference{
+public class FlickrImage extends ImageReference{
 	private final static String imageType = "flickrInternal";
 	private final static Paint paint = new Paint();
 	String farmID;
@@ -36,6 +36,7 @@ public class FlickrImage implements ImageReference{
 	public Bitmap getBitmap(){
 		return bitmap;
 	}
+	@Override
 	public void set128Bitmap(Bitmap bitmap){
 		this.bitmap = Bitmap.createBitmap(128, 128, Config.RGB_565);
 		Canvas cvs = new Canvas(this.bitmap);
@@ -44,12 +45,13 @@ public class FlickrImage implements ImageReference{
 		this.height = bitmap.getHeight() / 128.0f;
 		bitmap.recycle();
 	}
-	public void set512Bitmap(Bitmap bitmap){
-		this.bitmap = Bitmap.createBitmap(512, 512, Config.RGB_565);
+	@Override
+	public void set256Bitmap(Bitmap bitmap){
+		this.bitmap = Bitmap.createBitmap(256, 256, Config.RGB_565);
 		Canvas cvs = new Canvas(this.bitmap);
 		cvs.drawBitmap(bitmap, 0, 0, paint);
-		this.width = bitmap.getWidth() / 512.0f;
-		this.height = bitmap.getHeight() / 512.0f;
+		this.width = bitmap.getWidth() / 256.0f;
+		this.height = bitmap.getHeight() / 256.0f;
 		bitmap.recycle();		
 	}
 	public void getExtended(){
@@ -119,8 +121,12 @@ public class FlickrImage implements ImageReference{
 		this.unseen = false;
 	}
 	@Override
-	public String getSmallImageUrl() {
+	public String get128ImageUrl() {
 		return "http://farm" + farmID + ".static.flickr.com/" + serverID + "/" + imgID + "_" + secret + "_t.jpg";
+	}
+	@Override
+	public String get256ImageUrl() {
+		return "http://farm" + farmID + ".static.flickr.com/" + serverID + "/" + imgID + "_" + secret + "_m.jpg"; // 240, but 500 is waaaay too large!
 	}
 	@Override
 	public String getBigImageUrl() {
@@ -241,8 +247,5 @@ public class FlickrImage implements ImageReference{
 	@Override
 	public float getWidth() {
 		return width;
-	}
-	public int getRotation(){
-		return 0;
 	}
 }

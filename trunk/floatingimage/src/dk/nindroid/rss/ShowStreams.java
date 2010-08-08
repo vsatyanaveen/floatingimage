@@ -29,9 +29,9 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.Toast;
-import dk.nindroid.rss.data.FeedReference;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.LocalImage;
+import dk.nindroid.rss.flickr.FlickrFeeder;
 import dk.nindroid.rss.launchers.ReadFeeds;
 import dk.nindroid.rss.menu.Settings;
 import dk.nindroid.rss.orientation.OrientationManager;
@@ -47,8 +47,7 @@ import dk.nindroid.rss.renderers.floating.GlowImage;
 import dk.nindroid.rss.renderers.floating.ShadowPainter;
 import dk.nindroid.rss.renderers.slideshow.SlideshowRenderer;
 import dk.nindroid.rss.settings.FeedsDbAdapter;
-import dk.nindroid.rss.settings.SourceSelector;
-import dk.nindroid.rss.uiActivities.Toaster;
+import dk.nindroid.rss.settings.ManageFeeds;
 
 public class ShowStreams extends Activity {
 	public static final int 			ABOUT_ID 		= Menu.FIRST;
@@ -62,17 +61,15 @@ public class ShowStreams extends Activity {
 	public static final int				CONTEXT_SHARE 	= Menu.FIRST + 3;
 	public static final int				MENU_IMAGE_CONTEXT = 13;
 	public static final int				MISC_ROW_ID		= 201;
-	public static final String 			version 		= "2.2.13";
+	public static final String 			version 		= "2.5.0";
 	public static ShowStreams 			current;
 	private GLSurfaceView 				mGLSurfaceView;
 	private RiverRenderer 				renderer;
 	private PowerManager.WakeLock 		wl;
 	private OrientationManager			orientationManager;
-	private MenuItem					selectedItem;
 	private FeedController				mFeedController;
 	private ImageCache 					mImageCache;
 	private TextureBank					mTextureBank;
-	private MenuItem					mMenuItemShow;
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -92,18 +89,19 @@ public class ShowStreams extends Activity {
 			this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 			SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 			orientationManager = new OrientationManager(sensorManager);
-			cleanIfOld();
 			saveVersion(dataFile);
 			GlowImage.init(this);
 			ShadowPainter.init(this);
 			BackgroundPainter.init(this);
-			OSD.init(this);
 			this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 			PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 			wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "Floating Image");
 			ShowStreams.current = this;
 			mTextureBank = setupFeeders();
+			cleanIfOld();
 			renderer = new RiverRenderer(true, mTextureBank);
+			mFeedController.setRenderer(renderer);
+			OSD.init(this, renderer);
 			orientationManager.addSubscriber(RiverRenderer.mDisplay);
 			ClickHandler.init(renderer);
 			setContentView(R.layout.main);
@@ -155,6 +153,9 @@ public class ShowStreams extends Activity {
 	
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
+		if(item == null){
+			return super.onContextItemSelected(item);
+		}
 		Intent intent = null;
 		ImageReference ir = null;
 		switch(item.getItemId()){
@@ -236,9 +237,7 @@ public class ShowStreams extends Activity {
 		orientationManager.onResume();
 		
 		mGLSurfaceView.onResume();
-		if(!dk.nindroid.rss.settings.Settings.showingStream){ // Feed is already loaded!
-			ReadFeeds.runAsync(mFeedController);
-		}
+		ReadFeeds.runAsync(mFeedController);
 		dialog.dismiss();
 		Log.v("Floating Image", "End resume...");
 	}
@@ -247,22 +246,6 @@ public class ShowStreams extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		renderer.toggleMenu();
 		return false;
-		/*
-		boolean res = super.onCreateOptionsMenu(menu);
-		menu.clear();
-		menu.add(0, ABOUT_ID, 0, R.string.about);
-		if(RiverRenderer.mDisplay.isFullscreen()){
-			menu.add(0, FULLSCREEN_ID, 0, R.string.show_details);
-		}else{
-			menu.add(0, FULLSCREEN_ID, 0, R.string.fullscreen);
-		}
-		mMenuItemShow = menu.add(0, SHOW_FOLDER_ID, 0, R.string.show);
-		if(mShowing){
-			mMenuItemShow.setTitle(R.string.cancel_show);
-		}
-		menu.add(0, SETTINGS_ID, 0, R.string.settings);
-		return res;
-		*/
 	}
 	
 	@Override
@@ -292,39 +275,15 @@ public class ShowStreams extends Activity {
 	}
 	
 	public void showFolder(){
-		if(!dk.nindroid.rss.settings.Settings.showingStream){
-			Intent showFolder = new Intent(this, SourceSelector.class);
-			startActivityForResult(showFolder, SHOW_ACTIVITY);
-			selectedItem = mMenuItemShow;
-		}else{
-			dk.nindroid.rss.settings.Settings.showingStream = false;
-			mImageCache.resume();
-			ReadFeeds.runAsync(mFeedController);
-			runOnUiThread(new Toaster("Cancelling show"));
-		}
+		Intent showFolder = new Intent(this, ManageFeeds.class);
+		startActivityForResult(showFolder, SHOW_ACTIVITY);
 	}
 	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		if(requestCode == SHOW_ACTIVITY && resultCode == RESULT_OK){
-			Bundle b = data.getExtras();
-			int type = b.getInt("TYPE");
-			String path = (String)b.get("PATH");
-			String name = (String)b.get("NAME");
-			
-			FeedReference feed = mFeedController.getFeedReference(path, type, name);
-			if(!mFeedController.showFeed(feed)){
-				String error = this.getResources().getString(R.string.empty_feed) + " " + feed.getName();
-				Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
-				dk.nindroid.rss.settings.Settings.showingStream = false;
-			}else{
-				dk.nindroid.rss.settings.Settings.showingStream = true;
-				Toast.makeText(this, "Showing " + mFeedController.getShowing() + " images from " + path, Toast.LENGTH_SHORT).show();
-				if(selectedItem != null){
-					selectedItem.setTitle(R.string.cancel_show);
-				}
-			}
+			// Yay
 		}
 	}
 	
@@ -368,14 +327,10 @@ public class ShowStreams extends Activity {
 	private void cleanIfOld() {
 		SharedPreferences sp = getSharedPreferences("version", 0);
 		String oldVersion = sp.getString("version", "0.0.0");
-		if(isDeprecated(oldVersion)){
-			//String oldCache = this.getResources().getString(R.string.dataFolder) + "/exploreCache";
-			//oldCache = Environment.getExternalStorageDirectory().getAbsolutePath() + oldCache;
-			//File dir = new File(oldCache);
-			//if(dir.exists()){
-			//	ClearCache.deleteAll(dir);
-			//}
-			addDefaultLocalPaths();			
+		if(oldVersion == "0.0.0"){ // new install
+			addDefaultLocalPaths();
+		} else if(isDeprecated(oldVersion)){ // upgrade
+			mImageCache.cleanCache();
 		}
 		SharedPreferences.Editor editor = sp.edit(); 
 		editor.putString("version", version);
@@ -393,6 +348,7 @@ public class ShowStreams extends Activity {
 		mDbHelper.open();
 		mDbHelper.addFeed("Camera pictures", "/sdcard/DCIM", dk.nindroid.rss.settings.Settings.TYPE_LOCAL);
 		mDbHelper.addFeed("Downloads", "/sdcard/download", dk.nindroid.rss.settings.Settings.TYPE_LOCAL);
+		mDbHelper.addFeed(getString(R.string.flickrExplore), FlickrFeeder.getExplore(), dk.nindroid.rss.settings.Settings.TYPE_FLICKR);
 		mDbHelper.close();
 	}
 }

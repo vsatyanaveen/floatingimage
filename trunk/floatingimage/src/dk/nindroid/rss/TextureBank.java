@@ -76,7 +76,7 @@ public class TextureBank {
 		}
 		// If no new pictures, try some old ones.
 		// Do not show an image that's already being shown
-		if(Settings.useCache && !Settings.showingStream){
+		if(Settings.useCache){
 			ir = getCached();
 			
 			if(previousImage != null){
@@ -128,7 +128,11 @@ public class TextureBank {
 		}
 		return ir;
 	}
-	
+	public void reset(){
+		this.cached.clear();
+		this.unseen.clear();
+		this.mActiveBitmaps.clear();
+	}
 	public void stop(){
 		stopThreads = true;
 		synchronized(unseen){

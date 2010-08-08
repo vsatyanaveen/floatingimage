@@ -20,7 +20,7 @@ public class Fullscreen  extends Button {
 	}
 
 	@Override
-	public void click() {
+	public void click(long time) {
 		RiverRenderer.mDisplay.toggleFullscreen();
 	}
 
