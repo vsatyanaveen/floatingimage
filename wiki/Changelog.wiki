@@ -1,3 +1,10 @@
+_05/07-2010: 2.4.8_
+  * Full Picasa support, login and all
+  * Froyo App on SD-card support
+
+_27/06-2010: 2.4.7_
+  * Much improved Flickr support.
+
 _19/06-2010 (30 minutes later): 2.4.6_
   * Thinking about it, the fix from the previous version introduced different bugs. Should be fixed now.
 
