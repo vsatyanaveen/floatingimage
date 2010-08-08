@@ -55,7 +55,7 @@ public class FacebookFriendView extends ListActivity {
 		String url = null;
 		url = FacebookFeeder.getPhotos(id);
 		if(url != null){
-			returnResult(url, "Photos of " + id);
+			returnResult(url, "Photos of " + name);
 		}
 	}
 	

@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="error_showing_fetching_album_list">Error fetching album list. Click to try again.</string>
+    <string name="internal_error">Internal error caught, please contact the developer</string>
+    <string name="error_fetching_albums">Error fetching albums, please try again</string>
+    <string name="error_fetching_friends">Error fetching friends, please try again</string>
 </resources>

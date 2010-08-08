@@ -38,6 +38,7 @@ public class ManageFeedPreference extends Preference implements OnClickListener 
 		frame.setLongClickable(true);
 		frame.setOnClickListener(this);
 		final CheckBox checkbox = (CheckBox)view.findViewById(R.id.enabled);
+		checkbox.setClickable(false);
 		if(checkbox != null){
 			checkbox.setChecked(mEnabled);
 		}
