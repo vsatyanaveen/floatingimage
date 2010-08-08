@@ -11,7 +11,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import dk.nindroid.rss.flickr.FlickrFeeder;
 
-public class FlickrAlbumBrowser extends ListActivity {
+public class FlickrAlbumBrowser extends ListActivity implements GetAlbumsTask.Callback {
 	public final static String OWNER = "OWNER";
 	List<FlickrAlbum> albums;
 	
@@ -23,13 +23,7 @@ public class FlickrAlbumBrowser extends ListActivity {
 	
 	private void fillMenu(){
 		String owner = getIntent().getStringExtra(OWNER);
-		albums = FlickrFeeder.getAlbums(owner);
-		Collections.sort(albums);
-		String[] albumStrings = new String[albums.size()];
-		for(int i = 0; i < albums.size(); ++i){
-			albumStrings[i] = albums.get(i).getName();
-		}
-		setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, albumStrings));
+		new GetAlbumsTask(this, this).execute(owner);
 	}
 	
 	@Override
@@ -43,5 +37,20 @@ public class FlickrAlbumBrowser extends ListActivity {
 		intent.putExtras(b);
 		setResult(RESULT_OK, intent);
 		finish();
+	}
+
+	@Override
+	public void albumsFetched(List<FlickrAlbum> param) {
+		if(param == null){
+			finish();
+			return;
+		}
+		albums = param;
+		Collections.sort(albums);
+		String[] albumStrings = new String[albums.size()];
+		for(int i = 0; i < albums.size(); ++i){
+			albumStrings[i] = albums.get(i).getName();
+		}
+		setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, albumStrings));
 	}
 }

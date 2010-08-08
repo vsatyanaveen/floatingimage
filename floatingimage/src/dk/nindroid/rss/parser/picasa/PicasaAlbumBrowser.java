@@ -11,7 +11,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import dk.nindroid.rss.R;
 
-public class PicasaAlbumBrowser extends ListActivity {
+public class PicasaAlbumBrowser extends ListActivity implements GetAlbumsTask.Callback{
 	public final static String OWNER = "OWNER";
 	List<PicasaAlbum> albums;
 	String owner;
@@ -25,19 +25,7 @@ public class PicasaAlbumBrowser extends ListActivity {
 	}
 	
 	private void fillMenu(){
-		albums = PicasaFeeder.getAlbums(owner, this);
-		String[] albumStrings = null;
-		if(albums == null){
-			albumStrings = new String[]{getString(R.string.error_showing_fetching_album_list)};
-			error = true;
-		}else{
-			Collections.sort(albums);
-			albumStrings = new String[albums.size()];
-			for(int i = 0; i < albums.size(); ++i){
-				albumStrings[i] = albums.get(i).getTitle();
-			}
-		}
-		setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, albumStrings));
+		new GetAlbumsTask(this, this).execute(owner);
 	}
 	
 	@Override
@@ -56,5 +44,26 @@ public class PicasaAlbumBrowser extends ListActivity {
 			setResult(RESULT_OK, intent);
 			finish();
 		}
+	}
+
+	@Override
+	public void albumsFetched(List<PicasaAlbum> param) {
+		if(param == null){
+			finish();
+			return;
+		}
+		albums = param;
+		String[] albumStrings = null;
+		if(albums == null){
+			albumStrings = new String[]{getString(R.string.error_showing_fetching_album_list)};
+			error = true;
+		}else{
+			Collections.sort(albums);
+			albumStrings = new String[albums.size()];
+			for(int i = 0; i < albums.size(); ++i){
+				albumStrings[i] = albums.get(i).getTitle();
+			}
+		}
+		setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, albumStrings));
 	}
 }

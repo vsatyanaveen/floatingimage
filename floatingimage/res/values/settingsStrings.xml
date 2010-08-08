@@ -2,6 +2,7 @@
 <resources>
 	<string name="cancel">Cancel</string>
 	<string name="settings">Settings</string>
+	<string name="dismiss">Dismiss</string>
 	<string name="feeds">Feeds</string>
 	<!--  <string name="manageFeeds">Manage feeds</string> 
 	<string name="manageFeedsSummary">Choose which images to show</string> -->
@@ -72,4 +73,6 @@
 	<string name="facebookPhotosOfFriend">Show photos of</string>
 	<string name="facebookFriendsAlbums">Albums by</string>
 	<string name="facebookShowAlbum">show</string>
+	<string name="loadingAlbums">Loading albums...</string>
+	<string name="loadingFriends">Loading friends...</string>
 </resources>

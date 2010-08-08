@@ -2,7 +2,8 @@
 <resources>
     <string name="app_name">Floating Image</string>
     <string name="about">About</string>
-    <string name="about_text">Hello, I am your friendly neighbourhood programmer!\n\nFloating Image is a spare time project created in part as an attempt to bring a bit of eye candy to Android, in part to get some experience programming for the platform. Images from various sources are streamed to the phone in the stream you see floating by behind this box.\n\nImages with a blue glow have just been downloaded, where images with shadow are either taken from the phone locally, or from an image cache - not to worry, the cache is fairly small.\n\nSome Controls:\nNavigate stream: Swipe your finger sideways.\nPick image: Tap on it.\nGo to image homepage: Long click when selected.\n\nMore features are in the works, but I will of course gladly take advice on what would make this the killer application for you!\n\nThis application is free as in speech, which means that you may at any time request the code (I would however like improvements to float my way). It is also free as in beer, which means that if you like it, and happen to run into me, I encourage you to buy me a beer!</string>
+    <string name="aboutSummary">Shameless self promotion</string>
+    <string name="about_text">Hello, I am your friendly neighbourhood programmer!\n\nFloating Image is a spare time project created in part as an attempt to bring a bit of eye candy to Android, in part to get some experience programming for the platform. Images from various sources are streamed to the phone.\n\nImages with a blue glow have just been downloaded, where images with shadow are either taken from the phone locally, or from an image cache - not to worry, the cache is fairly small.\n\nSome Controls:\nNavigate stream: Swipe your finger sideways.\nPick image: Tap on it.\nGo to image homepage: Long click when selected.\n\nMore features are in the works, but I will of course gladly take advice on what would make this the killer application for you!\n\nThis application is free as in speech, which means that you may at any time request the code (I would however like improvements to float my way). It is also free as in beer, which means that if you like it, and happen to run into me, I encourage you to buy me a beer!</string>
 	<string name="dataFolder">/floatingImage</string>
 	<string name="exploreFolder">/.exploreCache</string>
 	<string name="fullscreen">Fullscreen</string>
@@ -16,10 +17,12 @@
 	<string name="go_to_source">Go to source</string>
 	<string name="save_image">Save image</string>
 	<string name="set_as_background">Set as background</string>
-	<string name="share_image">Share image</string>
 	<string name="user_agent">Floating image/Android</string>
 	<string name="empty_feed">No pictures found in feed</string>
 	<string name="authorize">Sign in</string>
 	<string name="unauthorize">Sign out</string>
 	<string name="please_wait">The gears are grinding... Please wait</string>
+	<string name="share_subject">Lookit, a picture!</string>
+	<string name="share_url">Share image URL</string>
+	<string name="share_image">Share image URL</string>
 </resources>

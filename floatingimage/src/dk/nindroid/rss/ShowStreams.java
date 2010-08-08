@@ -13,6 +13,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.hardware.SensorManager;
+import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.os.Environment;
@@ -146,6 +147,7 @@ public class ShowStreams extends Activity {
 			if(!(ir instanceof LocalImage)){
 				menu.add(0, CONTEXT_SAVE, 0, R.string.save_image);
 			}
+			menu.add(0, CONTEXT_SHARE, 0, R.string.share_image);
 		}else{
 			Toast.makeText(this, "No image selected...", Toast.LENGTH_SHORT).show();
 		}
@@ -178,6 +180,22 @@ public class ShowStreams extends Activity {
 			case CONTEXT_SAVE:
 				ir = renderer.getSelected();
 				ImageDownloader.downloadImage(ir.getOriginalImageUrl(), ir.getTitle());
+				return true;
+			case CONTEXT_SHARE:
+				Intent shareIntent = new Intent(android.content.Intent.ACTION_SEND);
+				ir = renderer.getSelected();
+				String shareString = "Share image";
+				if(ir instanceof LocalImage){
+					shareIntent.setType("image/jpeg");
+					shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(((LocalImage) ir).getFile()));
+					shareString = getString(R.string.share_image);
+				}else{
+					shareIntent.setType("text/plain");
+					shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, ir.getImagePageUrl());
+					shareString = getString(R.string.share_url);
+				}
+				shareIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, getString(R.string.share_subject));
+				startActivity(Intent.createChooser(shareIntent, shareString));
 				return true;
 		}
 		return super.onContextItemSelected(item);
