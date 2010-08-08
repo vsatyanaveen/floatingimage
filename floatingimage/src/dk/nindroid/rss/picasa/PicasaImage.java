@@ -11,15 +11,17 @@ import android.graphics.Bitmap.Config;
 import android.net.Uri;
 import dk.nindroid.rss.data.ImageReference;
 
-public class PicasaImage implements ImageReference{
+public class PicasaImage extends ImageReference{
 	private final static String imageType = "picasaInternal";
 	private final static Paint paint = new Paint();
 	String imgID;
 	String title;
 	String owner;
 	String sourceURL;
-	int thumbnailMax = 0;
-	String thumbnailURL;
+	int thumbnail128Max = 0;
+	int thumbnail256Max = 0;
+	String thumbnail128URL;
+	String thumbnail256URL;
 	String imageURL;
 	Bitmap bitmap;
 	boolean unseen;
@@ -44,12 +46,15 @@ public class PicasaImage implements ImageReference{
 	}
 	
 	public void setThumbnailURL(String source, int width, int height){
-		if(this.thumbnailURL != null){
-			if(thumbnailMax > 100 || thumbnailMax < Math.max(width, height)){
-				return;
-			}
+		int max = Math.max(width, height);
+		if((thumbnail128Max < 128 && max > thumbnail128Max) || (thumbnail128Max > 128 && max > 128)){ // smaller than target, and max is larger, og larger than target, and max is a closer fit.
+			thumbnail128Max = max;
+			this.thumbnail128URL = source;
 		}
-		this.thumbnailURL = source;
+		if((thumbnail256Max < 256 && max > thumbnail256Max) || (thumbnail256Max > 256 && max > 256)){ // Ditto
+			thumbnail256Max = max;
+			this.thumbnail256URL = source;
+		}
 	}
 	
 	public void setImageURL(String url){
@@ -120,7 +125,9 @@ public class PicasaImage implements ImageReference{
 		sb.append(nl);
 		sb.append(owner);
 		sb.append(nl);
-		sb.append(thumbnailURL);
+		sb.append(thumbnail128URL);
+		sb.append(nl);
+		sb.append(thumbnail256URL);
 		sb.append(nl);
 		sb.append(imageURL);
 		sb.append(nl);
@@ -135,7 +142,8 @@ public class PicasaImage implements ImageReference{
 		imgID = is.readLine();
 		title = is.readLine();
 		owner = is.readLine();
-		thumbnailURL = is.readLine();
+		thumbnail128URL = is.readLine();
+		thumbnail256URL = is.readLine();
 		imageURL = is.readLine();
 		sourceURL = is.readLine();
 		this.bitmap = bmp;
@@ -147,13 +155,13 @@ public class PicasaImage implements ImageReference{
 	}
 
 	@Override
-	public int getRotation() {
-		return 0;
+	public String get128ImageUrl() {
+		return thumbnail128URL;
 	}
-
+	
 	@Override
-	public String getSmallImageUrl() {
-		return thumbnailURL;
+	public String get256ImageUrl() {
+		return thumbnail256URL;
 	}
 
 	@Override
@@ -187,12 +195,12 @@ public class PicasaImage implements ImageReference{
 	}
 
 	@Override
-	public void set512Bitmap(Bitmap bitmap) {
-		this.bitmap = Bitmap.createBitmap(512, 512, Config.RGB_565);
+	public void set256Bitmap(Bitmap bitmap) {
+		this.bitmap = Bitmap.createBitmap(256, 256, Config.RGB_565);
 		Canvas cvs = new Canvas(this.bitmap);
 		cvs.drawBitmap(bitmap, 0, 0, paint);
-		this.width = bitmap.getWidth() / 512.0f;
-		this.height = bitmap.getHeight() / 512.0f;
+		this.width = bitmap.getWidth() / 256.0f;
+		this.height = bitmap.getHeight() / 256.0f;
 		bitmap.recycle();
 	}
 
@@ -200,5 +208,4 @@ public class PicasaImage implements ImageReference{
 	public void setOld() {
 		unseen = false;
 	}
-
 }

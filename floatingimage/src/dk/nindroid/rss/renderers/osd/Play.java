@@ -31,7 +31,7 @@ public class Play extends Button {
 	}
 
 	@Override
-	public void click() {
+	public void click(long time) {
 		if(playing){
 			playing = false;
 			mCurrentTex = mPlayTex;

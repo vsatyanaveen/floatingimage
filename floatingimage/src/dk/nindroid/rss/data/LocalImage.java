@@ -11,13 +11,14 @@ import android.graphics.Paint;
 import android.graphics.Bitmap.Config;
 import android.net.Uri;
 
-public class LocalImage implements ImageReference{
+public class LocalImage extends ImageReference{
+	public final static String imageType = "local";
 	private final static Paint paint = new Paint();
-	private final File 		mFile;
+	private 	  File 		mFile;
 	private 	  Bitmap 	mBitmap;
 	private 	  float		mWidth;
 	private 	  float		mHeight;
-	private int 			mRotation = 0;
+	private 	  float		mRotation = 0; // Use this when able to read EXIF
 	
 	public LocalImage(File file, int rotation){
 		this.mRotation = rotation;
@@ -62,17 +63,26 @@ public class LocalImage implements ImageReference{
 
 	@Override
 	public String getID() {
-		return mFile.getAbsolutePath();
+		return mFile.getAbsolutePath().replace('/', '_').replace('.', '_');
 	}
 
 	@Override
 	public String getImageID() {
-		return mFile.getAbsolutePath();
+		return mFile.getAbsolutePath().replace('/', '_').replace('.', '_');
 	}
 
 	@Override
 	public String getInfo() {
-		return null;
+		StringBuilder sb = new StringBuilder();
+		String nl = "\n";
+		sb.append(imageType);
+		sb.append(nl);
+		sb.append(mWidth);
+		sb.append(nl);
+		sb.append(mHeight);
+		sb.append(nl);
+		sb.append(mFile.getAbsolutePath());
+		return sb.toString();
 	}
 
 	@Override
@@ -83,7 +93,12 @@ public class LocalImage implements ImageReference{
 	}
 
 	@Override
-	public String getSmallImageUrl() {
+	public String get128ImageUrl() {
+		return null;
+	}
+	
+	@Override
+	public String get256ImageUrl() {
 		return null;
 	}
 
@@ -109,7 +124,10 @@ public class LocalImage implements ImageReference{
 
 	@Override
 	public void parseInfo(DataInputStream is, Bitmap bmp) throws IOException {
-		// No can do		
+		mWidth = Float.parseFloat(is.readLine());
+		mHeight = Float.parseFloat(is.readLine());
+		mFile = new File(is.readLine());
+		this.mBitmap = bmp;
 	}
 
 	@Override
@@ -121,27 +139,19 @@ public class LocalImage implements ImageReference{
 		this.mHeight = bmp.getHeight() / 128.0f;
 		bmp.recycle();
 	}
-
-	@Override
-	public void set512Bitmap(Bitmap bitmap) {
-		// No can do
-	}
 	
-	public void set1024Bitmap(Bitmap bmp){
-		this.mBitmap = Bitmap.createBitmap(1024, 1024, Config.RGB_565);
+	public void set256Bitmap(Bitmap bmp){
+		this.mBitmap = Bitmap.createBitmap(256, 256, Config.RGB_565);
 		Canvas cvs = new Canvas(this.mBitmap);
 		cvs.drawBitmap(bmp, 0, 0, paint);
-		this.mWidth = bmp.getWidth() / 1024.0f;
-		this.mHeight = bmp.getHeight() / 1024.0f;
+		this.mWidth = bmp.getWidth() / 256.0f;
+		this.mHeight = bmp.getHeight() / 256.0f;
 		bmp.recycle();
 	}
 
 	@Override
 	public void setOld() {
 		// No can do
-	}
-	public int getRotation(){
-		return this.mRotation;
 	}
 	
 	public File getFile(){

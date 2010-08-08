@@ -34,17 +34,6 @@ public class ClickHandler extends TimerTask {
 	public void run() {
 		mAction = ACTION_LONG_CLICK;
 		ShowStreams.current.runOnUiThread(new OpenContextMenu());
-		/*
-		((Vibrator)ShowStreams.current.getSystemService(Activity.VIBRATOR_SERVICE)).vibrate(100l);
-		
-		
-		Intent intent = renderer.followSelected();
-		if(intent != null){
-			ShowStreams.current.startActivity(intent);
-		}else{
-			ShowStreams.current.runOnUiThread(new Toaster("No image selected..."));
-		}
-		*/
 	}
 	
 	public static boolean onTouchEvent(MotionEvent event) {

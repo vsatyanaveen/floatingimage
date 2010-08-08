@@ -11,14 +11,15 @@ import android.graphics.Bitmap.Config;
 import android.net.Uri;
 import dk.nindroid.rss.data.ImageReference;
 
-public class FacebookImage implements ImageReference {
+public class FacebookImage extends ImageReference {
 
 	public final static String imageType = "facebook";
 	private final static Paint paint = new Paint();
 	String imgID;
 	String owner;
 	String sourceURL;
-	String thumbnailURL;
+	String thumb128URL;
+	String thumb256URL;
 	String pageURL;
 	Bitmap bitmap;
 	boolean unseen;
@@ -42,8 +43,12 @@ public class FacebookImage implements ImageReference {
 		this.pageURL = page;
 	}
 	
-	public void setThumbnailURL(String source){
-		this.thumbnailURL = source;
+	public void setThumbnail128URL(String source){
+		this.thumb128URL = source;
+	}
+
+	public void setThumbnail256URL(String source){
+		this.thumb256URL = source;
 	}
 		
 	@Override
@@ -108,7 +113,9 @@ public class FacebookImage implements ImageReference {
 		sb.append(nl);
 		sb.append(owner);
 		sb.append(nl);
-		sb.append(thumbnailURL);
+		sb.append(thumb128URL);
+		sb.append(nl);
+		sb.append(thumb256URL);
 		sb.append(nl);
 		sb.append(pageURL);
 		sb.append(nl);
@@ -122,7 +129,8 @@ public class FacebookImage implements ImageReference {
 		height = Float.parseFloat(is.readLine());
 		imgID = is.readLine();
 		owner = is.readLine();
-		thumbnailURL = is.readLine();
+		thumb128URL = is.readLine();
+		thumb256URL = is.readLine();
 		pageURL = is.readLine();
 		sourceURL = is.readLine();
 		this.bitmap = bmp;
@@ -134,13 +142,14 @@ public class FacebookImage implements ImageReference {
 	}
 
 	@Override
-	public int getRotation() {
-		return 0;
+	public String get128ImageUrl() {
+		return thumb128URL;
 	}
-
+	
 	@Override
-	public String getSmallImageUrl() {
-		return thumbnailURL;
+	public String get256ImageUrl() {
+		//return thumb256URL;
+		return getBigImageUrl();
 	}
 
 	@Override
@@ -174,12 +183,12 @@ public class FacebookImage implements ImageReference {
 	}
 
 	@Override
-	public void set512Bitmap(Bitmap bitmap) {
-		this.bitmap = Bitmap.createBitmap(512, 512, Config.RGB_565);
+	public void set256Bitmap(Bitmap bitmap) {
+		this.bitmap = Bitmap.createBitmap(256, 256, Config.RGB_565);
 		Canvas cvs = new Canvas(this.bitmap);
 		cvs.drawBitmap(bitmap, 0, 0, paint);
-		this.width = bitmap.getWidth() / 512.0f;
-		this.height = bitmap.getHeight() / 512.0f;
+		this.width = bitmap.getWidth() / 256.0f;
+		this.height = bitmap.getHeight() / 256.0f;
 		bitmap.recycle();
 	}
 

@@ -7,7 +7,7 @@ import android.opengl.GLUtils;
 import android.util.Log;
 
 public abstract class Button {
-	public abstract void click();
+	public abstract void click(long time);
 	public abstract int getTextureID();
 	public abstract void init(GL10 gl);
 	

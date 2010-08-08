@@ -17,6 +17,7 @@ import dk.nindroid.rss.ShowStreams;
 import dk.nindroid.rss.TextureBank;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.Ray;
+import dk.nindroid.rss.gfx.ImageUtil;
 import dk.nindroid.rss.gfx.Vec3f;
 import dk.nindroid.rss.helpers.MatrixTrackingGL;
 import dk.nindroid.rss.renderers.ImagePlane;
@@ -112,6 +113,7 @@ public class Image implements ImagePlane {
 	}
 	
 	public void revive(GL10 gl, long time){
+		Log.v("Floating Image", "Reviving image " + mID);
 		// Make sure the textures are redrawn after subactivity
 		if(!revivingTextureNulled){
 			revivingTextureNulled = true;
@@ -128,6 +130,27 @@ public class Image implements ImagePlane {
 			}
 		}
 	}
+	public void reset(GL10 gl, long time){
+		Log.v("Floating Image", "Resetting image " + mID);
+		if(mFocusBmp != null && !mFocusBmp.isRecycled()){
+			mFocusBmp.recycle();			
+		}
+		mFocusBmp = null;
+		mState = STATE_FLOATING;
+		if(mShowingImage != null && !mShowingImage.getBitmap().isRecycled()){
+			mShowingImage.getBitmap().recycle();			
+		}
+		mShowingImage = null;
+		if(mCurImage != null && !mCurImage.getBitmap().isRecycled()){
+			mCurImage.getBitmap().recycle();
+		}
+		mCurImage = null;
+		if(mLastImage != null && !mLastImage.getBitmap().isRecycled()){
+			mLastImage.getBitmap().recycle();
+		}
+		mLastImage = null;
+	}
+	
 	public boolean canSelect(){
 		if(mShowingImage == null){
 			return false;
@@ -188,7 +211,6 @@ public class Image implements ImagePlane {
 		mPos = new Vec3f(-FloatingRenderer.getFarRight(), mYPos, FloatingRenderer.mFloatZ);
 		reJitter();
 		mStartTime = startTime;
-				
 		ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
         tbb.order(ByteOrder.nativeOrder());
         mTexBuffer = tbb.asFloatBuffer();
@@ -239,14 +261,61 @@ public class Image implements ImagePlane {
 		mLineIndexBuffer.put(lineIndices);
 		mLineIndexBuffer.position(0);
 	}
-
+	
+	private float getRotationFraction(float rotation){
+		float fraction = Math.abs((float)Math.sin(rotation / 180.0f * Math.PI));
+		return fraction;
+	}
+	
 	private boolean isTall(){
-		boolean tall = maspect < RiverRenderer.mDisplay.getWidth() / RiverRenderer.mDisplay.getFocusedHeight();
+		return isTall(RiverRenderer.mDisplay.getWidth() / RiverRenderer.mDisplay.getFocusedHeight());
+	}
+	
+	private boolean isTall(float screenAspect){
+		boolean tall = maspect < screenAspect;
 		return tall;	
 	}
 	
+	public float getScale(float szX, float szY, boolean sideways){
+		float height = RiverRenderer.mDisplay.getFocusedHeight() * RiverRenderer.mDisplay.getFill();
+		float width = RiverRenderer.mDisplay.getWidth() * RiverRenderer.mDisplay.getFill();
+		if(sideways){
+			float scale = 1.0f;
+			if(szX > height){
+				scale = height / szX;
+				szY *= scale;
+			}
+			if(szY > width){
+				scale *= width / szY;
+			}
+			return scale;
+		}else{
+			float scale = 1.0f;
+			if(szX > width){
+				scale = width / szX;
+				szY *= scale;
+			}
+			if(szY > height){
+				scale *= height / szY;
+			}
+			return scale;
+		}
+	}
+	
+	public float getScale(float szX, float szY, long realTime){
+		float rotationFraction = Math.min(mShowingImage.getRotationFraction(realTime), 1.0f);
+		float rotationTarget = getRotationFraction(mShowingImage.getTargetOrientation());
+		float rotationOrg = getRotationFraction(mShowingImage.getPreviousOrientation());
+		
+		float targetScale = getScale(szX, szY, rotationTarget == 1.0f);
+		float orgScale = getScale(szX, szY, rotationOrg == 1.0f);
+		float scaleDiff = orgScale - targetScale;
+		float scale = orgScale - scaleDiff * ImageUtil.smoothstep(rotationFraction);
+		return scale;
+	}
+	
 	public void draw(MatrixTrackingGL gl, long time, long realTime){
-		if(mCurImage == null && mFocusBmp == null){
+		if(mShowingImage == null && !mLargeTex){
 			return;
 		}
 		
@@ -254,20 +323,38 @@ public class Image implements ImagePlane {
 		x = mPos.getX() + mJitter.getX();
 		y = mPos.getY() + mJitter.getY();
 		z = mPos.getZ() + mJitter.getZ();
-		if(isTall()){
-			szY = RiverRenderer.mDisplay.getFocusedHeight() * RiverRenderer.mDisplay.getFill();
-			szX = maspect * szY;
-		}else{
-			szX = RiverRenderer.mDisplay.getWidth() * RiverRenderer.mDisplay.getFill();
-			szY = szX / maspect;
+		if(mShowingImage != null){
+			szY = 5.0f; // Huge, since we only scale down.
+			szX = szY * maspect;
+			
+			float scale = getScale(szX, szY, realTime);
+			szX *= scale;
+			szY *= scale;
+		}else{ // Splash screen only!
+			if(isTall()){
+				szY = RiverRenderer.mDisplay.getFocusedHeight();
+				szY *= RiverRenderer.mDisplay.getFill();
+				
+				szX = maspect * szY;
+			}else{
+				szX = RiverRenderer.mDisplay.getWidth();
+				szX *= RiverRenderer.mDisplay.getFill();
+				
+				szY = szX / maspect;
+			}
 		}
+		
 		gl.glFrontFace(GL10.GL_CCW);
 		gl.glEnable(GL10.GL_TEXTURE_2D);
 		
 		gl.glPushMatrix();
 		
+		float rotation = mRotation;
+		if(mShowingImage != null){
+			rotation += mShowingImage.getRotation(realTime);
+		}
 		gl.glTranslatef(x, y, z);
-		gl.glRotatef(mRotation, 0, 0, 1);
+		gl.glRotatef(rotation, 0, 0, 1);
 		gl.glScalef(szX, szY, 1);
 		gl.glEnable(GL10.GL_BLEND);
 		
@@ -618,6 +705,7 @@ public class Image implements ImagePlane {
 	/************ Ray intersection ************/
 	
 	public float intersect(Ray r){
+		if(mShowingImage == null) return -1;
 		float posX = mPos.getX() + mJitter.getX();
 		float posY = mPos.getY() + mJitter.getY();
 		float posZ = mPos.getZ() + mJitter.getZ();
@@ -632,7 +720,7 @@ public class Image implements ImagePlane {
 		
 		float scaleX;
 		float scaleY;
-		if(isTall()){
+		if(isTall()){ // Close enough, doing this right requires lots of work. :(
 			scaleY = RiverRenderer.mDisplay.getFocusedHeight() * RiverRenderer.mDisplay.getFill();
 			scaleX = maspect * scaleY;
 		}else{

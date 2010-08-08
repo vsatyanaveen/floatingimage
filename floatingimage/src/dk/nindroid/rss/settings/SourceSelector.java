@@ -2,16 +2,15 @@ package dk.nindroid.rss.settings;
 
 import android.app.ListActivity;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.view.Menu;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import dk.nindroid.rss.R;
+import dk.nindroid.rss.gfx.ImageUtil;
+import dk.nindroid.rss.settings.SourceSelectorAdapter.Source;
 
 public class SourceSelector extends ListActivity {
-	public static final int		LOCAL = Menu.FIRST;
-	public static final int		FLICKR = Menu.FIRST + 1;
 	public static final int 	LOCAL_ACTIVITY  = 13;
 	public static final int 	FLICKR_ACTIVITY = 14;
 	public static final int 	PICASA_ACTIVITY = 15;
@@ -26,11 +25,23 @@ public class SourceSelector extends ListActivity {
 	
 	protected void fillMenu(){
 		String local = this.getResources().getString(R.string.local);
+		Bitmap localBmp = ImageUtil.readBitmap(this, R.drawable.phone_icon);
+		SourceSelectorAdapter.Source localS = new Source(local, localBmp, LOCAL_ACTIVITY);
+		
 		String flickr = this.getResources().getString(R.string.flickr);
+		Bitmap flickrBmp = ImageUtil.readBitmap(this, R.drawable.flickr_icon);
+		SourceSelectorAdapter.Source flickrS = new Source(flickr, flickrBmp, FLICKR_ACTIVITY);
+		
 		String picasa = this.getResources().getString(R.string.picasa);
+		Bitmap picasaBmp = ImageUtil.readBitmap(this, R.drawable.picasa_icon);
+		SourceSelectorAdapter.Source picasaS = new Source(picasa, picasaBmp, PICASA_ACTIVITY);
+		
 		String facebook = this.getResources().getString(R.string.facebook);
-		String[] options = new String[] {local, flickr, picasa, facebook};
-		setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, options));
+		Bitmap facebookBmp = ImageUtil.readBitmap(this, R.drawable.facebook_icon);
+		SourceSelectorAdapter.Source facebookS = new Source(facebook, facebookBmp, FACEBOOK_ACTIVITY);
+		
+		SourceSelectorAdapter.Source[] options = new Source[] {localS, flickrS, picasaS, facebookS};
+		setListAdapter(new SourceSelectorAdapter(this, options));
 	}
 	
 	@Override
@@ -53,6 +64,8 @@ public class SourceSelector extends ListActivity {
 			Intent showFacebook = new Intent(this, FacebookBrowser.class);
 			startActivityForResult(showFacebook, FACEBOOK_ACTIVITY);
 			break;
+		case 4:
+			finish(); // Cancel pressed!
 		}
 	}
 	

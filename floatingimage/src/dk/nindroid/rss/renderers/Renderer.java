@@ -19,4 +19,5 @@ public interface Renderer {
 	boolean slideRight(long realtime);
 	boolean slideLeft(long realtime);
 	void setBackground();
+	void resetImages();
 }

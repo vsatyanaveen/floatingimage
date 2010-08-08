@@ -2,11 +2,12 @@ package dk.nindroid.rss;
 
 import android.util.Log;
 import android.view.Surface;
+import dk.nindroid.rss.gfx.ImageUtil;
 import dk.nindroid.rss.orientation.OrientationSubscriber;
 import dk.nindroid.rss.settings.Settings;
 
 public class Display implements OrientationSubscriber {
-	private static final long		TURN_TIME = 500;
+	public static final long		TURN_TIME = 500;
 	private static final long		FULLSCREEN_TIME = 300;
 	private final static float		INFOBAR_HEIGHT = 80.0f;
 	private static final float		NORMAL_FILL = 0.90f;
@@ -31,16 +32,12 @@ public class Display implements OrientationSubscriber {
 		Settings.setFullscreen(mFullscreen);
 		Log.v("Display", "Fullscreen is " + mFullscreen);
 	}
-	
-	private float smoothstep(float val){
-		return Math.min(val * val * (3.0f - 2.0f * val), 1.0f);
-	}
-	
+		
 	public void setFrameTime(long time){
 		mFrameTime = time;
 		if(mFrameTime < mTurnedAt + TURN_TIME){
 			float fraction = 1.0f - ((float)((mTurnedAt + TURN_TIME) - mFrameTime)) / TURN_TIME;
-			fraction = smoothstep(fraction);
+			fraction = ImageUtil.smoothstep(fraction);
 			mWidth = (mTargetWidth - mPreviousWidth) * fraction + mPreviousWidth;
 			mHeight = (mTargetHeight - mPreviousHeight) * fraction + mPreviousHeight;
 			mWidthPixels = (int)((mTargetWidthPixels - mPreviousWidthPixels) * fraction + mPreviousHeight);
@@ -61,7 +58,7 @@ public class Display implements OrientationSubscriber {
 		if(mTargetInfoBarHeight != mInfoBarHeight){
 			if(mFrameTime < mFullscreenAt + FULLSCREEN_TIME){
 				float fraction = 1.0f - ((float)((mFullscreenAt + FULLSCREEN_TIME) - mFrameTime)) / FULLSCREEN_TIME;
-				fraction = smoothstep(fraction);
+				fraction = ImageUtil.smoothstep(fraction);
 				mInfoBarHeight = (mTargetInfoBarHeight - mPreviousInfoBarHeight) * fraction + mPreviousInfoBarHeight;
 				mFocusedHeight = calcFocusedHeight(mHeight, mHeightPixels);
 				mFill = (mTargetFill - mPreviousFill) * fraction + mPreviousFill;

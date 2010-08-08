@@ -43,7 +43,7 @@ public class FlickrFeeder {
 	private static final String EXPLORE = "http://api.flickr.com/services/rest/?api_key=" + API_KEY + "&auth_token=&method=flickr.interestingness.getList&per_page=500";
 	private static final String FIND_BY_USERNAME = "http://api.flickr.com/services/rest/?api_key=" + API_KEY + "&auth_token=&method=flickr.people.findByUsername&username=";
 	private static final String GET_PUBLIC_PHOTOS = "http://api.flickr.com/services/rest/?api_key=" + API_KEY + "&auth_token=&method=flickr.people.getPublicPhotos&per_page=500&user_id=";
-	private static final String SEARCH = "http://api.flickr.com/services/rest/?api_key=" + API_KEY + "&auth_token=&method=flickr.photos.search&per_page=500&safe_search=2&tags=";
+	private static final String SEARCH = "http://api.flickr.com/services/rest/?api_key=" + API_KEY + "&auth_token=&method=flickr.photos.search&per_page=500&safe_search=1&tags=";
 	private static final String IMAGE_SIZES = "http://api.flickr.com/services/rest/?api_key=" + API_KEY + "&method=flickr.photos.getSizes&photo_id=";
 	private static final String CONTACTS_PHOTOS = "http://api.flickr.com/services/rest/?api_key=" + API_KEY + "&auth_token=&count=500&method=flickr.photos.getContactsPhotos";
 	private static final String PHOTOS_FROM_HERE = "http://api.flickr.com/services/rest/?accuracy=8&api_key=" + API_KEY + "&auth_token=&lat=&lon=&method=flickr.photos.search&per_page=500&radius=5";	

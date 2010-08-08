@@ -33,8 +33,11 @@ public class FeedsDbAdapter {
      * Database creation sql statement
      */
     private static final String DATABASE_CREATE =
-            "create table feeds (_id integer primary key autoincrement, "
-                    + "type integer not null, uri text not null, title text not null);";
+            					"create table feeds ("
+            				  + KEY_ROWID +" integer primary key autoincrement, "
+            				  + KEY_TYPE + " integer not null, " 
+            				  + KEY_URI + " text not null, " 
+            				  + KEY_TITLE + " text not null);";
 
     private static final String DATABASE_NAME = "floatingImage";
     private static final String DATABASE_TABLE = "feeds";
@@ -58,13 +61,13 @@ public class FeedsDbAdapter {
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
                     + newVersion + ", which will destroy all old data");
-            db.execSQL("DROP TABLE IF EXISTS feeds");
+            db.execSQL("DROP TABLE IF EXISTS " + DATABASE_TABLE);
             onCreate(db);
         }
     }
     
     public void deleteAll(){
-    	mDb.execSQL("DROP TABLE IF EXISTS feeds");
+    	mDb.execSQL("DROP TABLE IF EXISTS " + DATABASE_TABLE);
     	mDbHelper.onCreate(mDb);
     }
 
@@ -112,6 +115,7 @@ public class FeedsDbAdapter {
         initialValues.put(KEY_TITLE, title);
         initialValues.put(KEY_URI, uri);
         initialValues.put(KEY_TYPE, type);
+        //initialValues.put(KEY_ENABLED, enabled ? 1 : 0);
 
         return mDb.insert(DATABASE_TABLE, null, initialValues);
     }
@@ -169,7 +173,7 @@ public class FeedsDbAdapter {
      * @param body value to set note body to
      * @return true if the note was successfully updated, false otherwise
      */
-    public boolean updateFeed(long rowId, String title, String body, int type) {
+    public boolean updateFeed(long rowId, String title, String body, int type, boolean enabled) {
         ContentValues args = new ContentValues();
         args.put(KEY_TITLE, title);
         args.put(KEY_URI, body);

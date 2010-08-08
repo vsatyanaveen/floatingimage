@@ -15,6 +15,7 @@ import dk.nindroid.rss.RiverRenderer;
 import dk.nindroid.rss.ShowStreams;
 import dk.nindroid.rss.TextureSelector;
 import dk.nindroid.rss.data.ImageReference;
+import dk.nindroid.rss.gfx.ImageUtil;
 import dk.nindroid.rss.gfx.Vec3f;
 import dk.nindroid.rss.renderers.ImagePlane;
 import dk.nindroid.rss.uiActivities.Toaster;
@@ -108,12 +109,12 @@ public class Image implements ImagePlane {
 		mIndexBuffer.put(indices);
 		mIndexBuffer.position(0);
 	}
-	
+	/*
 	private boolean isTall(){
 		boolean tall = mAspect < RiverRenderer.mDisplay.getWidth() / RiverRenderer.mDisplay.getFocusedHeight();
 		return tall	;	
 	}
-	
+	*/
 	public void setImage(GL10 gl, ImageReference image){
 		if(image == null)
 			return;
@@ -161,7 +162,50 @@ public class Image implements ImagePlane {
 		mTextureSelector.stopThread();
 	}
 	
-	public void render(GL10 gl){
+	private float getRotationFraction(float rotation){
+		float fraction = Math.abs((float)Math.sin(rotation / 180.0f * Math.PI));
+		return fraction;
+	}
+	
+	public float getScale(float szX, float szY, boolean sideways){
+		float height = RiverRenderer.mDisplay.getFocusedHeight() * RiverRenderer.mDisplay.getFill();
+		float width = RiverRenderer.mDisplay.getWidth() * RiverRenderer.mDisplay.getFill();
+		if(sideways){
+			float scale = 1.0f;
+			if(szX > height){
+				scale = height / szX;
+				szY *= scale;
+			}
+			if(szY > width){
+				scale *= width / szY;
+			}
+			return scale;
+		}else{
+			float scale = 1.0f;
+			if(szX > width){
+				scale = width / szX;
+				szY *= scale;
+			}
+			if(szY > height){
+				scale *= height / szY;
+			}
+			return scale;
+		}
+	}
+	
+	public float getScale(float szX, float szY, long realTime){
+		float rotationFraction = Math.min(mImage.getRotationFraction(realTime), 1.0f);
+		float rotationTarget = getRotationFraction(mImage.getTargetOrientation());
+		float rotationOrg = getRotationFraction(mImage.getPreviousOrientation());
+		
+		float targetScale = getScale(szX, szY, rotationTarget == 1.0f);
+		float orgScale = getScale(szX, szY, rotationOrg == 1.0f);
+		float scaleDiff = orgScale - targetScale;
+		float scale = orgScale - scaleDiff * ImageUtil.smoothstep(rotationFraction);
+		return scale;
+	}
+	
+	public void render(GL10 gl, long time){
 		if(this.mSetLargeTexture){
 			setTexture(gl, mLargeTextureID, true);
 			mSetLargeTexture = false;
@@ -170,11 +214,24 @@ public class Image implements ImagePlane {
 			setTexture(gl, mTextureID, mHasBitmap);
 			mRevive = false;
 		}
+		if(this.mImage == null){
+			return;
+		}
 		
 		float x, y, z, szX, szY;
 		x = mPos.getX();
 		y = mPos.getY();
 		z = mPos.getZ();
+		
+		szY = 5.0f; // Huge, since we only scale down.
+		szX = szY * mAspect;
+		
+		float scale = getScale(szX, szY, time);
+		szX *= scale;
+		szY *= scale;
+		
+		/*
+		// Doesn't support rotation, but is much more efficient than above. :P 
 		if(isTall()){
 			szY = RiverRenderer.mDisplay.getFocusedHeight() * RiverRenderer.mDisplay.getFill();
 			szX = mAspect * szY;
@@ -182,6 +239,7 @@ public class Image implements ImagePlane {
 			szX = RiverRenderer.mDisplay.getWidth() * RiverRenderer.mDisplay.getFill();
 			szY = szX / mAspect;
 		}
+		*/
 		gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_REPLACE);
 		gl.glFrontFace(GL10.GL_CCW);
 		gl.glEnable(GL10.GL_TEXTURE_2D);
@@ -202,6 +260,7 @@ public class Image implements ImagePlane {
 		gl.glPushMatrix();
 				
 		gl.glTranslatef(x, y, z);
+		gl.glRotatef(mImage.getRotation(time), 0, 0, 1.0f);
 		gl.glScalef(szX, szY, 1);
 		gl.glDrawElements(GL10.GL_TRIANGLE_STRIP, 4, GL10.GL_UNSIGNED_BYTE, mIndexBuffer);
 		

@@ -19,7 +19,7 @@ import dk.nindroid.rss.renderers.floating.GlowImage;
 import dk.nindroid.rss.renderers.floating.ShadowPainter;
 
 public class RiverRenderer implements GLSurfaceView.Renderer {
-	public static Display		mDisplay;
+	public static Display	mDisplay;
 	
 	private boolean 		mTranslucentBackground = false;
 	private boolean			mMoveEventHandled = false;
@@ -84,14 +84,14 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	        
 	        //gl.glScalef(0.25f, 0.25f, 1.0f);
 	        long realTime = System.currentTimeMillis();
-	        /*
+	        //*
 	        ++mFrames;
 	        if(realTime - mLastFrameTime > 1000){
 	        	Log.v("Floating Image", "Framerate is " + mFrames + " frames per second");
 	        	mFrames = 0;
 	        	mLastFrameTime = realTime;
 	        }
-	        */
+	        //*/
 	        fadeOffset(realTime);
 	        long time = realTime + mOffset;
 	        mDisplay.setFrameTime(realTime);
@@ -178,6 +178,11 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
             };
             return configSpec;
         }
+	}
+	
+	public void resetImages(){
+		Log.v("Floating Image", "Resetting images");
+		mRenderer.resetImages();
 	}
 
 	@Override
@@ -305,7 +310,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 			y = mDisplay.getHeightPixels() - y;
 		}
 		
-		if(!mOSD.click(x, y)){
+		if(!mOSD.click(x, y, System.currentTimeMillis())){ // This is ok, we're using realtime for the OSD
 			mClicked = true;
 			mClickedPos = new Vec2f((x/mDisplay.getWidthPixels() * 2.0f - 1.0f) * mDisplay.getWidth() / 2.0f, -(y / mDisplay.getHeightPixels() * 2.0f - 1.0f) * mDisplay.getHeight() / 2.0f);
 		}

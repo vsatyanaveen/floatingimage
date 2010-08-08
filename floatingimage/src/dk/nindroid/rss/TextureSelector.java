@@ -76,7 +76,7 @@ public class TextureSelector {
 						// Retry max 5 times in case we time out.
 						for(int i = 0; i < 5; ++i){
 							Bitmap bmp = BitmapDownloader.downloadImage(url, progress);
-							if(bmp != null){
+							if(bmp != null && bmp.getWidth() > 0 && bmp.getHeight() > 0){
 								applyLarge(bmp);
 								break;
 							}else{
