@@ -1,3 +1,11 @@
+_08/08-2010: 2.5.0_
+  * Manual image rotation
+  * Improved image source management.
+  * Option for high quality thumbnails
+  * Image sharing (Share URL on online images).
+  * Certain bugs killed.
+  * High res launcher icon
+
 _05/07-2010: 2.4.8_
   * Full Picasa support, login and all
   * Froyo App on SD-card support
