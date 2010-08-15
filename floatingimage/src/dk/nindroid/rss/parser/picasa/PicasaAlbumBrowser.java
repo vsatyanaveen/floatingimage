@@ -40,6 +40,7 @@ public class PicasaAlbumBrowser extends ListActivity implements GetAlbumsTask.Ca
 			Bundle b = new Bundle();
 			b.putString("PATH", url);
 			b.putString("NAME", albums.get(position).getTitle());
+			b.putString("EXTRAS", getString(R.string.albumBy) + " " + owner);
 			intent.putExtras(b);
 			setResult(RESULT_OK, intent);
 			finish();

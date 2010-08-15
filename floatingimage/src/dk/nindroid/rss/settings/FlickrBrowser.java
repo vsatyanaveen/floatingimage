@@ -140,6 +140,8 @@ public class FlickrBrowser extends ListActivity {
 			switch(requestCode){
 			case MY_ALBUMS:
 				setResult(RESULT_OK, data);
+				Bundle b = data.getExtras();
+				b.putString("EXTRAS", getString(R.string.albumBy) + " " + getString(R.string.me));
 				finish();
 				break;
 			}

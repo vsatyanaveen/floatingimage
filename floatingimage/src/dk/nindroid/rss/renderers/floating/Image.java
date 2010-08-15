@@ -49,7 +49,6 @@ public class Image implements ImagePlane {
 	private Random			mRand;
 	private TextureBank 	mbank;
 	private final long		mStartTime;
-	private final long 		mTraversal;
 	private ImageReference 	mCurImage;
 	private ImageReference 	mLastImage;
 	private ImageReference 	mShowingImage;
@@ -113,7 +112,6 @@ public class Image implements ImagePlane {
 	}
 	
 	public void revive(GL10 gl, long time){
-		Log.v("Floating Image", "Reviving image " + mID);
 		// Make sure the textures are redrawn after subactivity
 		if(!revivingTextureNulled){
 			revivingTextureNulled = true;
@@ -125,13 +123,12 @@ public class Image implements ImagePlane {
 			setFocusTexture(gl);
 		}else{
 			if(mShowingImage != null){
-				mRotations = (int)((time - mStartTime) / mTraversal) + 1;
+				mRotations = (int)((time - mStartTime) / Settings.floatingTraversal) + 1;
 				setTexture(gl, mShowingImage);
 			}
 		}
 	}
 	public void reset(GL10 gl, long time){
-		Log.v("Floating Image", "Resetting image " + mID);
 		if(mFocusBmp != null && !mFocusBmp.isRecycled()){
 			mFocusBmp.recycle();			
 		}
@@ -198,9 +195,8 @@ public class Image implements ImagePlane {
 		return mYPos * RiverRenderer.mDisplay.getFocusedHeight();
 	}
 	
-	public Image(TextureBank bank, long traversal, Pos layer, long startTime){
+	public Image(TextureBank bank, Pos layer, long startTime){
 		this.mID = ids++;
-		mTraversal = traversal;
 		mbank = bank;
 		mRand = new Random(startTime + mID);
 		switch(layer){
@@ -423,7 +419,7 @@ public class Image implements ImagePlane {
 	}
 	
 	private float getXPos(long relativeTime){
-		return -FloatingRenderer.getFarRight() + (((float)(relativeTime % mTraversal) / mTraversal) * FloatingRenderer.getFarRight() * 2);
+		return -FloatingRenderer.getFarRight() + (((float)(relativeTime % Settings.floatingTraversal) / Settings.floatingTraversal) * FloatingRenderer.getFarRight() * 2);
 	}
 	
 	private boolean updateFloating(GL10 gl, long time){
@@ -433,9 +429,9 @@ public class Image implements ImagePlane {
 		mPos.setZ(FloatingRenderer.mFloatZ);
 		mPos.setY(getYPos()); 
 		mPos.setX(getXPos(totalTime));
-		boolean isInRewind = totalTime < mTraversal * (mRotations - 1);
+		boolean isInRewind = totalTime < Settings.floatingTraversal * (mRotations - 1);
 		// Get new texture...
-		if(totalTime > mTraversal * mRotations && !isInRewind){
+		if(totalTime > Settings.floatingTraversal * mRotations && !isInRewind){
         	reJitter();
         	depthChanged = true;
         	resetTexture(gl);
@@ -450,7 +446,7 @@ public class Image implements ImagePlane {
         	mRewinding = true;
         }
 		// Exit rewinding mode
-		if(mRewinding && totalTime > mTraversal * (mRotations - 1)){
+		if(mRewinding && totalTime > Settings.floatingTraversal * (mRotations - 1)){
 			resetTexture(gl);
 			mRewinding = false;
 		}
@@ -494,7 +490,7 @@ public class Image implements ImagePlane {
 		if(fraction > 1){
 			mRotation = mRotationSaved;
 			long totalTime = time - mStartTime;
-			mRotations = (int)(totalTime / mTraversal) + 1;
+			mRotations = (int)(totalTime / Settings.floatingTraversal) + 1;
 			mState = STATE_FLOATING;
 			mRewinding = false;
 			if(mShowingImage != null){
@@ -584,6 +580,9 @@ public class Image implements ImagePlane {
     	if(mCurImage != null){
     		setTexture(gl, mCurImage);
     		mShowingImage = mCurImage;
+    	}else{
+    		this.mFocusBmp = null;
+    		this.mLargeTex = false;
     	}
 	}
 	

@@ -2,6 +2,8 @@ package dk.nindroid.rss.settings;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.view.Display;
+import android.view.WindowManager;
 
 public class Settings {
 	public static final int TYPE_LOCAL  = 1;
@@ -29,6 +31,7 @@ public class Settings {
 	public static long	 	slideSpeed;
 	public static boolean	imageDecorations;
 	public static boolean	highResThumbs;
+	public static long		floatingTraversal;
 	
 	public static boolean fullscreen;
 
@@ -42,11 +45,17 @@ public class Settings {
 		downloadDir = sp.getString("downloadDir", "/sdcard/download/");
 		fullscreen = sp.getBoolean("fullscreen", false);
 		mode = parseMode(sp.getString("mode", "5000"));
-		slideshowInterval = Long.parseLong(sp.getString("slideInterval", "5000"));
+		slideshowInterval = Long.parseLong(sp.getString("slideInterval", "10000"));
 		slideSpeed = Long.parseLong(sp.getString("slideSpeed", "300"));
 		fullscreenBlack = sp.getBoolean("fullscreenBlack", true);
 		imageDecorations = sp.getBoolean("imageDecorations", true);
 		highResThumbs = sp.getBoolean("highResThumbs", false);
+		floatingTraversal = Long.parseLong(sp.getString("floatingSpeed", "30000"));
+		
+		Display display = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+		if(display.getWidth() < 400){
+			highResThumbs = false;
+		}
 	}
 
 	private static int parseMode(String mode){

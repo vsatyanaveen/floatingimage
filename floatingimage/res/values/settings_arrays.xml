@@ -68,4 +68,16 @@
 		<item>1000</item>
 		<item>3000</item>
 	</string-array>
+	
+	<string-array name="floatingSpeedDescriptions">
+		<item>fast</item>
+		<item>normal</item>
+		<item>slow</item>
+	</string-array>
+	
+	<string-array name="floatingSpeedValues">
+		<item>15000</item>
+		<item>30000</item>
+		<item>60000</item>
+	</string-array>
 </resources>

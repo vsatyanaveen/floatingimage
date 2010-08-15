@@ -71,6 +71,7 @@ public class FacebookFriendView extends ListActivity {
 		if(resultCode == RESULT_OK){
 			switch(requestCode){
 			case ALBUMS:
+				data.putExtra("EXTRAS", getString(R.string.albumBy) + " " + name);
 				setResult(RESULT_OK, data);
 				finish();
 				break;

@@ -2,8 +2,6 @@ package dk.nindroid.rss.settings;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,33 +22,21 @@ public class SourceSelectorAdapter extends BaseAdapter {
 	
 	@Override
 	public int getCount() {
-		return mItems.length + 1;
+		return mItems.length;
 	}
 
 	@Override
 	public Object getItem(int position) {
-		if(position == mItems.length) return null;
 		return mItems[position];
 	}
 
 	@Override
 	public long getItemId(int position) {
-		if(position == mItems.length) return 0l;
 		return mItems[position].id;
 	}
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		if(position == mItems.length){
-			// Cancel item;
-			TextView text = new TextView(mContext);
-			text.setText(mContext.getString(R.string.cancel));
-			text.setTextSize(20);
-			text.setGravity(Gravity.CENTER_HORIZONTAL);
-			text.setTextColor(Color.WHITE);
-			text.setBackgroundColor(Color.DKGRAY);
-			return text;
-		}
 		LinearLayout itemLayout;
 		Source s = mItems[position];
 		if(convertView != null && convertView instanceof LinearLayout){

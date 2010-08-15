@@ -324,7 +324,7 @@ public class OSD {
         
 		float width = 64.0f / RiverRenderer.mDisplay.getWidthPixels() * RiverRenderer.mDisplay.getWidth();
 		float height = toScreenHeight(64);
-		float dx = -RiverRenderer.mDisplay.getWidth() + width * 1.2f;
+		float dx = -RiverRenderer.mDisplay.getWidth() + width * 1.75f;
 		float outsideLeft = -RiverRenderer.mDisplay.getWidth() - width;
         float outsideRight = RiverRenderer.mDisplay.getWidth() + width;
         
@@ -361,17 +361,17 @@ public class OSD {
 	private void drawRotationBoxes(GL10 gl, float yPos){
 		float height = 80.0f / RiverRenderer.mDisplay.getWidthPixels() * RiverRenderer.mDisplay.getWidth();
 		float width = height;
-		float left = -RiverRenderer.mDisplay.getWidth() + width;
-        float right = RiverRenderer.mDisplay.getWidth() - width;
+		float left = -RiverRenderer.mDisplay.getWidth() + width * 1.125f;
+        float right = RiverRenderer.mDisplay.getWidth() - width * 1.125f;
         //gl.glDisable(GL10.GL_TEXTURE_2D);
         //gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
 		gl.glPushMatrix();
 			gl.glTranslatef(left, yPos, -1.0f);
-			drawRotationBox(gl, width, height);
+			drawRotationBox(gl, width * 1.25f, height);
 		gl.glPopMatrix();
 		gl.glPushMatrix();
 			gl.glTranslatef(right, yPos, -1.0f);
-			drawRotationBox(gl, width, height);
+			drawRotationBox(gl, width * 1.25f, height);
 		gl.glPopMatrix();
 	}
 	
@@ -440,14 +440,14 @@ public class OSD {
 			}
 			if(mShowRotation && mRotateClockwise.doShow()){ // CounterClockwise is shown if clockwise is...
 				int middle = RiverRenderer.mDisplay.getHeightPixels() / 4;
-				int top = middle - 40;
-				int bottom = middle + 40;
+				int top = middle - 50;
+				int bottom = middle + 50;
 				if(y > top && y < bottom){
 					if(x < 80){
 						mExtendDisplayTime = true;
 						mRotateClockwise.click(time);
 						return true;
-					}else if (x > RiverRenderer.mDisplay.getWidthPixels() - 80){
+					}else if (x > RiverRenderer.mDisplay.getWidthPixels() - 100){
 						mExtendDisplayTime = true;
 						mRotateCounterClockwise.click(time);
 						return true;

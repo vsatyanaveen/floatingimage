@@ -25,21 +25,24 @@
                 android:summary="@string/modeSummary"
                 android:entries="@array/displayModeDescriptions"
                 android:entryValues="@array/displayModeValues"
-                android:dialogTitle="@string/modeTitle" />
+                android:dialogTitle="@string/modeTitle"
+                android:defaultValue="floatingImages" />
             <ListPreference
                 android:key="slideInterval"
                 android:title="@string/slideInterval"
                 android:summary="@string/slideIntervalSummary"
                 android:entries="@array/slideIntervalDescriptions"
                 android:entryValues="@array/slideIntervalValues"
-                android:dialogTitle="@string/slideIntervalTitle" />
+                android:dialogTitle="@string/slideIntervalTitle"
+                android:defaultValue="10000" />
             <ListPreference
                 android:key="slideSpeed"
                 android:title="@string/slideSpeed"
                 android:summary="@string/slideSpeedSummary"
                 android:entries="@array/slideSpeedDescriptions"
                 android:entryValues="@array/slideSpeedValues"
-                android:dialogTitle="@string/slideSpeedTitle" />
+                android:dialogTitle="@string/slideSpeedTitle"
+                android:defaultValue="300" />
     </PreferenceCategory>
     <PreferenceCategory
             android:title="@string/floating">
@@ -63,6 +66,14 @@
             	android:title="@string/useHighResThumbs"
             	android:summary="@string/useHighResThumbsSummary"
             	android:defaultValue="false" />
+            <ListPreference
+                android:key="floatingSpeed"
+                android:title="@string/floatingSpeed"
+                android:summary="@string/floatingSpeedSummary"
+                android:entries="@array/floatingSpeedDescriptions"
+                android:entryValues="@array/floatingSpeedValues"
+                android:dialogTitle="@string/floatingSpeedTitle"
+                android:defaultValue="30000" />
     </PreferenceCategory>
     <PreferenceCategory
             android:title="@string/internals">

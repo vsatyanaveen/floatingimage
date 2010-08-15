@@ -62,7 +62,7 @@ public class ShowStreams extends Activity {
 	public static final int				CONTEXT_SHARE 	= Menu.FIRST + 3;
 	public static final int				MENU_IMAGE_CONTEXT = 13;
 	public static final int				MISC_ROW_ID		= 201;
-	public static final String 			version 		= "2.5.0";
+	public static final String 			version 		= "2.5.1";
 	public static ShowStreams 			current;
 	private GLSurfaceView 				mGLSurfaceView;
 	private RiverRenderer 				renderer;
@@ -345,10 +345,9 @@ public class ShowStreams extends Activity {
 	private void cleanIfOld() {
 		SharedPreferences sp = getSharedPreferences("version", 0);
 		String oldVersion = sp.getString("version", "0.0.0");
-		if(oldVersion == "0.0.0"){ // new install
-			addDefaultLocalPaths();
-		} else if(isDeprecated(oldVersion)){ // upgrade
+		if(isDeprecated(oldVersion)){ // upgrade
 			mImageCache.cleanCache();
+			addDefaultLocalPaths();
 		}
 		SharedPreferences.Editor editor = sp.edit(); 
 		editor.putString("version", version);
@@ -362,11 +361,16 @@ public class ShowStreams extends Activity {
 	}
 
 	private void addDefaultLocalPaths() {
+		File phonePhotos = new File("/emmc");
+		
 		FeedsDbAdapter mDbHelper = new FeedsDbAdapter(this);
 		mDbHelper.open();
-		mDbHelper.addFeed("Camera pictures", "/sdcard/DCIM", dk.nindroid.rss.settings.Settings.TYPE_LOCAL);
-		mDbHelper.addFeed("Downloads", "/sdcard/download", dk.nindroid.rss.settings.Settings.TYPE_LOCAL);
-		mDbHelper.addFeed(getString(R.string.flickrExplore), FlickrFeeder.getExplore(), dk.nindroid.rss.settings.Settings.TYPE_FLICKR);
+		mDbHelper.addFeed(getString(R.string.cameraPictures), "/sdcard/DCIM", dk.nindroid.rss.settings.Settings.TYPE_LOCAL, "");
+		if(phonePhotos.exists()){
+			mDbHelper.addFeed(getString(R.string.moreCameraPictures), "/emmc/DCIM", dk.nindroid.rss.settings.Settings.TYPE_LOCAL, "");
+		}
+		mDbHelper.addFeed(getString(R.string.Downloads), "/sdcard/download", dk.nindroid.rss.settings.Settings.TYPE_LOCAL, "");
+		mDbHelper.addFeed(getString(R.string.flickrExplore), FlickrFeeder.getExplore(), dk.nindroid.rss.settings.Settings.TYPE_FLICKR, "");
 		mDbHelper.close();
 	}
 }

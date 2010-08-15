@@ -84,7 +84,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	        
 	        //gl.glScalef(0.25f, 0.25f, 1.0f);
 	        long realTime = System.currentTimeMillis();
-	        //*
+	        /*
 	        ++mFrames;
 	        if(realTime - mLastFrameTime > 1000){
 	        	Log.v("Floating Image", "Framerate is " + mFrames + " frames per second");
@@ -93,7 +93,9 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	        }
 	        //*/
 	        fadeOffset(realTime);
+	        mOffset = mRenderer.editOffset(mOffset, realTime);
 	        long time = realTime + mOffset;
+	        
 	        mDisplay.setFrameTime(realTime);
 	        if(mShowOSD){
 	        	mShowOSD = false;

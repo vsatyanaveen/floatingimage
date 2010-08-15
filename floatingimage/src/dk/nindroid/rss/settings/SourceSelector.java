@@ -64,8 +64,6 @@ public class SourceSelector extends ListActivity {
 			Intent showFacebook = new Intent(this, FacebookBrowser.class);
 			startActivityForResult(showFacebook, FACEBOOK_ACTIVITY);
 			break;
-		case 4:
-			finish(); // Cancel pressed!
 		}
 	}
 	
