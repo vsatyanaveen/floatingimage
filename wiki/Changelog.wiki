@@ -1,3 +1,10 @@
+_15/08-2010: 2.5.1_
+  * Preventing the user from rewinding too far (about a screen length), as the images will just repeat.
+  * Fix Picasa Album view.
+  * Show who owns the seleted album in the feed manager.
+  * The speed of the floating stream is now adjustable.
+  * Small UI fixes here and there.
+
 _08/08-2010: 2.5.0_
   * Manual image rotation
   * Improved image source management.
