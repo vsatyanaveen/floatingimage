@@ -127,6 +127,7 @@ public class FacebookBrowser extends ListActivity {
 		if(resultCode == RESULT_OK){
 			switch(requestCode){
 			case MY_ALBUMS:
+				data.putExtra("EXTRAS", getString(R.string.albumBy) + " " + getString(R.string.me));
 			case FRIENDS:
 				setResult(RESULT_OK, data);
 				finish();

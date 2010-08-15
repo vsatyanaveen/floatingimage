@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.TextView;
 import dk.nindroid.rss.R;
 
 public class ManageFeedPreference extends Preference implements OnClickListener {

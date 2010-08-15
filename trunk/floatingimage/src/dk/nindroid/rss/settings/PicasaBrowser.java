@@ -38,6 +38,11 @@ public class PicasaBrowser extends ListActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
 		fillMenu();
 	}
 	
@@ -93,8 +98,8 @@ public class PicasaBrowser extends ListActivity {
 				search();
 				break;
 			case AUTHD_SIGN_OUT:
-				fillMenu();
 				PicasaFeeder.signOut(this);
+				fillMenu();
 				break;
 			}
 		}
@@ -201,6 +206,8 @@ public class PicasaBrowser extends ListActivity {
 				finish();
 				break;
 			case SHOW_ALBUMS:
+				Bundle b = data.getExtras();
+				b.putString("EXTRAS", getString(R.string.albumBy) + " " + getString(R.string.me));
 				setResult(RESULT_OK, data);
 				finish();
 				break;

@@ -125,6 +125,7 @@ public class ManageFeeds extends PreferenceActivity {
 		pref.setKey("feed_" + Integer.toString(f.id));
 		pref.setDefaultValue(true);
 		pref.setTitle(f.title);
+		pref.setSummary(f.extras);
 		return pref;
 	}
 	
@@ -140,12 +141,14 @@ public class ManageFeeds extends PreferenceActivity {
 		int idi = c.getColumnIndex(FeedsDbAdapter.KEY_ROWID);
 		int typei = c.getColumnIndex(FeedsDbAdapter.KEY_TYPE);
 		int namei = c.getColumnIndex(FeedsDbAdapter.KEY_TITLE);
+		int extrasi = c.getColumnIndex(FeedsDbAdapter.KEY_EXTRA);
 		while(c.moveToNext()){
 			int type = c.getInt(typei);
 			String title = c.getString(namei);
 			int id = c.getInt(idi);
+			String extras = c.getString(extrasi);
 			Log.v("Floating Image", "Feed ID: " + id);
-			Feed feed = new Feed(title, id);
+			Feed feed = new Feed(title, id, extras);
 			data.get(type).add(feed);
 		}
 		stopManagingCursor(c);
@@ -186,8 +189,12 @@ public class ManageFeeds extends PreferenceActivity {
 			String path = (String)b.get("PATH");
 			String name = (String)b.get("NAME");
 			int type = b.getInt("TYPE");
+			String extras = "";
+			if(b.containsKey("EXTRAS")){
+				extras = (String)b.get("EXTRAS");
+			}
 			mDbHelper.open();
-			mDbHelper.addFeed(name, path, type);
+			mDbHelper.addFeed(name, path, type, extras);
 			mDbHelper.close();
 			setPreferenceScreen(createPreferenceHierarchy());
 		}
@@ -216,9 +223,11 @@ public class ManageFeeds extends PreferenceActivity {
 	private class Feed{
 		int id;
 		String title;
-		Feed(String title, int id){
+		String extras;
+		Feed(String title, int id, String extras){
 			this.title = title;
 			this.id = id;
+			this.extras = extras;
 		}
 		
 	}

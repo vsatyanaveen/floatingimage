@@ -23,7 +23,7 @@ import dk.nindroid.rss.renderers.Renderer;
 import dk.nindroid.rss.renderers.floating.Image.Pos;
 import dk.nindroid.rss.settings.Settings;
 
-public class FloatingRenderer implements Renderer {
+public class FloatingRenderer extends Renderer {
 	public static final long 	mFocusDuration = 300;
 	public static long			mSelectedTime;
 	public static final float  	mFocusX = 0.0f;
@@ -39,13 +39,14 @@ public class FloatingRenderer implements Renderer {
 	private Image[] 		mImgs;
 	private TextureBank 	mBank;
 	public static TextureSelector mTextureSelector;
-	private long 			mTraversal = 30000;
 	private long 			mInterval;
+	private long			mMaxTime = 0;
 	private int 			mTotalImgRows = 6;
 	private int 			mImgCnt = 0;
 	private boolean 		mCreateMiddle = true;
 	private boolean			mDoUnselect = false;
 	private boolean			mResetImages = false;
+	
 	
 	
 	private static final Vec3f mCamPos = new Vec3f(0,0,0);
@@ -61,16 +62,16 @@ public class FloatingRenderer implements Renderer {
 		mTextureSelector = new TextureSelector();
 		this.mBank = bank;
 		mImgs = new Image[mTotalImgRows * 3 / 2];
-		mInterval = mTraversal / mTotalImgRows;
+		mInterval = Settings.floatingTraversal / mTotalImgRows;
 		long curTime = System.currentTimeMillis();
 		long creationOffset = 0;
 		for(int i = 0; i < mTotalImgRows; ++i){
 			
 			if(mCreateMiddle){
-	        	mImgs[mImgCnt++] = new Image(mBank, mTraversal, Pos.MIDDLE, curTime - creationOffset);
+	        	mImgs[mImgCnt++] = new Image(mBank, Pos.MIDDLE, curTime - creationOffset);
 	        }else{
-	        	mImgs[mImgCnt++] = new Image(mBank, mTraversal, Pos.UP, curTime - creationOffset);
-	        	mImgs[mImgCnt++] = new Image(mBank, mTraversal, Pos.DOWN, curTime - creationOffset);
+	        	mImgs[mImgCnt++] = new Image(mBank, Pos.UP, curTime - creationOffset);
+	        	mImgs[mImgCnt++] = new Image(mBank, Pos.DOWN, curTime - creationOffset);
 	        }
 	        	mCreateMiddle ^= true;
 	        	creationOffset += mInterval;
@@ -115,6 +116,16 @@ public class FloatingRenderer implements Renderer {
     		mSelectedTime = realTime;
         	mSelected.select(gl, frameTime, realTime); // Deselect!
     	}
+	}
+	
+	@Override 
+	public long editOffset(long offset, long realTime){
+		long frameTime = realTime + offset;
+		mMaxTime = Math.max(mMaxTime, frameTime);
+		long reverseTime = mMaxTime - frameTime;
+		long illegalDistance = reverseTime - Settings.floatingTraversal;
+		long id = Math.max(0, illegalDistance / 500); // Same, but only positive
+		return offset + id * id;
 	}
 	
 	public void update(MatrixTrackingGL gl, long frameTime, long realTime){

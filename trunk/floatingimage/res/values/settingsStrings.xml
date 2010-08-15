@@ -16,6 +16,9 @@
 	<string name="fullscreenBlackSummary">Fade background to all black when in fullscreen mode</string>
 	<string name="imageDecorations">Decorate images</string>
 	<string name="imageDecorationsSummary">Show shadows and glow behind images</string>
+	<string name="floatingSpeed">Speed</string>
+	<string name="floatingSpeedSummary">How fast do the images traverse the screen</string>
+	<string name="floatingSpeedTitle">Floating images speed</string>
 	<string name="internals">Internals</string>
 	<string name="shuffle">Shuffle images</string>
 	<string name="shuffleSummary">Show images in random order</string>
@@ -31,8 +34,8 @@
 	<string name="slideSpeedTitle">Select transition speed</string>
 	<string name="useCache">Cache images</string>
 	<string name="useCacheSummary">This gives a steadier flow when streaming</string>
-	<string name="useHighResThumbs">Use high res tumbnails</string>
-	<string name="useHighResThumbsSummary">This will use significantly more data and require more bandwidth</string>
+	<string name="useHighResThumbs">Use high-res tumbnails</string>
+	<string name="useHighResThumbsSummary">This is disabled for low resolution devices.</string>
 	<string name="clearCache">Clear cache</string>
 	<string name="clearCacheSummary">Erase entire image cache</string>
 	<string name="feedMenuAdd">Add new feed</string>
@@ -75,4 +78,9 @@
 	<string name="facebookShowAlbum">show</string>
 	<string name="loadingAlbums">Loading albums...</string>
 	<string name="loadingFriends">Loading friends...</string>
+	<string name="albumBy">Album by</string>
+	<string name="me">me</string>
+	<string name="cameraPictures">Camera pictures</string>
+	<string name="moreCameraPictures">More camera pictures</string>
+	<string name="Downloads">Downloads</string>
 </resources>

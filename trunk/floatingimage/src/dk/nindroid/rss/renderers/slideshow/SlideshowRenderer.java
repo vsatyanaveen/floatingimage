@@ -23,7 +23,7 @@ import dk.nindroid.rss.renderers.slideshow.transitions.SlideTopToBottom;
 import dk.nindroid.rss.renderers.slideshow.transitions.Transition;
 import dk.nindroid.rss.settings.Settings;
 
-public class SlideshowRenderer implements Renderer, dk.nindroid.rss.renderers.osd.Play.EventHandler {
+public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.renderers.osd.Play.EventHandler {
 	Image 			mPrevious, mCurrent, mNext;
 	TextureBank 	mBank;
 	long			mSlideTime;

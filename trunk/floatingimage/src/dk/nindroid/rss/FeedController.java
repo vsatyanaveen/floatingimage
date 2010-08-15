@@ -79,7 +79,6 @@ public class FeedController {
 				return i;
 			}
 		}
-		Log.v("FeedController", "Falling back to last feed!");
 		return mReferences.size() - 1;
 	}
 	
@@ -190,7 +189,7 @@ public class FeedController {
 					Log.w("FeedController", "Reading feed failed too many times, giving up!");
 				}
 			}
-			Log.v("FeedController", "Showing images from " + mReferences.size() + " feeds");
+			Log.v("Floating Image", "Showing images from " + mReferences.size() + " feeds");
 			return mReferences.size() > 0;
 		}
 	}

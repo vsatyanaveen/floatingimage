@@ -48,7 +48,7 @@ public class PicasaParser extends XMLParser {
 					sb = new StringBuilder();
 				}
 			}else if(localName.equals(PicasaTags.AUTHOR_NAME)){
-				if(stack.peek().equals(PicasaTags.AUTHOR)){
+				if(!stack.empty() && stack.peek().equals(PicasaTags.AUTHOR)){
 					sb = new StringBuilder();
 				}
 			}else if(localName.equals(PicasaTags.AUTHOR_URI)){
@@ -103,10 +103,12 @@ public class PicasaParser extends XMLParser {
 			}else if(localName.equals(PicasaTags.AUTHOR)){
 				stack.pop();
 			}else if(localName.equals(PicasaTags.AUTHOR_NAME)){
-				if(image != null){
-					image.setOwner(sb.toString());
-				}else{
-					author = sb.toString();
+				if(!stack.empty() && stack.peek().equals(PicasaTags.AUTHOR)){
+					if(image != null){
+						image.setOwner(sb.toString());
+					}else{
+						author = sb.toString();
+					}
 				}
 				sb = null;
 			}else if(localName.equals(PicasaTags.AUTHOR_URI)){
