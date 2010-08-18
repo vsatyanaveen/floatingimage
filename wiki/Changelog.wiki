@@ -1,3 +1,7 @@
+_18/08-2010: 2.5.2_
+  * Fixed appearance bugs on manage feeds view.
+  * Made it possible to view hidden files when selecting feed directory, through the menu.
+
 _15/08-2010: 2.5.1_
   * Preventing the user from rewinding too far (about a screen length), as the images will just repeat.
   * Fix Picasa Album view.
