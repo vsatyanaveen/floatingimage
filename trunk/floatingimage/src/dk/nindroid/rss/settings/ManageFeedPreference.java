@@ -7,13 +7,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.preference.Preference;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.CheckBox;
 import android.widget.ImageView;
-import android.widget.TextView;
 import dk.nindroid.rss.R;
 
-public class ManageFeedPreference extends Preference implements OnClickListener {
+public class ManageFeedPreference extends Preference {
 	Bitmap 		mIcon;
 	boolean 	mEnabled = true;
 	Context 	mContext;
@@ -35,11 +33,8 @@ public class ManageFeedPreference extends Preference implements OnClickListener 
 	@Override
 	protected void onBindView(View view) {
 		super.onBindView(view);
-		View frame = view.findViewById(android.R.id.widget_frame);
-		frame.setLongClickable(true);
-		frame.setOnClickListener(this);
 		final CheckBox checkbox = (CheckBox)view.findViewById(R.id.enabled);
-		checkbox.setClickable(false);
+		
 		if(checkbox != null){
 			checkbox.setChecked(mEnabled);
 		}
@@ -55,11 +50,6 @@ public class ManageFeedPreference extends Preference implements OnClickListener 
 		persistBoolean(mEnabled);
 		notifyChanged();
 		super.onClick();
-	}
-	
-	@Override
-	public void onClick(View v) {
-		this.onClick();
 	}
 	
 	@Override

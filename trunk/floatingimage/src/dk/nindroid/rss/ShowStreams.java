@@ -365,11 +365,11 @@ public class ShowStreams extends Activity {
 		
 		FeedsDbAdapter mDbHelper = new FeedsDbAdapter(this);
 		mDbHelper.open();
-		mDbHelper.addFeed(getString(R.string.cameraPictures), "/sdcard/DCIM", dk.nindroid.rss.settings.Settings.TYPE_LOCAL, "");
+		mDbHelper.addFeed(getString(R.string.cameraPictures), Environment.getExternalStorageDirectory().getAbsolutePath() + "/DCIM", dk.nindroid.rss.settings.Settings.TYPE_LOCAL, "");
 		if(phonePhotos.exists()){
 			mDbHelper.addFeed(getString(R.string.moreCameraPictures), "/emmc/DCIM", dk.nindroid.rss.settings.Settings.TYPE_LOCAL, "");
 		}
-		mDbHelper.addFeed(getString(R.string.Downloads), "/sdcard/download", dk.nindroid.rss.settings.Settings.TYPE_LOCAL, "");
+		mDbHelper.addFeed(getString(R.string.Downloads), Environment.getExternalStorageDirectory().getAbsolutePath() + "/download", dk.nindroid.rss.settings.Settings.TYPE_LOCAL, "");
 		mDbHelper.addFeed(getString(R.string.flickrExplore), FlickrFeeder.getExplore(), dk.nindroid.rss.settings.Settings.TYPE_FLICKR, "");
 		mDbHelper.close();
 	}

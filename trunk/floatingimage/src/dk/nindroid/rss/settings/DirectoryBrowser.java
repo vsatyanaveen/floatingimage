@@ -9,7 +9,9 @@ import java.util.Stack;
 
 import android.app.ListActivity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.KeyEvent;
@@ -24,9 +26,11 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import dk.nindroid.rss.R;
 
 public class DirectoryBrowser extends ListActivity implements OnTouchListener{
-	public static final int PARENT_ID = Menu.FIRST;
+	public static final int SHOW_HIDDEN = Menu.FIRST;
+	public static final int PARENT_ID = Menu.FIRST + 1;
 	public static final int SELECT_ID = Menu.FIRST;
-	public static final String ID = "local"; 
+	public static final String ID = "local";
+	private boolean showHidden = false;
 	private int selected;
 	private Stack<File> history;
 	
@@ -35,16 +39,16 @@ public class DirectoryBrowser extends ListActivity implements OnTouchListener{
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		SharedPreferences sp = getSharedPreferences("dk.nindroid.rss_preferences", 0);
+		showHidden = sp.getBoolean("folderShowHiddenFiles", false);
 		directories = new ArrayList<String>();
 		registerForContextMenu(getListView());
-		currentDirectory = new File("/sdcard");
+		currentDirectory = Environment.getExternalStorageDirectory();
 		history = new Stack<File>();
-		if(currentDirectory.exists()){
-			browseTo("/sdcard");
-		}else{
+		if(!currentDirectory.exists()){
 			currentDirectory = new File("/");
-			browseTo("/");
 		}
+		browseTo(currentDirectory.getAbsolutePath());
 		history.add(currentDirectory);
 	}
 
@@ -57,7 +61,7 @@ public class DirectoryBrowser extends ListActivity implements OnTouchListener{
 		if(files != null){
 			for(String file : files){
 				File f = new File(curDir + "/" + file);
-				if(f.isDirectory() && !f.getName().startsWith(".")){
+				if(f.isDirectory() && (!f.getName().startsWith(".") || this.showHidden)){
 					directories.add(file);
 				}
 			}
@@ -105,15 +109,28 @@ public class DirectoryBrowser extends ListActivity implements OnTouchListener{
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		boolean res = super.onCreateOptionsMenu(menu);
-		menu.add(0, SELECT_ID, 0, R.string.selectCurrentFolder);
+		menu.add(0, PARENT_ID, 0, R.string.selectCurrentFolder);
+		menu.add(0, SHOW_HIDDEN, 0, R.string.showHiddenFiles);
 		return res;
 	}
 	
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		returnResult(currentDirectory.getAbsolutePath());
-		finish();
+		switch(item.getItemId()){
+		case PARENT_ID:
+			returnResult(currentDirectory.getAbsolutePath());
+			finish();
+			return super.onOptionsItemSelected(item);
+		case SHOW_HIDDEN:
+			this.showHidden ^= true;
+			SharedPreferences sp = getSharedPreferences("dk.nindroid.rss_preferences", 0);
+			SharedPreferences.Editor editor = sp.edit();
+			editor.putBoolean("folderShowHiddenFiles", this.showHidden);
+			editor.commit();
+			browseTo(currentDirectory.getAbsolutePath());
+			return super.onOptionsItemSelected(item);
+		}
 		return super.onOptionsItemSelected(item);
 	}
 	
