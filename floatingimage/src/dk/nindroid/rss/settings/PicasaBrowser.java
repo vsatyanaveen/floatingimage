@@ -206,8 +206,7 @@ public class PicasaBrowser extends ListActivity {
 				finish();
 				break;
 			case SHOW_ALBUMS:
-				Bundle b = data.getExtras();
-				b.putString("EXTRAS", getString(R.string.albumBy) + " " + getString(R.string.me));
+				data.putExtra("EXTRAS", getString(R.string.albumBy) + " " + getString(R.string.me));
 				setResult(RESULT_OK, data);
 				finish();
 				break;

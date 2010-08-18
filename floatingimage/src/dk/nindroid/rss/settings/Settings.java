@@ -2,6 +2,7 @@ package dk.nindroid.rss.settings;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Environment;
 import android.view.Display;
 import android.view.WindowManager;
 
@@ -42,7 +43,7 @@ public class Settings {
 		shuffleImages = sp.getBoolean("shuffleImages", true);
 		useCache = sp.getBoolean("useCache", false);
 		rotateImages = sp.getBoolean("rotateImages", true);
-		downloadDir = sp.getString("downloadDir", "/sdcard/download/");
+		downloadDir = sp.getString("downloadDir", Environment.getExternalStorageDirectory().getAbsolutePath() + "/download/");
 		fullscreen = sp.getBoolean("fullscreen", false);
 		mode = parseMode(sp.getString("mode", "5000"));
 		slideshowInterval = Long.parseLong(sp.getString("slideInterval", "10000"));

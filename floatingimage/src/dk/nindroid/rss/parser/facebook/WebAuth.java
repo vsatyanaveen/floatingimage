@@ -22,7 +22,7 @@ public class WebAuth extends Activity {
 		webView.getSettings().setJavaScriptEnabled(true);
 		webView.setWebViewClient(new MyWebViewClient(this));
 		String url = getIntent().getExtras().getString("URL");
-		Log.v("Floating Image", "Visiting url: " + url);
+		//Log.v("Floating Image", "Visiting url: " + url);
 		webView.loadUrl(url);
 	}
 	
@@ -35,7 +35,7 @@ public class WebAuth extends Activity {
 		
 	    @Override
 	    public boolean shouldOverrideUrlLoading(WebView view, String url) {
-	    	Log.v("Floating Image", "Visiting url: " + url);
+	    	//Log.v("Floating Image", "Visiting url: " + url);
 	    	if(url.startsWith("http") || url.startsWith("https")){
 		    	view.loadUrl(url);
 		        return true;
