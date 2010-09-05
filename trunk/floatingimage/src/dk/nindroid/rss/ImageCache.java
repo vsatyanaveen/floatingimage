@@ -74,7 +74,7 @@ public class ImageCache implements Runnable {
 		if(mExploreFiles == null) return;
 		while(true){
 			if(bank.stopThreads) return;
-			while(bank.cached.size() < bank.textureCache && !mExploreFiles.isEmpty()){
+			while(bank.cached.size() < 5 && !mExploreFiles.isEmpty()){
 				if(bank.stopThreads) return;
 				bank.addOldBitmap(getRandomExplore());
 			}

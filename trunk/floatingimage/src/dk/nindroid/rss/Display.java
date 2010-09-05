@@ -1,5 +1,8 @@
 package dk.nindroid.rss;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.util.Log;
 import android.view.Surface;
 import dk.nindroid.rss.gfx.ImageUtil;
@@ -17,7 +20,15 @@ public class Display implements OrientationSubscriber {
 	private long					mFrameTime;
 	private boolean					mTurning = false;
 	private boolean					mFullscreen = false;
+	private List<ImageSizeChanged>	mImageSizeChangedListeners = new ArrayList<ImageSizeChanged>();
 	
+	public void RegisterImageSizeChangedListener(ImageSizeChanged listener){
+		mImageSizeChangedListeners.add(listener);
+	}
+	
+	public void deRegisterImageSizeChangedListener(ImageSizeChanged listener){
+		mImageSizeChangedListeners.remove(listener);
+	}
 	
 	public boolean isFullscreen(){
 		return mFullscreen;
@@ -53,6 +64,7 @@ public class Display implements OrientationSubscriber {
 				mHeightPixels = mTargetHeightPixels;
 				mFocusedHeight = mTargetFocusedHeight;
 				mRotation = mTargetRotation;
+				onImageSizeChanged();
 			}
 		}
 		if(mTargetInfoBarHeight != mInfoBarHeight){
@@ -68,6 +80,16 @@ public class Display implements OrientationSubscriber {
 				mInfoBarHeight = mTargetInfoBarHeight;
 				mFocusedHeight = calcFocusedHeight(mHeight, mHeightPixels);
 				mFill = mTargetFill;
+				onImageSizeChanged();
+			}
+		}
+	}
+	
+	private void onImageSizeChanged(){
+		// Make sure we're not transitioning
+		if(!mTurning && mInfoBarHeight == mTargetInfoBarHeight){
+			for(ImageSizeChanged listener : mImageSizeChangedListeners){
+				listener.imageSizeChanged();
 			}
 		}
 	}
@@ -240,5 +262,9 @@ public class Display implements OrientationSubscriber {
 	
 	private float calcFocusedHeight(float height, int heightPixels){
 		return height - mInfoBarHeight / heightPixels * height;
+	}
+	
+	public static interface ImageSizeChanged{
+		void imageSizeChanged();
 	}
 }

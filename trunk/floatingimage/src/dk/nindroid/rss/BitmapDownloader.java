@@ -17,8 +17,10 @@ import org.xml.sax.XMLReader;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.ExifInterface;
 import android.os.Process;
 import android.util.Log;
+import dk.nindroid.rss.compatibility.Exif;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.LocalImage;
 import dk.nindroid.rss.data.Progress;
@@ -28,7 +30,19 @@ import dk.nindroid.rss.settings.Settings;
 
 public class BitmapDownloader implements Runnable {
 	TextureBank bank;
-	FeedController mFeedController; 
+	FeedController mFeedController;
+	static boolean exifAvailable = false;
+	
+	// Do we have access to the Exif class?
+	static{
+		try{
+			Exif.checkAvailable();
+			exifAvailable = true;
+		}catch(Throwable t){
+			exifAvailable = false;
+		}
+	}
+	
 	public BitmapDownloader(TextureBank bank, FeedController feedController){
 		this.bank = bank;
 		this.mFeedController = feedController;
@@ -115,6 +129,28 @@ public class BitmapDownloader implements Runnable {
 		int size = Settings.highResThumbs ? 256 : 128;
 		Bitmap bmp = ImageFileReader.readImage(file, size, null);
 		if(bmp != null){
+			if(exifAvailable){
+				try {
+					Exif exif = new Exif(file.getAbsolutePath());
+					int rotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, -1);
+					switch(rotation){
+					case ExifInterface.ORIENTATION_NORMAL:
+					case -1:
+						break;
+					case ExifInterface.ORIENTATION_ROTATE_90:
+						image.setRotation(270);
+						break;
+					case ExifInterface.ORIENTATION_ROTATE_180:
+						image.setRotation(180);
+						break;
+					case ExifInterface.ORIENTATION_ROTATE_270:
+						image.setRotation(90);
+						break;
+					}
+				} catch (IOException e) {
+					Log.w("Floating Image", "Error reading exif info for file", e);
+				}
+			}
 			if(Settings.highResThumbs){
 				image.set256Bitmap(bmp);
 			}else{

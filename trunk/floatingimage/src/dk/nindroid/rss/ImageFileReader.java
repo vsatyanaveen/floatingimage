@@ -48,19 +48,21 @@ public class ImageFileReader{
 		}
 	}
 	
+	// Minimize image size, but don't sample too small!
 	private static int getSampleSize(int target, int source){
 		int fraction = source / target;
-		if(fraction > 32){
+		if(fraction > 24){
 			return 32;
-		}if(fraction > 16){
+		}if(fraction > 12){
 			return 16;
-		}if(fraction > 8){
+		}if(fraction > 6){
 			return 8;
-		}if(fraction > 4){
+		}if(fraction > 3){
 			return 4;
-		}if(fraction > 2){
-			return 2;
 		}
-		return 1;
+		//if(fraction > 1){
+			return 2;
+		//}
+		//return 1;
 	}
 }

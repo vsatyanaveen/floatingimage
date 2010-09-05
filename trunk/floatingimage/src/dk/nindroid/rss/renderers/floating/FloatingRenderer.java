@@ -143,7 +143,6 @@ public class FloatingRenderer extends Renderer {
 		if(mDoUnselect){
 			mDoUnselect = false;
 			deselect(gl, frameTime, realTime);
-			Log.v("Floating Image", "Splash deselect");
 		}
 		// Defocus splash image after defined period.
         if(mSplashImg != null){
@@ -164,12 +163,9 @@ public class FloatingRenderer extends Renderer {
         	}
         	if(mSelected.stateFloating()){
         		if(mSelectingNext || mSelectingPrev){
-        			Log.v("FloatingRenderer", mSelectingNext ? "next" : "prev");
         			int imageCount = mImgs.length;
-        			Log.v("FloatingRenderer", "Previous selected: " + mSelectedIndex);
         			mSelectedIndex += (mSelectingNext ? imageCount - 1 : 1);
         			mSelectedIndex %= imageCount;
-        			Log.v("FloatingRenderer", "Updated  selected: " + mSelectedIndex);
         			mSelected = mImgs[mSelectedIndex];
         			mSelectedTime = realTime;
         			mSelectingNext = false;
@@ -291,7 +287,6 @@ public class FloatingRenderer extends Renderer {
 		if(mSelected != null){
 			mSelectingNext = true;
 			mSelectingPrev = false;
-			Log.v("FloatingRenderer", "Select left");
 			return true;
 		}
 		return false;
@@ -302,7 +297,6 @@ public class FloatingRenderer extends Renderer {
 		if(mSelected != null){
 			mSelectingNext = false;
 			mSelectingPrev = true;
-			Log.v("FloatingRenderer", "Select right");
 			return true;
 		}
 		return false;

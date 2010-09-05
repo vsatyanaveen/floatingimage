@@ -70,14 +70,18 @@
 	</string-array>
 	
 	<string-array name="floatingSpeedDescriptions">
+		<item>very fast</item>
 		<item>fast</item>
 		<item>normal</item>
 		<item>slow</item>
+		<item>very slow</item>
 	</string-array>
 	
 	<string-array name="floatingSpeedValues">
+		<item>7000</item>
 		<item>15000</item>
 		<item>30000</item>
 		<item>60000</item>
+		<item>250000</item>
 	</string-array>
 </resources>

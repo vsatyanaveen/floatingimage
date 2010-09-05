@@ -121,7 +121,7 @@ public class ShowStreams extends Activity {
 	}
 	
 	TextureBank setupFeeders(){
-		TextureBank bank = new TextureBank(15);
+		TextureBank bank = new TextureBank(10);
 		mFeedController = new FeedController();
 		BitmapDownloader bitmapDownloader = new BitmapDownloader(bank, mFeedController);
 		mImageCache = new ImageCache(bank);

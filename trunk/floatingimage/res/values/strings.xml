@@ -23,6 +23,6 @@
 	<string name="unauthorize">Sign out</string>
 	<string name="please_wait">The gears are grinding... Please wait</string>
 	<string name="share_subject">Lookit, a picture!</string>
-	<string name="share_url">Share image</string>
-	<string name="share_image">Share image URL</string>
+	<string name="share_url">Share image URL</string>
+	<string name="share_image">Share image</string>
 </resources>

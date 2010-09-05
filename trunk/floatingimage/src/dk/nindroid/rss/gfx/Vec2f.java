@@ -37,4 +37,9 @@ public class Vec2f {
 	public String toString() {
 		return x + "x" + y;
 	}
+	
+	public static float dot(float ax, float ay, float bx, float by){
+		// Normalize
+		return ax * bx + ay * by;
+	}
 }

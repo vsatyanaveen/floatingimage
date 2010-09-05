@@ -50,4 +50,7 @@ public abstract class ImageReference {
 	public void turn(long time, float degrees){
 		mRotator.turn(time, degrees);
 	}
+	public void setRotation(float degrees){
+		mRotator.setRotation(degrees);
+	}
 }

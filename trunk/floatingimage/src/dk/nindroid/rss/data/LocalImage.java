@@ -18,10 +18,8 @@ public class LocalImage extends ImageReference{
 	private 	  Bitmap 	mBitmap;
 	private 	  float		mWidth;
 	private 	  float		mHeight;
-	private 	  float		mRotation = 0; // Use this when able to read EXIF
 	
-	public LocalImage(File file, int rotation){
-		this.mRotation = rotation;
+	public LocalImage(File file){
 		this.mFile = file;
 		mWidth = 0;
 		mHeight = 0;

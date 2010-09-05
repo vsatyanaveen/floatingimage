@@ -591,6 +591,7 @@ public class Image implements ImagePlane {
 			this.mFocusBmp = texture;
 			this.mFocusWidth = width;
 			this.mFocusHeight = height;
+			this.mLargeTex = false;
 		}
 	}
 	
