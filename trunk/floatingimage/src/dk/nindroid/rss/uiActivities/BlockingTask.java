@@ -25,7 +25,9 @@ public abstract class BlockingTask<Params, Result> extends AsyncTask<Params, Int
 	}
 	
 	protected void onPostExecute(Result result) {
-		mBusyDialog.dismiss();
+		if(mBusyDialog.isShowing()){
+			mBusyDialog.dismiss();
+		}
 		if(mError != -1){
 			Toast.makeText(mContext, mError, Toast.LENGTH_LONG).show();
 		}
