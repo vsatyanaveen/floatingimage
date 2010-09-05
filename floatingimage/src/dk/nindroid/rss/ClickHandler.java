@@ -88,7 +88,7 @@ public class ClickHandler extends TimerTask {
 		mTouchLastPos.setY(y);
 		return true;
 	}
-	
+	/*
 	private static void handleMultitouch(MotionEvent event) {
 		// We only get one "up" for when the user stops touching the screen!
 		if(event.getAction() == MotionEvent.ACTION_UP){
@@ -147,7 +147,7 @@ public class ClickHandler extends TimerTask {
 		//Log.v("Floating Image", "Multitouch rotation: " + rotation * 180.0 / Math.PI + ", z: " + z);
 		//Log.v("Floating Image", "Multitouch scale: " + scale);
 	}
-
+*/
 
 	private static void saveSpeed(float diffX, float diffY){
 		long timeDiff = System.currentTimeMillis() - mMoveTime;

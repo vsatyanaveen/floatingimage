@@ -35,7 +35,7 @@
 	<string name="useCache">Cache images</string>
 	<string name="useCacheSummary">This gives a steadier flow when streaming</string>
 	<string name="useHighResThumbs">Use high-res tumbnails</string>
-	<string name="useHighResThumbsSummary">This is disabled for low resolution devices.</string>
+	<string name="useHighResThumbsSummary">EXPERIMENTAL: This might crash your phone! High res devices only.</string>
 	<string name="clearCache">Clear cache</string>
 	<string name="clearCacheSummary">Erase entire image cache</string>
 	<string name="feedMenuAdd">Add new feed</string>
