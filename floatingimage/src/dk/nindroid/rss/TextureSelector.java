@@ -20,12 +20,14 @@ public class TextureSelector {
 		if(mWorker != null) stopThread();
 		mWorker = new Worker();
 		mWorker.mRun = true;
+		RiverRenderer.mDisplay.RegisterImageSizeChangedListener(mWorker);
 		Thread t = new Thread(mWorker);
 		t.start();
 	}
 	
 	public void stopThread(){
 		synchronized (mWorker) {
+			RiverRenderer.mDisplay.deRegisterImageSizeChangedListener(mWorker);
 			mWorker.mRun = false;
 			mWorker.notifyAll();
 		}
@@ -43,12 +45,13 @@ public class TextureSelector {
 		return mWorker.progress.isKey(mWorker.mCurSelected) ? mWorker.progress.getPercentDone() : 2;
 	}
 	
-	private class Worker implements Runnable{
+	private class Worker implements Runnable, Display.ImageSizeChanged{
 		private final Paint			mPaint  = new Paint(); 
 		private ImagePlane			mCurSelected;
 		private ImageReference 		mRef;
 		private boolean 			mRun	= true;
 		private final Progress 		progress = new Progress();
+		private Bitmap				mCurrentBitmap;
 		
 		@Override
 		public void run() {
@@ -105,24 +108,73 @@ public class TextureSelector {
 			int height = bmp.getHeight();
 			int width = bmp.getWidth();
 			int max = Math.max(width, height);
-			int screenMax = Math.max(RiverRenderer.mDisplay.getHeightPixels(), RiverRenderer.mDisplay.getWidthPixels());
+			int screenMax = Math.max(RiverRenderer.mDisplay.getPortraitHeightPixels(), RiverRenderer.mDisplay.getPortraitWidthPixels());
 			if(max > screenMax){
 				float scale = (float)screenMax / max;
 				Bitmap tmp = Bitmap.createScaledBitmap(bmp, (int)(width * scale), (int)(height * scale), true);
 				bmp.recycle();
+				if(mCurrentBitmap != null && !mCurrentBitmap.isRecycled()){
+					mCurrentBitmap.recycle();
+				}
 				bmp = tmp;
 			}
-			Bitmap bitmap = Bitmap.createBitmap(1024, 1024, Config.RGB_565);
-			Canvas canvas = new Canvas(bitmap);
-			canvas.drawBitmap(bmp, 0, 0, mPaint);
-			bmp.recycle();
-			synchronized(this){
-				if(mRef != null){
-					bitmap.recycle();
+			mCurrentBitmap = bmp;
+			applyLarge();
+		}
+		
+		private void applyLarge(){
+			if(mCurrentBitmap != null && !mCurrentBitmap.isRecycled() && mRef == null){
+				float aspect = mCurrentBitmap.getWidth() / (float)mCurrentBitmap.getHeight();
+				int height, width;
+				if(isTall(aspect)){
+					height = (int)(RiverRenderer.mDisplay.getHeightPixels() * (RiverRenderer.mDisplay.getFocusedHeight() / RiverRenderer.mDisplay.getHeight()));
+					height *= RiverRenderer.mDisplay.getFill();
+					
+					width = (int)(aspect * height);
 				}else{
-					mCurSelected.setFocusTexture(bitmap, (float)bmp.getWidth() / 1024.0f, (float)bmp.getHeight() / 1024.0f);
+					width = RiverRenderer.mDisplay.getWidthPixels();
+					width *= RiverRenderer.mDisplay.getFill();
+					
+					height = (int)(width / aspect);
+				}
+				Bitmap bmp = Bitmap.createScaledBitmap(mCurrentBitmap, width, height, true);
+				Bitmap bitmap;
+				int res;
+				int max = Math.max(RiverRenderer.mDisplay.getPortraitHeightPixels(), RiverRenderer.mDisplay.getPortraitWidthPixels());
+				if(max < 512){
+					bitmap = Bitmap.createBitmap(512, 512, Config.RGB_565);
+					res = 512;
+				}else if(max < 1024){
+					bitmap = Bitmap.createBitmap(1024, 1024, Config.RGB_565);
+					res = 1024;
+				}else if(max < 2048){
+					bitmap = Bitmap.createBitmap(2048, 2048, Config.RGB_565);
+					res = 2048;
+				}else{
+					Log.v("Floating Image", "Creating 4Kx4K focus texture!");
+					bitmap = Bitmap.createBitmap(4092, 4092, Config.RGB_565); // Will this destroy everything?
+					res = 4092;
+				}
+				Canvas canvas = new Canvas(bitmap);
+				canvas.drawBitmap(bmp, 0, 0, mPaint);
+				bmp.recycle();
+				synchronized(this){
+					if(mRef != null){
+						bitmap.recycle();
+					}else{
+						mCurSelected.setFocusTexture(bitmap, (float)bmp.getWidth() / res, (float)bmp.getHeight() / res);
+					}
 				}
 			}
+		}
+		
+		private boolean isTall(float aspect){
+			return aspect < RiverRenderer.mDisplay.getWidth() / RiverRenderer.mDisplay.getFocusedHeight();
+		}
+		
+		@Override
+		public void imageSizeChanged() {
+			applyLarge();
 		}
 	}
 }

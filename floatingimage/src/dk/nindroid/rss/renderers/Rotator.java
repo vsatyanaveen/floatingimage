@@ -35,6 +35,10 @@ public class Rotator {
 		mTurning = true;
 	}
 	
+	public void setRotation(float degrees){
+		mTarget = degrees;
+	}
+	
 	public float getTargetOrientation(){
 		return mTarget;
 	}

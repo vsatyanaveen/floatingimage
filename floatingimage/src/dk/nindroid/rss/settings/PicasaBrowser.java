@@ -130,13 +130,13 @@ public class PicasaBrowser extends ListActivity {
 		final AlertDialog searchDialog = new AlertDialog.Builder(this)
 		.setView(fl)
 		.setTitle(R.string.picasaSearchTerm)
-		.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+		.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				dialog.dismiss();
 				returnSearch(input.getText().toString());
 			}
-		}).setNegativeButton("Cancel", new DialogInterface.OnClickListener(){
+		}).setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener(){
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				dialog.dismiss();
@@ -155,13 +155,13 @@ public class PicasaBrowser extends ListActivity {
 		final AlertDialog streamDialog = new AlertDialog.Builder(this)
 		.setView(fl)
 		.setTitle(R.string.picasaShowUserUsername)
-		.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+		.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				dialog.dismiss();
 				showUser(input.getText().toString());
 			}
-		}).setNegativeButton("Cancel", new DialogInterface.OnClickListener(){
+		}).setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener(){
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				dialog.dismiss();

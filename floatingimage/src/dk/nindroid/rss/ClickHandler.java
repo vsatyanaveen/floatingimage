@@ -16,6 +16,10 @@ public class ClickHandler extends TimerTask {
 	private static long 	mMoveTime;
 	private static float[]	mLastSpeedX = new float[2];
 	private static float[]	mLastSpeedY = new float[2];
+	private static boolean 	mIsMultitouch = false;
+	private static Vec2f	mPointerBStart;
+	private static int		mPointerA;
+	private static int		mPointerB;
 	
 	private static int 		mAction = 0; // 0: nothing, 1: move, 2: long click, 3: ??
 	
@@ -27,6 +31,7 @@ public class ClickHandler extends TimerTask {
 		ClickHandler.renderer = renderer;
 		mTouchLastPos = new Vec2f();
 		mTouchStartPos = new Vec2f();
+		mPointerBStart = new Vec2f();
 	}
 	
 		
@@ -37,6 +42,14 @@ public class ClickHandler extends TimerTask {
 	}
 	
 	public static boolean onTouchEvent(MotionEvent event) {
+		/*
+		// Multitouch, 2.1-update1+ only!
+		if(event.getPointerCount() > 1 || mIsMultitouch){
+			handleMultitouch(event);
+			return true;
+		}
+		*/
+		
 		int action = event.getAction();
 		float x = event.getX(); float y = event.getY();
 		float lastX = mTouchLastPos.getX();
@@ -76,6 +89,66 @@ public class ClickHandler extends TimerTask {
 		return true;
 	}
 	
+	private static void handleMultitouch(MotionEvent event) {
+		// We only get one "up" for when the user stops touching the screen!
+		if(event.getAction() == MotionEvent.ACTION_UP){
+			mIsMultitouch = false;
+			return;
+		}
+		float ax = 0, ay = 0, bx = 0, by = 0;
+		if(!mIsMultitouch){
+			mClickTimer.cancel();
+			mIsMultitouch = true;
+			mPointerA = event.getPointerId(0);
+			mPointerB = event.getPointerId(1);
+			ax = event.getX(0);
+			ay = event.getY(0);
+			bx = event.getX(1);
+			by = event.getY(1);
+			mTouchStartPos.set(ax, ay);
+			mPointerBStart.set(bx, by);
+			return;
+		}else{
+			for(int i = 0; i < event.getPointerCount(); ++i){
+				if(mPointerA == event.getPointerId(i)){
+					ax = event.getX(i);
+					ay = event.getY(i);
+				} else if(mPointerB == event.getPointerId(i)){
+					bx = event.getX(i);
+					by = event.getY(i);
+				}
+			}
+		}
+		float orgCenterX = mTouchStartPos.getX() + (mPointerBStart.getX() - mTouchStartPos.getX()) / 2.0f;
+		float orgCenterY = mTouchStartPos.getY() + (mPointerBStart.getY() - mTouchStartPos.getY()) / 2.0f;
+		float centerX = ax + (bx - ax) / 2.0f;
+		float centerY = ay + (by - ay) / 2.0f;
+		float orgXDiff = mTouchStartPos.getX() - mPointerBStart.getX();
+		float orgYDiff = mTouchStartPos.getY() - mPointerBStart.getY();
+		float orgDist = (float)Math.sqrt(orgXDiff * orgXDiff + orgYDiff * orgYDiff);
+		float xDiff = ax - bx;
+		float yDiff = ay - by;
+		float dist = (float)Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+		float scale = dist / orgDist;
+		float moveX = centerX - orgCenterX;
+		float moveY = centerY - orgCenterY;
+		float oldLength = (float)Math.sqrt(orgXDiff * orgXDiff + orgYDiff * orgYDiff);
+		float newLength = (float)Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+		float oldXDir = orgXDiff / oldLength;
+		float oldYDir = orgYDiff / oldLength;
+		float newXDir = xDiff / newLength;
+		float newYDir = yDiff / newLength;
+		
+		float rotation = (float)Math.acos(Vec2f.dot(oldXDir, oldYDir, newXDir, newYDir));
+		float z = oldXDir * newYDir - oldYDir * newXDir; // Z-part of a cross
+		if(z < 0) rotation = -rotation;		
+		
+		//Log.v("Floating Image", "Multitouch move: (" + moveX +  "," + moveY + ")");
+		//Log.v("Floating Image", "Multitouch rotation: " + rotation * 180.0 / Math.PI + ", z: " + z);
+		//Log.v("Floating Image", "Multitouch scale: " + scale);
+	}
+
+
 	private static void saveSpeed(float diffX, float diffY){
 		long timeDiff = System.currentTimeMillis() - mMoveTime;
 		if(timeDiff < 10) return; // Ignore too small updates, it makes the stream go wonky!

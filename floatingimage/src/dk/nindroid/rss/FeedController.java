@@ -49,7 +49,7 @@ public class FeedController {
 	
 	public ImageReference getImageReference(){
 		ImageReference ir = null;
-		synchronized (mFeeds) {
+		synchronized (mReferences) {
 			if(mReferences.size() == 0) return null;
 			int thisFeed = getFeed();
 			List<ImageReference> feed = mReferences.get(thisFeed);
@@ -183,8 +183,10 @@ public class FeedController {
 					if(Settings.shuffleImages){
 						Collections.shuffle(references);
 					}
-					mReferences.add(references); // These two 
-					mFeedIndex.add(-1);			// are in sync!
+					synchronized(mReferences){
+						mReferences.add(references); // These two 
+						mFeedIndex.add(-1);			// are in sync!
+					}
 				}else{
 					Log.w("FeedController", "Reading feed failed too many times, giving up!");
 				}
@@ -230,7 +232,7 @@ public class FeedController {
 				buildImageIndex(images, f, level + 1);
 			}else{
 				if(isImage(f)){
-					ImageReference ir = new LocalImage(f, 0);
+					ImageReference ir = new LocalImage(f);
 					images.add(ir);
 				}
 			}
