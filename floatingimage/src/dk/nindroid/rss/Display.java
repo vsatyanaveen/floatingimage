@@ -163,6 +163,12 @@ public class Display implements OrientationSubscriber {
 	public int getHeightPixels(){
 		return mHeightPixels;
 	}
+	public int getTargetWidthPixels(){
+		return mTargetWidthPixels;
+	}
+	public int getTargetHeightPixels(){
+		return mTargetHeightPixels;
+	}
 	public float getFocusedHeight(){
 		return mFocusedHeight;
 	}
