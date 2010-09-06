@@ -128,16 +128,17 @@ public class TextureSelector {
 				float aspect = mCurrentBitmap.getWidth() / (float)mCurrentBitmap.getHeight();
 				int height, width;
 				if(isTall(aspect)){
-					height = (int)(RiverRenderer.mDisplay.getHeightPixels() * (RiverRenderer.mDisplay.getFocusedHeight() / RiverRenderer.mDisplay.getHeight()));
+					height = (int)(RiverRenderer.mDisplay.getTargetHeightPixels() * (RiverRenderer.mDisplay.getFocusedHeight() / RiverRenderer.mDisplay.getHeight()));
 					height *= RiverRenderer.mDisplay.getFill();
 					
 					width = (int)(aspect * height);
 				}else{
-					width = RiverRenderer.mDisplay.getWidthPixels();
+					width = RiverRenderer.mDisplay.getTargetWidthPixels();
 					width *= RiverRenderer.mDisplay.getFill();
 					
 					height = (int)(width / aspect);
 				}
+				Log.v("Floating Image", width + "x" + height);
 				Bitmap bmp = Bitmap.createScaledBitmap(mCurrentBitmap, width, height, true);
 				Bitmap bitmap;
 				int res;
