@@ -64,6 +64,7 @@ public class TextureSelector {
 				}
 				synchronized (this) {
 					ref = mRef;
+					mCurrentBitmap = null;
 					mRef = null;
 				}
 				if(ref != null){
@@ -140,18 +141,18 @@ public class TextureSelector {
 				Bitmap bmp = Bitmap.createScaledBitmap(mCurrentBitmap, width, height, true);
 				Bitmap bitmap;
 				int res;
+				// Scale to screen
 				int max = Math.max(RiverRenderer.mDisplay.getPortraitHeightPixels(), RiverRenderer.mDisplay.getPortraitWidthPixels());
-				if(max < 512){
+				if(max <= 512){
 					bitmap = Bitmap.createBitmap(512, 512, Config.RGB_565);
 					res = 512;
-				}else if(max < 1024){
+				}else if(max <= 1024){
 					bitmap = Bitmap.createBitmap(1024, 1024, Config.RGB_565);
 					res = 1024;
-				}else if(max < 2048){
+				}else if(max <= 2048){
 					bitmap = Bitmap.createBitmap(2048, 2048, Config.RGB_565);
 					res = 2048;
 				}else{
-					Log.v("Floating Image", "Creating 4Kx4K focus texture!");
 					bitmap = Bitmap.createBitmap(4092, 4092, Config.RGB_565); // Will this destroy everything?
 					res = 4092;
 				}
