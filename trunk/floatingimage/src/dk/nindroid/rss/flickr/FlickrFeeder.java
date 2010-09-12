@@ -34,6 +34,7 @@ import dk.nindroid.rss.parser.flickr.FlickrUser;
 import dk.nindroid.rss.parser.flickr.GetAlbumsParser;
 import dk.nindroid.rss.parser.flickr.ImageSizesParser;
 import dk.nindroid.rss.parser.flickr.data.ImageSizes;
+import dk.nindroid.rss.settings.Settings;
 
 public class FlickrFeeder {
 	private static final String PHOTOS_FROM_HERE_CONST = "HERE";
@@ -112,6 +113,7 @@ public class FlickrFeeder {
 		if(token != null){
 			url = url.replace("method=flickr.people.getPublicPhotos", "method=flickr.people.getPhotos");
 			url = url.replace("&auth_token=", "&auth_token=" + token);
+			url.replace("safe_search=1", "safe_search=3");
 			String signature = SECRET + url.substring(url.indexOf('?') + 1).replace("=", "").replace("&", "");
 			signature = getMD5(signature);
 			return url + "&api_sig=" + signature;

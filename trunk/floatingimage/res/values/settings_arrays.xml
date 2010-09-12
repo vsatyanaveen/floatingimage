@@ -84,4 +84,18 @@
 		<item>60000</item>
 		<item>250000</item>
 	</string-array>
+	
+	<string-array name="forceRotationDescriptions">
+		<item>No rotation</item>
+		<item>90 degrees</item>
+		<item>180 degrees</item>
+		<item>270 degrees</item>
+	</string-array>
+	
+	<string-array name="forceRotationValues">
+		<item>0</item>
+		<item>90</item>
+		<item>180</item>
+		<item>270</item>
+	</string-array>
 </resources>

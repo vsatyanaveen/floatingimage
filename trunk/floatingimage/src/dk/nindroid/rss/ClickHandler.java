@@ -239,6 +239,7 @@ public class ClickHandler extends TimerTask {
 			// We only get one "up" for when the user stops touching the screen!
 			if(event.getAction() == MotionEvent.ACTION_UP){
 				mIsMultitouch = false;
+				renderer.transformEnd();
 				return;
 			}
 			if(pointerCount < 2){

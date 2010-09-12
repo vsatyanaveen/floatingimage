@@ -119,8 +119,13 @@ public class TextureSelector {
 					String url = ref.getBigImageUrl();
 					progress.setKey(mCurSelected);
 					progress.setPercentDone(5);
+					int res = mTextureResolution;
+					if(res == 0){
+						setTextureResolution();
+						res = mTextureResolution;
+					}
 					if(ref instanceof LocalImage){ // Special case, read from disk
-						Bitmap bmp = ImageFileReader.readImage(new File(url), Math.max(RiverRenderer.mDisplay.getPortraitHeightPixels(), RiverRenderer.mDisplay.getPortraitWidthPixels()), progress);
+						Bitmap bmp = ImageFileReader.readImage(new File(url), res, progress);
 						if(bmp != null){
 							applyLarge(bmp);
 						}
@@ -132,7 +137,7 @@ public class TextureSelector {
 								applyLarge(bmp);
 								break;
 							}else{
-								mCurSelected.setFocusTexture(null, 0, 0);
+								mCurSelected.setFocusTexture(null, 0, 0, ImagePlane.SIZE_LARGE);
 							}
 						}
 					}
@@ -154,6 +159,7 @@ public class TextureSelector {
 		
 		private void applyLarge(Bitmap bmp){
 			if(mRef != null) return;
+			/*
 			int height = bmp.getHeight();
 			int width = bmp.getWidth();
 			int max = Math.max(width, height);
@@ -167,6 +173,7 @@ public class TextureSelector {
 				}
 				bmp = tmp;
 			}
+			*/
 			mCurrentBitmap = bmp;
 			applyLarge();
 		}
@@ -195,21 +202,18 @@ public class TextureSelector {
 				}
 				Bitmap bmp = Bitmap.createScaledBitmap(mCurrentBitmap, width, height, true);
 				
-				applyBitmap(bmp);
+				applyBitmap(bmp, ImagePlane.SIZE_LARGE);
 				bmp.recycle();
 			}
 		}
 		
 		private void applyOriginal(){
-			applyBitmap(mCurrentBitmap);
+			applyBitmap(mCurrentBitmap, ImagePlane.SIZE_ORIGINAL);
 		}
 		
-		private void applyBitmap(Bitmap bmp){
+		private void applyBitmap(Bitmap bmp, int sizeType){
+			if(bmp == null) return;
 			int res = mTextureResolution;
-			if(res == 0){
-				setTextureResolution();
-				res = mTextureResolution;
-			}
 			Bitmap bitmap = Bitmap.createBitmap(res, res, Config.RGB_565);
 			Canvas canvas = new Canvas(bitmap);
 			canvas.drawBitmap(bmp, 0, 0, mPaint);
@@ -217,7 +221,7 @@ public class TextureSelector {
 				if(mRef != null){
 					bitmap.recycle();
 				}else{
-					mCurSelected.setFocusTexture(bitmap, (float)bmp.getWidth() / res, (float)bmp.getHeight() / res);
+					mCurSelected.setFocusTexture(bitmap, (float)bmp.getWidth() / res, (float)bmp.getHeight() / res, sizeType);
 				}
 			}
 		}

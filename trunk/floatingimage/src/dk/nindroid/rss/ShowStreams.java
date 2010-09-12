@@ -30,6 +30,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.Toast;
+import dk.nindroid.rss.compatibility.ButtonBrightness;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.LocalImage;
 import dk.nindroid.rss.flickr.FlickrFeeder;
@@ -233,7 +234,9 @@ public class ShowStreams extends Activity {
 		String loading = this.getString(dk.nindroid.rss.R.string.please_wait);
 		ProgressDialog dialog = ProgressDialog.show(this, "", loading, true);
 		dk.nindroid.rss.settings.Settings.readSettings(this);
-		
+		try{
+			ButtonBrightness.setButtonBrightness(getWindow().getAttributes(), 0.0f);
+		}catch (Throwable t){}
 		Log.v("Floating Image", "Begin resume...");
 		Renderer defaultRenderer = renderer.getRenderer();
 		if(dk.nindroid.rss.settings.Settings.mode == dk.nindroid.rss.settings.Settings.MODE_FLOATING_IMAGE){

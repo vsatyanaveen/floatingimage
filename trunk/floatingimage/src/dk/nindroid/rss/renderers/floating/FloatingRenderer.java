@@ -7,8 +7,6 @@ import javax.microedition.khronos.opengles.GL10;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.opengl.GLU;
-import android.util.Log;
 import dk.nindroid.rss.R;
 import dk.nindroid.rss.RiverRenderer;
 import dk.nindroid.rss.ShowStreams;
@@ -350,6 +348,13 @@ public class FloatingRenderer extends Renderer {
 	public void move(float x, float y) {
 		if(mSelected != null){
 			mSelected.move(x, y);
+		}
+	}
+
+	@Override
+	public void transformEnd() {
+		if(mSelected != null){
+			mSelected.transformEnd();
 		}
 	}
 }

@@ -162,6 +162,16 @@ public class FeedController {
 	// False if no images.
 	private synchronized boolean parseFeeds(){
 		synchronized(mFeeds){
+			Collections.sort(mFeeds, new Comparator<FeedReference>() {
+
+				@Override
+				public int compare(FeedReference a, FeedReference b) {
+					int tA = a.getType(); int tB = b.getType();
+					if (tA < tB) return -1;
+					if (tA > tB) return 1;
+					return 0;
+				}
+			});
 			mReferences.clear();
 			mFeedIndex.clear();
 			for(FeedReference feed : mFeeds){
@@ -170,7 +180,7 @@ public class FeedController {
 					references = readLocalFeed(feed);
 				}else{
 					int i = 5;
-					while(i-->0){
+					while(i --> 0){ // Oh glorious obfuscation! :D
 						try{
 							references = parseFeed(feed);
 							break;
