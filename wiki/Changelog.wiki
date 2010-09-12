@@ -1,3 +1,6 @@
+_12/09-2010: 2.6.1_
+  * Fixed immediate crash on non-multitouch devices.
+
 _12/09-2010: 2.6.0_
   * Multitouch! Not perfect, but not bad. :)
   * Rotation fix for devices with non-standard default rotation (ie. landscape)
