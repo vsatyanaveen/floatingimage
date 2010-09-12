@@ -228,4 +228,28 @@ public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.rende
 		mCurrent.clear();
 		mNext.clear();
 	}
+
+	@Override
+	public void initTransform() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void transform(float centerX, float centerY, float x, float y, float rotate, float scale) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean freeMove() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void move(float x, float y) {
+		// TODO Auto-generated method stub
+		
+	}
 }

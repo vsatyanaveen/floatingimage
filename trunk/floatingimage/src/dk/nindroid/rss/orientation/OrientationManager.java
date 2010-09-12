@@ -15,10 +15,12 @@ public class OrientationManager implements SensorEventListener {
 	List<OrientationSubscriber> subscribers;
 	int currentOrientation = -1;
 	int settingOrientation = -1;
+	int initialRotation = 0;
 	
-	public OrientationManager(SensorManager sensorManager) {
+	public OrientationManager(SensorManager sensorManager, int initialRotation) {
 		subscribers = new ArrayList<OrientationSubscriber>();
 		mSensorManager = sensorManager;
+		this.initialRotation = initialRotation != -1 ? initialRotation : 0;
 	}
 	
 	public void addSubscriber(OrientationSubscriber subscriber){
@@ -68,6 +70,8 @@ public class OrientationManager implements SensorEventListener {
 			}
 		}
 		if(orientation != -1 && orientation != settingOrientation){
+			// Adjust for rotated devices
+			orientation = (orientation + 4 - initialRotation) % 4;
 			settingOrientation = orientation;
 			setOrientation();
 		}
