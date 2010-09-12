@@ -137,12 +137,14 @@ public class GlowImage {
 	 * @param szY
 	 * @param szZ
 	 */
-	public static void draw(GL10 gl){
+	public static void draw(GL10 gl, float x, float y, float z, float rot, float scaleX, float scaleY){
 		gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 		gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE);
 		// Draw glow
 		gl.glPushMatrix();
-			gl.glScalef(1.10f, 1.10f, 1);
+			gl.glTranslatef(x, y, z);
+			gl.glRotatef(rot, 0, 0, 1);
+			gl.glScalef(0.10f + scaleX, 0.10f + scaleY, 1);
 			gl.glActiveTexture(GL10.GL_TEXTURE0);
 	        gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
 			gl.glVertexPointer(3, GL10.GL_FIXED, 0, mVertexBuffer);

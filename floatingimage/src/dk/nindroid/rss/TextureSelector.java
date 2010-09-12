@@ -41,6 +41,25 @@ public class TextureSelector {
 		}		
 	}
 	
+	public void applyLarge(){
+		mWorker.mDoApplyLarge = true;
+		synchronized (mWorker) {
+			mWorker.notify();
+		}
+	}
+	
+	public void setRotated(float rot){
+		mWorker.mSwapSides = rot % 180 == 90;
+		applyLarge();
+	}
+	
+	public void applyOriginal(){
+		mWorker.mDoApplyOriginal = true;
+		synchronized (mWorker) {
+			mWorker.notify();
+		}
+	}
+	
 	public int getProgress(){
 		return mWorker.progress.isKey(mWorker.mCurSelected) ? mWorker.progress.getPercentDone() : 2;
 	}
@@ -52,22 +71,51 @@ public class TextureSelector {
 		private boolean 			mRun	= true;
 		private final Progress 		progress = new Progress();
 		private Bitmap				mCurrentBitmap;
+		private boolean				mDoApplyLarge = false;
+		private boolean				mDoApplyOriginal = false;
+		private int					mTextureResolution;
+		private boolean				mSwapSides = false;
+		
+		private void setTextureResolution(){
+			int max = Math.max(RiverRenderer.mDisplay.getPortraitHeightPixels(), RiverRenderer.mDisplay.getPortraitWidthPixels());
+			if(max == 0) return; // Not ready yet!
+			if(max <= 512){
+				mTextureResolution = 512;
+			}else if(max <= 1024){
+				mTextureResolution = 1024;
+			}else if(max <= 2048){
+				mTextureResolution = 2048;
+			}else{
+				mTextureResolution = 4092;
+			}
+		}
 		
 		@Override
 		public void run() {
 			Process.setThreadPriority(5);
+			setTextureResolution();
 			ImageReference ref = null;
 			while (true){
 				if(!mRun){
 					Log.i("dk.nindroid.rss.TextureSelector", "Stop received");
 					return;
 				}
+				if(mDoApplyLarge){
+					applyLarge();
+					mDoApplyLarge = false;
+				}
+				if(mDoApplyOriginal){
+					applyOriginal();
+					mDoApplyOriginal = false;
+				}
 				synchronized (this) {
 					ref = mRef;
-					mCurrentBitmap = null;
 					mRef = null;
 				}
 				if(ref != null){
+					int rot = (int)ref.getTargetOrientation();
+					mSwapSides = rot % 180 == 90;
+					mCurrentBitmap = null;
 					String url = ref.getBigImageUrl();
 					progress.setKey(mCurSelected);
 					progress.setPercentDone(5);
@@ -123,9 +171,13 @@ public class TextureSelector {
 			applyLarge();
 		}
 		
+		// Scale bmp to current screen size, and apply
 		private void applyLarge(){
 			if(mCurrentBitmap != null && !mCurrentBitmap.isRecycled() && mRef == null){
 				float aspect = mCurrentBitmap.getWidth() / (float)mCurrentBitmap.getHeight();
+				if(mSwapSides){
+					aspect = 1.0f / aspect;
+				}
 				int height, width;
 				if(isTall(aspect)){
 					height = (int)(RiverRenderer.mDisplay.getTargetHeightPixels() * (RiverRenderer.mDisplay.getFocusedHeight() / RiverRenderer.mDisplay.getHeight()));
@@ -138,34 +190,34 @@ public class TextureSelector {
 					
 					height = (int)(width / aspect);
 				}
-				Log.v("Floating Image", width + "x" + height);
-				Bitmap bmp = Bitmap.createScaledBitmap(mCurrentBitmap, width, height, true);
-				Bitmap bitmap;
-				int res;
-				// Scale to screen
-				int max = Math.max(RiverRenderer.mDisplay.getPortraitHeightPixels(), RiverRenderer.mDisplay.getPortraitWidthPixels());
-				if(max <= 512){
-					bitmap = Bitmap.createBitmap(512, 512, Config.RGB_565);
-					res = 512;
-				}else if(max <= 1024){
-					bitmap = Bitmap.createBitmap(1024, 1024, Config.RGB_565);
-					res = 1024;
-				}else if(max <= 2048){
-					bitmap = Bitmap.createBitmap(2048, 2048, Config.RGB_565);
-					res = 2048;
-				}else{
-					bitmap = Bitmap.createBitmap(4092, 4092, Config.RGB_565); // Will this destroy everything?
-					res = 4092;
+				if(mSwapSides){
+					width ^= height; height ^= width; width ^= height; // mmmMMMMmmm... Donuts!
 				}
-				Canvas canvas = new Canvas(bitmap);
-				canvas.drawBitmap(bmp, 0, 0, mPaint);
+				Bitmap bmp = Bitmap.createScaledBitmap(mCurrentBitmap, width, height, true);
+				
+				applyBitmap(bmp);
 				bmp.recycle();
-				synchronized(this){
-					if(mRef != null){
-						bitmap.recycle();
-					}else{
-						mCurSelected.setFocusTexture(bitmap, (float)bmp.getWidth() / res, (float)bmp.getHeight() / res);
-					}
+			}
+		}
+		
+		private void applyOriginal(){
+			applyBitmap(mCurrentBitmap);
+		}
+		
+		private void applyBitmap(Bitmap bmp){
+			int res = mTextureResolution;
+			if(res == 0){
+				setTextureResolution();
+				res = mTextureResolution;
+			}
+			Bitmap bitmap = Bitmap.createBitmap(res, res, Config.RGB_565);
+			Canvas canvas = new Canvas(bitmap);
+			canvas.drawBitmap(bmp, 0, 0, mPaint);
+			synchronized(this){
+				if(mRef != null){
+					bitmap.recycle();
+				}else{
+					mCurSelected.setFocusTexture(bitmap, (float)bmp.getWidth() / res, (float)bmp.getHeight() / res);
 				}
 			}
 		}
@@ -176,7 +228,10 @@ public class TextureSelector {
 		
 		@Override
 		public void imageSizeChanged() {
-			applyLarge();
+			mDoApplyLarge = true;
+			synchronized (this) {
+				this.notify();
+			}
 		}
 	}
 }

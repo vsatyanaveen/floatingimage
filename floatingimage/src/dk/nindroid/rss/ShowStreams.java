@@ -35,6 +35,7 @@ import dk.nindroid.rss.data.LocalImage;
 import dk.nindroid.rss.flickr.FlickrFeeder;
 import dk.nindroid.rss.launchers.ReadFeeds;
 import dk.nindroid.rss.menu.Settings;
+import dk.nindroid.rss.orientation.InitialOritentationReflector;
 import dk.nindroid.rss.orientation.OrientationManager;
 import dk.nindroid.rss.parser.ParserProvider;
 import dk.nindroid.rss.parser.facebook.FacebookParser;
@@ -76,7 +77,6 @@ public class ShowStreams extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
 		registerParsers();
 		String dataFolder = getString(R.string.dataFolder);
 		File sdDir = Environment.getExternalStorageDirectory();
@@ -89,7 +89,8 @@ public class ShowStreams extends Activity {
 		try{
 			this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 			SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-			orientationManager = new OrientationManager(sensorManager);
+			int rotation = InitialOritentationReflector.getRotation(getWindowManager().getDefaultDisplay());
+			orientationManager = new OrientationManager(sensorManager, rotation);
 			saveVersion(dataFile);
 			GlowImage.init(this);
 			ShadowPainter.init(this);

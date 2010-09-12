@@ -84,7 +84,6 @@ public class ProgressBar {
 			gl.glFrontFace(GL10.GL_CCW);
 			gl.glDisable(GL10.GL_TEXTURE_2D);
 			gl.glEnableClientState(GL10.GL_COLOR_ARRAY);
-			gl.glEnable(GL10.GL_COLOR_ARRAY);
 			gl.glVertexPointer(3, GL10.GL_FIXED, 0, mVertexBuffer);
 			gl.glColorPointer(4, GL10.GL_FIXED, 0, mColorBuffer);
 			gl.glDrawElements(GL10.GL_TRIANGLE_STRIP, 4, GL10.GL_UNSIGNED_BYTE, mIndexBuffer);

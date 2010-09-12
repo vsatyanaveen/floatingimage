@@ -10,6 +10,7 @@ import java.util.Random;
 import javax.microedition.khronos.opengles.GL10;
 
 import android.graphics.Bitmap;
+import android.opengl.GLU;
 import android.opengl.GLUtils;
 import android.util.Log;
 import dk.nindroid.rss.RiverRenderer;
@@ -59,6 +60,7 @@ public class Image implements ImagePlane {
 	// Selected vars
 	private Vec3f			mSelectedPos = new Vec3f();
 	private float 			mYPos;
+	private boolean			mUpdateLargeTex = false;
 	private Bitmap			mFocusBmp;
 	private float			mFocusWidth;
 	private float			mFocusHeight;
@@ -349,19 +351,30 @@ public class Image implements ImagePlane {
 		if(mShowingImage != null){
 			rotation += mShowingImage.getRotation(realTime);
 		}
-		gl.glTranslatef(x, y, z);
-		gl.glRotatef(rotation, 0, 0, 1);
-		gl.glScalef(szX, szY, 1);
+		float userScale = mScale * mInitialScale;
+		float userMoveX = mX + mInitialX;
+		float userMoveY = mY + mInitialY;
+		
+		x += userMoveX;
+		y += userMoveY;
+		szX *= userScale;
+		szY *= userScale;
+		
 		gl.glEnable(GL10.GL_BLEND);
 		
 		if(Settings.imageDecorations){
 			if(mCurImage != null && mCurImage.isNew()){
-				GlowImage.draw(gl);
+				GlowImage.draw(gl, x, y, z, rotation, szX, szY);
 			}
 			else{
-				ShadowPainter.draw(gl);
+				ShadowPainter.draw(gl, x, y, z, rotation, szX, szY);
 			}
 		}
+		
+		gl.glTranslatef(x, y, z);
+		gl.glRotatef(rotation, 0, 0, 1);
+		gl.glScalef(szX, szY, 1);
+		
 		gl.glDisable(GL10.GL_BLEND);
 		// Draw image
 		gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_REPLACE);
@@ -409,8 +422,114 @@ public class Image implements ImagePlane {
 	}
 	
 	
-	/************ Position functions ************/
+	/************ User transformations ************/
+	float mInitialX, mInitialY, mInitialRotate;
+	float mInitialScale = 1.0f;
+	float mX, mY, mRotate;
+	float mScale = 1.0f;
+	float mRestoreX, mRestoreY, mRestoreRotate;
+	float mRestoreScale = 1.0f;
+	boolean mRestoreTransformation = false;
+	private static final long RESTORE_TIME = 400;
+	long mRestoredAt;
+	boolean mUseOriginalTex = false;
 	
+	public void initTransform(){
+		applyOriginal();
+		mInitialX += this.mX;
+		mInitialY += this.mY;
+		mInitialRotate += this.mRotate;
+		mInitialScale *= this.mScale;
+		mX = mY = mRotate = 0.0f;
+		mScale = 1.0f;
+	}
+	
+	public void transform(float centerX, float centerY, float x, float y, float rotate, float scale) {
+		float invScale = 1.0f / mInitialScale;
+		if(scale < invScale){
+			this.mScale = invScale;
+			applyLarge();
+		}
+		this.mScale = Math.max(scale, 1.0f / mInitialScale); // Clamp scale so we don't zoom too far out
+		x = x + centerX * (1.0f - scale);
+		y = y + centerY * (1.0f - scale);
+		this.move(x, y);
+		this.mRotate = rotate;
+		
+	}
+	
+	private void applyOriginal(){
+		if(!mUseOriginalTex){
+			FloatingRenderer.mTextureSelector.applyOriginal();
+			mUseOriginalTex = true;
+		}
+	}
+	
+	private void applyLarge(){
+		if(mUseOriginalTex){
+			mUseOriginalTex = false;
+			FloatingRenderer.mTextureSelector.applyLarge();
+		}
+	}
+	
+	private boolean isTransformed(){
+		return (mScale * mInitialScale > 1.1f) || mRotate < -1.0f || mRotate > 1.0f;
+	}
+	
+	public boolean click(long realTime){
+		if(isTransformed()){
+			mRestoreTransformation = true;
+			mRestoredAt = realTime + RESTORE_TIME;
+			mInitialX += this.mX;
+			mInitialY += this.mY;
+			mInitialRotate += this.mRotate;
+			mInitialScale *= this.mScale;
+			this.mX = 0.0f;
+			this.mY = 0.0f;
+			this.mRotation = 0.0f;
+			this.mScale = 1.0f;
+			mRestoreX = mInitialX;
+			mRestoreY = mInitialY;
+			mRestoreRotate = mInitialRotate;
+			mRestoreScale = mInitialScale;
+			return true;
+		}
+		return false;
+	}
+	
+	public void updateTransformation(long realTime){
+		if(mRestoreTransformation){
+			if(realTime > mRestoredAt){
+				mX = mY = mRotate = mInitialX = mInitialY = mInitialRotate = 0.0f;
+				mInitialScale = mScale = 1.0f;
+				mRestoreTransformation = false;
+				applyLarge();
+			}else{
+				float fraction = (realTime - mRestoredAt + RESTORE_TIME) / (float)RESTORE_TIME;
+				fraction = ImageUtil.smoothstep(fraction);
+				mInitialX = mRestoreX * (1.0f - fraction);
+				mInitialY = mRestoreY * (1.0f - fraction);
+				mInitialRotate = mRestoreRotate * (1.0f - fraction);
+				mInitialScale = mRestoreScale - (mRestoreScale - 1.0f) * (fraction);
+			}
+		}
+	}
+	
+	public boolean freeMove(){
+		return isTransformed() && !mRestoreTransformation;
+	}
+	
+	public void move(float x, float y){
+		float scale = mInitialScale * mScale;
+		x = Math.min(x, scale - 1.0f - mInitialX);
+		x = Math.max(x, 1.0f - scale - mInitialX);
+		y = Math.min(y, scale - 1.0f - mInitialY);
+		y = Math.max(y, 1.0f - scale - mInitialY);
+		this.mX = x;
+		this.mY = y;
+	}
+	
+	/************ Position functions ************/
 	private void reJitter(){
 		mJitter.setX(mRand.nextFloat() * FloatingRenderer.mJitterX * 2 - FloatingRenderer.mJitterX);
 		mJitter.setY(mRand.nextFloat() * FloatingRenderer.mJitterY * 2 - FloatingRenderer.mJitterY);
@@ -525,6 +644,7 @@ public class Image implements ImagePlane {
 	}
 	
 	public boolean update(GL10 gl, long time, long realTime){
+		updateTransformation(realTime);
 		boolean depthChanged = false;
 		if(mState == STATE_FLOATING){
 			depthChanged = updateFloating(gl, time);		
@@ -536,9 +656,10 @@ public class Image implements ImagePlane {
 			if(mState == STATE_FOCUSED){
 				setFocusedPosition();
 				synchronized(this){
-					if(!mLargeTex && mFocusBmp != null){
+					if(mUpdateLargeTex && mFocusBmp != null){
 						setFocusTexture(gl);
 						mLargeTex = true;
+						mUpdateLargeTex = false;
 					}
 				}
 			}
@@ -587,11 +708,14 @@ public class Image implements ImagePlane {
 	}
 	
 	public void setFocusTexture(Bitmap texture, float width, float height){
-		synchronized(this){
-			this.mFocusBmp = texture;
-			this.mFocusWidth = width;
-			this.mFocusHeight = height;
-			this.mLargeTex = false;
+		if(this.stateInFocus()){
+			synchronized(this){
+				texture.prepareToDraw();
+				this.mFocusBmp = texture;
+				this.mFocusWidth = width;
+				this.mFocusHeight = height;
+				this.mUpdateLargeTex = true;
+			}
 		}
 	}
 	
@@ -599,6 +723,10 @@ public class Image implements ImagePlane {
 		if(mFocusBmp == null || mState != STATE_FOCUSED){
 			return;
 		}
+		long startTime = System.currentTimeMillis();
+		long timeA, timeB, timeC;
+		gl.glGetError(); // Clear errors
+		gl.glGetError(); // Clear errors
 		float width = mFocusWidth;
 		float height = mFocusHeight;
 		
@@ -628,14 +756,30 @@ public class Image implements ImagePlane {
 
         gl.glTexEnvf(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE,
                 GL10.GL_BLEND);
-        
         try{
+        	// The strangest hack I have ever did!
+        	// Pause for 15 ms, then texSubImage2D will take 150-200ms rather than 450-500ms.
+        	try {
+				Thread.sleep(15);
+			} catch (InterruptedException e) {
+				// Whatever
+			}
+			// Aaaand...
+        	timeA = System.currentTimeMillis();
         	if(firstDraw){
+        		Log.v("Floating Image", "Setting large texture");
     			GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, mFocusBmp, 0);
     		}else{
     			GLUtils.texSubImage2D(GL10.GL_TEXTURE_2D, 0, 0, 0, mFocusBmp);
     		}
+        	// Tadaaa!
         	
+        	timeB = System.currentTimeMillis();
+        	int error = gl.glGetError();
+        	if(error != 0){
+        		String errString = GLU.gluErrorString(error);
+        		throw new IllegalArgumentException("OpenGL error caught: " + errString);
+        	}
         	
         	ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
             tbb.order(ByteOrder.nativeOrder());
@@ -649,10 +793,15 @@ public class Image implements ImagePlane {
             };
             mTexBuffer.put(tex);
             mTexBuffer.position(0);
+            
+            timeC = System.currentTimeMillis();
+            Log.v("Floating Image", "Set texture timings. A: " + (timeA - startTime) + "ms, B:" + (timeB - timeA) + "ms, C: " + (timeC - timeB) + "ms.");
         }catch(IllegalArgumentException e){
-        	Log.w("Floating Image", "Image: Large texture could not be shown", e);
+        	Log.w("Floating Image", "Large texture could not be shown", e);
+        	mFocusBmp.recycle();
+			mFocusBmp = null;
+			mLargeTex = false;
         	setTexture(gl, mShowingImage);
-        	return;
         }
         setState(gl);
 	}
@@ -664,7 +813,6 @@ public class Image implements ImagePlane {
 		float width  = ir.getWidth();
 		
 		maspect = width / height;
-		
 		gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
         gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
         gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);

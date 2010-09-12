@@ -17,7 +17,6 @@ import org.xml.sax.XMLReader;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.ExifInterface;
 import android.os.Process;
 import android.util.Log;
 import dk.nindroid.rss.compatibility.Exif;
@@ -40,6 +39,7 @@ public class BitmapDownloader implements Runnable {
 			exifAvailable = true;
 		}catch(Throwable t){
 			exifAvailable = false;
+			Log.v("Floating Image", "Exif tool is not available");
 		}
 	}
 	
@@ -132,23 +132,26 @@ public class BitmapDownloader implements Runnable {
 			if(exifAvailable){
 				try {
 					Exif exif = new Exif(file.getAbsolutePath());
-					int rotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, -1);
+					int rotation = exif.getAttributeInt(Exif.TAG_ORIENTATION, -1);
 					switch(rotation){
-					case ExifInterface.ORIENTATION_NORMAL:
+					case Exif.ORIENTATION_NORMAL:
 					case -1:
 						break;
-					case ExifInterface.ORIENTATION_ROTATE_90:
+					case Exif.ORIENTATION_ROTATE_90:
 						image.setRotation(270);
 						break;
-					case ExifInterface.ORIENTATION_ROTATE_180:
+					case Exif.ORIENTATION_ROTATE_180:
 						image.setRotation(180);
 						break;
-					case ExifInterface.ORIENTATION_ROTATE_270:
+					case Exif.ORIENTATION_ROTATE_270:
 						image.setRotation(90);
 						break;
 					}
 				} catch (IOException e) {
 					Log.w("Floating Image", "Error reading exif info for file", e);
+				} catch (Throwable t){
+					exifAvailable = false; // Some devices sort of know ExifInterface...
+					Log.w("Floating Image", "Disabling Exif Interface, the device lied!");
 				}
 			}
 			if(Settings.highResThumbs){

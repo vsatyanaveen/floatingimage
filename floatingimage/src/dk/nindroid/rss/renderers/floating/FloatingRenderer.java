@@ -7,6 +7,8 @@ import javax.microedition.khronos.opengles.GL10;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.opengl.GLU;
+import android.util.Log;
 import dk.nindroid.rss.R;
 import dk.nindroid.rss.RiverRenderer;
 import dk.nindroid.rss.ShowStreams;
@@ -81,7 +83,7 @@ public class FloatingRenderer extends Renderer {
 		
 	public void click(MatrixTrackingGL gl, float x, float y, long frameTime, long realTime){
 		if(mSelected != null){
-        	deselect(gl, frameTime, realTime);
+			deselect(gl, frameTime, realTime);
 		}else{
 			// Ignore click if we're at the splash
         	if(mSplashImg == null){
@@ -111,10 +113,14 @@ public class FloatingRenderer extends Renderer {
 	}
 	
 	private void deselect(MatrixTrackingGL gl, long frameTime, long realTime){
-		if(mSelected.stateInFocus()){
-    		mSelectedTime = realTime;
-        	mSelected.select(gl, frameTime, realTime); // Deselect!
-    	}
+		if(!mSelected.click(realTime)){
+			if(mSelected.stateInFocus()){
+	    		mSelectedTime = realTime;
+	        	mSelected.select(gl, frameTime, realTime); // Deselect!
+	    	}
+		}else{
+			mSelectingNext = mSelectingPrev = false;
+		}
 	}
 	
 	@Override 
@@ -191,11 +197,9 @@ public class FloatingRenderer extends Renderer {
 		gl.glDepthMask(false);
 		gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
 		gl.glEnable(GL10.GL_TEXTURE_2D);
-		gl.glDisable(GL10.GL_DEPTH_BITS);
 		gl.glDisable(GL10.GL_DEPTH_TEST);
 		// Background first, this is backmost
 		BackgroundPainter.draw(gl);
-		
         Image.setState(gl);
         for(int i = 0; i < mImgCnt; ++i){
         	if(mImgs[i] != mSelected){
@@ -203,7 +207,6 @@ public class FloatingRenderer extends Renderer {
         	}
         }
         Image.unsetState(gl);
-        
         float fraction = getFraction(realTime);
         if(mSelected != null){
         	float dark = Settings.fullscreenBlack ? RiverRenderer.mDisplay.getFill() * RiverRenderer.mDisplay.getFill() : 0.8f;
@@ -319,5 +322,34 @@ public class FloatingRenderer extends Renderer {
 		for(Image i : mImgs){
 			i.reset(gl, time);
 		}	
+	}
+
+	@Override
+	public void transform(float centerX, float centerY, float x, float y, float rotate, float scale) {
+		if(mSelected != null){
+			mSelected.transform(centerX, centerY, x, y, rotate, scale);
+		}
+	}
+	
+	@Override
+	public void initTransform() {
+		if(mSelected != null){
+			mSelected.initTransform();
+		}
+	}
+
+	@Override
+	public boolean freeMove() {
+		if(mSelected != null){
+			return mSelected.freeMove();
+		}
+		return false;
+	}
+
+	@Override
+	public void move(float x, float y) {
+		if(mSelected != null){
+			mSelected.move(x, y);
+		}
 	}
 }

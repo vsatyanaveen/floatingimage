@@ -8,9 +8,15 @@ import android.media.ExifInterface;
 public class Exif {
 	private ExifInterface mInstance;
 	
+	public static final int ORIENTATION_NORMAL 		= ExifInterface.ORIENTATION_NORMAL;
+	public static final int ORIENTATION_ROTATE_90 	= ExifInterface.ORIENTATION_ROTATE_90;
+	public static final int ORIENTATION_ROTATE_180 	= ExifInterface.ORIENTATION_ROTATE_180;
+	public static final int ORIENTATION_ROTATE_270 	= ExifInterface.ORIENTATION_ROTATE_270;
+	public static final String TAG_ORIENTATION 		= ExifInterface.TAG_ORIENTATION;
+	
 	static {
 		try{
-			Class.forName("ExifInterface");
+			Class.forName("android.media.ExifInterface");
 		}catch(Exception e){
 			throw new RuntimeException(e);
 		}

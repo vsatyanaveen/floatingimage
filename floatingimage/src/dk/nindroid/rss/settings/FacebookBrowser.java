@@ -87,7 +87,7 @@ public class FacebookBrowser extends ListActivity {
 				showFriends();
 				break;
 			case UNAUTHORIZE:
-				
+				FacebookFeeder.unauthorize(this);
 			}
 		}
 	}

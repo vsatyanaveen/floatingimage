@@ -2,6 +2,7 @@ package dk.nindroid.rss.renderers;
 
 import dk.nindroid.rss.Display;
 import dk.nindroid.rss.gfx.ImageUtil;
+import dk.nindroid.rss.renderers.floating.FloatingRenderer;
 
 public class Rotator {
 	private long 	mTurnedAt;
@@ -18,6 +19,7 @@ public class Rotator {
 			float fraction = getFraction(time);
 			if(fraction > 1.0f){
 				mTurning = false;
+				FloatingRenderer.mTextureSelector.setRotated(mTarget); // Ew
 				return mTarget;
 			}else{
 				fraction = ImageUtil.smoothstep(fraction);
