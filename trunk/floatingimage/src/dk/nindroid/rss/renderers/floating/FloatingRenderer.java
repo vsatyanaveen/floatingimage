@@ -177,6 +177,7 @@ public class FloatingRenderer extends Renderer {
         		}else{
         			mSelected = null;
         		}
+        		Arrays.sort(mImgs, mDepthComparator);
         	}
         }
         boolean sortArray = false;
