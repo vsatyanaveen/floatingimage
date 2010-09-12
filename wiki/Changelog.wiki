@@ -1,3 +1,35 @@
+_12/09-2010: 2.6.0_
+  * Multitouch! Not perfect, but not bad. :)
+  * Rotation fix for devices with non-standard default rotation (ie. landscape)
+  * Rotation option for devices that show wrong side up.
+  * 2.2 devices get soft button light turned off
+  * Facebook signout fixed
+  * Rotation image reload made slightly smoother.
+  * Exif reading fixed.
+  * Various bugfixes
+
+_06/09-2010: 2.5.7_
+  * Fix crash when rotating while finishing download of large image.
+
+_06/09-2010: 2.5.6_
+  * Showing old image when rotating after new image is selected but not yet loaded, fixed.
+
+_05/09-2010: 2.5.5_
+  * Added much needed warning that high resolution thumbnails might crash phone. :(
+
+_05/09-2010: 2.5.4_
+  * Removed some initial multitouch code that crashed pre-2.1update-1 phones. Sorry about that.
+
+_05/09-2010: 2.5.3_
+  * More image speeds available.
+  * Tweaks to lower memory usage.
+  * Focused images look better.
+  * Read Exif data on capable devices.
+  * HD display errors fixed.
+  * Minior language fixes.
+  * Feeds should be added faster.
+  * Error when rotating selected image fixed.
+
 _18/08-2010: 2.5.2_
   * Fixed appearance bugs on manage feeds view.
   * Made it possible to view hidden files when selecting feed directory, through the menu.
