@@ -14,6 +14,7 @@ import dk.nindroid.rss.uiActivities.OpenContextMenu;
 public class ClickHandler extends TimerTask {
 	private static MultitouchHandler mtHandler;
 	
+	
 	private static RiverRenderer renderer;
 	private static Vec2f 	mTouchLastPos;
 	private static Vec2f	mTouchStartPos;
@@ -266,11 +267,12 @@ public class ClickHandler extends TimerTask {
 				return;
 			}else{
 				try{
-					for(int i = 0; i < event.getPointerCount(); ++i){
-						if(mPointerA == event.getPointerId(i)){
+					for(int i = 0; i < pointerCount; ++i){
+						int pointerID = runGetPointerId(event, i);
+						if(mPointerA == pointerID){
 							ax = runGetX(event, i);
 							ay = runGetY(event, i);
-						} else if(mPointerB == event.getPointerId(i)){
+						} else if(mPointerB == pointerID){
 							bx = runGetX(event, i);
 							by = runGetY(event, i);
 						}
