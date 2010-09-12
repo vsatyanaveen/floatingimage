@@ -340,7 +340,7 @@ public class Image implements ImagePlane {
 	}
 
 	@Override
-	public void setFocusTexture(Bitmap texture, float width, float height) {
+	public void setFocusTexture(Bitmap texture, float width, float height, int sizeType) {
 		if(this.mBitmap != null){
 			this.mBitmap.recycle();
 		}

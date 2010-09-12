@@ -25,6 +25,7 @@ public abstract class Renderer {
 	public abstract void resetImages();
 	public abstract void transform(float centerX, float centerY, float x, float y, float rotate, float scale);
 	public abstract void initTransform();
+	public abstract void transformEnd();
 	public abstract boolean freeMove();
 	public abstract void move(float x, float y);
 }

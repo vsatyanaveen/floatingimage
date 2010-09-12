@@ -252,4 +252,10 @@ public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.rende
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public void transformEnd() {
+		// TODO Auto-generated method stub
+		
+	}
 }

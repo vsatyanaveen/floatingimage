@@ -43,6 +43,14 @@
                 android:entryValues="@array/slideSpeedValues"
                 android:dialogTitle="@string/slideSpeedTitle"
                 android:defaultValue="300" />
+            <ListPreference
+            	android:key="forceRotation"
+                android:title="@string/forceRotation"
+                android:summary="@string/forceRotationSummary"
+                android:entries="@array/forceRotationDescriptions"
+                android:entryValues="@array/forceRotationValues"
+                android:dialogTitle="@string/forceRotationTitle"
+                android:defaultValue="0" />
     </PreferenceCategory>
     <PreferenceCategory
             android:title="@string/floating">

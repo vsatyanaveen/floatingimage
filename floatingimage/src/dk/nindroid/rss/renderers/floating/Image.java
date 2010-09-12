@@ -33,9 +33,11 @@ public class Image implements ImagePlane {
 	private static boolean	revivingTextureNulled = false; 
 	private static final int STATE_FLOATING =   0;
 	private static final int STATE_FOCUSING =   1;
-	private static final int STATE_FOCUSED =    2;
+	private static final int STATE_FOCUSED	=   2;
 	private static final int STATE_DEFOCUSING = 3;
+	
 	private int				mState = STATE_FLOATING;
+	
 	
 	int						mID;
 	private IntBuffer   	mVertexBuffer;
@@ -164,7 +166,9 @@ public class Image implements ImagePlane {
 	public void select(GL10 gl, long time, long realTime){
 		mSelectedPos.set(mPos);
 		if(mState == STATE_FOCUSED){
-			mState = STATE_DEFOCUSING;
+			if(!this.isTransformed()){
+				mState = STATE_DEFOCUSING;
+			}
 		}else{
 			if(mShowingImage == null){
 				return;
@@ -435,7 +439,6 @@ public class Image implements ImagePlane {
 	boolean mUseOriginalTex = false;
 	
 	public void initTransform(){
-		applyOriginal();
 		mInitialX += this.mX;
 		mInitialY += this.mY;
 		mInitialRotate += this.mRotate;
@@ -445,17 +448,22 @@ public class Image implements ImagePlane {
 	}
 	
 	public void transform(float centerX, float centerY, float x, float y, float rotate, float scale) {
-		float invScale = 1.0f / mInitialScale;
-		if(scale < invScale){
-			this.mScale = invScale;
-			applyLarge();
+		if(this.mState == STATE_FOCUSED){
+			float invScale = 1.0f / mInitialScale;
+			if(scale < invScale){
+				scale = invScale;
+				applyLarge();
+			}
+			this.mScale = Math.min(scale, 5.0f / mInitialScale); // Avoid focusing on a single pixel, that's just silly!
+			x = x + centerX * (1.0f - scale);
+			y = y + centerY * (1.0f - scale);
+			this.move(x, y);
+			this.mRotate = rotate;
 		}
-		this.mScale = Math.max(scale, 1.0f / mInitialScale); // Clamp scale so we don't zoom too far out
-		x = x + centerX * (1.0f - scale);
-		y = y + centerY * (1.0f - scale);
-		this.move(x, y);
-		this.mRotate = rotate;
-		
+	}
+	
+	public void transformEnd(){
+		applyOriginal();
 	}
 	
 	private void applyOriginal(){
@@ -521,10 +529,12 @@ public class Image implements ImagePlane {
 	
 	public void move(float x, float y){
 		float scale = mInitialScale * mScale;
-		x = Math.min(x, scale - 1.0f - mInitialX);
-		x = Math.max(x, 1.0f - scale - mInitialX);
-		y = Math.min(y, scale - 1.0f - mInitialY);
-		y = Math.max(y, 1.0f - scale - mInitialY);
+		float maxX = RiverRenderer.mDisplay.getWidth() - scale * RiverRenderer.mDisplay.getWidth();
+		float maxY = RiverRenderer.mDisplay.getHeight() - scale * RiverRenderer.mDisplay.getHeight();
+		x = Math.max(x, maxX - mInitialX);
+		x = Math.min(x, -maxX - mInitialX);
+		y = Math.max(y, maxY - mInitialY);
+		y = Math.min(y, -maxY - mInitialY);
 		this.mX = x;
 		this.mY = y;
 	}
@@ -707,8 +717,13 @@ public class Image implements ImagePlane {
     	}
 	}
 	
-	public void setFocusTexture(Bitmap texture, float width, float height){
+	public void setFocusTexture(Bitmap texture, float width, float height, int imageSize){
 		if(this.stateInFocus()){
+			if(this.isTransformed() && imageSize != SIZE_ORIGINAL){
+				// Ignore
+				texture.recycle();
+				return;
+			}
 			synchronized(this){
 				texture.prepareToDraw();
 				this.mFocusBmp = texture;
@@ -716,6 +731,8 @@ public class Image implements ImagePlane {
 				this.mFocusHeight = height;
 				this.mUpdateLargeTex = true;
 			}
+		}else{
+			texture.recycle();
 		}
 	}
 	

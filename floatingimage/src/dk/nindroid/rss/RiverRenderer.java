@@ -223,21 +223,27 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	}
 	
 	private boolean showOSD(float x, float y){
-		if(y < 150){
-			if(y > 0){
-				//mShowOSD = true;
-			}else{
-				mHideOSD = true;
-			}
+		if(y > 0){
+			mHideOSD = true;
 			return true;
-		}else if(y > mDisplay.getHeightPixels() - 150){
+		}
+		/*
+		if(y < 150){
 			if(y < 0){
 				//mShowOSD = true;
 			}else{
 				mHideOSD = true;
 			}
 			return true;
+		}else if(y > mDisplay.getHeightPixels() - 150){
+			if(y > 0){
+				//mShowOSD = true;
+			}else{
+				mHideOSD = true;
+			}
+			return true;
 		}
+		*/
 		return false;
 	}
 	
@@ -261,19 +267,19 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 			break;
 		case Surface.ROTATION_270:
 			tmp = x; x = y; y = tmp;
-			y = mDisplay.getHeightPixels() - y;
+			y *= -1;
 			tmp = speedX; speedX = speedY; speedY = tmp;
 			speedY *= -1;
 			break;
 		case Surface.ROTATION_90:
 			tmp = x; x = y; y = tmp;
-			x = mDisplay.getWidthPixels() - x;
+			x *= -1;
 			tmp = speedX; speedX = speedY; speedY = tmp;
 			speedX *= -1;
 			break;
 		case Surface.ROTATION_180:
-			x = mDisplay.getWidthPixels() - x;
-			y = mDisplay.getHeightPixels() - y;
+			x *= -1;
+			y *= -1;
 			speedX *= -1;
 			speedY *= -1;
 		}
@@ -286,8 +292,8 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 			mRenderer.move(x, y);
 		}else{
 			// Pull up OSD?
-			if(isVertical(x, y)){
-				showOSD(x, y);
+			if(isVertical(speedX, speedY)){
+				showOSD(speedX, speedY);
 			}else{
 				// Slide right or left gesture?
 				if((x > 0 ? mRenderer.slideRight(System.currentTimeMillis()) : mRenderer.slideLeft(System.currentTimeMillis()))){
@@ -307,46 +313,64 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 		centerY = mDisplay.getHeightPixels() - centerY;
 		switch(orientation){
 		case Surface.ROTATION_0:
-			x /= mDisplay.getPortraitWidthPixels();
-			y /= mDisplay.getPortraitHeightPixels();
-			centerX /= mDisplay.getPortraitWidthPixels();
-			centerY /= mDisplay.getPortraitHeightPixels();			
 			break;
 		case Surface.ROTATION_270:
-			tmp = x;
-			x = y / -mDisplay.getPortraitHeightPixels();
-			y = tmp / mDisplay.getPortraitWidthPixels();
-			tmp = centerX;
-			centerX = centerY / -mDisplay.getPortraitHeightPixels();
-			centerY = tmp / mDisplay.getPortraitWidthPixels();
+			tmp = x; x = y; y = tmp;
+			x *= -1;
+			tmp = centerX; centerX = centerY; centerY = tmp;
 			break;
 		case Surface.ROTATION_90:
-			tmp = x;
-			x = y / mDisplay.getPortraitHeightPixels();
-			y = tmp / -mDisplay.getPortraitWidthPixels();
-			tmp = centerX;
-			centerX = centerY / mDisplay.getPortraitHeightPixels();
-			centerY = tmp / -mDisplay.getPortraitWidthPixels();
+			tmp = x; x = y; y = tmp;
+			y *= -1;
+			tmp = centerX; centerX = centerY; centerY = tmp;
 			break;
 		case Surface.ROTATION_180:
-			x /= -mDisplay.getPortraitWidthPixels();
-			y /= -mDisplay.getPortraitHeightPixels();
-			centerX /= -mDisplay.getPortraitWidthPixels();
-			centerY /= -mDisplay.getPortraitHeightPixels();
+			x *= -1;
+			y *= -1;
 			break;
 		}
+		
+		x /= mDisplay.getWidthPixels();
+		y /= mDisplay.getHeightPixels();
+		centerX /= mDisplay.getWidthPixels();
+		centerY /= mDisplay.getHeightPixels();
+		
 		x *= mDisplay.getWidth() * 2.0f;
 		y *= mDisplay.getHeight() * 2.0f;
 		centerX *= mDisplay.getWidth() * 2.0f;
 		centerY *= mDisplay.getHeight() * 2.0f;
-		centerX -=  mDisplay.getWidth();
-		centerY -=  mDisplay.getHeight();
+		
+		switch(orientation){
+		case Surface.ROTATION_0:
+			centerX -=  mDisplay.getWidth();
+			centerY -=  mDisplay.getHeight();
+			break;
+		case Surface.ROTATION_270:
+			centerY -=  mDisplay.getHeight();
+			centerX *= -1;
+			break;
+		case Surface.ROTATION_90:
+			centerY -=  mDisplay.getHeight();
+			centerY *= -1;
+			break;
+		case Surface.ROTATION_180:
+			centerX -=  mDisplay.getWidth();
+			centerY -=  mDisplay.getHeight();
+			centerX *= -1;
+			centerY *= -1;
+			break;
+		}
+		
 		mRenderer.transform(centerX, centerY, x, y, rotate, scale);
 	}
 	
 	public void moveInit(){
 		mMoveEventHandled = false;
 		mRenderer.initTransform();
+	}
+	
+	public void transformEnd(){
+		mRenderer.transformEnd();
 	}
 	
 	public void onClick(float x, float y){

@@ -3,6 +3,8 @@ package dk.nindroid.rss.orientation;
 import java.util.ArrayList;
 import java.util.List;
 
+import dk.nindroid.rss.settings.Settings;
+
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -71,7 +73,7 @@ public class OrientationManager implements SensorEventListener {
 		}
 		if(orientation != -1 && orientation != settingOrientation){
 			// Adjust for rotated devices
-			orientation = (orientation + 4 - initialRotation) % 4;
+			orientation = (orientation + 4 - initialRotation + Settings.forceRotation) % 4;
 			settingOrientation = orientation;
 			setOrientation();
 		}

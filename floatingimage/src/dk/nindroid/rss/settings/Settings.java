@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
 import android.view.Display;
+import android.view.Surface;
 import android.view.WindowManager;
 
 public class Settings {
@@ -33,6 +34,7 @@ public class Settings {
 	public static boolean	imageDecorations;
 	public static boolean	highResThumbs;
 	public static long		floatingTraversal;
+	public static int		forceRotation;
 	
 	public static boolean fullscreen;
 
@@ -52,6 +54,18 @@ public class Settings {
 		imageDecorations = sp.getBoolean("imageDecorations", true);
 		highResThumbs = sp.getBoolean("highResThumbs", false);
 		floatingTraversal = Long.parseLong(sp.getString("floatingSpeed", "30000"));
+		forceRotation = Integer.parseInt(sp.getString("forceRotation", "0"));
+		switch(forceRotation){
+		case 90:
+			forceRotation = Surface.ROTATION_90;
+			break;
+		case 180:
+			forceRotation = Surface.ROTATION_180;
+			break;
+		case 270:
+			forceRotation = Surface.ROTATION_270;
+			break;
+		}
 		
 		Display display = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
 		if(display.getWidth() < 400){
