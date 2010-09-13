@@ -1,3 +1,12 @@
+_13/09-2010: 2.6.3_
+  * Improved zoom navigation (Spring action when exceeding bounds)
+  * Removed some unused code and textures = slight optimization
+  * Fixed zoom texture bug
+  * Added error handling - might fix HTC Wildfire texture bug?
+
+_12/09-2010: 2.6.2_
+  * Fixed immediate crash on 1.5 devices.
+
 _12/09-2010: 2.6.1_
   * Fixed immediate crash on non-multitouch devices.
 
