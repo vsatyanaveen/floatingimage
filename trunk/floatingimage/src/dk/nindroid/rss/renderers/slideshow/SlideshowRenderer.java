@@ -8,11 +8,9 @@ import dk.nindroid.rss.RiverRenderer;
 import dk.nindroid.rss.TextureBank;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.gfx.Vec3f;
-import dk.nindroid.rss.helpers.MatrixTrackingGL;
 import dk.nindroid.rss.renderers.OSD;
 import dk.nindroid.rss.renderers.ProgressBar;
 import dk.nindroid.rss.renderers.Renderer;
-import dk.nindroid.rss.renderers.slideshow.Image;
 import dk.nindroid.rss.renderers.slideshow.transitions.CrossFade;
 import dk.nindroid.rss.renderers.slideshow.transitions.FadeToBlack;
 import dk.nindroid.rss.renderers.slideshow.transitions.FadeToWhite;
@@ -98,7 +96,7 @@ public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.rende
 	}
 
 	@Override
-	public void click(MatrixTrackingGL gl, float x, float y, long frameTime,
+	public void click(GL10 gl, float x, float y, long frameTime,
 			long realTime) {
 		// TODO Auto-generated method stub
 
@@ -127,7 +125,7 @@ public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.rende
 	}
 
 	@Override
-	public void render(MatrixTrackingGL gl, long frameTime, long realtime) {
+	public void render(GL10 gl, long frameTime, long realtime) {
 		gl.glDisable(GL10.GL_DEPTH_TEST);
 		gl.glDepthMask(false);
 		if(!mCurrentTransition.isFinished()){
@@ -146,7 +144,7 @@ public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.rende
 	}
 
 	@Override
-	public void update(MatrixTrackingGL gl, long time, long realTime) {
+	public void update(GL10 gl, long time, long realTime) {
 		if (mResetImages){
 			resetImages(gl);
 		}
@@ -171,7 +169,7 @@ public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.rende
 		}
 	}
 	
-	private void next(MatrixTrackingGL gl, long realTime){
+	private void next(GL10 gl, long realTime){
 		Image temp = mCurrent;
 		mCurrent = mNext;
 		mNext = mPrevious;
