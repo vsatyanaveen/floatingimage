@@ -20,7 +20,6 @@ import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.Ray;
 import dk.nindroid.rss.gfx.ImageUtil;
 import dk.nindroid.rss.gfx.Vec3f;
-import dk.nindroid.rss.helpers.MatrixTrackingGL;
 import dk.nindroid.rss.renderers.ImagePlane;
 import dk.nindroid.rss.renderers.ProgressBar;
 import dk.nindroid.rss.settings.Settings;
@@ -67,7 +66,6 @@ public class Image implements ImagePlane {
 	private float			mFocusWidth;
 	private float			mFocusHeight;
 	private boolean			mLargeTex = false;
-	private float[]			mModelviewMatrix = new float[16];
 	private boolean			mSetBackgroundWhenReady = false;
 	
 	public enum Pos {
@@ -316,7 +314,7 @@ public class Image implements ImagePlane {
 		return scale;
 	}
 	
-	public void draw(MatrixTrackingGL gl, long time, long realTime){
+	public void draw(GL10 gl, long time, long realTime){
 		if(mShowingImage == null && !mLargeTex){
 			return;
 		}
@@ -401,8 +399,6 @@ public class Image implements ImagePlane {
 		gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
 		gl.glLineWidth(1.0f);
 		gl.glDrawElements(GL10.GL_LINE_STRIP, 5, GL10.GL_UNSIGNED_BYTE, mLineIndexBuffer);
-
-		gl.getMatrix(mModelviewMatrix, 0);
 		
         gl.glPopMatrix();
         
@@ -521,20 +517,51 @@ public class Image implements ImagePlane {
 				mInitialScale = mRestoreScale - (mRestoreScale - 1.0f) * (fraction);
 			}
 		}
+		adjustMove();
+	}
+	
+	public void adjustMove(){
+		float width;
+		float height;
+		boolean isTall = isTall();
+		if(isTall){
+			height = RiverRenderer.mDisplay.getHeight();
+			width = maspect * height;
+		}else{
+			width = RiverRenderer.mDisplay.getWidth();
+			height = width / maspect;
+		}
+		float scale = mInitialScale * mScale;
+		float maxX = width - scale * width;
+		float maxY = height - scale * height;
+		
+		float maxDiffX =  maxX - mInitialX;
+		float maxDiffY =  maxY - mInitialY;
+		float minDiffX = -maxX - mInitialX;
+		float minDiffY = -maxY - mInitialY;
+		if(mX < maxDiffX){
+			float adjust = (mX - maxDiffX);
+			mX -= adjust * 0.1f;
+		}
+		if(mX > minDiffX){
+			float adjust = (mX - minDiffX);
+			mX -= adjust * 0.1f;
+		}
+		if(mY < maxDiffY){
+			float adjust = (mY - maxDiffY);
+			mY -= adjust * 0.1f;
+		}
+		if(mY > minDiffY){
+			float adjust = (mY - minDiffY);
+			mY -= adjust * 0.1f;
+		}
 	}
 	
 	public boolean freeMove(){
 		return isTransformed() && !mRestoreTransformation;
 	}
 	
-	public void move(float x, float y){
-		float scale = mInitialScale * mScale;
-		float maxX = RiverRenderer.mDisplay.getWidth() - scale * RiverRenderer.mDisplay.getWidth();
-		float maxY = RiverRenderer.mDisplay.getHeight() - scale * RiverRenderer.mDisplay.getHeight();
-		x = Math.max(x, maxX - mInitialX);
-		x = Math.min(x, -maxX - mInitialX);
-		y = Math.max(y, maxY - mInitialY);
-		y = Math.min(y, -maxY - mInitialY);
+	public void move(float x, float y){		
 		this.mX = x;
 		this.mY = y;
 	}
@@ -720,12 +747,12 @@ public class Image implements ImagePlane {
 	public void setFocusTexture(Bitmap texture, float width, float height, int imageSize){
 		if(this.stateInFocus()){
 			if(this.isTransformed() && imageSize != SIZE_ORIGINAL){
-				// Ignore
+				// Ignore, but set large texture instead.
 				texture.recycle();
+				FloatingRenderer.mTextureSelector.applyOriginal();
 				return;
 			}
 			synchronized(this){
-				texture.prepareToDraw();
 				this.mFocusBmp = texture;
 				this.mFocusWidth = width;
 				this.mFocusHeight = height;
@@ -740,8 +767,8 @@ public class Image implements ImagePlane {
 		if(mFocusBmp == null || mState != STATE_FOCUSED){
 			return;
 		}
-		long startTime = System.currentTimeMillis();
-		long timeA, timeB, timeC;
+		//long startTime = System.currentTimeMillis();
+		//long timeA, timeB, timeC;
 		gl.glGetError(); // Clear errors
 		gl.glGetError(); // Clear errors
 		float width = mFocusWidth;
@@ -774,6 +801,7 @@ public class Image implements ImagePlane {
         gl.glTexEnvf(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE,
                 GL10.GL_BLEND);
         try{
+        	/*
         	// The strangest hack I have ever did!
         	// Pause for 15 ms, then texSubImage2D will take 150-200ms rather than 450-500ms.
         	try {
@@ -781,8 +809,10 @@ public class Image implements ImagePlane {
 			} catch (InterruptedException e) {
 				// Whatever
 			}
+			*/
+        	gl.glFinish();
 			// Aaaand...
-        	timeA = System.currentTimeMillis();
+        	//timeA = System.currentTimeMillis();
         	if(firstDraw){
         		Log.v("Floating Image", "Setting large texture");
     			GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, mFocusBmp, 0);
@@ -791,11 +821,15 @@ public class Image implements ImagePlane {
     		}
         	// Tadaaa!
         	
-        	timeB = System.currentTimeMillis();
+        	//timeB = System.currentTimeMillis();
         	int error = gl.glGetError();
         	if(error != 0){
-        		String errString = GLU.gluErrorString(error);
-        		throw new IllegalArgumentException("OpenGL error caught: " + errString);
+        		Log.w("Floating Image", "Error drawing on old image, trying to set new image.");
+        		GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, mFocusBmp, 0);
+        		if(error != 0){
+        			String errString = GLU.gluErrorString(error);
+        			throw new IllegalArgumentException("OpenGL error caught: " + errString);
+        		}
         	}
         	
         	ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
@@ -811,8 +845,8 @@ public class Image implements ImagePlane {
             mTexBuffer.put(tex);
             mTexBuffer.position(0);
             
-            timeC = System.currentTimeMillis();
-            Log.v("Floating Image", "Set texture timings. A: " + (timeA - startTime) + "ms, B:" + (timeB - timeA) + "ms, C: " + (timeC - timeB) + "ms.");
+            //timeC = System.currentTimeMillis();
+            //Log.v("Floating Image", "Set texture timings. A: " + (timeA - startTime) + "ms, B:" + (timeB - timeA) + "ms, C: " + (timeC - timeB) + "ms.");
         }catch(IllegalArgumentException e){
         	Log.w("Floating Image", "Large texture could not be shown", e);
         	mFocusBmp.recycle();

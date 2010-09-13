@@ -15,7 +15,6 @@ import dk.nindroid.rss.TextureSelector;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.Ray;
 import dk.nindroid.rss.gfx.Vec3f;
-import dk.nindroid.rss.helpers.MatrixTrackingGL;
 import dk.nindroid.rss.renderers.Dimmer;
 import dk.nindroid.rss.renderers.OSD;
 import dk.nindroid.rss.renderers.Renderer;
@@ -79,7 +78,7 @@ public class FloatingRenderer extends Renderer {
 		Arrays.sort(mImgs, mDepthComparator);
 	}
 		
-	public void click(MatrixTrackingGL gl, float x, float y, long frameTime, long realTime){
+	public void click(GL10 gl, float x, float y, long frameTime, long realTime){
 		if(mSelected != null){
 			deselect(gl, frameTime, realTime);
 		}else{
@@ -110,7 +109,7 @@ public class FloatingRenderer extends Renderer {
         }
 	}
 	
-	private void deselect(MatrixTrackingGL gl, long frameTime, long realTime){
+	private void deselect(GL10 gl, long frameTime, long realTime){
 		if(!mSelected.click(realTime)){
 			if(mSelected.stateInFocus()){
 	    		mSelectedTime = realTime;
@@ -131,7 +130,7 @@ public class FloatingRenderer extends Renderer {
 		return offset + id * id;
 	}
 	
-	public void update(MatrixTrackingGL gl, long frameTime, long realTime){
+	public void update(GL10 gl, long frameTime, long realTime){
 		if(mResetImages){
 			resetImages(gl, frameTime);
 		}
@@ -192,7 +191,7 @@ public class FloatingRenderer extends Renderer {
         }
 	}
 	
-	public void render(MatrixTrackingGL gl, long time, long realTime){
+	public void render(GL10 gl, long time, long realTime){
 		gl.glDepthMask(false);
 		gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
 		gl.glEnable(GL10.GL_TEXTURE_2D);

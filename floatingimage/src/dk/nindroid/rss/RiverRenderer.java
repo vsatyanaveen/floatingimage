@@ -11,7 +11,6 @@ import android.util.Log;
 import android.view.Surface;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.gfx.Vec2f;
-import dk.nindroid.rss.helpers.MatrixTrackingGL;
 import dk.nindroid.rss.renderers.OSD;
 import dk.nindroid.rss.renderers.Renderer;
 import dk.nindroid.rss.renderers.floating.BackgroundPainter;
@@ -57,9 +56,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	}
 	
 	@Override
-	public void onDrawFrame(GL10 gl10) {
-		
-		MatrixTrackingGL gl = new MatrixTrackingGL(gl10);
+	public void onDrawFrame(GL10 gl) {
 		try{
 			gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE,
 	                GL10.GL_MODULATE);

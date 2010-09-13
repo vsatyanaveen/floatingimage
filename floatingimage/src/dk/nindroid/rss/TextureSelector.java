@@ -147,7 +147,7 @@ public class TextureSelector {
 						Log.i("dk.nindroid.rss.TextureSelector", "Stop received");
 						return;
 					}
-					if(mRef == null){
+					if(mRef == null && !mDoApplyLarge && !mDoApplyOriginal){
 						try {
 							this.wait();
 						} catch (InterruptedException e) {
@@ -217,12 +217,10 @@ public class TextureSelector {
 			Bitmap bitmap = Bitmap.createBitmap(res, res, Config.RGB_565);
 			Canvas canvas = new Canvas(bitmap);
 			canvas.drawBitmap(bmp, 0, 0, mPaint);
-			synchronized(this){
-				if(mRef != null){
-					bitmap.recycle();
-				}else{
-					mCurSelected.setFocusTexture(bitmap, (float)bmp.getWidth() / res, (float)bmp.getHeight() / res, sizeType);
-				}
+			if(mRef != null){
+				bitmap.recycle();
+			}else{
+				mCurSelected.setFocusTexture(bitmap, (float)bmp.getWidth() / res, (float)bmp.getHeight() / res, sizeType);
 			}
 		}
 		
