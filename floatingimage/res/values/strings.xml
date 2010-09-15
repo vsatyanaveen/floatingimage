@@ -25,4 +25,5 @@
 	<string name="share_subject">Lookit, a picture!</string>
 	<string name="share_url">Share image URL</string>
 	<string name="share_image">Share image</string>
+	<string name="loading_feeds">Loading feeds</string>
 </resources>

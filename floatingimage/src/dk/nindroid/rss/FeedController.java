@@ -174,6 +174,8 @@ public class FeedController {
 			});
 			mReferences.clear();
 			mFeedIndex.clear();
+			int progress = 0;
+			mRenderer.setFeeds(0, mFeeds.size());
 			for(FeedReference feed : mFeeds){
 				List<ImageReference> references = null;
 				if(feed.getType() == Settings.TYPE_LOCAL){
@@ -200,6 +202,7 @@ public class FeedController {
 				}else{
 					Log.w("FeedController", "Reading feed failed too many times, giving up!");
 				}
+				mRenderer.setFeeds(++progress, mFeeds.size());
 			}
 			Log.v("Floating Image", "Showing images from " + mReferences.size() + " feeds");
 			return mReferences.size() > 0;

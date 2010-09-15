@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.Surface;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.gfx.Vec2f;
+import dk.nindroid.rss.renderers.FeedProgress;
 import dk.nindroid.rss.renderers.OSD;
 import dk.nindroid.rss.renderers.Renderer;
 import dk.nindroid.rss.renderers.floating.BackgroundPainter;
@@ -34,8 +35,12 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	
 	private Renderer  		mRenderer;
 	private OSD				mOSD;
+	private FeedProgress	mFeedProgress;
 	private long			mLastFrameTime = 0;
 	private int				mFrames = 0;
+	
+	private int				mFeedsLoaded;
+	private int				mFeedsTotal;
 	
 	static {
 		mDisplay = new Display();
@@ -45,6 +50,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 		mTranslucentBackground = useTranslucentBackground;
 		mBank = textureBank;
 		mOSD = new OSD();
+		mFeedProgress = new FeedProgress();
 	}
 	
 	public void setRenderer(Renderer renderer){
@@ -113,6 +119,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	        gl.glRotatef(mDisplay.getRotation(), 0.0f, 0.0f, 1.0f);
 	        mRenderer.render(gl, time, realTime);
 	        if(!mDisplay.isTurning()){
+	        	mFeedProgress.draw(gl, mFeedsLoaded, mFeedsTotal);
 	        	mOSD.draw(gl, realTime);
 	        }
 		}catch(Throwable t){
@@ -120,7 +127,6 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 		}
 		
 	}
-	
 	private void fadeOffset(long time) {
 		float timeFactor = (3000 - (time - mUpTime)) / 3000.0f;
 		float fadeOffset = mFadeOffset * timeFactor * timeFactor * mSensitivityX;
@@ -130,6 +136,12 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 			mFadeOffset = 0.0f;
 		}
 	}
+	
+	public void setFeeds(int progress, int total){
+		this.mFeedsTotal = total;
+		this.mFeedsLoaded = progress;
+	}
+	
 	public Intent followSelected(){
 		return mRenderer.followCurrent();
 	}
@@ -252,9 +264,6 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	float lastY;
 	
 	public void move(float x, float y, float speedX, float speedY){
-		if(mMoveEventHandled){
-			return;
-		}
 		// Transform event!
 		int orientation = mDisplay.getOrientation();
 		float tmp;
@@ -283,24 +292,55 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 		
 		// Free image movement, override gestures
 		if(mRenderer.freeMove()){
+			mMoveEventHandled = true;
 			y *= -1;
 			x = x / mDisplay.getWidthPixels() * mDisplay.getWidth() * 2.0f;
 			y = y / mDisplay.getHeightPixels() * mDisplay.getHeight() * 2.0f;
 			mRenderer.move(x, y);
 		}else{
-			// Pull up OSD?
-			if(isVertical(speedX, speedY)){
-				showOSD(speedX, speedY);
-			}else{
-				// Slide right or left gesture?
-				if((x > 0 ? mRenderer.slideRight(System.currentTimeMillis()) : mRenderer.slideLeft(System.currentTimeMillis()))){
-					mMoveEventHandled = true;
-				}else{ // Move stream
+			if(!mMoveEventHandled){
+				// Pull up OSD?
+				if(isVertical(speedX, speedY)){
+					showOSD(speedX, speedY);
+				}else if(mRenderer.getCurrent() == null){
 					mFadeOffset = speedX;
+					mUpTime = System.currentTimeMillis();
 				}
-				mUpTime = System.currentTimeMillis();
 			}
 		}
+	}
+	
+	public void moveEnd(float speedX, float speedY){
+		if(!mMoveEventHandled){
+			// Transform event!
+			int orientation = mDisplay.getOrientation();
+			float tmp;
+			switch(orientation){
+			case Surface.ROTATION_0:
+				// Do nothing
+				break;
+			case Surface.ROTATION_270:				
+				tmp = speedX; speedX = speedY; speedY = tmp;
+				speedY *= -1;
+				break;
+			case Surface.ROTATION_90:
+				tmp = speedX; speedX = speedY; speedY = tmp;
+				speedX *= -1;
+				break;
+			case Surface.ROTATION_180:
+				speedX *= -1;
+				speedY *= -1;
+			}
+			
+			// Slide right or left gesture?
+			if(speedX > 0.0f){
+				mRenderer.slideRight(System.currentTimeMillis());
+			}
+			else{
+				mRenderer.slideLeft(System.currentTimeMillis());
+			}
+		}
+		transformEnd();
 	}
 	
 	public void transform(float centerX, float centerY, float x, float y, float rotate, float scale){
