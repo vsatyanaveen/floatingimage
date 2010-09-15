@@ -134,6 +134,7 @@ public class TextureSelector {
 						for(int i = 0; i < 5; ++i){
 							Bitmap bmp = BitmapDownloader.downloadImage(url, progress);
 							if(bmp != null && bmp.getWidth() > 0 && bmp.getHeight() > 0){
+								Log.v("Floating Image", "Image size: (" + bmp.getWidth() + "," + bmp.getHeight() + ")");
 								applyLarge(bmp);
 								break;
 							}else{
@@ -159,21 +160,20 @@ public class TextureSelector {
 		
 		private void applyLarge(Bitmap bmp){
 			if(mRef != null) return;
-			/*
+			
 			int height = bmp.getHeight();
 			int width = bmp.getWidth();
 			int max = Math.max(width, height);
-			int screenMax = Math.max(RiverRenderer.mDisplay.getPortraitHeightPixels(), RiverRenderer.mDisplay.getPortraitWidthPixels());
-			if(max > screenMax){
-				float scale = (float)screenMax / max;
+			int res = mTextureResolution;
+			if(max > res){
+				float scale = (float)res / max;
 				Bitmap tmp = Bitmap.createScaledBitmap(bmp, (int)(width * scale), (int)(height * scale), true);
 				bmp.recycle();
-				if(mCurrentBitmap != null && !mCurrentBitmap.isRecycled()){
-					mCurrentBitmap.recycle();
-				}
 				bmp = tmp;
 			}
-			*/
+			if(mCurrentBitmap != null && !mCurrentBitmap.isRecycled()){
+				mCurrentBitmap.recycle();
+			}
 			mCurrentBitmap = bmp;
 			applyLarge();
 		}

@@ -20,7 +20,7 @@ public class InfoBar {
 	private static ByteBuffer	mIndexBuffer;
 	private static IntBuffer	mColorBuffer;
 	private static final InfoPainter	mInfoPainter;
-	private static int			mTextureID;
+	private static int			mTextureID = -1;
 	private static FloatBuffer 	mTexBuffer;
 	private static int 			mLastDisplayWidth = 0;
 	
@@ -87,6 +87,12 @@ public class InfoBar {
 	}
 	
 	protected static void setTexture(GL10 gl, Bitmap bmp){
+		if(mTextureID == -1){
+			int[] textures = new int[1];
+			gl.glGenTextures(1, textures, 0);
+			mTextureID = textures[0];
+		}
+		
 		gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER,
                 GL10.GL_NEAREST);
         gl.glTexParameterf(GL10.GL_TEXTURE_2D,

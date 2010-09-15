@@ -433,6 +433,7 @@ public class Image implements ImagePlane {
 	private static final long RESTORE_TIME = 400;
 	long mRestoredAt;
 	boolean mUseOriginalTex = false;
+	boolean transforming = true;
 	
 	public void initTransform(){
 		mInitialX += this.mX;
@@ -441,38 +442,37 @@ public class Image implements ImagePlane {
 		mInitialScale *= this.mScale;
 		mX = mY = mRotate = 0.0f;
 		mScale = 1.0f;
+		transforming = true;
 	}
 	
 	public void transform(float centerX, float centerY, float x, float y, float rotate, float scale) {
 		if(this.mState == STATE_FOCUSED){
 			float invScale = 1.0f / mInitialScale;
-			if(scale < invScale){
+			if(scale < invScale * 1.01f){
 				scale = invScale;
-				applyLarge();
+				return;
+			}else{
+				this.mScale = Math.min(scale, 5.0f / mInitialScale); // Avoid focusing on a single pixel, that's just silly!
+				x = x + centerX * (1.0f - scale);
+				y = y + centerY * (1.0f - scale);
+				this.move(x, y);
 			}
-			this.mScale = Math.min(scale, 5.0f / mInitialScale); // Avoid focusing on a single pixel, that's just silly!
-			x = x + centerX * (1.0f - scale);
-			y = y + centerY * (1.0f - scale);
-			this.move(x, y);
 			this.mRotate = rotate;
 		}
 	}
 	
 	public void transformEnd(){
-		applyOriginal();
+		updateTexture();
+		transforming = false;
 	}
 	
-	private void applyOriginal(){
+	private void updateTexture(){
 		if(!mUseOriginalTex){
 			FloatingRenderer.mTextureSelector.applyOriginal();
 			mUseOriginalTex = true;
-		}
-	}
-	
-	private void applyLarge(){
-		if(mUseOriginalTex){
+		}else{
 			mUseOriginalTex = false;
-			FloatingRenderer.mTextureSelector.applyLarge();
+			FloatingRenderer.mTextureSelector.applyLarge();	
 		}
 	}
 	
@@ -507,7 +507,7 @@ public class Image implements ImagePlane {
 				mX = mY = mRotate = mInitialX = mInitialY = mInitialRotate = 0.0f;
 				mInitialScale = mScale = 1.0f;
 				mRestoreTransformation = false;
-				applyLarge();
+				updateTexture();
 			}else{
 				float fraction = (realTime - mRestoredAt + RESTORE_TIME) / (float)RESTORE_TIME;
 				fraction = ImageUtil.smoothstep(fraction);
@@ -541,19 +541,19 @@ public class Image implements ImagePlane {
 		float minDiffY = -maxY - mInitialY;
 		if(mX < maxDiffX){
 			float adjust = (mX - maxDiffX);
-			mX -= adjust * 0.1f;
+			mX -= adjust * 0.4f;
 		}
 		if(mX > minDiffX){
 			float adjust = (mX - minDiffX);
-			mX -= adjust * 0.1f;
+			mX -= adjust * 0.4f;
 		}
 		if(mY < maxDiffY){
 			float adjust = (mY - maxDiffY);
-			mY -= adjust * 0.1f;
+			mY -= adjust * 0.4f;
 		}
 		if(mY > minDiffY){
 			float adjust = (mY - minDiffY);
-			mY -= adjust * 0.1f;
+			mY -= adjust * 0.4f;
 		}
 	}
 	
@@ -748,8 +748,10 @@ public class Image implements ImagePlane {
 		if(this.stateInFocus()){
 			if(this.isTransformed() && imageSize != SIZE_ORIGINAL){
 				// Ignore, but set large texture instead.
-				texture.recycle();
-				FloatingRenderer.mTextureSelector.applyOriginal();
+				if(texture != null){
+					texture.recycle();
+					FloatingRenderer.mTextureSelector.applyOriginal();
+				}
 				return;
 			}
 			synchronized(this){
@@ -801,17 +803,7 @@ public class Image implements ImagePlane {
         gl.glTexEnvf(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE,
                 GL10.GL_BLEND);
         try{
-        	/*
-        	// The strangest hack I have ever did!
-        	// Pause for 15 ms, then texSubImage2D will take 150-200ms rather than 450-500ms.
-        	try {
-				Thread.sleep(15);
-			} catch (InterruptedException e) {
-				// Whatever
-			}
-			*/
         	gl.glFinish();
-			// Aaaand...
         	//timeA = System.currentTimeMillis();
         	if(firstDraw){
         		Log.v("Floating Image", "Setting large texture");
@@ -819,7 +811,6 @@ public class Image implements ImagePlane {
     		}else{
     			GLUtils.texSubImage2D(GL10.GL_TEXTURE_2D, 0, 0, 0, mFocusBmp);
     		}
-        	// Tadaaa!
         	
         	//timeB = System.currentTimeMillis();
         	int error = gl.glGetError();

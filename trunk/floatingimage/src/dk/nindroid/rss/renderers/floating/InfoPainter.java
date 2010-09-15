@@ -22,7 +22,7 @@ public class InfoPainter {
 		this.mAuthorSize = authorSize;
 		mPainter = new Paint();
 		mPainter.setAntiAlias(true);
-		mPainter.setTextSize(titleSize);
+		//mPainter.setTextSize(titleSize);
 		//mPainter.setColor(0);
 		mTitleContinuedWidth = (int)Math.ceil(mPainter.measureText("..."));
 		mPainter.setTextSize(authorSize);
