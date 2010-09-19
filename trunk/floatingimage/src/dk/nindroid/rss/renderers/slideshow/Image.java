@@ -41,8 +41,13 @@ public class Image implements ImagePlane {
 	private boolean				mSetBackgroundWhenReady = false;
 	private boolean				mRevive = false;
 	private boolean				mSetLargeTexture = false;
+	private boolean				mInFocus;
 	
 	private Vec3f				mPos;
+	
+	public void setFocus(boolean inFocus){
+		this.mInFocus = inFocus;
+	}
 	
 	public void init(GL10 gl, long time){
 		int[] textures = new int[1];
@@ -337,6 +342,10 @@ public class Image implements ImagePlane {
 	
 	public static void unsetState(GL10 gl){
 		gl.glDisable(GL10.GL_TEXTURE_2D);
+	}
+	
+	public boolean validForTextureUpdate(){
+		return this.mInFocus;
 	}
 
 	@Override

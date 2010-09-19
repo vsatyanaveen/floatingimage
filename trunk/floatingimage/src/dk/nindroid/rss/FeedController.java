@@ -29,13 +29,8 @@ public class FeedController {
 	private List<List<ImageReference>> 		mReferences;
 	private List<Integer>					mFeedIndex;
 	private List<FeedReference>				mFeeds;
-	private boolean 						showing = false;
 	private Random 							mRand = new Random(System.currentTimeMillis());
 	private RiverRenderer					mRenderer;
-	
-	public boolean isShowing(){
-		return showing;
-	}
 	
 	public FeedController(){
 		mFeeds = new ArrayList<FeedReference>();
@@ -115,7 +110,17 @@ public class FeedController {
 			mDbHelper.close();
 		}
 		
-		showing = false;
+		// Make sure local feeds are read first - they load crazy fast! :)
+		Collections.sort(newFeeds, new Comparator<FeedReference>() {
+			@Override
+			public int compare(FeedReference a, FeedReference b) {
+				int tA = a.getType(); int tB = b.getType();
+				if (tA < tB) return -1;
+				if (tA > tB) return 1;
+				return 0;
+			}
+		});
+		
 		synchronized(mFeeds){
 			if(mFeeds.size() != newFeeds.size()){
 				feedsChanged();
@@ -162,16 +167,6 @@ public class FeedController {
 	// False if no images.
 	private synchronized boolean parseFeeds(){
 		synchronized(mFeeds){
-			Collections.sort(mFeeds, new Comparator<FeedReference>() {
-
-				@Override
-				public int compare(FeedReference a, FeedReference b) {
-					int tA = a.getType(); int tB = b.getType();
-					if (tA < tB) return -1;
-					if (tA > tB) return 1;
-					return 0;
-				}
-			});
 			mReferences.clear();
 			mFeedIndex.clear();
 			int progress = 0;

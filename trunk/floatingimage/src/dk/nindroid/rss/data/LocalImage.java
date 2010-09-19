@@ -19,6 +19,11 @@ public class LocalImage extends ImageReference{
 	private 	  float		mWidth;
 	private 	  float		mHeight;
 	
+	public LocalImage(){
+		mWidth = 0;
+		mHeight = 0;
+	}
+	
 	public LocalImage(File file){
 		this.mFile = file;
 		mWidth = 0;

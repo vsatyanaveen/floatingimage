@@ -7,8 +7,6 @@ import java.util.Queue;
 import java.util.Vector;
 
 import dk.nindroid.rss.data.ImageReference;
-import dk.nindroid.rss.data.LocalImage;
-import dk.nindroid.rss.settings.Settings;
 
 public class TextureBank {
 	Queue<ImageReference> 					unseen   = new LinkedList<ImageReference>();
@@ -34,10 +32,7 @@ public class TextureBank {
 			synchronized (unseen) {
 				unseen.add(ir);
 			}
-			// Don't cache local images.
-			if(Settings.useCache && !(ir instanceof LocalImage)){
-				ic.saveExploreImage(ir);
-			}
+			ic.saveImage(ir);
 		}
 	}
 	public void addOldBitmap(ImageReference ir){
@@ -62,29 +57,19 @@ public class TextureBank {
 			this.notify();
 		}
 	}
+	
+	public boolean isShowing(String id){
+		return mActiveBitmaps.containsKey(id);
+	}
 		
 	public ImageReference getTexture(ImageReference previousImage){
 		ImageReference ir = getUnseen();
-		
 		if(ir != null){
 			// Remove previous image, if any
 			if(previousImage != null){
 				mActiveBitmaps.remove(previousImage.getID());
 			}
 			mActiveBitmaps.put(ir.getID(), ir);
-			return ir;
-		}
-		// If no new pictures, try some old ones.
-		// Do not show an image that's already being shown
-		if(Settings.useCache){
-			ir = getCached();
-			
-			if(previousImage != null){
-				mActiveBitmaps.remove(previousImage.getID());
-			}
-			if(ir != null){
-				mActiveBitmaps.put(ir.getID(), ir);
-			}
 			return ir;
 		}
 		return null;
@@ -104,27 +89,8 @@ public class TextureBank {
 				}
 				
 				ir = unseen.poll();
-			}while(ir != null && mActiveBitmaps.containsKey(ir.getID()));
+			}while(ir != null && isShowing(ir.getID()));
 			unseen.notify();
-		}
-		return ir;
-	}
-	private ImageReference getCached(){
-		ImageReference ir = null;
-		synchronized (cached) {
-			int attempts = 0;
-			do{
-				if(ir != null){
-					ir.getBitmap().recycle();
-				}
-				if(++attempts == 3){
-					ir = null;
-					break;
-				}
-				
-				ir = cached.poll();
-			}while(ir != null && mActiveBitmaps.containsKey(ir.getID()));
-			cached.notify();
 		}
 		return ir;
 	}
@@ -145,7 +111,7 @@ public class TextureBank {
 	}
 	public void startExternal(){
 		new Thread(bitmapDownloader).start();
-		new Thread(ic).start();
+		//new Thread(ic).start();
 	}
 	
 	public void start(){

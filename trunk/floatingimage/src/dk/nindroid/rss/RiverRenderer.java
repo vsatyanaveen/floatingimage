@@ -454,6 +454,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 		gl.glMatrixMode(GL10.GL_MODELVIEW);
 		mOSD.init(gl);
 		mRenderer.init(gl, System.currentTimeMillis() + mOffset, mOSD);
+		mFeedProgress.init();
 		
 		/*
          * By default, OpenGL enables features that improve quality

@@ -57,18 +57,25 @@ public class BitmapDownloader implements Runnable {
 				if(bank.stopThreads) return;
 				while(bank.unseen.size() < bank.textureCache){
 					if(bank.stopThreads){
-						Log.v("Bitmap downloader", "*** Stopping asynchronous downloader thread per request");
+						Log.i("Bitmap downloader", "*** Stopping asynchronous downloader thread per request");
 						return;
 					}
 					ImageReference ir = mFeedController.getImageReference();
-					if(ir == null)
+					if(ir == null || bank.isShowing(ir.getID())){
+						// Nothing (new) to show just yet...
+						Thread.sleep(500);
 						break;
-					if(ir.getBitmap() != null && !ir.getBitmap().isRecycled()){ // Image is being shown, ignore!
-						break;
-					}else if(ir instanceof LocalImage){
-						addLocalImage((LocalImage)ir);
-					}else {
-						addExternalImage(ir);
+					}
+					if(bank.doDownload(ir.getImageID())){
+						if(ir.getBitmap() != null && !ir.getBitmap().isRecycled()){ // Image is being shown, ignore!
+							break;
+						}else if(ir instanceof LocalImage){
+							addLocalImage((LocalImage)ir);
+						}else {
+							addExternalImage(ir);
+						}
+					}else{
+						bank.addFromCache(ir.getImageID());
 					}
 				}
 				synchronized (bank.unseen) {
@@ -91,37 +98,31 @@ public class BitmapDownloader implements Runnable {
 	
 	public void addExternalImage(ImageReference ir){ 
 		String url = Settings.highResThumbs ? ir.get256ImageUrl() : ir.get128ImageUrl();
-		if(bank.doDownload(ir.getImageID())){
-			Bitmap bmp = downloadImage(url, null);
-			if(bmp == null){
-				return;
-			}
-			if(Settings.highResThumbs){
-				int max = Math.max(bmp.getHeight(), bmp.getWidth());
-				if(max > 256){
-					float scale = (float)256 / max;
-					Bitmap tmp = Bitmap.createScaledBitmap(bmp, (int)(bmp.getWidth() * scale), (int)(bmp.getHeight() * scale), true);
-					bmp.recycle();
-					bmp = tmp;
-				}
-				ir.set256Bitmap(bmp);
-			}else{
-				int max = Math.max(bmp.getHeight(), bmp.getWidth());
-				if(max > 128){
-					float scale = (float)128 / max;
-					Bitmap tmp = Bitmap.createScaledBitmap(bmp, (int)(bmp.getWidth() * scale), (int)(bmp.getHeight() * scale), true);
-					bmp.recycle();
-					bmp = tmp;
-				}
-				ir.set128Bitmap(bmp);
-			}
-			ir.getExtended();
-			bank.addNewBitmap(ir);
-		}else{
-			if(mFeedController.isShowing()){
-				bank.addFromCache(ir.getImageID());
-			}
+		Bitmap bmp = downloadImage(url, null);
+		if(bmp == null){
+			return;
 		}
+		if(Settings.highResThumbs){
+			int max = Math.max(bmp.getHeight(), bmp.getWidth());
+			if(max > 256){
+				float scale = (float)256 / max;
+				Bitmap tmp = Bitmap.createScaledBitmap(bmp, (int)(bmp.getWidth() * scale), (int)(bmp.getHeight() * scale), true);
+				bmp.recycle();
+				bmp = tmp;
+			}
+			ir.set256Bitmap(bmp);
+		}else{
+			int max = Math.max(bmp.getHeight(), bmp.getWidth());
+			if(max > 128){
+				float scale = (float)128 / max;
+				Bitmap tmp = Bitmap.createScaledBitmap(bmp, (int)(bmp.getWidth() * scale), (int)(bmp.getHeight() * scale), true);
+				bmp.recycle();
+				bmp = tmp;
+			}
+			ir.set128Bitmap(bmp);
+		}
+		ir.getExtended();
+		bank.addNewBitmap(ir);
 	}
 	
 	public void addLocalImage(LocalImage image){

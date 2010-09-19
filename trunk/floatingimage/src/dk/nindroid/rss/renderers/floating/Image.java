@@ -118,8 +118,10 @@ public class Image implements ImagePlane {
 		if(!revivingTextureNulled){
 			revivingTextureNulled = true;
 			largeTextureSize = 0;
+			largeTextureID = -1;
 		}
 		mLastTextureSize = 0;
+		
 		// Revive textures
 		if(mState == STATE_FOCUSED && mFocusBmp != null){
 			setFocusTexture(gl);
@@ -365,12 +367,14 @@ public class Image implements ImagePlane {
 		gl.glEnable(GL10.GL_BLEND);
 		
 		if(Settings.imageDecorations){
+			/*
 			if(mCurImage != null && mCurImage.isNew()){
 				GlowImage.draw(gl, x, y, z, rotation, szX, szY);
 			}
 			else{
+			*/
 				ShadowPainter.draw(gl, x, y, z, rotation, szX, szY);
-			}
+			//}
 		}
 		
 		gl.glTranslatef(x, y, z);
@@ -411,7 +415,7 @@ public class Image implements ImagePlane {
 		gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_REPLACE);
 		gl.glFrontFace(GL10.GL_CCW);
 		gl.glEnable(GL10.GL_TEXTURE_2D);
-		gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER,GL10.GL_NEAREST);
+		gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER,GL10.GL_LINEAR);
         gl.glTexParameterf(GL10.GL_TEXTURE_2D,GL10.GL_TEXTURE_MAG_FILTER,GL10.GL_LINEAR);
         gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S,GL10.GL_CLAMP_TO_EDGE);
         gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T,GL10.GL_CLAMP_TO_EDGE);
@@ -467,12 +471,16 @@ public class Image implements ImagePlane {
 	}
 	
 	private void updateTexture(){
-		if(!mUseOriginalTex){
-			FloatingRenderer.mTextureSelector.applyOriginal();
-			mUseOriginalTex = true;
+		if(isTransformed()){
+			if(!mUseOriginalTex){
+				FloatingRenderer.mTextureSelector.applyOriginal();
+				mUseOriginalTex = true;
+			}
 		}else{
-			mUseOriginalTex = false;
-			FloatingRenderer.mTextureSelector.applyLarge();	
+			if(mUseOriginalTex){
+				mUseOriginalTex = false;
+				FloatingRenderer.mTextureSelector.applyLarge();
+			}
 		}
 	}
 	
@@ -744,6 +752,10 @@ public class Image implements ImagePlane {
     	}
 	}
 	
+	public boolean validForTextureUpdate(){
+		return this.stateInFocus();
+	}
+	
 	public void setFocusTexture(Bitmap texture, float width, float height, int imageSize){
 		if(this.stateInFocus()){
 			if(this.isTransformed() && imageSize != SIZE_ORIGINAL){
@@ -811,7 +823,7 @@ public class Image implements ImagePlane {
     		}else{
     			GLUtils.texSubImage2D(GL10.GL_TEXTURE_2D, 0, 0, 0, mFocusBmp);
     		}
-        	
+
         	//timeB = System.currentTimeMillis();
         	int error = gl.glGetError();
         	if(error != 0){

@@ -28,6 +28,12 @@ public class FeedProgress {
 	String 	mLoadingText;
 	int		mLoaded = -1;
 	
+	public static void init()
+	{
+		// Make sure a texture ID is generated, and a new texture is made.
+		mTextureID = -1;
+	}
+	
 	private static final int VERTS = 4;
 	static {
     	
@@ -69,7 +75,6 @@ public class FeedProgress {
 		mIndexBuffer = ByteBuffer.allocateDirect(indices.length);
 		mIndexBuffer.put(indices);
 		mIndexBuffer.position(0);
-		
 	}
 	
 	public FeedProgress(){

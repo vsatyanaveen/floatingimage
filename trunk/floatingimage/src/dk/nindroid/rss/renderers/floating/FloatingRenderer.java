@@ -233,7 +233,7 @@ public class FloatingRenderer extends Renderer {
 	}
 	
 	public static float getFarRight(){
-		return RiverRenderer.mDisplay.getWidth() * 0.5f * (-mFloatZ + mJitterZ) * 1.2f + 1.2f + mJitterX;
+		return RiverRenderer.mDisplay.getWidth() * 0.5f * (-mFloatZ + mJitterZ) * 1.2f + 1.3f + mJitterX;
 	}
 	
 	public static float getFraction(long realTime){
@@ -284,21 +284,25 @@ public class FloatingRenderer extends Renderer {
 
 	@Override
 	public boolean slideLeft(long realTime) {
+		/*
 		if(mSelected != null){
 			mSelectingNext = true;
 			mSelectingPrev = false;
 			return true;
 		}
+		*/
 		return false;
 	}
 
 	@Override
 	public boolean slideRight(long realTime) {
+		/*
 		if(mSelected != null){
 			mSelectingNext = false;
 			mSelectingPrev = true;
 			return true;
 		}
+		*/
 		return false;
 	}
 	

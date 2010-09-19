@@ -14,6 +14,8 @@ public abstract class Transition {
 	public void preRender(GL10 gl, long frameTime){}
 	public void postRender(GL10 gl, long frameTime){}
 	public void init(Image previous, Image next, long now, long duration){
+		next.setFocus(true);
+		previous.setFocus(false);
 		this.mFinished = false;	
 		this.mPrevious = previous;
 		this.mNext = next;
