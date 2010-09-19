@@ -2,6 +2,8 @@ package dk.nindroid.rss.flickr;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -194,9 +196,9 @@ public class FlickrImage extends ImageReference{
 		sb.append(nl);
 		sb.append(secret);
 		sb.append(nl);
-		sb.append(title);
+		sb.append(URLEncoder.encode(title));
 		sb.append(nl);
-		sb.append(owner);
+		sb.append(URLEncoder.encode(owner));
 		// Person info
 		if(userInfo != null){
 			sb.append(nl);
@@ -223,8 +225,8 @@ public class FlickrImage extends ImageReference{
 		serverID = is.readLine();
 		imgID = is.readLine();
 		secret = is.readLine();
-		title = is.readLine();
-		owner = is.readLine();
+		title = URLDecoder.decode(is.readLine());
+		owner = URLDecoder.decode(is.readLine());
 		userInfo = new FlickrUserInfo();
 		userInfo.setUsername(is.readLine());
 		userInfo.setRealName(is.readLine());

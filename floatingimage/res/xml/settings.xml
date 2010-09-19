@@ -83,6 +83,7 @@
                 android:dialogTitle="@string/floatingSpeedTitle"
                 android:defaultValue="30000" />
     </PreferenceCategory>
+    <!-- 
     <PreferenceCategory
             android:title="@string/internals">
 
@@ -99,6 +100,7 @@
         </PreferenceScreen>
 
     </PreferenceCategory>
+     -->
     <PreferenceScreen android:title="@string/about" android:summary="@string/aboutSummary">
 			<intent 
 			android:action="android.intent.action.MAIN" 

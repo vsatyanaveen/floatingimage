@@ -22,8 +22,6 @@ public class Settings {
 	public static final int MODE_RANDOM = 6;
 	public static final int MODE_FLOATING_IMAGE = 7;
 	
-	
-	public static boolean 	useCache;
 	public static boolean 	shuffleImages;
 	public static boolean 	rotateImages;
 	public static boolean 	fullscreenBlack;
@@ -43,7 +41,6 @@ public class Settings {
 	public static void readSettings(Context context) {
 		Settings.sp = context.getSharedPreferences("dk.nindroid.rss_preferences", 0);
 		shuffleImages = sp.getBoolean("shuffleImages", true);
-		useCache = sp.getBoolean("useCache", false);
 		rotateImages = sp.getBoolean("rotateImages", true);
 		downloadDir = sp.getString("downloadDir", Environment.getExternalStorageDirectory().getAbsolutePath() + "/download/");
 		fullscreen = sp.getBoolean("fullscreen", false);

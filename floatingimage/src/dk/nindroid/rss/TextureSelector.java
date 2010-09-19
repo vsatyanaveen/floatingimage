@@ -181,24 +181,35 @@ public class TextureSelector {
 		// Scale bmp to current screen size, and apply
 		private void applyLarge(){
 			if(mCurrentBitmap != null && !mCurrentBitmap.isRecycled() && mRef == null){
+				int displayMax = Math.max(RiverRenderer.mDisplay.getTargetHeightPixels(),RiverRenderer.mDisplay.getTargetWidthPixels());
 				float aspect = mCurrentBitmap.getWidth() / (float)mCurrentBitmap.getHeight();
-				if(mSwapSides){
-					aspect = 1.0f / aspect;
-				}
 				int height, width;
-				if(isTall(aspect)){
-					height = (int)(RiverRenderer.mDisplay.getTargetHeightPixels() * (RiverRenderer.mDisplay.getFocusedHeight() / RiverRenderer.mDisplay.getHeight()));
-					height *= RiverRenderer.mDisplay.getFill();
-					
-					width = (int)(aspect * height);
-				}else{
-					width = RiverRenderer.mDisplay.getTargetWidthPixels();
-					width *= RiverRenderer.mDisplay.getFill();
-					
-					height = (int)(width / aspect);
-				}
-				if(mSwapSides){
-					width ^= height; height ^= width; width ^= height; // mmmMMMMmmm... Donuts!
+				if(displayMax < mTextureResolution){
+					if(mSwapSides){
+						aspect = 1.0f / aspect;
+					}
+					if(isTall(aspect)){
+						height = (int)(RiverRenderer.mDisplay.getTargetHeightPixels() * (RiverRenderer.mDisplay.getFocusedHeight() / RiverRenderer.mDisplay.getHeight()));
+						height *= RiverRenderer.mDisplay.getFill();
+						
+						width = (int)(aspect * height);
+					}else{
+						width = RiverRenderer.mDisplay.getTargetWidthPixels();
+						width *= RiverRenderer.mDisplay.getFill();
+						
+						height = (int)(width / aspect);
+					}
+					if(mSwapSides){
+						width ^= height; height ^= width; width ^= height; // mmmMMMMmmm... Donuts!
+					}
+				}else{ // Hello Alexis. :)
+					if(aspect > 1){
+						width  = mTextureResolution;
+						height = (int)(width / aspect);
+					}else{
+						height = mTextureResolution;
+						width  = (int)(aspect * height);
+					}
 				}
 				Bitmap bmp = Bitmap.createScaledBitmap(mCurrentBitmap, width, height, true);
 				
@@ -208,7 +219,9 @@ public class TextureSelector {
 		}
 		
 		private void applyOriginal(){
-			applyBitmap(mCurrentBitmap, ImagePlane.SIZE_ORIGINAL);
+			if(mCurSelected != null && mCurSelected.validForTextureUpdate()){
+				applyBitmap(mCurrentBitmap, ImagePlane.SIZE_ORIGINAL);
+			}
 		}
 		
 		private void applyBitmap(Bitmap bmp, int sizeType){
@@ -230,9 +243,12 @@ public class TextureSelector {
 		
 		@Override
 		public void imageSizeChanged() {
-			mDoApplyLarge = true;
-			synchronized (this) {
-				this.notify();
+			// Don't retexture all large textured planes, only the focused one!
+			if(mCurSelected != null && mCurSelected.validForTextureUpdate()){
+				mDoApplyLarge = true;
+				synchronized (this) {
+					this.notify();
+				}
 			}
 		}
 	}

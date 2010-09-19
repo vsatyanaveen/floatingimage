@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import dk.nindroid.rss.data.ImageReference;
+import dk.nindroid.rss.data.LocalImage;
 import dk.nindroid.rss.facebook.FacebookImage;
 import dk.nindroid.rss.flickr.FlickrImage;
 import dk.nindroid.rss.picasa.PicasaImage;
@@ -17,7 +18,9 @@ public class ImageTypeResolver {
 			return new PicasaImage();
 		}else if(type.equals(FacebookImage.imageType)){
 			return new FacebookImage();
+		}else if(type.equals(LocalImage.imageType)){
+			return new LocalImage();
 		}
-		return null;
+		return null; // ?? Unknown internal format! Ought to be an exception!
 	}
 }

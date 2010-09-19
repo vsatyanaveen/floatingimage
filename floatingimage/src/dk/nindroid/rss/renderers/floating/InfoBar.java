@@ -75,6 +75,11 @@ public class InfoBar {
         mTexBuffer.put(tex);
         mTexBuffer.position(0);
         mInfoPainter.paintCanvas(Math.min(RiverRenderer.mDisplay.getWidthPixels(), 1024), 80);
+        if(mTextureID == -1){
+			int[] textures = new int[1];
+			gl.glGenTextures(1, textures, 0);
+			mTextureID = textures[0];
+		}
 		gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
         setTexture(gl, mInfoPainter.getBitmap());
 	}
@@ -86,13 +91,7 @@ public class InfoBar {
         setTexture(gl, mInfoPainter.getBitmap());        
 	}
 	
-	protected static void setTexture(GL10 gl, Bitmap bmp){
-		if(mTextureID == -1){
-			int[] textures = new int[1];
-			gl.glGenTextures(1, textures, 0);
-			mTextureID = textures[0];
-		}
-		
+	protected static void setTexture(GL10 gl, Bitmap bmp){		
 		gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER,
                 GL10.GL_NEAREST);
         gl.glTexParameterf(GL10.GL_TEXTURE_2D,
@@ -181,22 +180,4 @@ public class InfoBar {
 		gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mTexBuffer);
 		gl.glDrawElements(GL10.GL_TRIANGLE_STRIP, 4, GL10.GL_UNSIGNED_BYTE, mIndexBuffer);
 	}
-	
-/*
-		mInfo.beginDrawing(gl, mWidth, mHeight);
-		
-		int rotation = 0;
-		if(RiverRenderer.mOrientation == RiverRenderer.UP_IS_LEFT){
-			rotation = -90;
-		}
-		
-		mInfo.draw(gl, mWidth / 2 - mInfo.getWidth(mInfoTitle) / 2, 52, rotation, mInfoTitle);
-		if(mInfoTitle2 != -1){
-			mInfo.draw(gl, mWidth / 2 - mInfo.getWidth(mInfoTitle2) / 2, 30, rotation, mInfoTitle2);
-		}
-		if(mInfoAuthor != -1){
-			mInfo.draw(gl, mWidth - mInfo.getWidth(mInfoAuthor) - 5, 5, rotation, mInfoAuthor);
-		}
-		mInfo.endDrawing(gl);
-*/
 }
