@@ -333,11 +333,13 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 			}
 			
 			// Slide right or left gesture?
-			if(speedX > 0.0f){
-				mRenderer.slideRight(System.currentTimeMillis());
-			}
-			else{
-				mRenderer.slideLeft(System.currentTimeMillis());
+			if(Math.abs(speedX) > Math.abs(speedY)){
+				if(speedX > 0.0f){
+					mRenderer.slideRight(System.currentTimeMillis());
+				}
+				else{
+					mRenderer.slideLeft(System.currentTimeMillis());
+				}
 			}
 		}
 		transformEnd();

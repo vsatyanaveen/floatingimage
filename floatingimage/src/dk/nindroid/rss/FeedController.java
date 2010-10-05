@@ -231,6 +231,8 @@ public class FeedController {
 	
 	private static void buildImageIndex(List<ImageReference> images, File dir, int level){
 		File[] files = dir.listFiles();
+		if(files == null || files.length == 0) 
+			return;
 		if(!Settings.shuffleImages){
 			Arrays.sort(files, new InverseComparator()); // Show last items first
 		}

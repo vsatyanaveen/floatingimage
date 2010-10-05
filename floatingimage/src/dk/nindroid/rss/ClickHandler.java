@@ -79,12 +79,12 @@ public class ClickHandler extends TimerTask {
 			}
 		}
 		if(action == MotionEvent.ACTION_UP){
+			if(mAction == ACTION_MOVE){
+				renderer.moveEnd(mLastSpeedX[0], mLastSpeedY[0]);
+			}
 			for(int i = 0; i < 2; ++i){
 				mLastSpeedX[i] = 0;
 				mLastSpeedY[i] = 0;
-			}
-			if(mAction == ACTION_MOVE){
-				renderer.moveEnd(mLastSpeedX[0], mLastSpeedY[0]);
 			}
 		}
 		mTouchLastPos.setX(x);

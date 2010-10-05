@@ -61,7 +61,7 @@ public class ImageDownloader implements Runnable {
 				activity.runOnUiThread(toaster);
 				return;
 			} catch (IOException e) {
-				Log.e("ImageDownloader", "Failed to get image", e);
+				Log.e("Floating Image", "Failed to get image", e);
 				toaster = new Toaster("Failed fetching image: \"" + name + "\"");
 				activity.runOnUiThread(toaster);
 				return;

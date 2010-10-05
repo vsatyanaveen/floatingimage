@@ -68,6 +68,10 @@ public class TextureBank {
 			// Remove previous image, if any
 			if(previousImage != null){
 				mActiveBitmaps.remove(previousImage.getID());
+				if(previousImage.isInvalidated()){
+					ic.updateMeta(previousImage);
+					previousImage.validate();
+				}
 			}
 			mActiveBitmaps.put(ir.getID(), ir);
 			return ir;

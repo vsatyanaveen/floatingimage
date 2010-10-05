@@ -35,8 +35,10 @@ public class BitmapDownloader implements Runnable {
 	// Do we have access to the Exif class?
 	static{
 		try{
+			Log.v("Floating Image", "Checking if Exif tool is available...");
 			Exif.checkAvailable();
 			exifAvailable = true;
+			Log.v("Floating Image", "Enabling Exif reading!");
 		}catch(Throwable t){
 			exifAvailable = false;
 			Log.v("Floating Image", "Exif tool is not available");

@@ -85,6 +85,8 @@ public class LocalImage extends ImageReference{
 		sb.append(mHeight);
 		sb.append(nl);
 		sb.append(mFile.getAbsolutePath());
+		sb.append(nl);
+		sb.append(getTargetOrientation());
 		return sb.toString();
 	}
 
@@ -130,6 +132,10 @@ public class LocalImage extends ImageReference{
 		mWidth = Float.parseFloat(is.readLine());
 		mHeight = Float.parseFloat(is.readLine());
 		mFile = new File(is.readLine());
+		String rotation = is.readLine();
+		if(rotation != null){
+			setRotation(Float.parseFloat(rotation));
+		}
 		this.mBitmap = bmp;
 	}
 
