@@ -126,14 +126,14 @@ public class ImageCache {
 			ir.getBitmap().compress(CompressFormat.JPEG, 85, fos);
 			fos.flush();
 			fos.close();
-			File f_info = new File(mExploreInfo.getPath() + "/" + name + ".info");
-			FileOutputStream fos_info = new FileOutputStream(f_info);
-			fos_info.write((f.getAbsolutePath() + "\n" + ir.getInfo()).getBytes());
-			fos_info.flush();
-			fos_info.close();
-			synchronized(mFiles){
-				addFile(f_info);
-				mCached.put(f_info.getName(), mFiles.size() - 1);
+			File f_info = updateMeta(ir);
+			if(f_info == null){
+				f.delete();
+			}else{
+				synchronized(mFiles){
+					addFile(f_info);
+					mCached.put(f_info.getName(), mFiles.size() - 1);
+				}
 			}
 		} catch (FileNotFoundException e) {
 			Log.w("Floating Image", "Image could not be cached", e);
@@ -141,6 +141,26 @@ public class ImageCache {
 		} catch (IOException e) {
 			Log.w("Floating Image", "Image could not be cached", e);
 			return;
+		}
+	}
+	
+	public File updateMeta(ImageReference ir){
+		try {
+			String name = ir.getID();
+			String thumbPath = mExplore.getPath() + "/" + name + ".jpg";
+			File f_info = new File(mExploreInfo.getPath() + "/" + name + ".info");
+			f_info.delete();
+			FileOutputStream fos_info = new FileOutputStream(f_info);
+			fos_info.write((thumbPath + "\n" + ir.getInfo()).getBytes());
+			fos_info.flush();
+			fos_info.close();
+			return f_info;
+		} catch (FileNotFoundException e) {
+			Log.w("Floating Image", "Image could not be cached", e);
+			return null;
+		} catch (IOException e) {
+			Log.w("Floating Image", "Image could not be cached", e);
+			return null;
 		}
 	}
 	

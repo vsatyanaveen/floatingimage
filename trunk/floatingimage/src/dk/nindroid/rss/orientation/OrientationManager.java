@@ -71,9 +71,9 @@ public class OrientationManager implements SensorEventListener {
 				orientation = Surface.ROTATION_90;
 			}
 		}
+		// Adjust for rotated devices
+		orientation = (orientation + 4 - initialRotation + Settings.forceRotation) % 4;
 		if(orientation != -1 && orientation != settingOrientation){
-			// Adjust for rotated devices
-			orientation = (orientation + 4 - initialRotation + Settings.forceRotation) % 4;
 			settingOrientation = orientation;
 			setOrientation();
 		}

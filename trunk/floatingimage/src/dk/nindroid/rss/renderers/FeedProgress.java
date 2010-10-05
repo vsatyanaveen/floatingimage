@@ -11,7 +11,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.opengl.GLUtils;
-import android.util.Log;
 import dk.nindroid.rss.R;
 import dk.nindroid.rss.RiverRenderer;
 import dk.nindroid.rss.ShowStreams;
@@ -94,6 +93,7 @@ public class FeedProgress {
 				int[] textures = new int[1];
 				gl.glGenTextures(1, textures, 0);
 				mTextureID = textures[0];
+				mLoaded = -1;
 			}
 			gl.glActiveTexture(GL10.GL_TEXTURE0);
 			if(mLoaded != loaded){

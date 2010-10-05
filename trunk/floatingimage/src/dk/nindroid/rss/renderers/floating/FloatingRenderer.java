@@ -7,6 +7,7 @@ import javax.microedition.khronos.opengles.GL10;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 import dk.nindroid.rss.R;
 import dk.nindroid.rss.RiverRenderer;
 import dk.nindroid.rss.ShowStreams;
@@ -35,6 +36,7 @@ public class FloatingRenderer extends Renderer {
 	
 	private boolean 		mNewStart = true;
 	private Image[] 		mImgs;
+	private Image[] 		mImgDepths;
 	private TextureBank 	mBank;
 	public static TextureSelector mTextureSelector;
 	private long 			mInterval;
@@ -74,8 +76,12 @@ public class FloatingRenderer extends Renderer {
 	        	mCreateMiddle ^= true;
 	        	creationOffset += mInterval;
 		}
+		mImgDepths = new Image[mImgs.length];
+		for(int i = 0; i < mImgs.length; ++i){
+			mImgDepths[i] = mImgs[i];
+		}
 		mDepthComparator = new ImageDepthComparator();
-		Arrays.sort(mImgs, mDepthComparator);
+		Arrays.sort(mImgDepths, mDepthComparator);
 	}
 		
 	public void click(GL10 gl, float x, float y, long frameTime, long realTime){
@@ -88,22 +94,26 @@ public class FloatingRenderer extends Renderer {
 	        	Vec3f rayDir = new Vec3f(x, y, -1);
 	        	rayDir.normalize();
 	        	Ray r = new Ray(mCamPos, rayDir);
-	        	int i = 0;
+	        	int i = mImgCnt - 1;
 	        	Image selected = null;
 	        	float closest = Float.MAX_VALUE;
 	        	float t;
-	        	for(; i < mImgCnt; ++i){
-	        		t = mImgs[i].intersect(r); 
+	        	for(; i > -1; --i){
+	        		t = mImgDepths[i].intersect(r); 
 	            	if(t > 0 && t < closest){
 	            		closest = t;
-	            		selected = mImgs[i];
-	            		mSelectedIndex = i;
+	            		selected = mImgDepths[i];
+	            		break; // Images are depth sorted.
 	            	}
 	            }
 	        	if(selected != null && selected.canSelect()){
 	        		mSelectedTime = realTime;
 	        		mSelected = selected;
 	        		selected.select(gl, frameTime, realTime);
+	        		for(i = mImgs.length; i > 0; --i){
+	        			if(mImgs[i - 1] == selected)
+	        				mSelectedIndex = i - 1;
+	        		}
 	        	}
 	        }
         }
@@ -136,7 +146,7 @@ public class FloatingRenderer extends Renderer {
 		}
 		// If new start, show splash!
 		if(mNewStart){
-			mSplashImg = mImgs[4];
+			mSplashImg = mImgDepths[4];
 			Bitmap splash = BitmapFactory.decodeStream(ShowStreams.current.getResources().openRawResource(R.drawable.splash));
 			mSplashImg.setSelected(gl, splash, 343.0f/512.0f, 1.0f, frameTime);
 			mNewStart = false;
@@ -165,7 +175,7 @@ public class FloatingRenderer extends Renderer {
         	}
         	if(mSelected.stateFloating()){
         		if(mSelectingNext || mSelectingPrev){
-        			int imageCount = mImgs.length;
+        			int imageCount = mImgDepths.length;
         			mSelectedIndex += (mSelectingNext ? imageCount - 1 : 1);
         			mSelectedIndex %= imageCount;
         			mSelected = mImgs[mSelectedIndex];
@@ -173,21 +183,22 @@ public class FloatingRenderer extends Renderer {
         			mSelectingNext = false;
         			mSelectingPrev = false;
         			mSelected.select(gl, frameTime, realTime);
+        			Log.v("Floating Image", "SelectedIndex: " + mSelectedIndex);
         		}else{
         			mSelected = null;
         		}
-        		Arrays.sort(mImgs, mDepthComparator);
+        		Arrays.sort(mImgDepths, mDepthComparator);
         	}
         }
         boolean sortArray = false;
         for(int i = 0; i < mImgCnt; ++i){
-        	if(mImgs[i].update(gl, frameTime, realTime)){
+        	if(mImgDepths[i].update(gl, frameTime, realTime)){
         		sortArray = true;
         	}
         }
         if(sortArray)
         {
-        	Arrays.sort(mImgs, mDepthComparator);
+        	Arrays.sort(mImgDepths, mDepthComparator);
         }
 	}
 	
@@ -200,8 +211,8 @@ public class FloatingRenderer extends Renderer {
 		BackgroundPainter.draw(gl);
         Image.setState(gl);
         for(int i = 0; i < mImgCnt; ++i){
-        	if(mImgs[i] != mSelected){
-        		mImgs[i].draw(gl, time, realTime);
+        	if(mImgDepths[i] != mSelected){
+        		mImgDepths[i].draw(gl, time, realTime);
         	}
         }
         Image.unsetState(gl);
@@ -284,25 +295,23 @@ public class FloatingRenderer extends Renderer {
 
 	@Override
 	public boolean slideLeft(long realTime) {
-		/*
 		if(mSelected != null){
 			mSelectingNext = true;
 			mSelectingPrev = false;
+			Log.v("Floating Image", "SlideLeft");
 			return true;
 		}
-		*/
 		return false;
 	}
 
 	@Override
 	public boolean slideRight(long realTime) {
-		/*
 		if(mSelected != null){
 			mSelectingNext = false;
 			mSelectingPrev = true;
+			Log.v("Floating Image", "SlideRight");
 			return true;
 		}
-		*/
 		return false;
 	}
 	

@@ -65,6 +65,9 @@ public class DownloadUtil {
 				chunkIndex = chunkIndex + bytesRead;
 			}
 			spaceLeft = CHUNKSIZE - chunkIndex;
+			if(buffer == null){
+				buffer = new byte[BUFFERSIZE]; // reinitialize buffer?!?
+			}
 		}
 		//Log.v("Download util", "Bytes read: " + totalRead);
 		

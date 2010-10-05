@@ -75,20 +75,20 @@ public class InfoBar {
         mTexBuffer.put(tex);
         mTexBuffer.position(0);
         mInfoPainter.paintCanvas(Math.min(RiverRenderer.mDisplay.getWidthPixels(), 1024), 80);
-        if(mTextureID == -1){
-			int[] textures = new int[1];
-			gl.glGenTextures(1, textures, 0);
-			mTextureID = textures[0];
-		}
 		gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
         setTexture(gl, mInfoPainter.getBitmap());
 	}
 	
 	public static void select(GL10 gl, ImageReference ir){
+		if(mTextureID == -1){
+			int[] textures = new int[1];
+			gl.glGenTextures(1, textures, 0);
+			mTextureID = textures[0];
+		}		
 		mInfoPainter.setInfo(ir.getTitle(), ir.getAuthor(), 1024, 128);
 		mInfoPainter.paintCanvas(Math.min(RiverRenderer.mDisplay.getWidthPixels(), 1024), 80);
 		gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
-        setTexture(gl, mInfoPainter.getBitmap());        
+        setTexture(gl, mInfoPainter.getBitmap());
 	}
 	
 	protected static void setTexture(GL10 gl, Bitmap bmp){		

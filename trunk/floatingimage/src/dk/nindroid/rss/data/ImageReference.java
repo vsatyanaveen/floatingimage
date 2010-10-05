@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 
 public abstract class ImageReference {
 	private Rotator mRotator;
+	protected boolean mInvalidated = false;
 	public ImageReference(){
 		this.mRotator = new Rotator();
 	}
@@ -35,6 +36,12 @@ public abstract class ImageReference {
 	public abstract boolean isPersonal();
 	public abstract String getAuthor();
 	public abstract void getExtended();
+	public boolean isInvalidated(){
+		return mInvalidated;
+	}
+	public void validate(){
+		mInvalidated = false;
+	}
 	public float getRotation(long time){
 		return mRotator.getRotation(time);
 	}
@@ -49,8 +56,10 @@ public abstract class ImageReference {
 	}
 	public void turn(long time, float degrees){
 		mRotator.turn(time, degrees);
+		mInvalidated = true;
 	}
 	public void setRotation(float degrees){
 		mRotator.setRotation(degrees);
+		mInvalidated = true;
 	}
 }

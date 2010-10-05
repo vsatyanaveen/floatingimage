@@ -178,7 +178,7 @@ public class Image implements ImagePlane {
 			mState = STATE_FOCUSING;
 			mRotationSaved = mRotation;
 			// Get large texture, if not already there.
-			InfoBar.select(gl, this.mShowingImage);			
+			InfoBar.select(gl, this.mShowingImage);
 		}
 	}
 	
@@ -430,6 +430,7 @@ public class Image implements ImagePlane {
 	float mInitialX, mInitialY, mInitialRotate;
 	float mInitialScale = 1.0f;
 	float mX, mY, mRotate;
+	float mTmpX, mTmpY, mTmpRotate;
 	float mScale = 1.0f;
 	float mRestoreX, mRestoreY, mRestoreRotate;
 	float mRestoreScale = 1.0f;
@@ -444,7 +445,7 @@ public class Image implements ImagePlane {
 		mInitialY += this.mY;
 		mInitialRotate += this.mRotate;
 		mInitialScale *= this.mScale;
-		mX = mY = mRotate = 0.0f;
+		mX = mY = mRotate = mTmpX = mTmpY = mTmpRotate = 0.0f;
 		mScale = 1.0f;
 		transforming = true;
 	}
@@ -547,6 +548,10 @@ public class Image implements ImagePlane {
 		float maxDiffY =  maxY - mInitialY;
 		float minDiffX = -maxX - mInitialX;
 		float minDiffY = -maxY - mInitialY;
+		if(transforming){
+			mX = mTmpX;
+			mY = mTmpY;
+		}
 		if(mX < maxDiffX){
 			float adjust = (mX - maxDiffX);
 			mX -= adjust * 0.4f;
@@ -570,8 +575,8 @@ public class Image implements ImagePlane {
 	}
 	
 	public void move(float x, float y){		
-		this.mX = x;
-		this.mY = y;
+		this.mTmpX = x;
+		this.mTmpY = y;
 	}
 	
 	/************ Position functions ************/
@@ -773,7 +778,9 @@ public class Image implements ImagePlane {
 				this.mUpdateLargeTex = true;
 			}
 		}else{
-			texture.recycle();
+			if(texture != null){
+				texture.recycle();
+			}
 		}
 	}
 	

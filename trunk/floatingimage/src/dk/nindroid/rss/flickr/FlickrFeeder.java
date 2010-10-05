@@ -34,7 +34,6 @@ import dk.nindroid.rss.parser.flickr.FlickrUser;
 import dk.nindroid.rss.parser.flickr.GetAlbumsParser;
 import dk.nindroid.rss.parser.flickr.ImageSizesParser;
 import dk.nindroid.rss.parser.flickr.data.ImageSizes;
-import dk.nindroid.rss.settings.Settings;
 
 public class FlickrFeeder {
 	private static final String PHOTOS_FROM_HERE_CONST = "HERE";

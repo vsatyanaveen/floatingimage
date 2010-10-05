@@ -321,9 +321,9 @@ public class ShowStreams extends Activity {
 	public void showAbout(){
 		Builder builder = new Builder(this);
 		builder.setTitle(R.string.about);
-		builder.setMessage(R.string.about_text);
-		builder.setPositiveButton("Ok", null);
-		builder.show();
+		//builder.setMessage(R.string.about_text);
+		//builder.setPositiveButton("Ok", null);
+		//builder.show();
 	}
 	@Override
 	public boolean dispatchTouchEvent(MotionEvent ev) {
