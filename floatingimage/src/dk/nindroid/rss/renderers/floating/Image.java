@@ -308,7 +308,6 @@ public class Image implements ImagePlane {
 		float rotationFraction = Math.min(mShowingImage.getRotationFraction(realTime), 1.0f);
 		float rotationTarget = getRotationFraction(mShowingImage.getTargetOrientation());
 		float rotationOrg = getRotationFraction(mShowingImage.getPreviousOrientation());
-		
 		float targetScale = getScale(szX, szY, rotationTarget == 1.0f);
 		float orgScale = getScale(szX, szY, rotationOrg == 1.0f);
 		float scaleDiff = orgScale - targetScale;
@@ -325,7 +324,7 @@ public class Image implements ImagePlane {
 		x = mPos.getX() + mJitter.getX();
 		y = mPos.getY() + mJitter.getY();
 		z = mPos.getZ() + mJitter.getZ();
-		if(mShowingImage != null){
+		if(mShowingImage != null && (Math.min(mShowingImage.getRotationFraction(realTime), 1.0f) != 1.0f || mShowingImage.getTargetOrientation() != 0.0f)){
 			szY = 5.0f; // Huge, since we only scale down.
 			szX = szY * maspect;
 			
@@ -404,7 +403,7 @@ public class Image implements ImagePlane {
 		gl.glLineWidth(1.0f);
 		gl.glDrawElements(GL10.GL_LINE_STRIP, 5, GL10.GL_UNSIGNED_BYTE, mLineIndexBuffer);
 		
-        gl.glPopMatrix();
+		gl.glPopMatrix();
         
         if(mState == STATE_FOCUSED && !mLargeTex){
         	ProgressBar.draw(gl, FloatingRenderer.mTextureSelector.getProgress());
@@ -694,7 +693,6 @@ public class Image implements ImagePlane {
 	}
 	
 	public boolean update(GL10 gl, long time, long realTime){
-		updateTransformation(realTime);
 		boolean depthChanged = false;
 		if(mState == STATE_FLOATING){
 			depthChanged = updateFloating(gl, time);		
@@ -704,6 +702,7 @@ public class Image implements ImagePlane {
 			}
 			// We might change the value here...
 			if(mState == STATE_FOCUSED){
+				updateTransformation(realTime);
 				setFocusedPosition();
 				synchronized(this){
 					if(mUpdateLargeTex && mFocusBmp != null){
