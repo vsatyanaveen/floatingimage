@@ -16,6 +16,7 @@ import android.hardware.SensorManager;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Environment;
 import android.os.PowerManager;
 import android.os.Vibrator;
@@ -218,6 +219,7 @@ public class ShowStreams extends Activity {
 	@Override 
 	protected void onPause() {
 		Log.v("Floating image", "Pausing...");
+		Debug.stopMethodTracing();
 		mGLSurfaceView.onPause();
 		renderer.onPause();
 		wl.release();
@@ -230,7 +232,6 @@ public class ShowStreams extends Activity {
 	protected void onResume() {
 		Log.v("Floating Image", "Resuming main activity");
 		super.onResume();
-		
 		String loading = this.getString(dk.nindroid.rss.R.string.please_wait);
 		ProgressDialog dialog = ProgressDialog.show(this, "", loading, true);
 		dk.nindroid.rss.settings.Settings.readSettings(this);
@@ -261,6 +262,7 @@ public class ShowStreams extends Activity {
 		mGLSurfaceView.onResume();
 		ReadFeeds.runAsync(mFeedController);
 		dialog.dismiss();
+		Debug.startMethodTracing("floatingimage");
 		Log.v("Floating Image", "End resume...");
 	}
 	
