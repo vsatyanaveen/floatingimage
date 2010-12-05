@@ -33,9 +33,11 @@ public class ImageCache {
 	Random 					mRand;
 	File 					mExplore;
 	File 					mExploreInfo;
+	byte[]					mBuf;
 	
 	public ImageCache(TextureBank bank){
 		this.bank = bank;
+		mBuf = new byte[1024];
 		String datafolder = ShowStreams.current.getString(R.string.dataFolder);
 		datafolder = Environment.getExternalStorageDirectory().getAbsolutePath() + datafolder;
 		mExploreInfoFolder = datafolder + ShowStreams.current.getString(R.string.exploreFolder);
@@ -183,37 +185,32 @@ public class ImageCache {
 		return getFile(mRand.nextInt(mExploreFiles.size()));
 	}
 	*/
-	public ImageReference getFile(int index){
-		InputStream is;
+	public ImageReference getFile(int index, ImageReference ir){
 		try {
 			File f_info = mFiles.get(index);
+			int length = (int)f_info.length();
 			InputStream is_info = new FileInputStream(f_info);
-			BufferedInputStream bis_info = new BufferedInputStream(is_info, 256);
-			DataInputStream dis = new DataInputStream(bis_info);
-			String bmpName = dis.readLine();
+			if(mBuf.length < length){
+				mBuf = new byte[length];
+			}
+			is_info.read(mBuf);
+			is_info.close();
+			String s = new String(mBuf, 0, length, "UTF-8");
+			String[] tokens = s.split("\n");
+			
+			String bmpName = tokens[0];
 			if(bmpName == null){
-				dis.close();
-				bis_info.close();
 				f_info.delete();
 				//return getRandomExplore();
 				return null;
 			}
 			// Read bitmap
-			File bmpFile = new File(bmpName);
-			is = new FileInputStream(bmpFile);
-			BufferedInputStream bis = new BufferedInputStream(is, 2048);
-			Bitmap bmp = BitmapFactory.decodeStream(bis);
+			Bitmap bmp = BitmapFactory.decodeFile(bmpName);
 			
-			// Get image reference
-			ImageReference ir = ImageTypeResolver.getReference(dis);
-			if(ir != null){
-				ir.parseInfo(dis, bmp);
-			}
+			// Fill image reference
+			ir.parseInfo(tokens, bmp);
 			
 			// Clean up
-			dis.close();
-			bis_info.close();
-			bis.close();
 			return ir;
 		} catch (FileNotFoundException e) {
 			//mExploreFiles.remove(index);
@@ -234,7 +231,7 @@ public class ImageCache {
 		}
 	}
 	
-	public void addImage(String name){
-		bank.addNewBitmap(getFile(mCached.get(name + ".info")));
+	public void addImage(ImageReference ir){
+		bank.addNewBitmap(getFile(mCached.get(ir.getID() + ".info"), ir), false);
 	}
 }

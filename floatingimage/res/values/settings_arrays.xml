@@ -57,6 +57,28 @@
 		<item>604800000</item>
 	</string-array>
 	
+	<string-array name="backgroundColorDescriptions">
+		<item>Grey</item>
+		<item>Black</item>
+		<item>White</item>
+		<item>Blue</item>
+		<item>Green</item>
+		<item>Red</item>
+		<item>Yellow</item>
+		<item>All</item>
+	</string-array>
+	
+	<string-array name="backgroundColorValues">
+		<item>0</item>
+		<item>1</item>
+		<item>2</item>
+		<item>3</item>
+		<item>4</item>
+		<item>5</item>
+		<item>6</item>
+		<item>7</item>
+	</string-array>
+	
 	<string-array name="slideSpeedDescriptions">
 		<item>fast</item>
 		<item>slow</item>

@@ -1,6 +1,5 @@
 package dk.nindroid.rss.data;
 
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 
@@ -128,11 +127,13 @@ public class LocalImage extends ImageReference{
 	}
 
 	@Override
-	public void parseInfo(DataInputStream is, Bitmap bmp) throws IOException {
-		mWidth = Float.parseFloat(is.readLine());
-		mHeight = Float.parseFloat(is.readLine());
-		mFile = new File(is.readLine());
-		String rotation = is.readLine();
+	public void parseInfo(String[] tokens, Bitmap bmp) throws IOException {
+		mWidth = Float.parseFloat(tokens[2]);
+		mHeight = Float.parseFloat(tokens[3]);
+		if(mFile == null){
+			mFile = new File(tokens[4]);
+		}
+		String rotation = tokens[5];
 		if(rotation != null){
 			setRotation(Float.parseFloat(rotation));
 		}

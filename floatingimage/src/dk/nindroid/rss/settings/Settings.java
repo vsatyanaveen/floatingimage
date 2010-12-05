@@ -34,6 +34,8 @@ public class Settings {
 	public static long		floatingTraversal;
 	public static int		forceRotation;
 	
+	public static int		backgroundColor;
+	
 	public static boolean fullscreen;
 
 	private static SharedPreferences sp;
@@ -68,6 +70,7 @@ public class Settings {
 		if(display.getWidth() < 400){
 			highResThumbs = false;
 		}
+		backgroundColor = Integer.parseInt(sp.getString("backgroundColor", "0"));
 	}
 
 	private static int parseMode(String mode){

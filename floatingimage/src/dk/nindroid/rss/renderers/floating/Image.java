@@ -868,10 +868,9 @@ public class Image implements ImagePlane {
 	
 	public void setTexture(GL10 gl, ImageReference ir) {
 		mLargeTex = false;
-		
 		float height = ir.getHeight();
 		float width  = ir.getWidth();
-		
+		Log.v("Floating Image", "Setting texture (" + ir.getBitmap().getWidth()+ "," + ir.getBitmap().getHeight()+ ")");
 		maspect = width / height;
 		gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
         gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
@@ -881,6 +880,7 @@ public class Image implements ImagePlane {
         gl.glTexEnvf(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_BLEND);
         
         try{
+        	gl.glFinish();
         	if(mLastTextureSize != ir.getBitmap().getWidth()){
         		GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, ir.getBitmap(), 0);
         		mLastTextureSize = ir.getBitmap().getWidth();
