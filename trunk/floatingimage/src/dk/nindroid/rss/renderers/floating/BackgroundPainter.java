@@ -15,9 +15,20 @@ import android.graphics.Bitmap.Config;
 import android.opengl.GLUtils;
 import dk.nindroid.rss.R;
 import dk.nindroid.rss.RiverRenderer;
+import dk.nindroid.rss.ShowStreams;
 import dk.nindroid.rss.gfx.Vec3f;
+import dk.nindroid.rss.settings.Settings;
 
 public class BackgroundPainter {
+	public static final int GREY = 0;
+	public static final int BLACK = 1;
+	public static final int WHITE = 2;
+	public static final int BLUE = 3;
+	public static final int GREEN = 4;
+	public static final int RED = 5;
+	public static final int YELLOW = 6;
+	public static final int ALL = 7;
+	
 	private static final float zDepth = 15.0f;
 	private static Bitmap bg;
 	private static Bitmap canvas;
@@ -29,10 +40,7 @@ public class BackgroundPainter {
 	
 	private static final int VERTS = 4;
 	
-	public static void init(Context context){
-		InputStream shadowIS = context.getResources().openRawResource(R.drawable.background);
-		bg = BitmapFactory.decodeStream(shadowIS);
-		
+	public static void init(){
 		canvas = Bitmap.createBitmap(512, 512, Config.RGB_565);
 		
 		initPlane();
@@ -82,7 +90,42 @@ public class BackgroundPainter {
 		mIndexBuffer.position(0);
 	}
 	
-	public static void initTexture(GL10 gl){		
+	public static void initTexture(GL10 gl){	
+		InputStream shadowIS;
+		Context context = ShowStreams.current;
+		
+		switch(Settings.backgroundColor){
+		case GREY:
+			shadowIS = context.getResources().openRawResource(R.drawable.background);
+			break;
+		case BLACK:
+			shadowIS = context.getResources().openRawResource(R.drawable.background_dark);
+			break;
+		case WHITE:
+			shadowIS = context.getResources().openRawResource(R.drawable.background_white);
+			break;
+		case BLUE:
+			shadowIS = context.getResources().openRawResource(R.drawable.background_blue);
+			break;
+		case GREEN:
+			shadowIS = context.getResources().openRawResource(R.drawable.background_green);
+			break;
+		case RED:
+			shadowIS = context.getResources().openRawResource(R.drawable.background_red);
+			break;
+		case YELLOW:
+			shadowIS = context.getResources().openRawResource(R.drawable.background_yellow);
+			break;
+		case ALL:
+			shadowIS = context.getResources().openRawResource(R.drawable.background_all);
+			break;
+		default:
+			shadowIS = context.getResources().openRawResource(R.drawable.background);
+			break;
+		}
+		
+		bg = BitmapFactory.decodeStream(shadowIS);		
+		
 		int[] textures = new int[1];
         gl.glGenTextures(1, textures, 0);
 		mTextureID = textures[0];		

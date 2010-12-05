@@ -16,7 +16,6 @@ import android.hardware.SensorManager;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
-import android.os.Debug;
 import android.os.Environment;
 import android.os.PowerManager;
 import android.os.Vibrator;
@@ -96,7 +95,7 @@ public class ShowStreams extends Activity {
 			saveVersion(dataFile);
 			GlowImage.init(this);
 			ShadowPainter.init(this);
-			BackgroundPainter.init(this);
+			BackgroundPainter.init();
 			this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 			PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 			wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "Floating Image");
@@ -124,7 +123,7 @@ public class ShowStreams extends Activity {
 	}
 	
 	TextureBank setupFeeders(){
-		TextureBank bank = new TextureBank(10);
+		TextureBank bank = new TextureBank(5);
 		mFeedController = new FeedController();
 		BitmapDownloader bitmapDownloader = new BitmapDownloader(bank, mFeedController);
 		mImageCache = new ImageCache(bank);
@@ -219,7 +218,7 @@ public class ShowStreams extends Activity {
 	@Override 
 	protected void onPause() {
 		Log.v("Floating image", "Pausing...");
-		Debug.stopMethodTracing();
+		//Debug.stopMethodTracing();
 		mGLSurfaceView.onPause();
 		renderer.onPause();
 		wl.release();
@@ -262,7 +261,7 @@ public class ShowStreams extends Activity {
 		mGLSurfaceView.onResume();
 		ReadFeeds.runAsync(mFeedController);
 		dialog.dismiss();
-		Debug.startMethodTracing("floatingimage");
+		//Debug.startMethodTracing("floatingimage");
 		Log.v("Floating Image", "End resume...");
 	}
 	

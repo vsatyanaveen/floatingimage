@@ -1,12 +1,10 @@
 package dk.nindroid.rss.data;
 
-import java.io.DataInputStream;
 import java.io.IOException;
-
-import dk.nindroid.rss.renderers.Rotator;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import dk.nindroid.rss.renderers.Rotator;
 
 public abstract class ImageReference {
 	private Rotator mRotator;
@@ -30,7 +28,7 @@ public abstract class ImageReference {
 	public abstract float getHeight();
 	public abstract String getID();
 	public abstract String getInfo();
-	public abstract void parseInfo(DataInputStream is, Bitmap bmp) throws IOException;
+	public abstract void parseInfo(String[] tokens, Bitmap bmp) throws IOException;
 	public abstract boolean isNew();
 	public abstract void setOld();
 	public abstract boolean isPersonal();

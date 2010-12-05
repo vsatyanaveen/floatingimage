@@ -1,6 +1,5 @@
 package dk.nindroid.rss.facebook;
 
-import java.io.DataInputStream;
 import java.io.IOException;
 
 import android.content.Intent;
@@ -124,15 +123,15 @@ public class FacebookImage extends ImageReference {
 	}
 	
 	@Override
-	public void parseInfo(DataInputStream is, Bitmap bmp) throws IOException {
-		width = Float.parseFloat(is.readLine());
-		height = Float.parseFloat(is.readLine());
-		imgID = is.readLine();
-		owner = is.readLine();
-		thumb128URL = is.readLine();
-		thumb256URL = is.readLine();
-		pageURL = is.readLine();
-		sourceURL = is.readLine();
+	public void parseInfo(String[] tokens, Bitmap bmp) throws IOException {
+		width = Float.parseFloat(tokens[2]);
+		height = Float.parseFloat(tokens[3]);
+		imgID = tokens[4];
+		owner = tokens[5];
+		thumb128URL = tokens[6];
+		thumb256URL = tokens[7];
+		pageURL = tokens[8];
+		sourceURL = tokens[9];
 		this.bitmap = bmp;
 	}
 

@@ -82,6 +82,14 @@
                 android:entryValues="@array/floatingSpeedValues"
                 android:dialogTitle="@string/floatingSpeedTitle"
                 android:defaultValue="30000" />
+           <ListPreference
+                android:key="backgroundColor"
+                android:title="@string/backgroundColor"
+                android:summary="@string/backgroundColorSummary"
+                android:entries="@array/backgroundColorDescriptions"
+                android:entryValues="@array/backgroundColorValues"
+                android:dialogTitle="@string/backgroundColorTitle"
+                android:defaultValue="0" />
     </PreferenceCategory>
     <!-- 
     <PreferenceCategory

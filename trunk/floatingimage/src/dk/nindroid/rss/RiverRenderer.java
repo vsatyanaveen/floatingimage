@@ -66,7 +66,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 		try{
 			gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE,
 	                GL10.GL_MODULATE);
-			gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
+			gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
 			
 			gl.glMatrixMode(GL10.GL_MODELVIEW);
 	        gl.glLoadIdentity();

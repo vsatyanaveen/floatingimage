@@ -1,6 +1,5 @@
 package dk.nindroid.rss.picasa;
 
-import java.io.DataInputStream;
 import java.io.IOException;
 
 import android.content.Intent;
@@ -136,16 +135,16 @@ public class PicasaImage extends ImageReference{
 	}
 	
 	@Override
-	public void parseInfo(DataInputStream is, Bitmap bmp) throws IOException {
-		width = Float.parseFloat(is.readLine());
-		height = Float.parseFloat(is.readLine());
-		imgID = is.readLine();
-		title = is.readLine();
-		owner = is.readLine();
-		thumbnail128URL = is.readLine();
-		thumbnail256URL = is.readLine();
-		imageURL = is.readLine();
-		sourceURL = is.readLine();
+	public void parseInfo(String[] tokens, Bitmap bmp) throws IOException {
+		width = Float.parseFloat(tokens[2]);
+		height = Float.parseFloat(tokens[3]);
+		imgID = tokens[4];
+		title = tokens[5];
+		owner = tokens[6];
+		thumbnail128URL = tokens[7];
+		thumbnail256URL = tokens[8];
+		imageURL = tokens[9];
+		sourceURL = tokens[10];
 		this.bitmap = bmp;
 	}
 

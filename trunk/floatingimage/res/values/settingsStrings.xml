@@ -32,12 +32,15 @@
 	<string name="slideSpeed">Slideshow transition speed</string>
 	<string name="slideSpeedSummary">How fast should the slide transitions be</string>
 	<string name="slideSpeedTitle">Select transition speed</string>
+	<string name="backgroundColor">Background color</string>
+	<string name="backgroundColorSummary">The color behind the floating images</string>
+	<string name="backgroundColorTitle">Select the background color</string>
 	<string name="forceRotation">Force screen rotation</string>
 	<string name="forceRotationSummary">Adjust screen rotation manually</string>
 	<string name="forceRotationTitle">Screen rotation</string>
 	<string name="useCache">Cache images</string>
 	<string name="useCacheSummary">This gives a steadier flow when streaming</string>
-	<string name="useHighResThumbs">Use high-res tumbnails</string>
+	<string name="useHighResThumbs">Use high-res thumbnails</string>
 	<string name="useHighResThumbsSummary">EXPERIMENTAL: This might crash your phone! High res devices only.</string>
 	<string name="clearCache">Clear cache</string>
 	<string name="clearCacheSummary">Erase entire image cache</string>

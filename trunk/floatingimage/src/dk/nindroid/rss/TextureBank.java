@@ -27,12 +27,14 @@ public class TextureBank {
 		this.ic = ic;
 	}
 	
-	public void addNewBitmap(ImageReference ir){
+	public void addNewBitmap(ImageReference ir, boolean doCache){
 		if(ir != null){
 			synchronized (unseen) {
 				unseen.add(ir);
 			}
-			ic.saveImage(ir);
+			if(doCache){
+				ic.saveImage(ir);
+			}
 		}
 	}
 	public void addOldBitmap(ImageReference ir){
@@ -47,8 +49,8 @@ public class TextureBank {
 		return !ic.exists(url);
 	}
 	
-	public void addFromCache(String name){
-		ic.addImage(name);
+	public void addFromCache(ImageReference ir){
+		ic.addImage(ir);
 	}
 	
 	public void addStream(String stream){
@@ -94,7 +96,9 @@ public class TextureBank {
 				
 				ir = unseen.poll();
 			}while(ir != null && isShowing(ir.getID()));
-			unseen.notify();
+			if(unseen.size() < textureCache - 2){
+				unseen.notify();
+			}
 		}
 		return ir;
 	}

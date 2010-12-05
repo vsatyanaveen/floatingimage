@@ -53,7 +53,7 @@ public class BitmapDownloader implements Runnable {
 	@Override
 	public void run() {
 		Log.v("Bitmap downloader", "*** Starting asynchronous downloader thread");
-		Process.setThreadPriority(10);
+		Process.setThreadPriority(15);
 		while(true){
 			try{
 				if(bank.stopThreads) return;
@@ -77,7 +77,7 @@ public class BitmapDownloader implements Runnable {
 							addExternalImage(ir);
 						}
 					}else{
-						bank.addFromCache(ir.getImageID());
+						bank.addFromCache(ir);
 					}
 				}
 				synchronized (bank.unseen) {
@@ -124,10 +124,11 @@ public class BitmapDownloader implements Runnable {
 			ir.set128Bitmap(bmp);
 		}
 		ir.getExtended();
-		bank.addNewBitmap(ir);
+		bank.addNewBitmap(ir, true);
 	}
 	
 	public void addLocalImage(LocalImage image){
+		
 		File file = image.getFile();
 		int size = Settings.highResThumbs ? 256 : 128;
 		Bitmap bmp = ImageFileReader.readImage(file, size, null);
@@ -162,7 +163,7 @@ public class BitmapDownloader implements Runnable {
 			}else{
 				image.set128Bitmap(bmp);
 			}
-			bank.addNewBitmap(image);
+			bank.addNewBitmap(image, true);
 		}
 	}
 	

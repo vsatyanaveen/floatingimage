@@ -1,6 +1,5 @@
 package dk.nindroid.rss.flickr;
 
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -218,19 +217,19 @@ public class FlickrImage extends ImageReference{
 		return sb.toString(); 
 	}
 	@Override
-	public void parseInfo(DataInputStream is, Bitmap bmp) throws IOException {
-		width = Float.parseFloat(is.readLine());
-		height = Float.parseFloat(is.readLine());
-		farmID = is.readLine();
-		serverID = is.readLine();
-		imgID = is.readLine();
-		secret = is.readLine();
-		title = URLDecoder.decode(is.readLine());
-		owner = URLDecoder.decode(is.readLine());
+	public void parseInfo(String[] tokens, Bitmap bmp) throws IOException {
+		width = Float.parseFloat(tokens[2]);
+		height = Float.parseFloat(tokens[3]);
+		farmID = tokens[4];
+		serverID = tokens[5];
+		imgID = tokens[6];
+		secret = tokens[7];
+		title = URLDecoder.decode(tokens[8]);
+		owner = URLDecoder.decode(tokens[9]);
 		userInfo = new FlickrUserInfo();
-		userInfo.setUsername(is.readLine());
-		userInfo.setRealName(is.readLine());
-		userInfo.setUrl(is.readLine());
+		userInfo.setUsername(tokens[10]);
+		userInfo.setRealName(tokens[11]);
+		userInfo.setUrl(tokens[12]);
 		this.bitmap = bmp;
 	}
 	public boolean isNew(){
