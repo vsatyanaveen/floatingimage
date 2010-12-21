@@ -113,7 +113,7 @@ public class ImageCache {
 			for(int i = 0; i < entries; ++i){
 				addFile(files[i]);
 			}
-		}catch(IOException e){
+		}catch(Exception e){
 			Log.w("Floating Image", "Error removing old images...", e);
 		}
 	}

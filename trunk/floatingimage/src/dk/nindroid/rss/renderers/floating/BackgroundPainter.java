@@ -12,7 +12,9 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.Config;
+import android.opengl.GLU;
 import android.opengl.GLUtils;
+import android.util.Log;
 import dk.nindroid.rss.R;
 import dk.nindroid.rss.RiverRenderer;
 import dk.nindroid.rss.ShowStreams;
@@ -179,6 +181,12 @@ public class BackgroundPainter {
 	 */
 	public static void draw(GL10 gl){
 		gl.glDisable(GL10.GL_BLEND);
+		
+		int error = gl.glGetError();
+		if(error != 0){
+			Log.e("Floating Image", "GL Error before painting background: " + GLU.gluErrorString(error));
+			gl.glGetError(); // Clear errors
+		}
 		// Draw background
 		gl.glPushMatrix();
 			gl.glLoadIdentity();
@@ -186,11 +194,14 @@ public class BackgroundPainter {
 			gl.glScalef(RiverRenderer.mDisplay.getPortraitWidth() * zDepth, RiverRenderer.mDisplay.getPortraitHeight() * zDepth, 1);
 			gl.glActiveTexture(GL10.GL_TEXTURE0);
 	        gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
-			gl.glFrontFace(GL10.GL_CCW);
 			gl.glVertexPointer(3, GL10.GL_FIXED, 0, mVertexBuffer);
 			gl.glEnable(GL10.GL_TEXTURE_2D);
 			gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mTexBuffer);
 			gl.glDrawElements(GL10.GL_TRIANGLE_STRIP, 4, GL10.GL_UNSIGNED_BYTE, mIndexBuffer);
+			error = gl.glGetError();
+			if(error != 0){
+				Log.e("Floating Image", "GL Error painting background: " + GLU.gluErrorString(error));
+			}
 		gl.glPopMatrix();
 	}
 }

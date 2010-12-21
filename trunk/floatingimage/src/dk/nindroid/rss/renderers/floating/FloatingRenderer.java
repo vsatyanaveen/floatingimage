@@ -202,14 +202,24 @@ public class FloatingRenderer extends Renderer {
         }
 	}
 	
-	public void render(GL10 gl, long time, long realTime){
+	void initRender(GL10 gl){
 		gl.glDepthMask(false);
 		gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
 		gl.glEnable(GL10.GL_TEXTURE_2D);
 		gl.glDisable(GL10.GL_DEPTH_TEST);
+		gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_REPLACE);
+		gl.glFrontFace(GL10.GL_CCW);
+		gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER,GL10.GL_LINEAR);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D,GL10.GL_TEXTURE_MAG_FILTER,GL10.GL_LINEAR);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S,GL10.GL_CLAMP_TO_EDGE);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T,GL10.GL_CLAMP_TO_EDGE);
+	}
+	
+	public void render(GL10 gl, long time, long realTime){
+		initRender(gl);
 		// Background first, this is backmost
 		BackgroundPainter.draw(gl);
-        Image.setState(gl);
+        //Image.setState(gl);
         for(int i = 0; i < mImgCnt; ++i){
         	if(mImgDepths[i] != mSelected){
         		mImgDepths[i].draw(gl, time, realTime);

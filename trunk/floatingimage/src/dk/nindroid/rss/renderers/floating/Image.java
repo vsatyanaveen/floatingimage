@@ -887,6 +887,11 @@ public class Image implements ImagePlane {
         	}else{
         		GLUtils.texSubImage2D(GL10.GL_TEXTURE_2D, 0, 0, 0, ir.getBitmap());
         	}
+        	
+        	int error = gl.glGetError();
+        	if(error != 0){
+        		Log.e("Floating Image", "GL error in Image when setting small texture: " + error);
+        	}
 	        
 	        ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
 	        tbb.order(ByteOrder.nativeOrder());
@@ -903,7 +908,7 @@ public class Image implements ImagePlane {
         }catch(IllegalArgumentException e){
         	Log.e("Floating Image", "Image: Error setting texture", e);
         }
-        setState(gl);
+        //setState(gl);
 	}
 	private int mTextureID;
 	private FloatBuffer mTexBuffer;

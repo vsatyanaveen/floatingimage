@@ -72,15 +72,18 @@ public class OrientationManager implements SensorEventListener {
 			}
 		}
 		// Adjust for rotated devices
-		orientation = (orientation + 4 - initialRotation + Settings.forceRotation) % 4;
-		if(orientation != -1 && orientation != settingOrientation){
-			settingOrientation = orientation;
-			setOrientation();
+		if(orientation != -1){
+			orientation = (orientation + 4 - initialRotation + Settings.forceRotation) % 4;
+			if(orientation != settingOrientation){
+				settingOrientation = orientation;
+				setOrientation();
+			}
 		}
 	}
 	
 	void setOrientation(){
 		if(settingOrientation != currentOrientation){
+			Log.v("Floating Image", "Rotation: " + settingOrientation);
 			currentOrientation = settingOrientation;
 			for(OrientationSubscriber os : subscribers){
 				os.setOrientation(currentOrientation);
