@@ -54,7 +54,7 @@ public class FacebookParser implements FeedParser {
 				img.setOwner(obj.getJSONObject(FacebookTags.FROM).getString(FacebookTags.NAME));
 				img.setThumbnail128URL(obj.getString(FacebookTags.PICTURE));
 				//img.setThumbnail256URL(obj.getString(FacebookTags.PICTURE)); // 200 pixels, next step is full size!
-				img.setSourceURL(obj.getString(FacebookTags.SOURCE));
+				img.setSourceURL(obj.getString(FacebookTags.SOURCE));	
 				img.setPageURL(obj.getString(FacebookTags.LINK));
 				images.add(img);
 			}
@@ -62,7 +62,9 @@ public class FacebookParser implements FeedParser {
 			Log.w("Floating Image", "Error reading facebook stream", e);
 			return null;
 		}
-		
+		if(images != null){
+			Log.v("Floating Image", images.size() + " Facebook images found.");
+		}
 		return images;
 	}
 

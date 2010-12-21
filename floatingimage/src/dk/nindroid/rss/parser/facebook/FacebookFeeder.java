@@ -18,7 +18,7 @@ public class FacebookFeeder {
 	private static final String APP_SECRET = "085182d54361333699c436f5e0e45f71";
 	
 	private static final String CALLBACK_URL = "http://floating-image.appspot.com/facebookauthorization";
-	private static final String AUTHORIZATION_URL = "https://graph.facebook.com/oauth/authorize?client_id=" + APP_ID + "&scope=user_photos,read_friendlists,friends_photos,offline_access,user_photo_video_tags&redirect_uri=" + CALLBACK_URL;// + "&display=touch";
+	private static final String AUTHORIZATION_URL = "https://graph.facebook.com/oauth/authorize?client_id=" + APP_ID + "&scope=user_photos,read_friendlists,friends_photos,offline_access,user_photo_video_tags,friends_photo_video_tags&redirect_uri=" + CALLBACK_URL;// + "&display=touch";
 	private static final String ACCESS_TOKEN_URL = "https://graph.facebook.com/oauth/access_token?client_id=" + APP_ID + "&redirect_uri=" + CALLBACK_URL + "&client_secret=" + APP_SECRET + "&code=";
 	
 	private static final String BASEURL		  	= "https://graph.facebook.com/";
