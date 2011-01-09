@@ -35,6 +35,8 @@
 	<string name="backgroundColor">Background color</string>
 	<string name="backgroundColorSummary">The color behind the floating images</string>
 	<string name="backgroundColorTitle">Select the background color</string>
+	<string name="liveWallpaperLowFramerate">Live Wallpaper reduced framerate</string>
+	<string name="liveWallpaperLowFramerateSummary">Force max 20 frames per second to reduce battery drain</string>
 	<string name="forceRotation">Force screen rotation</string>
 	<string name="forceRotationSummary">Adjust screen rotation manually</string>
 	<string name="forceRotationTitle">Screen rotation</string>

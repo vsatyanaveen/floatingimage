@@ -26,7 +26,7 @@ public class PicasaParser extends XMLParser {
 		
 		@Override
 		protected String extendURL(String url) {
-			return PicasaFeeder.signUrl(url, ShowStreams.current);
+			return PicasaFeeder.signUrl(url, ShowStreams.current.context());
 		}
 		
 		@Override

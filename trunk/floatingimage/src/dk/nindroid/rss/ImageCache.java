@@ -38,9 +38,9 @@ public class ImageCache {
 	public ImageCache(TextureBank bank){
 		this.bank = bank;
 		mBuf = new byte[1024];
-		String datafolder = ShowStreams.current.getString(R.string.dataFolder);
+		String datafolder = ShowStreams.current.context().getString(R.string.dataFolder);
 		datafolder = Environment.getExternalStorageDirectory().getAbsolutePath() + datafolder;
-		mExploreInfoFolder = datafolder + ShowStreams.current.getString(R.string.exploreFolder);
+		mExploreInfoFolder = datafolder + ShowStreams.current.context().getString(R.string.exploreFolder);
 		mExploreFolder = mExploreInfoFolder + "/bmp";
 		mRand = new Random(new Date().getTime());
 		mExploreInfo = new File(mExploreInfoFolder);
