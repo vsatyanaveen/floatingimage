@@ -90,7 +90,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	        //*
 	        ++mFrames;
 	        if(realTime - mLastFrameTime > 1000){
-	        	Log.v("Floating Image", "Framerate is " + mFrames + " frames per second");
+	        	//Log.v("Floating Image", "Framerate is " + mFrames + " frames per second");
 	        	mFrames = 0;
 	        	mLastFrameTime = realTime;
 	        }
@@ -456,7 +456,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 		gl.glMatrixMode(GL10.GL_MODELVIEW);
 		mOSD.init(gl);
 		mRenderer.init(gl, System.currentTimeMillis() + mOffset, mOSD);
-		mFeedProgress.init();
+		FeedProgress.init();
 		
 		/*
          * By default, OpenGL enables features that improve quality

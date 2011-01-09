@@ -65,6 +65,7 @@ public class ShowStreams extends Activity {
 	public static final int				MENU_IMAGE_CONTEXT = 13;
 	public static final int				MISC_ROW_ID		= 201;
 	public static final String 			version 		= "2.5.1";
+	public static final int				CACHE_SIZE		= 15;
 	public static ShowStreams 			current;
 	private GLSurfaceView 				mGLSurfaceView;
 	private RiverRenderer 				renderer;
@@ -123,7 +124,7 @@ public class ShowStreams extends Activity {
 	}
 	
 	TextureBank setupFeeders(){
-		TextureBank bank = new TextureBank(5);
+		TextureBank bank = new TextureBank();
 		mFeedController = new FeedController();
 		BitmapDownloader bitmapDownloader = new BitmapDownloader(bank, mFeedController);
 		mImageCache = new ImageCache(bank);
@@ -253,13 +254,14 @@ public class ShowStreams extends Activity {
 		Log.v("Floating Image", "Resume texture bank done...");
 		
 		renderer.setRenderer(defaultRenderer);
+		mTextureBank.initCache(CACHE_SIZE, defaultRenderer.totalImages());
 		renderer.onResume();
 		
 		wl.acquire();
 		orientationManager.onResume();
 		
 		mGLSurfaceView.onResume();
-		ReadFeeds.runAsync(mFeedController);
+		ReadFeeds.runAsync(mFeedController, defaultRenderer.totalImages() + CACHE_SIZE);
 		dialog.dismiss();
 		//Debug.startMethodTracing("floatingimage");
 		Log.v("Floating Image", "End resume...");

@@ -1,25 +1,24 @@
 package dk.nindroid.rss;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.Queue;
-import java.util.Vector;
 
+import android.util.Log;
+
+import dk.nindroid.rss.data.CircularList;
 import dk.nindroid.rss.data.ImageReference;
 
 public class TextureBank {
-	Queue<ImageReference> 					unseen   = new LinkedList<ImageReference>();
-	Vector<String> 							streams  = new Vector<String>();
-	Queue<ImageReference> 					cached   = new LinkedList<ImageReference>();
+	//Queue<ImageReference> 				unseen   = new LinkedList<ImageReference>();
+	CircularList<ImageReference>			images;
+	//Vector<String> 							streams  = new Vector<String>();
 	ImageCache 								ic;
 	BitmapDownloader						bitmapDownloader; 
 	private Map<String, ImageReference> 	mActiveBitmaps = new HashMap<String, ImageReference>();
-	int 									textureCache;
 	boolean 								stopThreads = false;
 	
-	public TextureBank(int textureCache){
-		this.textureCache = textureCache;
+	public void initCache(int cacheSize, int activeImages){
+		this.images = new CircularList<ImageReference>(cacheSize, activeImages);
 	}
 	
 	public void setFeeders(BitmapDownloader bitmapDownloader, ImageCache ic){
@@ -27,45 +26,36 @@ public class TextureBank {
 		this.ic = ic;
 	}
 	
-	public void addNewBitmap(ImageReference ir, boolean doCache){
+	public void addBitmap(ImageReference ir, boolean doCache, boolean next){
 		if(ir != null){
-			synchronized (unseen) {
-				unseen.add(ir);
+			synchronized (images) {
+				if(next){
+					images.addNext(ir);
+				}else{
+					images.addPrev(ir);
+				}
 			}
 			if(doCache){
 				ic.saveImage(ir);
 			}
 		}
 	}
-	public void addOldBitmap(ImageReference ir){
-		if(ir != null){
-			synchronized (cached) {
-				cached.add(ir);
-			}
-		}
-	}
-	
+		
 	public boolean doDownload(String url){
 		return !ic.exists(url);
 	}
 	
-	public void addFromCache(ImageReference ir){
-		ic.addImage(ir);
+	public void addFromCache(ImageReference ir, boolean next){
+		ic.addImage(ir, next);
 	}
-	
-	public void addStream(String stream){
-		streams.add(stream);
-		synchronized (this) {
-			this.notify();
-		}
-	}
-	
+
 	public boolean isShowing(String id){
-		return mActiveBitmaps.containsKey(id);
+		return false;
+		//return mActiveBitmaps.containsKey(id);
 	}
 		
-	public ImageReference getTexture(ImageReference previousImage){
-		ImageReference ir = getUnseen();
+	public ImageReference getTexture(ImageReference previousImage, boolean next){
+		ImageReference ir = get(next);
 		if(ir != null){
 			// Remove previous image, if any
 			if(previousImage != null){
@@ -76,44 +66,41 @@ public class TextureBank {
 				}
 			}
 			mActiveBitmaps.put(ir.getID(), ir);
+			if(ir.getBitmap().isRecycled()){
+				Log.e("Floating Image", "Using recycled image!");
+			}
 			return ir;
 		}
 		return null;
 	}
-	private ImageReference getUnseen(){
+	private ImageReference get(boolean next){
 		ImageReference ir = null;
-		synchronized (unseen) {
+		synchronized (images) {
 			int attempts = 0;
-			do{
-				if(ir != null){
-					ir.getBitmap().recycle();
+			do{				
+				if(!(next ? images.hasNext() : images.hasPrev())){
+					ir = null; 
+					break;
 				}
-				
 				if(++attempts == 3){
 					ir = null;
 					break;
 				}
 				
-				ir = unseen.poll();
+				ir = next ? images.next() : images.prev();
 			}while(ir != null && isShowing(ir.getID()));
-			if(unseen.size() < textureCache - 2){
-				unseen.notify();
-			}
+			images.notify();
 		}
 		return ir;
 	}
 	public void reset(){
-		this.cached.clear();
-		this.unseen.clear();
+		this.images.clear();
 		this.mActiveBitmaps.clear();
 	}
 	public void stop(){
 		stopThreads = true;
-		synchronized(unseen){
-			unseen.notifyAll();
-		}
-		synchronized(cached){
-			cached.notifyAll();
+		synchronized(images){
+			images.notifyAll();
 		}
 		ic.cleanCache();
 	}

@@ -40,7 +40,7 @@ public class FloatingRenderer extends Renderer {
 	private TextureBank 	mBank;
 	public static TextureSelector mTextureSelector;
 	private long 			mInterval;
-	private long			mMaxTime = 0;
+	private long			mStartTime;
 	private int 			mTotalImgRows = 6;
 	private int 			mImgCnt = 0;
 	private boolean 		mCreateMiddle = true;
@@ -82,6 +82,7 @@ public class FloatingRenderer extends Renderer {
 		}
 		mDepthComparator = new ImageDepthComparator();
 		Arrays.sort(mImgDepths, mDepthComparator);
+		mStartTime = System.currentTimeMillis();
 	}
 		
 	public void click(GL10 gl, float x, float y, long frameTime, long realTime){
@@ -132,11 +133,8 @@ public class FloatingRenderer extends Renderer {
 	
 	@Override 
 	public long editOffset(long offset, long realTime){
-		long frameTime = realTime + offset;
-		mMaxTime = Math.max(mMaxTime, frameTime);
-		long reverseTime = mMaxTime - frameTime;
-		long illegalDistance = reverseTime - Settings.floatingTraversal;
-		long id = Math.max(0, illegalDistance / 500); // Same, but only positive
+		long illegalDistance = Math.max(0, mStartTime - (realTime + offset));
+		long id = illegalDistance / 300;
 		return offset + id * id;
 	}
 	
@@ -379,5 +377,10 @@ public class FloatingRenderer extends Renderer {
 		if(mSelected != null){
 			mSelected.transformEnd();
 		}
+	}
+
+	@Override
+	public int totalImages() {
+		return mImgs.length;
 	}
 }
