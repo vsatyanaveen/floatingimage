@@ -231,7 +231,7 @@ public class ImageCache {
 		}
 	}
 	
-	public void addImage(ImageReference ir){
-		bank.addNewBitmap(getFile(mCached.get(ir.getID() + ".info"), ir), false);
+	public void addImage(ImageReference ir, boolean next){
+		bank.addBitmap(getFile(mCached.get(ir.getID() + ".info"), ir), false, next);
 	}
 }

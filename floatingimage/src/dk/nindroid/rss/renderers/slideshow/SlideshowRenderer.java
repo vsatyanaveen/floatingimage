@@ -155,10 +155,10 @@ public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.rende
 		updateNext(gl, realTime);
 		// Read first image to be shown
 		if(mCurrent.getImage() == null){
-			mCurrent.setImage(gl, mBank.getTexture(null));
+			mCurrent.setImage(gl, mBank.getTexture(null, true));
 			mSlideTime = realTime;
 		}else if(mCurrent.hasBitmap() && mNext.getImage() == null){ // Load next image when first is done.
-				mNext.setImage(gl, mBank.getTexture(null));
+				mNext.setImage(gl, mBank.getTexture(null, true));
 		}// Continue with normal slideshow
 		else if(realTime - mSlideTime > Settings.slideshowInterval + Settings.slideSpeed && mPlaying){
 			next(gl, realTime);
@@ -183,7 +183,7 @@ public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.rende
 		if(!mNextSet && realTime - mSlideTime > Settings.slideSpeed){
 			ImageReference oldImage = mNext.getImage();
 			mNext.clear(); // Clean slate
-			mNext.setImage(gl, mBank.getTexture(oldImage));
+			mNext.setImage(gl, mBank.getTexture(oldImage, true));
 			mNextSet = true;
 		}
 	}
@@ -255,5 +255,10 @@ public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.rende
 	public void transformEnd() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public int totalImages() {
+		return 3;
 	}
 }

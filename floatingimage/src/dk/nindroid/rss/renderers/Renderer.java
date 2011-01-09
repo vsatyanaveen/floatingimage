@@ -27,4 +27,5 @@ public abstract class Renderer {
 	public abstract void transformEnd();
 	public abstract boolean freeMove();
 	public abstract void move(float x, float y);
+	public abstract int totalImages();
 }

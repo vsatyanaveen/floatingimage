@@ -27,14 +27,15 @@ import dk.nindroid.rss.settings.Settings;
 
 public class FeedController {
 	private List<List<ImageReference>> 		mReferences;
-	private List<Integer>					mFeedIndex;
+	//private List<Integer>					mFeedIndex;
 	private List<FeedReference>				mFeeds;
+	private List<PositionInterval>			mPositions;
 	private Random 							mRand = new Random(System.currentTimeMillis());
 	private RiverRenderer					mRenderer;
 	
 	public FeedController(){
 		mFeeds = new ArrayList<FeedReference>();
-		mFeedIndex = new ArrayList<Integer>();
+		mPositions = new ArrayList<PositionInterval>();
 		mReferences = new ArrayList<List<ImageReference>>();
 	}
 	
@@ -42,19 +43,22 @@ public class FeedController {
 		this.mRenderer = renderer;
 	}
 	
-	public ImageReference getImageReference(){
+	public ImageReference getNextImageReference(){
+		return getImageReference(true);
+	}
+	
+	public ImageReference getPrevImageReference(){
+		return getImageReference(false);
+	}
+	
+	public ImageReference getImageReference(boolean forward){
 		ImageReference ir = null;
 		synchronized (mReferences) {
 			if(mReferences.size() == 0) return null;
 			int thisFeed = getFeed();
 			List<ImageReference> feed = mReferences.get(thisFeed);
-			int index = (mFeedIndex.get(thisFeed) + 1) % feed.size();
+			int index = forward ? mPositions.get(thisFeed).getNext() : mPositions.get(thisFeed).getPrev();
 			ir = feed.get(index);
-			try{
-				mFeedIndex.set(thisFeed, index);
-			}catch(Exception e){
-				Log.v("FeedController", "Could not save position. FeedIndex size: " + mFeedIndex.size() + ", trying to set index: " + index, e);
-			}
 		}
 		return ir;
 	}
@@ -77,7 +81,7 @@ public class FeedController {
 		return mReferences.size() - 1;
 	}
 	
-	public void readFeeds(){
+	public void readFeeds(int active){
 		List<FeedReference> newFeeds = new ArrayList<FeedReference>();
 		FeedsDbAdapter mDbHelper = new FeedsDbAdapter(ShowStreams.current);
 		SharedPreferences sp = ShowStreams.current.getSharedPreferences("dk.nindroid.rss_preferences", 0);
@@ -134,8 +138,7 @@ public class FeedController {
 			}
 			
 			mFeeds = newFeeds;
-			mFeedIndex.clear();
-			parseFeeds();
+			parseFeeds(active);
 		}
 	}
 	
@@ -165,10 +168,10 @@ public class FeedController {
 	}
 	
 	// False if no images.
-	private synchronized boolean parseFeeds(){
+	private synchronized boolean parseFeeds(int active){
 		synchronized(mFeeds){
 			mReferences.clear();
-			mFeedIndex.clear();
+			mPositions.clear();
 			int progress = 0;
 			mRenderer.setFeeds(0, mFeeds.size());
 			for(FeedReference feed : mFeeds){
@@ -192,7 +195,7 @@ public class FeedController {
 					}
 					synchronized(mReferences){
 						mReferences.add(references); // These two 
-						mFeedIndex.add(-1);			// are in sync!
+						mPositions.add(new PositionInterval(active, references.size())); // are in sync!
 					}
 				}else{
 					Log.w("FeedController", "Reading feed failed too many times, giving up!");
@@ -265,5 +268,42 @@ public class FeedController {
 			return true;
 		}
 		return false;
+	}
+	
+	private class PositionInterval{
+		int a;
+		int b;
+		int space;
+		int interval;
+				
+		private boolean isSpread(){
+			int x = this.a;
+			int y = this.b;
+			y = (b - a + space) % space;
+			return y == interval;
+		}
+		
+		public int getNext(){
+			b = (b + 1) % space;
+			if(isSpread()){
+				a = (a + 1) % space;
+			}
+			return b;
+		}
+		
+		public int getPrev(){
+			a = ((a - 1) + space) % space;
+			if(isSpread()){
+				b = ((b - 1) + space) % space;
+			}
+			return a;
+		}
+		
+		public PositionInterval(int intervalLength, int space){
+			this.space = space;
+			this.interval = intervalLength;
+			b = space - 1;
+			a = b;
+		}
 	}
 }

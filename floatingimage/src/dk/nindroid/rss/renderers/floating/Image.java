@@ -51,10 +51,7 @@ public class Image implements ImagePlane {
 	private Random			mRand;
 	private TextureBank 	mbank;
 	private final long		mStartTime;
-	private ImageReference 	mCurImage;
-	private ImageReference 	mLastImage;
 	private ImageReference 	mShowingImage;
-	private boolean			mRewinding = false;	
 	private Vec3f[]			mVertices;
 	private int				mLastTextureSize;
 	
@@ -139,17 +136,10 @@ public class Image implements ImagePlane {
 		mFocusBmp = null;
 		mState = STATE_FLOATING;
 		if(mShowingImage != null && !mShowingImage.getBitmap().isRecycled()){
-			mShowingImage.getBitmap().recycle();			
+			mShowingImage.getBitmap().recycle();
+			Log.v("Floating Image", "Recycle bitmap due to image reset");
 		}
 		mShowingImage = null;
-		if(mCurImage != null && !mCurImage.getBitmap().isRecycled()){
-			mCurImage.getBitmap().recycle();
-		}
-		mCurImage = null;
-		if(mLastImage != null && !mLastImage.getBitmap().isRecycled()){
-			mLastImage.getBitmap().recycle();
-		}
-		mLastImage = null;
 	}
 	
 	public boolean canSelect(){
@@ -602,24 +592,18 @@ public class Image implements ImagePlane {
 		if(totalTime > Settings.floatingTraversal * mRotations && !isInRewind){
         	reJitter();
         	depthChanged = true;
-        	resetTexture(gl);
+        	resetTexture(gl, true);
         	++mRotations;
         }
 		// Read last texture (Rewind)
-		if(isInRewind && mLastImage != null && !mRewinding){
+		if(isInRewind){
 			reJitter();
 			depthChanged = true;
-        	setTexture(gl, mLastImage);
-        	mShowingImage = mLastImage;
-        	mRewinding = true;
+			resetTexture(gl, false);
+			--mRotations;
         }
-		// Exit rewinding mode
-		if(mRewinding && totalTime > Settings.floatingTraversal * (mRotations - 1)){
-			resetTexture(gl);
-			mRewinding = false;
-		}
 		if(mShowingImage == null & mPos.getX() < -5.0f){
-			resetTexture(gl);
+			resetTexture(gl, true);
 		}
 		return depthChanged;
 	}
@@ -660,7 +644,6 @@ public class Image implements ImagePlane {
 			long totalTime = time - mStartTime;
 			mRotations = (int)(totalTime / Settings.floatingTraversal) + 1;
 			mState = STATE_FLOATING;
-			mRewinding = false;
 			if(mShowingImage != null){
 				setTexture(gl, mShowingImage);
 				if(mFocusBmp != null){
@@ -734,22 +717,14 @@ public class Image implements ImagePlane {
 	
 	/************ Texture functions ************/
 	
-	private void resetTexture(GL10 gl){
+	private void resetTexture(GL10 gl, boolean next){
 		mFocusBmp = null;
-		ImageReference deprecatedImage = mLastImage;
-		if(!mRewinding){
-			ImageReference ir = mbank.getTexture(mCurImage);
-			if(ir != null){
-				mLastImage = mCurImage;
-				mCurImage = ir;
-				if(deprecatedImage != null){
-					deprecatedImage.getBitmap().recycle();
-				}
-			}
+		ImageReference ir = mbank.getTexture(mShowingImage, next);
+		if(ir != null){
+			mShowingImage = ir;
 		}	
-    	if(mCurImage != null){
-    		setTexture(gl, mCurImage);
-    		mShowingImage = mCurImage;
+    	if(mShowingImage != null){
+    		setTexture(gl, mShowingImage);
     	}else{
     		this.mFocusBmp = null;
     		this.mLargeTex = false;
@@ -870,7 +845,7 @@ public class Image implements ImagePlane {
 		mLargeTex = false;
 		float height = ir.getHeight();
 		float width  = ir.getWidth();
-		Log.v("Floating Image", "Setting texture (" + ir.getBitmap().getWidth()+ "," + ir.getBitmap().getHeight()+ ")");
+		//Log.v("Floating Image", "Setting texture (" + ir.getBitmap().getWidth()+ "," + ir.getBitmap().getHeight()+ ")");
 		maspect = width / height;
 		gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
         gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);

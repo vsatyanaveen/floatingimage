@@ -57,36 +57,38 @@ public class BitmapDownloader implements Runnable {
 		while(true){
 			try{
 				if(bank.stopThreads) return;
-				while(bank.unseen.size() < bank.textureCache){
-					if(bank.stopThreads){
-						Log.i("Bitmap downloader", "*** Stopping asynchronous downloader thread per request");
-						return;
-					}
-					ImageReference ir = mFeedController.getImageReference();
-					if(ir == null || bank.isShowing(ir.getID())){
-						// Nothing (new) to show just yet...
-						Thread.sleep(500);
-						break;
-					}
-					if(bank.doDownload(ir.getImageID())){
-						if(ir.getBitmap() != null && !ir.getBitmap().isRecycled()){ // Image is being shown, ignore!
-							break;
-						}else if(ir instanceof LocalImage){
-							addLocalImage((LocalImage)ir);
-						}else {
-							addExternalImage(ir);
+				for(int i = 0; i < 2; ++i){ // 0 = next, 1 = prev
+					while(i == 0 ? bank.images.needNext() : bank.images.needPrev()){
+						if(bank.stopThreads){
+							Log.i("Bitmap downloader", "*** Stopping asynchronous downloader thread per request");
+							return;
 						}
-					}else{
-						bank.addFromCache(ir);
+						ImageReference ir = i == 0 ? mFeedController.getNextImageReference() : mFeedController.getPrevImageReference();
+						if(ir == null || bank.isShowing(ir.getID())){
+							// Nothing (new) to show just yet...
+							Thread.sleep(100);
+							break;
+						}
+						if(bank.doDownload(ir.getImageID())){
+							if(ir.getBitmap() != null && !ir.getBitmap().isRecycled()){ // Image is being shown, ignore!
+								break;
+							}else if(ir instanceof LocalImage){
+								addLocalImage((LocalImage)ir, i == 0);
+							}else {
+								addExternalImage(ir, i == 0);
+							}
+						}else{
+							bank.addFromCache(ir, i == 0);
+						}
 					}
 				}
-				synchronized (bank.unseen) {
+				synchronized (bank.images) {
 					if(bank.stopThreads){
 						Log.v("Bitmap downloader", "*** Stopping asynchronous downloader thread per request");
 						return;
 					}
 					try {
-						bank.unseen.wait();
+						bank.images.wait();
 					} catch (InterruptedException e) {
 						Log.v("Bitmap downloader", "*** Stopping asynchronous downloader thread", e);
 						return;
@@ -98,7 +100,7 @@ public class BitmapDownloader implements Runnable {
 		}
 	}
 	
-	public void addExternalImage(ImageReference ir){ 
+	public void addExternalImage(ImageReference ir, boolean next){ 
 		String url = Settings.highResThumbs ? ir.get256ImageUrl() : ir.get128ImageUrl();
 		Bitmap bmp = downloadImage(url, null);
 		if(bmp == null){
@@ -124,10 +126,10 @@ public class BitmapDownloader implements Runnable {
 			ir.set128Bitmap(bmp);
 		}
 		ir.getExtended();
-		bank.addNewBitmap(ir, true);
+		bank.addBitmap(ir, true, next);
 	}
 	
-	public void addLocalImage(LocalImage image){
+	public void addLocalImage(LocalImage image, boolean next){
 		
 		File file = image.getFile();
 		int size = Settings.highResThumbs ? 256 : 128;
@@ -163,7 +165,7 @@ public class BitmapDownloader implements Runnable {
 			}else{
 				image.set128Bitmap(bmp);
 			}
-			bank.addNewBitmap(image, true);
+			bank.addBitmap(image, true, next);
 		}
 	}
 	
