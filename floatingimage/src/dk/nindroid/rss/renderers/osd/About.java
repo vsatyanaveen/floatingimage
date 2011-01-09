@@ -21,7 +21,7 @@ public class About extends Button {
 
 	@Override
 	public void click(long time) {
-		ShowStreams.current.showAbout();
+		//ShowStreams.current.showAbout();
 	}
 
 	@Override

@@ -29,7 +29,7 @@ public class FacebookParser implements FeedParser {
 	public List<ImageReference> parseFeed(FeedReference feed)
 			throws ParserConfigurationException, SAXException,
 			FactoryConfigurationError, IOException {
-		FacebookFeeder.readCode(ShowStreams.current);
+		FacebookFeeder.readCode(ShowStreams.current.context());
 		String url = FacebookFeeder.constructFeed(feed.getFeedLocation()); // Do this to always use updated access token
 		if (url == null){
 			return null;

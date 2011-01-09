@@ -35,6 +35,7 @@ public class Settings {
 	public static int		forceRotation;
 	
 	public static int		backgroundColor;
+	public static boolean	lowFps;
 	
 	public static boolean fullscreen;
 
@@ -71,6 +72,13 @@ public class Settings {
 			highResThumbs = false;
 		}
 		backgroundColor = Integer.parseInt(sp.getString("backgroundColor", "0"));
+		lowFps = sp.getBoolean("liveWallpaperLowFramerate", false);
+	}
+	
+	public static void PreferenceChanged(SharedPreferences sp, String key){
+		if(key.equals("lowFps")){
+			lowFps = sp.getBoolean("liveWallpaperLowFramerate", false);
+		}
 	}
 
 	private static int parseMode(String mode){

@@ -45,7 +45,7 @@ public class FlickrParser extends XMLParser {
 	
 	@Override
 	protected String extendURL(String url) {
-		return FlickrFeeder.finalizeUrl(ShowStreams.current, url);
+		return FlickrFeeder.finalizeUrl(ShowStreams.current.context(), url);
 	}
 	
 	public List<ImageReference> getData(){

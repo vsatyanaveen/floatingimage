@@ -135,10 +135,13 @@ public class Image implements ImagePlane {
 		}
 		mFocusBmp = null;
 		mState = STATE_FLOATING;
+		/*
+		 * All images are recycled by the Cyclic list!
 		if(mShowingImage != null && !mShowingImage.getBitmap().isRecycled()){
 			mShowingImage.getBitmap().recycle();
 			Log.v("Floating Image", "Recycle bitmap due to image reset");
 		}
+		*/
 		mShowingImage = null;
 	}
 	
@@ -592,6 +595,7 @@ public class Image implements ImagePlane {
 		if(totalTime > Settings.floatingTraversal * mRotations && !isInRewind){
         	reJitter();
         	depthChanged = true;
+        	Log.v("Floating Image", "Getting new texture - forward!");
         	resetTexture(gl, true);
         	++mRotations;
         }
@@ -599,10 +603,12 @@ public class Image implements ImagePlane {
 		if(isInRewind){
 			reJitter();
 			depthChanged = true;
+			Log.v("Floating Image", "Getting new texture - rewind!");
 			resetTexture(gl, false);
 			--mRotations;
         }
 		if(mShowingImage == null & mPos.getX() < -5.0f){
+			Log.v("Floating Image", "Getting new texture - I need one!");
 			resetTexture(gl, true);
 		}
 		return depthChanged;
@@ -865,7 +871,7 @@ public class Image implements ImagePlane {
         	
         	int error = gl.glGetError();
         	if(error != 0){
-        		Log.e("Floating Image", "GL error in Image when setting small texture: " + error);
+        		Log.e("Floating Image", "GL error in Image when setting small texture: " + GLU.gluErrorString(error));
         	}
 	        
 	        ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);

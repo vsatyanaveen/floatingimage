@@ -94,7 +94,7 @@ public class BackgroundPainter {
 	
 	public static void initTexture(GL10 gl){	
 		InputStream shadowIS;
-		Context context = ShowStreams.current;
+		Context context = ShowStreams.current.context();
 		
 		switch(Settings.backgroundColor){
 		case GREY:

@@ -17,8 +17,9 @@ import dk.nindroid.rss.renderers.Renderer;
 import dk.nindroid.rss.renderers.floating.BackgroundPainter;
 import dk.nindroid.rss.renderers.floating.GlowImage;
 import dk.nindroid.rss.renderers.floating.ShadowPainter;
+import dk.nindroid.rss.settings.Settings;
 
-public class RiverRenderer implements GLSurfaceView.Renderer {
+public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.helpers.GLWallpaperService.Renderer {
 	public static Display	mDisplay;
 	
 	private boolean 		mTranslucentBackground = false;
@@ -32,25 +33,30 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	private long 			mOffset = 0;
 	private float			mFadeOffset = 0;
 	private static final float mSensitivityX = 70.0f;
+	private final boolean 	mLimitFramerate;
 	
 	private Renderer  		mRenderer;
 	private OSD				mOSD;
 	private FeedProgress	mFeedProgress;
 	private long			mLastFrameTime = 0;
+	private long			mLastFPSTime = 0;
 	private int				mFrames = 0;
 	
 	private int				mFeedsLoaded;
 	private int				mFeedsTotal;
+	private boolean			mReinit = true;
 	
 	static {
 		mDisplay = new Display();
 	}
 	
-	public RiverRenderer(boolean useTranslucentBackground, TextureBank textureBank){
+	public RiverRenderer(boolean useTranslucentBackground, TextureBank textureBank, boolean limitFramerate){
+		this.mLimitFramerate = limitFramerate;
 		mTranslucentBackground = useTranslucentBackground;
 		mBank = textureBank;
 		mOSD = new OSD();
 		mFeedProgress = new FeedProgress();
+		mLastFrameTime = System.currentTimeMillis();
 	}
 	
 	public void setRenderer(Renderer renderer){
@@ -64,6 +70,16 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	@Override
 	public void onDrawFrame(GL10 gl) {
 		try{
+			if(mReinit){
+				mReinit = false;
+				GlowImage.initTexture(gl);
+		      	ShadowPainter.initTexture(gl);
+		      	BackgroundPainter.initTexture(gl);
+		      	mOSD.init(gl);
+		      	mRenderer.init(gl, System.currentTimeMillis() + mOffset, mOSD);
+				FeedProgress.init();
+			}
+			
 			gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE,
 	                GL10.GL_MODULATE);
 			gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
@@ -87,12 +103,28 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	        
 	        //gl.glScalef(0.25f, 0.25f, 1.0f);
 	        long realTime = System.currentTimeMillis();
+	        
+	        long timeDiff = realTime - mLastFrameTime;
+	        mLastFrameTime = realTime;
+	        if(timeDiff > 200){ // We left the app, and have returned, or experienced a lag.
+	        	this.mOffset -= timeDiff + 80; 
+	        }
+	        
+	        if(mLimitFramerate){
+	        	int targetFrametime = Settings.lowFps ? 80 : 40;
+		        if(timeDiff < targetFrametime){
+		        	Thread.sleep(targetFrametime - timeDiff);
+		        }
+	        }
+	        
+	        Log.v("Floating Image", "timeDiff: " + timeDiff);
+	        
 	        //*
 	        ++mFrames;
-	        if(realTime - mLastFrameTime > 1000){
-	        	//Log.v("Floating Image", "Framerate is " + mFrames + " frames per second");
+	        if(realTime - mLastFPSTime > 1000){
+	        	Log.v("Floating Image", "Framerate is " + mFrames + " frames per second");
 	        	mFrames = 0;
-	        	mLastFrameTime = realTime;
+	        	mLastFPSTime = realTime;
 	        }
 	        //*/
 	        fadeOffset(realTime);
@@ -157,6 +189,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 	public void onResume(){
 		mBank.start();
 		mFadeOffset = 0.0f;
+		mReinit = true;
 		mRenderer.onResume();
 	}
 	public void onPause(){
@@ -454,9 +487,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
 		gl.glMatrixMode(GL10.GL_TEXTURE);
 		gl.glLoadIdentity();
 		gl.glMatrixMode(GL10.GL_MODELVIEW);
-		mOSD.init(gl);
-		mRenderer.init(gl, System.currentTimeMillis() + mOffset, mOSD);
-		FeedProgress.init();
+		//mOSD.init(gl);
 		
 		/*
          * By default, OpenGL enables features that improve quality
@@ -484,8 +515,5 @@ public class RiverRenderer implements GLSurfaceView.Renderer {
          gl.glEnable(GL10.GL_CULL_FACE);
          gl.glShadeModel(GL10.GL_SMOOTH);
          gl.glEnable(GL10.GL_DEPTH_TEST);
-       	 GlowImage.initTexture(gl);
-       	 ShadowPainter.initTexture(gl);
-       	 BackgroundPainter.initTexture(gl);
 	}
 }

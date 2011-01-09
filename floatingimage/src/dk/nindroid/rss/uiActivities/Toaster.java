@@ -10,12 +10,22 @@ import dk.nindroid.rss.ShowStreams;
 		}
 		
 		String text;
+		int res;
 		public Toaster(String text){
 			this.text = text;
 		}
+		public Toaster(int res){
+			this.res = res;
+		}
 		@Override
 		public void run() {
-			Toast t = Toast.makeText(ShowStreams.current, text, Toast.LENGTH_SHORT);
+			Toast t;
+			if(text == null){
+				t = Toast.makeText(ShowStreams.current.context(), res, Toast.LENGTH_SHORT);
+			}else{
+				t = Toast.makeText(ShowStreams.current.context(), text, Toast.LENGTH_SHORT);
+			}
 			t.show();
+			
 		}
 	}

@@ -39,7 +39,7 @@ public class ImageDownloader implements Runnable {
 	
 	@Override
 	public void run() {
-		ShowStreams activity = ShowStreams.current;
+		MainActivity activity = ShowStreams.current;
 		Toaster toaster = null;
 		String urlString = this.url;
 		URL url = null;
@@ -54,7 +54,7 @@ public class ImageDownloader implements Runnable {
 				f = new File(Settings.downloadDir + "/" + filename);
 				f.createNewFile();
 				OutputStream os = new FileOutputStream(f);
-				byte[] dl = DownloadUtil.fetchUrlBytes(url, activity.getString(R.string.user_agent), null);
+				byte[] dl = DownloadUtil.fetchUrlBytes(url, activity.context().getString(R.string.user_agent), null);
 				os.write(dl, 0, dl.length);
 			} catch (MalformedURLException e1) {
 				toaster = new Toaster("Cannot read image address: \"" + this.url + "\"");

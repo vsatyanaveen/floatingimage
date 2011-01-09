@@ -90,7 +90,12 @@
                 android:entryValues="@array/backgroundColorValues"
                 android:dialogTitle="@string/backgroundColorTitle"
                 android:defaultValue="0" />
-    </PreferenceCategory>
+           <CheckBoxPreference
+           		android:key="liveWallpaperLowFramerate"
+                android:title="@string/liveWallpaperLowFramerate"
+                android:summary="@string/liveWallpaperLowFramerateSummary"
+                android:defaultValue="false" />
+	</PreferenceCategory>
     <!-- 
     <PreferenceCategory
             android:title="@string/internals">

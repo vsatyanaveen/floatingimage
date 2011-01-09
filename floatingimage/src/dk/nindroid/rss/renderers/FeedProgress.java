@@ -80,7 +80,7 @@ public class FeedProgress {
 		mPainter = new Paint();
 		mPainter.setAntiAlias(true);
 		mPainter.setTextSize(22);
-		mLoadingText = ShowStreams.current.getString(R.string.loading_feeds);
+		mLoadingText = ShowStreams.current.context().getString(R.string.loading_feeds);
 	}
 	
 	public void draw(GL10 gl, int loaded, int total){

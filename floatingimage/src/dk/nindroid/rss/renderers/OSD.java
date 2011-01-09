@@ -190,28 +190,31 @@ public class OSD {
 		boolean showRotation = mShowRotation && mRotateClockwise.doShow();
 		gl.glPushMatrix();
 			gl.glDisable(GL10.GL_DEPTH_TEST);
-			gl.glDisable(GL10.GL_DEPTH_BITS);
 			gl.glEnable(GL10.GL_BLEND);
+			
 			float barHeight = toScreenHeight(80);
 			barHeight = (mButtons.length > 4 ? barHeight * 2 : barHeight);
 			if(RiverRenderer.mDisplay.getOrientation() == Surface.ROTATION_180){
 				float offset = toScreenHeight(20);
 				gl.glTranslatef(0.0f, offset, 0.0f);
 			}
+			
 			gl.glColor4f(1.0f, 1.0f, 1.0f, mFraction * 0.5f);
 			drawBackBar(gl, barHeight);
 			float yPos = RiverRenderer.mDisplay.getHeight() * 0.5f;
 			if(showRotation){
 				drawRotationBoxes(gl, yPos);
 			}
+			
 			gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 			drawIcons(gl);
 			if(showRotation){
 				drawRotation(gl, yPos);
 			}
+			
 			gl.glDisable(GL10.GL_BLEND);
-			gl.glEnable(GL10.GL_DEPTH_BITS);
 			gl.glEnable(GL10.GL_DEPTH_TEST);
+			
 		gl.glPopMatrix();
 	}
 	

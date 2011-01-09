@@ -5,13 +5,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.hardware.SensorManager;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
@@ -31,6 +32,7 @@ import android.view.WindowManager;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.Toast;
 import dk.nindroid.rss.compatibility.ButtonBrightness;
+import dk.nindroid.rss.compatibility.SetWallpaper;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.LocalImage;
 import dk.nindroid.rss.flickr.FlickrFeeder;
@@ -52,7 +54,7 @@ import dk.nindroid.rss.renderers.slideshow.SlideshowRenderer;
 import dk.nindroid.rss.settings.FeedsDbAdapter;
 import dk.nindroid.rss.settings.ManageFeeds;
 
-public class ShowStreams extends Activity {
+public class ShowStreams extends Activity implements MainActivity {
 	public static final int 			ABOUT_ID 		= Menu.FIRST;
 	public static final int 			FULLSCREEN_ID	= Menu.FIRST + 1;
 	public static final int 			SHOW_FOLDER_ID	= Menu.FIRST + 2;
@@ -66,7 +68,7 @@ public class ShowStreams extends Activity {
 	public static final int				MISC_ROW_ID		= 201;
 	public static final String 			version 		= "2.5.1";
 	public static final int				CACHE_SIZE		= 15;
-	public static ShowStreams 			current;
+	public static MainActivity 			current;
 	private GLSurfaceView 				mGLSurfaceView;
 	private RiverRenderer 				renderer;
 	private PowerManager.WakeLock 		wl;
@@ -103,7 +105,7 @@ public class ShowStreams extends Activity {
 			ShowStreams.current = this;
 			mTextureBank = setupFeeders();
 			cleanIfOld();
-			renderer = new RiverRenderer(true, mTextureBank);
+			renderer = new RiverRenderer(true, mTextureBank, false);
 			mFeedController.setRenderer(renderer);
 			OSD.init(this, renderer);
 			orientationManager.addSubscriber(RiverRenderer.mDisplay);
@@ -117,7 +119,7 @@ public class ShowStreams extends Activity {
 		}
 	}
 	
-	void registerParsers(){
+	static void registerParsers(){
 		ParserProvider.registerParser(dk.nindroid.rss.settings.Settings.TYPE_FLICKR, FlickrParser.class);
 		ParserProvider.registerParser(dk.nindroid.rss.settings.Settings.TYPE_PICASA, PicasaParser.class);
 		ParserProvider.registerParser(dk.nindroid.rss.settings.Settings.TYPE_FACEBOOK, FacebookParser.class);
@@ -141,7 +143,7 @@ public class ShowStreams extends Activity {
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo menuInfo) {
-		((Vibrator)ShowStreams.current.getSystemService(Activity.VIBRATOR_SERVICE)).vibrate(100l);
+		((Vibrator)getSystemService(Activity.VIBRATOR_SERVICE)).vibrate(100l);
 		ImageReference ir = renderer.getSelected();
 		if(ir != null){
 			super.onCreateContextMenu(menu, v, menuInfo);
@@ -232,8 +234,8 @@ public class ShowStreams extends Activity {
 	protected void onResume() {
 		Log.v("Floating Image", "Resuming main activity");
 		super.onResume();
-		String loading = this.getString(dk.nindroid.rss.R.string.please_wait);
-		ProgressDialog dialog = ProgressDialog.show(this, "", loading, true);
+		//String loading = this.getString(dk.nindroid.rss.R.string.please_wait);
+		//ProgressDialog dialog = ProgressDialog.show(this, "", loading, true);
 		dk.nindroid.rss.settings.Settings.readSettings(this);
 		try{
 			ButtonBrightness.setButtonBrightness(getWindow().getAttributes(), 0.0f);
@@ -259,10 +261,10 @@ public class ShowStreams extends Activity {
 		
 		wl.acquire();
 		orientationManager.onResume();
-		
+
 		mGLSurfaceView.onResume();
 		ReadFeeds.runAsync(mFeedController, defaultRenderer.totalImages() + CACHE_SIZE);
-		dialog.dismiss();
+		//dialog.dismiss();
 		//Debug.startMethodTracing("floatingimage");
 		Log.v("Floating Image", "End resume...");
 	}
@@ -370,6 +372,7 @@ public class ShowStreams extends Activity {
 	private void addDefaultLocalPaths() {
 		File phonePhotos = new File("/emmc");
 		
+		
 		FeedsDbAdapter mDbHelper = new FeedsDbAdapter(this);
 		mDbHelper.open();
 		mDbHelper.addFeed(getString(R.string.cameraPictures), Environment.getExternalStorageDirectory().getAbsolutePath() + "/DCIM", dk.nindroid.rss.settings.Settings.TYPE_LOCAL, "");
@@ -379,5 +382,28 @@ public class ShowStreams extends Activity {
 		mDbHelper.addFeed(getString(R.string.Downloads), Environment.getExternalStorageDirectory().getAbsolutePath() + "/download", dk.nindroid.rss.settings.Settings.TYPE_LOCAL, "");
 		mDbHelper.addFeed(getString(R.string.flickrExplore), FlickrFeeder.getExplore(), dk.nindroid.rss.settings.Settings.TYPE_FLICKR, "");
 		mDbHelper.close();
+	}
+
+	@Override
+	public Context context() {
+		return this;
+	}
+	
+	@Override
+	public void setWallpaper(Bitmap bitmap) throws IOException {
+		try{
+			SetWallpaper.setWallpaper(bitmap, this);
+		}catch(Throwable e){
+			super.setWallpaper(bitmap);
+		}
+	}
+	
+	@Override
+	public void setWallpaper(InputStream data) throws IOException {
+		try{
+			SetWallpaper.setWallpaper(data, this);
+		}catch(Throwable e){
+			super.setWallpaper(data);
+		}
 	}
 }

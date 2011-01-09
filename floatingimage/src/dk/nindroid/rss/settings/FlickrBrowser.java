@@ -17,9 +17,11 @@ import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 import dk.nindroid.rss.R;
+import dk.nindroid.rss.ShowStreams;
 import dk.nindroid.rss.flickr.FlickrFeeder;
 import dk.nindroid.rss.parser.flickr.FlickrAlbumBrowser;
 import dk.nindroid.rss.parser.flickr.FlickrUser;
+import dk.nindroid.rss.uiActivities.Toaster;
 
 public class FlickrBrowser extends ListActivity {
 	// Positions
@@ -37,7 +39,7 @@ public class FlickrBrowser extends ListActivity {
 	private static final int	PHOTOS_FROM_HERE_AUTHORIZED = 6;
 	private static final int	UNAUTHORIZE 				= 7;
 	
-	@Override
+	@Override 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		FlickrFeeder.readCode(this);
@@ -210,14 +212,18 @@ public class FlickrBrowser extends ListActivity {
 	}
 	private void returnMyStream(){
 		FlickrUser user = FlickrFeeder.getAuthorizedUser();
-		Intent intent = new Intent();
-		Bundle b = new Bundle();
-		String streamURL = FlickrFeeder.getPublicPhotos(user.getNsid());
-		b.putString("PATH", streamURL);
-		b.putString("NAME", "Stream: " + user.getUsername());
-		intent.putExtras(b);
-		setResult(RESULT_OK, intent);		
-		finish();
+		if(user == null){
+			ShowStreams.current.runOnUiThread(new Toaster(R.string.error_getting_flickr_user));
+		}else{
+			Intent intent = new Intent();
+			Bundle b = new Bundle();
+			String streamURL = FlickrFeeder.getPublicPhotos(user.getNsid());
+			b.putString("PATH", streamURL);
+			b.putString("NAME", "Stream: " + user.getUsername());
+			intent.putExtras(b);
+			setResult(RESULT_OK, intent);		
+			finish();
+		}
 	}
 	
 	private void returnMyContactsPhotos(){

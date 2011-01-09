@@ -83,8 +83,8 @@ public class FeedController {
 	
 	public void readFeeds(int active){
 		List<FeedReference> newFeeds = new ArrayList<FeedReference>();
-		FeedsDbAdapter mDbHelper = new FeedsDbAdapter(ShowStreams.current);
-		SharedPreferences sp = ShowStreams.current.getSharedPreferences("dk.nindroid.rss_preferences", 0);
+		FeedsDbAdapter mDbHelper = new FeedsDbAdapter(ShowStreams.current.context());
+		SharedPreferences sp = ShowStreams.current.context().getSharedPreferences("dk.nindroid.rss_preferences", 0);
 		mDbHelper.open();
 		Cursor c = null;
 		try{
@@ -277,7 +277,6 @@ public class FeedController {
 		int interval;
 				
 		private boolean isSpread(){
-			int x = this.a;
 			int y = this.b;
 			y = (b - a + space) % space;
 			return y == interval;

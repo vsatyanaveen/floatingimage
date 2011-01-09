@@ -145,7 +145,7 @@ public class FloatingRenderer extends Renderer {
 		// If new start, show splash!
 		if(mNewStart){
 			mSplashImg = mImgDepths[4];
-			Bitmap splash = BitmapFactory.decodeStream(ShowStreams.current.getResources().openRawResource(R.drawable.splash));
+			Bitmap splash = BitmapFactory.decodeStream(ShowStreams.current.context().getResources().openRawResource(R.drawable.splash));
 			mSplashImg.setSelected(gl, splash, 343.0f/512.0f, 1.0f, frameTime);
 			mNewStart = false;
 			mDefocusSplashTime = realTime + SPLASHTIME;
