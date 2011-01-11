@@ -24,6 +24,7 @@ public class ClickHandler extends TimerTask {
 	private static float[]	mLastSpeedX = new float[2];
 	private static float[]	mLastSpeedY = new float[2];
 	private static boolean 	mIsMultitouch = false;
+	private static MainActivity	mActivity;
 	
 	private static int 		mAction = 0;
 	
@@ -31,8 +32,9 @@ public class ClickHandler extends TimerTask {
 	private final static int ACTION_MOVE    	= 1;
 	private final static int ACTION_LONG_CLICK	= 2;
 	
-	public static void init(RiverRenderer renderer){
+	public static void init(MainActivity activity, RiverRenderer renderer){
 		ClickHandler.renderer = renderer;
+		mActivity = activity;
 		mTouchLastPos = new Vec2f();
 		mTouchStartPos = new Vec2f();
 		mtHandler = new MultitouchHandler();
@@ -42,7 +44,7 @@ public class ClickHandler extends TimerTask {
 	@Override
 	public void run() {
 		mAction = ACTION_LONG_CLICK;
-		ShowStreams.current.runOnUiThread(new OpenContextMenu());
+		mActivity.runOnUiThread(new OpenContextMenu(mActivity));
 	}
 	
 	public static boolean onTouchEvent(MotionEvent event) {
@@ -71,12 +73,7 @@ public class ClickHandler extends TimerTask {
 				mClickTimer.cancel();
 				mAction = ACTION_MOVE;
 			}
-			if(mAction == ACTION_MOVE){
-				float diffX = x - lastX;
-				float diffY = y - lastY;
-				saveSpeed(diffX, diffY);
-				renderer.move(x - mTouchStartPos.getX(), y - mTouchStartPos.getY(), mLastSpeedX[0], mLastSpeedY[0]);
-			}
+			//if(mAction == ACTION_MOVE)
 		}
 		if(action == MotionEvent.ACTION_UP){
 			if(mAction == ACTION_MOVE){
@@ -86,6 +83,11 @@ public class ClickHandler extends TimerTask {
 				mLastSpeedX[i] = 0;
 				mLastSpeedY[i] = 0;
 			}
+		}else{
+			float diffX = x - lastX;
+			float diffY = y - lastY;
+			saveSpeed(diffX, diffY);
+			renderer.move(x - mTouchStartPos.getX(), y - mTouchStartPos.getY(), mLastSpeedX[0], mLastSpeedY[0]);
 		}
 		mTouchLastPos.setX(x);
 		mTouchLastPos.setY(y);

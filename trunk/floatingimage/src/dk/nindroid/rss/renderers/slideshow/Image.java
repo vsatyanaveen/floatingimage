@@ -11,8 +11,8 @@ import javax.microedition.khronos.opengles.GL10;
 import android.graphics.Bitmap;
 import android.opengl.GLUtils;
 import android.util.Log;
-import dk.nindroid.rss.RiverRenderer;
-import dk.nindroid.rss.ShowStreams;
+import dk.nindroid.rss.Display;
+import dk.nindroid.rss.MainActivity;
 import dk.nindroid.rss.TextureSelector;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.gfx.ImageUtil;
@@ -42,6 +42,8 @@ public class Image implements ImagePlane {
 	private boolean				mRevive = false;
 	private boolean				mSetLargeTexture = false;
 	private boolean				mInFocus;
+	private Display				mDisplay;
+	MainActivity 				mActivity;
 	
 	private Vec3f				mPos;
 	
@@ -70,8 +72,10 @@ public class Image implements ImagePlane {
 		this.mBitmapWidth = 0;
 	}
 
-	public Image(){
-		mTextureSelector = new TextureSelector();
+	public Image(Display display, MainActivity activity){
+		this.mDisplay = display;
+		this.mActivity = activity;
+		mTextureSelector = new TextureSelector(display);
 		ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
         tbb.order(ByteOrder.nativeOrder());
         mTexBuffer = tbb.asFloatBuffer();
@@ -173,8 +177,8 @@ public class Image implements ImagePlane {
 	}
 	
 	public float getScale(float szX, float szY, boolean sideways){
-		float height = RiverRenderer.mDisplay.getFocusedHeight() * RiverRenderer.mDisplay.getFill();
-		float width = RiverRenderer.mDisplay.getWidth() * RiverRenderer.mDisplay.getFill();
+		float height = mDisplay.getFocusedHeight() * mDisplay.getFill();
+		float width = mDisplay.getWidth() * mDisplay.getFill();
 		if(sideways){
 			float scale = 1.0f;
 			if(szX > height){
@@ -370,11 +374,11 @@ public class Image implements ImagePlane {
 	public void setBackground(){
 		if(mHasBitmap){
 			try {
-				ShowStreams.current.setWallpaper(mBitmap);
+				mActivity.setWallpaper(mBitmap);
 			} catch (IOException e) {
 				Log.e("ImageDownloader", "Failed to get image", e);
-				Toaster toaster = new Toaster("Sorry, there was an error setting wallpaper!");
-				ShowStreams.current.runOnUiThread(toaster);
+				Toaster toaster = new Toaster(mActivity.context(), "Sorry, there was an error setting wallpaper!");
+				mActivity.runOnUiThread(toaster);
 			}
 		}else{
 			mSetBackgroundWhenReady = true;

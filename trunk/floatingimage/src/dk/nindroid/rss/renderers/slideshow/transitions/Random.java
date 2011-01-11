@@ -2,6 +2,7 @@ package dk.nindroid.rss.renderers.slideshow.transitions;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import dk.nindroid.rss.Display;
 import dk.nindroid.rss.renderers.slideshow.Image;
 
 
@@ -10,12 +11,13 @@ public class Random extends Transition{
 	java.util.Random	mRand;
 	Transition			mCurrent;
 	
-	public Random(){
+	public Random(Display display){
+		
 		mTransitions[0] = new CrossFade();
-		mTransitions[1] = new FadeToBlack();
-		mTransitions[2] = new FadeToWhite();
-		mTransitions[3] = new SlideRightToLeft();
-		mTransitions[4] = new SlideTopToBottom();
+		mTransitions[1] = new FadeToBlack(display);
+		mTransitions[2] = new FadeToWhite(display);
+		mTransitions[3] = new SlideRightToLeft(display);
+		mTransitions[4] = new SlideTopToBottom(display);
 		mRand = new java.util.Random(System.currentTimeMillis());
 	}
 	

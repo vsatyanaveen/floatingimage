@@ -64,7 +64,7 @@ public class BitmapDownloader implements Runnable {
 							return;
 						}
 						ImageReference ir = i == 0 ? mFeedController.getNextImageReference() : mFeedController.getPrevImageReference();
-						if(ir == null || bank.isShowing(ir.getID())){
+						if(ir == null || (ir.getBitmap() != null && !ir.getBitmap().isRecycled())){
 							// Nothing (new) to show just yet...
 							Thread.sleep(100);
 							break;

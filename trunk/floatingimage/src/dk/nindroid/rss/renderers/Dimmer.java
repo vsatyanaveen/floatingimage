@@ -6,7 +6,7 @@ import java.nio.IntBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
 
-import dk.nindroid.rss.RiverRenderer;
+import dk.nindroid.rss.Display;
 import dk.nindroid.rss.gfx.Vec3f;
 
 public class Dimmer {
@@ -85,13 +85,13 @@ public class Dimmer {
 	 * @param szY
 	 * @param szZ
 	 */
-	public static void draw(GL10 gl, float fraction, float finalIntensity){
+	public static void draw(GL10 gl, float fraction, float finalIntensity, Display display){
 		setAlpha(fraction * finalIntensity);
 		gl.glPushMatrix();
 		
 			gl.glLoadIdentity(); // We fill whole screen, never rotate!
 			gl.glTranslatef(0, 0, -zDepth);
-			gl.glScalef(RiverRenderer.mDisplay.getPortraitWidth() * zDepth, RiverRenderer.mDisplay.getPortraitHeight() * zDepth, 1);
+			gl.glScalef(display.getPortraitWidth() * zDepth, display.getPortraitHeight() * zDepth, 1);
 			
 			gl.glFrontFace(GL10.GL_CCW);
 			gl.glDisable(GL10.GL_TEXTURE_2D);

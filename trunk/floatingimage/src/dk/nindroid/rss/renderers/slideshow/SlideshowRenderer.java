@@ -4,7 +4,8 @@ import javax.microedition.khronos.opengles.GL10;
 
 import android.content.Intent;
 import android.util.Log;
-import dk.nindroid.rss.RiverRenderer;
+import dk.nindroid.rss.Display;
+import dk.nindroid.rss.MainActivity;
 import dk.nindroid.rss.TextureBank;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.gfx.Vec3f;
@@ -26,15 +27,17 @@ public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.rende
 	TextureBank 	mBank;
 	long			mSlideTime;
 	Transition 		mCurrentTransition;
+	Display 		mDisplay;
 	boolean			mPlaying = true;
 	boolean			mStartPlaying = false;
 	boolean			mNextSet = false;
 	boolean			mResetImages = false;
 	
-	public SlideshowRenderer(TextureBank bank){
-		mPrevious = new Image();
-		mCurrent = new Image();
-		mNext = new Image();
+	public SlideshowRenderer(MainActivity activity, TextureBank bank, Display display){
+		this.mDisplay = display;
+		mPrevious = new Image(display, activity);
+		mCurrent = new Image(display, activity);
+		mNext = new Image(display, activity);
 		this.mBank = bank;
 	}
 	
@@ -44,25 +47,25 @@ public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.rende
 			mCurrentTransition = new CrossFade();
 			break;
 		case Settings.MODE_FADE_TO_BLACK:
-			mCurrentTransition = new FadeToBlack();
+			mCurrentTransition = new FadeToBlack(mDisplay);
 			break;
 		case Settings.MODE_FADE_TO_WHITE:
-			mCurrentTransition = new FadeToWhite();
+			mCurrentTransition = new FadeToWhite(mDisplay);
 			break;
 		case Settings.MODE_NONE:
 			mCurrentTransition = new Instant();
 			break;
 		case Settings.MODE_RANDOM:
-			mCurrentTransition = new Random();
+			mCurrentTransition = new Random(mDisplay);
 			break;
 		case Settings.MODE_SLIDE_RIGHT_TO_LEFT:
-			mCurrentTransition = new SlideRightToLeft();
+			mCurrentTransition = new SlideRightToLeft(mDisplay);
 			break;
 		case Settings.MODE_SLIDE_TOP_TO_BOTTOM:
-			mCurrentTransition = new SlideTopToBottom();
+			mCurrentTransition = new SlideTopToBottom(mDisplay);
 			break;
 		default:
-			mCurrentTransition = new Random(); // This should never happen, but better have a safe fallback!
+			mCurrentTransition = new Random(mDisplay); // This should never happen, but better have a safe fallback!
 			break;
 		}
 		Log.v("Slideshow renderer", "Using mode: " + mode);
@@ -81,8 +84,8 @@ public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.rende
 	@Override
 	public void onResume(){
 		setTransition(Settings.mode);
-		if(!RiverRenderer.mDisplay.isFullscreen()){
-			RiverRenderer.mDisplay.toggleFullscreen();
+		if(!mDisplay.isFullscreen()){
+			mDisplay.toggleFullscreen();
 		}
 		mPrevious.onResume();
 		mCurrent.onResume();
@@ -134,7 +137,7 @@ public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.rende
 		mPrevious.render(gl, realtime);
 		mCurrent.render(gl, realtime);
 		if(!mCurrent.hasBitmap()){
-			ProgressBar.draw(gl, mCurrent.getProgress());
+			ProgressBar.draw(gl, mCurrent.getProgress(), mDisplay);
 		}
 		if(!mCurrentTransition.isFinished()){
 			mCurrentTransition.postRender(gl, frameTime);

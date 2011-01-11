@@ -7,13 +7,13 @@ import java.nio.IntBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.opengl.GLUtils;
+import dk.nindroid.rss.Display;
 import dk.nindroid.rss.R;
-import dk.nindroid.rss.RiverRenderer;
-import dk.nindroid.rss.ShowStreams;
 import dk.nindroid.rss.gfx.Vec3f;
 
 public class FeedProgress {
@@ -76,14 +76,14 @@ public class FeedProgress {
 		mIndexBuffer.position(0);
 	}
 	
-	public FeedProgress(){
+	public FeedProgress(Context context){
 		mPainter = new Paint();
 		mPainter.setAntiAlias(true);
 		mPainter.setTextSize(22);
-		mLoadingText = ShowStreams.current.context().getString(R.string.loading_feeds);
+		mLoadingText = context.getString(R.string.loading_feeds);
 	}
 	
-	public void draw(GL10 gl, int loaded, int total){
+	public void draw(GL10 gl, int loaded, int total, Display display){
 		if(loaded != total)
 		{
 			gl.glDisableClientState(GL10.GL_COLOR_ARRAY);
@@ -111,11 +111,11 @@ public class FeedProgress {
 			}
 			gl.glPushMatrix();
 				gl.glEnable(GL10.GL_BLEND);
-				float height = 64.0f / RiverRenderer.mDisplay.getHeightPixels() * RiverRenderer.mDisplay.getHeight();
-				float width = 256.0f / RiverRenderer.mDisplay.getWidthPixels() * RiverRenderer.mDisplay.getWidth();
+				float height = 64.0f / display.getHeightPixels() * display.getHeight();
+				float width = 256.0f / display.getWidthPixels() * display.getWidth();
 				gl.glTexParameterx(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S,GL10.GL_CLAMP_TO_EDGE);
 		        gl.glTexParameterx(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_CLAMP_TO_EDGE);
-				gl.glTranslatef(-RiverRenderer.mDisplay.getWidth() + width, RiverRenderer.mDisplay.getHeight() - height, -1.0f);
+				gl.glTranslatef(-display.getWidth() + width, display.getHeight() - height, -1.0f);
 				gl.glScalef(width, height, 1.0f);
 				
 		        gl.glEnable(GL10.GL_TEXTURE_2D);

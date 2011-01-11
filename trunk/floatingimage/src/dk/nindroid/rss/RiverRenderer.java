@@ -20,7 +20,7 @@ import dk.nindroid.rss.renderers.floating.ShadowPainter;
 import dk.nindroid.rss.settings.Settings;
 
 public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.helpers.GLWallpaperService.Renderer {
-	public static Display	mDisplay;
+	public Display			mDisplay;
 	
 	private boolean 		mTranslucentBackground = false;
 	private boolean			mMoveEventHandled = false;
@@ -38,24 +38,24 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 	private Renderer  		mRenderer;
 	private OSD				mOSD;
 	private FeedProgress	mFeedProgress;
+	MainActivity 			mActivity;
 	private long			mLastFrameTime = 0;
 	private long			mLastFPSTime = 0;
 	private int				mFrames = 0;
+	private boolean			mPause = false;
 	
 	private int				mFeedsLoaded;
 	private int				mFeedsTotal;
 	private boolean			mReinit = true;
-	
-	static {
-		mDisplay = new Display();
-	}
-	
-	public RiverRenderer(boolean useTranslucentBackground, TextureBank textureBank, boolean limitFramerate){
+		
+	public RiverRenderer(MainActivity activity, boolean useTranslucentBackground, TextureBank textureBank, boolean limitFramerate){
+		this.mActivity = activity;
 		this.mLimitFramerate = limitFramerate;
+		mDisplay = new Display();
 		mTranslucentBackground = useTranslucentBackground;
 		mBank = textureBank;
-		mOSD = new OSD();
-		mFeedProgress = new FeedProgress();
+		mOSD = new OSD(activity);
+		mFeedProgress = new FeedProgress(activity.context());
 		mLastFrameTime = System.currentTimeMillis();
 	}
 	
@@ -69,15 +69,17 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 	
 	@Override
 	public void onDrawFrame(GL10 gl) {
-		try{
+		//try{
 			if(mReinit){
+				Log.v("Floating Image", "initting");
 				mReinit = false;
 				GlowImage.initTexture(gl);
 		      	ShadowPainter.initTexture(gl);
-		      	BackgroundPainter.initTexture(gl);
-		      	mOSD.init(gl);
+		      	BackgroundPainter.initTexture(gl, mActivity.context());
+		      	mOSD.init(gl, mDisplay);
 		      	mRenderer.init(gl, System.currentTimeMillis() + mOffset, mOSD);
 				FeedProgress.init();
+				Log.v("Floating Image", "initting done!");
 			}
 			
 			gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE,
@@ -106,23 +108,27 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 	        
 	        long timeDiff = realTime - mLastFrameTime;
 	        mLastFrameTime = realTime;
-	        if(timeDiff > 200){ // We left the app, and have returned, or experienced a lag.
+	        if(mPause){
+	        	this.mOffset -= timeDiff;
+	        } else if(timeDiff > 200){ // We left the app, and have returned, or experienced a lag.
 	        	this.mOffset -= timeDiff + 80; 
 	        }
 	        
 	        if(mLimitFramerate){
 	        	int targetFrametime = Settings.lowFps ? 80 : 40;
 		        if(timeDiff < targetFrametime){
-		        	Thread.sleep(targetFrametime - timeDiff);
+		        	try {
+						Thread.sleep(targetFrametime - timeDiff);
+					} catch (InterruptedException e) {
+						Log.w("Floating Image", "Framerate limiting sleep interrupted.", e);
+					}
 		        }
 	        }
-	        
-	        Log.v("Floating Image", "timeDiff: " + timeDiff);
 	        
 	        //*
 	        ++mFrames;
 	        if(realTime - mLastFPSTime > 1000){
-	        	Log.v("Floating Image", "Framerate is " + mFrames + " frames per second");
+	        	//Log.v("Floating Image", "Framerate is " + mFrames + " frames per second");
 	        	mFrames = 0;
 	        	mLastFPSTime = realTime;
 	        }
@@ -151,12 +157,14 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 	        gl.glRotatef(mDisplay.getRotation(), 0.0f, 0.0f, 1.0f);
 	        mRenderer.render(gl, time, realTime);
 	        if(!mDisplay.isTurning()){
-	        	mFeedProgress.draw(gl, mFeedsLoaded, mFeedsTotal);
+	        	mFeedProgress.draw(gl, mFeedsLoaded, mFeedsTotal, mDisplay);
 	        	mOSD.draw(gl, realTime);
 	        }
+		/*	
 		}catch(Throwable t){
 			Log.e("Floating Image", "Unexpected exception caught!", t);
 		}
+		*/
 		
 	}
 	private void fadeOffset(long time) {
@@ -291,6 +299,11 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 	
 	public boolean isVertical(float speedX, float speedY){
 		return Math.abs(speedY) > Math.abs(speedX);
+	}
+	
+	public boolean pause(){
+		this.mPause ^= true;
+		return this.mPause;
 	}
 	
 	float lastX;

@@ -17,7 +17,6 @@ import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 import dk.nindroid.rss.R;
-import dk.nindroid.rss.ShowStreams;
 import dk.nindroid.rss.flickr.FlickrFeeder;
 import dk.nindroid.rss.parser.flickr.FlickrAlbumBrowser;
 import dk.nindroid.rss.parser.flickr.FlickrUser;
@@ -28,7 +27,7 @@ public class FlickrBrowser extends ListActivity {
 	private static final int	SHOW_STREAM 				= 0;
 	private static final int	SEARCH 						= 1;
 	private static final int	EXPLORE						= 2;
-	private static final int	PHOTOS_FROM_HERE 			= 3;
+	//private static final int	PHOTOS_FROM_HERE 			= 3;
 	private static final int	AUTHORIZE   				= 4;
 	private static final int	MY_STREAM					= 0;
 	private static final int	MY_ALBUMS					= 1;
@@ -36,7 +35,7 @@ public class FlickrBrowser extends ListActivity {
 	private static final int	SHOW_STREAM_AUTHORIZED 		= 3;
 	private static final int	SEARCH_AUTHORIZED 			= 4;
 	private static final int	EXPLORE_AUTHORIZED			= 5;
-	private static final int	PHOTOS_FROM_HERE_AUTHORIZED = 6;
+	//private static final int	PHOTOS_FROM_HERE_AUTHORIZED = 6;
 	private static final int	UNAUTHORIZE 				= 7;
 	
 	@Override 
@@ -56,9 +55,9 @@ public class FlickrBrowser extends ListActivity {
 			String showStream = this.getResources().getString(R.string.flickrShowStream);
 			String search = this.getResources().getString(R.string.flickrSearch);
 			String explore = this.getResources().getString(R.string.flickrExplore);
-			String photosFromHere = this.getResources().getString(R.string.flickrPhotosFromHere);
+			//String photosFromHere = this.getResources().getString(R.string.flickrPhotosFromHere);
 			String authorize = this.getResources().getString(R.string.authorize);
-			String[] options = new String[]{showStream, search, explore, photosFromHere, authorize};
+			String[] options = new String[]{showStream, search, explore, authorize};
 			setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, options));
 		}else{
 			String myStream = this.getResources().getString(R.string.flickrMyPhotos);
@@ -67,9 +66,9 @@ public class FlickrBrowser extends ListActivity {
 			String showStream = this.getResources().getString(R.string.flickrShowStream);
 			String search = this.getResources().getString(R.string.flickrSearch);
 			String explore = this.getResources().getString(R.string.flickrExplore);
-			String photosFromHere = this.getResources().getString(R.string.flickrPhotosFromHere);
+			//String photosFromHere = this.getResources().getString(R.string.flickrPhotosFromHere);
 			String unauthorize = this.getResources().getString(R.string.unauthorize);
-			String[] options = new String[]{myStream, myAlbums, myContacts, showStream, search, explore, photosFromHere, unauthorize};
+			String[] options = new String[]{myStream, myAlbums, myContacts, showStream, search, explore, unauthorize};
 			setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, options));
 		}
 	}
@@ -87,9 +86,9 @@ public class FlickrBrowser extends ListActivity {
 				break;
 			case EXPLORE:
 				returnExplore();
-			case PHOTOS_FROM_HERE:
+			/*case PHOTOS_FROM_HERE:
 				returnPhotosFromHere();
-				break;
+				break;*/
 			case AUTHORIZE:
 				try {
 					FlickrFeeder.authorize(this);
@@ -119,9 +118,9 @@ public class FlickrBrowser extends ListActivity {
 			case EXPLORE_AUTHORIZED:
 				returnExplore();
 				break;
-			case PHOTOS_FROM_HERE_AUTHORIZED:
+			/*case PHOTOS_FROM_HERE_AUTHORIZED:
 				returnPhotosFromHere();
-				break;
+				break;*/
 			case UNAUTHORIZE:
 				FlickrFeeder.unauthorize(this);
 				fillMenu();
@@ -213,7 +212,7 @@ public class FlickrBrowser extends ListActivity {
 	private void returnMyStream(){
 		FlickrUser user = FlickrFeeder.getAuthorizedUser();
 		if(user == null){
-			ShowStreams.current.runOnUiThread(new Toaster(R.string.error_getting_flickr_user));
+			runOnUiThread(new Toaster(this, R.string.error_getting_flickr_user));
 		}else{
 			Intent intent = new Intent();
 			Bundle b = new Bundle();
@@ -247,7 +246,7 @@ public class FlickrBrowser extends ListActivity {
 		setResult(RESULT_OK, intent);		
 		finish();
 	}
-	
+	/*
 	private void returnPhotosFromHere(){
 		Intent intent = new Intent();
 		Bundle b = new Bundle();
@@ -258,7 +257,7 @@ public class FlickrBrowser extends ListActivity {
 		setResult(RESULT_OK, intent);		
 		finish();
 	}
-
+*/
 	private void returnStream(String username){
 		String uid = FlickrFeeder.findByUsername(username);
 		if(username.length() == 0){ // This actually returns a user with no images!

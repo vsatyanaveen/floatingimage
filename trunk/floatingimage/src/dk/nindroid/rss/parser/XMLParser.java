@@ -14,15 +14,16 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
+import android.content.Context;
 import android.util.Log;
 import dk.nindroid.rss.HttpTools;
 import dk.nindroid.rss.data.FeedReference;
 import dk.nindroid.rss.data.ImageReference;
 
 public abstract class XMLParser extends DefaultHandler implements FeedParser {
-	public List<ImageReference> parseFeed(FeedReference feed) throws ParserConfigurationException, SAXException, FactoryConfigurationError, IOException {
+	public List<ImageReference> parseFeed(FeedReference feed, Context context) throws ParserConfigurationException, SAXException, FactoryConfigurationError, IOException {
 		String url = feed.getFeedLocation();
-		url = extendURL(url);
+		url = extendURL(url, context);
 		Log.v("Floating Image", "Fetching from " + url);
 		InputStream stream = HttpTools.openHttpConnection(url);
 		SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
@@ -39,6 +40,6 @@ public abstract class XMLParser extends DefaultHandler implements FeedParser {
 		}
 		return list;
 	}
-	protected String extendURL(String url){return url;}
+	protected String extendURL(String url, Context context){return url;}
 	protected abstract List<ImageReference> getData();
 }

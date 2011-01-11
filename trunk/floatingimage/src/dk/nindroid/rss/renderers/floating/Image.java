@@ -13,11 +13,12 @@ import android.graphics.Bitmap;
 import android.opengl.GLU;
 import android.opengl.GLUtils;
 import android.util.Log;
-import dk.nindroid.rss.RiverRenderer;
-import dk.nindroid.rss.ShowStreams;
+import dk.nindroid.rss.Display;
+import dk.nindroid.rss.MainActivity;
 import dk.nindroid.rss.TextureBank;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.Ray;
+import dk.nindroid.rss.data.Texture;
 import dk.nindroid.rss.gfx.ImageUtil;
 import dk.nindroid.rss.gfx.Vec3f;
 import dk.nindroid.rss.renderers.ImagePlane;
@@ -26,17 +27,15 @@ import dk.nindroid.rss.settings.Settings;
 import dk.nindroid.rss.uiActivities.Toaster;
 
 public class Image implements ImagePlane {
-	private static int  ids = 0;
-	private static int	largeTextureID = -1;
-	private static int	largeTextureSize = 0;
-	private static boolean	revivingTextureNulled = false; 
 	private static final int STATE_FLOATING =   0;
 	private static final int STATE_FOCUSING =   1;
 	private static final int STATE_FOCUSED	=   2;
 	private static final int STATE_DEFOCUSING = 3;
 	
+	private Texture			mLargeTexture;
 	private int				mState = STATE_FLOATING;
 	
+	private Display			mDisplay;
 	
 	int						mID;
 	private IntBuffer   	mVertexBuffer;
@@ -54,6 +53,8 @@ public class Image implements ImagePlane {
 	private ImageReference 	mShowingImage;
 	private Vec3f[]			mVertices;
 	private int				mLastTextureSize;
+	private MainActivity	mActivity;
+	private InfoBar		mInfoBar;
 	
 	// Selected vars
 	private Vec3f			mSelectedPos = new Vec3f();
@@ -98,12 +99,12 @@ public class Image implements ImagePlane {
 				if(mFocusBmp.isRecycled()){
 					Log.e("Floating Image", "Trying to set recycled bitmap as background!");
 				}else{
-					ShowStreams.current.setWallpaper(mFocusBmp);
+					mActivity.setWallpaper(mFocusBmp);
 				}
 			} catch (IOException e) {
 				Log.e("Floating Image", "Failed to get image", e);
-				Toaster toaster = new Toaster("Sorry, there was an error setting wallpaper!");
-				ShowStreams.current.runOnUiThread(toaster);
+				Toaster toaster = new Toaster(mActivity.context(), "Sorry, there was an error setting wallpaper!");
+				mActivity.runOnUiThread(toaster);
 			}
 		}else{
 			mSetBackgroundWhenReady = true;
@@ -112,11 +113,7 @@ public class Image implements ImagePlane {
 	
 	public void revive(GL10 gl, long time){
 		// Make sure the textures are redrawn after subactivity
-		if(!revivingTextureNulled){
-			revivingTextureNulled = true;
-			largeTextureSize = 0;
-			largeTextureID = -1;
-		}
+		mLargeTexture.nullTexture();
 		mLastTextureSize = 0;
 		
 		// Revive textures
@@ -124,7 +121,7 @@ public class Image implements ImagePlane {
 			setFocusTexture(gl);
 		}else{
 			if(mShowingImage != null){
-				mRotations = (int)((time - mStartTime) / Settings.floatingTraversal) + 1;
+				//mRotations = (int)((time - mStartTime) / Settings.floatingTraversal) + 1;
 				setTexture(gl, mShowingImage);
 			}
 		}
@@ -171,7 +168,7 @@ public class Image implements ImagePlane {
 			mState = STATE_FOCUSING;
 			mRotationSaved = mRotation;
 			// Get large texture, if not already there.
-			InfoBar.select(gl, this.mShowingImage);
+			mInfoBar.select(gl, mDisplay, this.mShowingImage);
 		}
 	}
 	
@@ -191,19 +188,22 @@ public class Image implements ImagePlane {
 	}
 	
 	protected float getYPos(){
-		return mYPos * RiverRenderer.mDisplay.getFocusedHeight();
+		return mYPos * mDisplay.getFocusedHeight();
 	}
 	
-	public Image(TextureBank bank, Pos layer, long startTime){
-		this.mID = ids++;
+	public Image(MainActivity activity, TextureBank bank, Display display, InfoBar infoBar, Pos layer, Texture largeTexture, long startTime){
+		this.mDisplay = display;
 		mbank = bank;
+		this.mActivity = activity;
+		this.mInfoBar = infoBar;
 		mRand = new Random(startTime + mID);
+		this.mLargeTexture = largeTexture;
 		switch(layer){
 			case UP: mYPos = 1.25f; break;
 			case MIDDLE: mYPos = 0.0f; break;
 			case DOWN: mYPos = -1.25f; break;
 		}
-		mPos = new Vec3f(-FloatingRenderer.getFarRight(), mYPos, FloatingRenderer.mFloatZ);
+		mPos = new Vec3f(-FloatingRenderer.getFarRight(mDisplay), mYPos, FloatingRenderer.mFloatZ);
 		reJitter();
 		mStartTime = startTime;
 		ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
@@ -263,7 +263,7 @@ public class Image implements ImagePlane {
 	}
 	
 	private boolean isTall(){
-		return isTall(RiverRenderer.mDisplay.getWidth() / RiverRenderer.mDisplay.getFocusedHeight());
+		return isTall(mDisplay.getWidth() / mDisplay.getFocusedHeight());
 	}
 	
 	private boolean isTall(float screenAspect){
@@ -272,8 +272,8 @@ public class Image implements ImagePlane {
 	}
 	
 	public float getScale(float szX, float szY, boolean sideways){
-		float height = RiverRenderer.mDisplay.getFocusedHeight() * RiverRenderer.mDisplay.getFill();
-		float width = RiverRenderer.mDisplay.getWidth() * RiverRenderer.mDisplay.getFill();
+		float height = mDisplay.getFocusedHeight() * mDisplay.getFill();
+		float width = mDisplay.getWidth() * mDisplay.getFill();
 		if(sideways){
 			float scale = 1.0f;
 			if(szX > height){
@@ -326,13 +326,13 @@ public class Image implements ImagePlane {
 			szY *= scale;
 		}else{ // Splash screen only!
 			if(isTall()){
-				szY = RiverRenderer.mDisplay.getFocusedHeight();
-				szY *= RiverRenderer.mDisplay.getFill();
+				szY = mDisplay.getFocusedHeight();
+				szY *= mDisplay.getFill();
 				
 				szX = maspect * szY;
 			}else{
-				szX = RiverRenderer.mDisplay.getWidth();
-				szX *= RiverRenderer.mDisplay.getFill();
+				szX = mDisplay.getWidth();
+				szX *= mDisplay.getFill();
 				
 				szY = szX / maspect;
 			}
@@ -378,7 +378,7 @@ public class Image implements ImagePlane {
 		gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_REPLACE);
 		gl.glActiveTexture(GL10.GL_TEXTURE0);
 		if(mLargeTex){
-			gl.glBindTexture(GL10.GL_TEXTURE_2D, largeTextureID);
+			gl.glBindTexture(GL10.GL_TEXTURE_2D, mLargeTexture.getTextureID(gl));
 		}else{
 			gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
 		}
@@ -399,7 +399,7 @@ public class Image implements ImagePlane {
 		gl.glPopMatrix();
         
         if(mState == STATE_FOCUSED && !mLargeTex){
-        	ProgressBar.draw(gl, FloatingRenderer.mTextureSelector.getProgress());
+        	ProgressBar.draw(gl, FloatingRenderer.mTextureSelector.getProgress(), mDisplay);
         }
 	}
 	
@@ -526,10 +526,10 @@ public class Image implements ImagePlane {
 		float height;
 		boolean isTall = isTall();
 		if(isTall){
-			height = RiverRenderer.mDisplay.getHeight();
+			height = mDisplay.getHeight();
 			width = maspect * height;
 		}else{
-			width = RiverRenderer.mDisplay.getWidth();
+			width = mDisplay.getWidth();
 			height = width / maspect;
 		}
 		float scale = mInitialScale * mScale;
@@ -580,7 +580,7 @@ public class Image implements ImagePlane {
 	}
 	
 	private float getXPos(long relativeTime){
-		return -FloatingRenderer.getFarRight() + (((float)(relativeTime % Settings.floatingTraversal) / Settings.floatingTraversal) * FloatingRenderer.getFarRight() * 2);
+		return -FloatingRenderer.getFarRight(mDisplay) + (((float)(relativeTime % Settings.floatingTraversal) / Settings.floatingTraversal) * FloatingRenderer.getFarRight(mDisplay) * 2);
 	}
 	
 	private boolean updateFloating(GL10 gl, long time){
@@ -595,7 +595,7 @@ public class Image implements ImagePlane {
 		if(totalTime > Settings.floatingTraversal * mRotations && !isInRewind){
         	reJitter();
         	depthChanged = true;
-        	Log.v("Floating Image", "Getting new texture - forward!");
+        	//Log.v("Floating Image", "Getting new texture - forward!");
         	resetTexture(gl, true);
         	++mRotations;
         }
@@ -603,12 +603,12 @@ public class Image implements ImagePlane {
 		if(isInRewind){
 			reJitter();
 			depthChanged = true;
-			Log.v("Floating Image", "Getting new texture - rewind!");
+			//Log.v("Floating Image", "Getting new texture - rewind!");
 			resetTexture(gl, false);
 			--mRotations;
         }
 		if(mShowingImage == null & mPos.getX() < -5.0f){
-			Log.v("Floating Image", "Getting new texture - I need one!");
+			//Log.v("Floating Image", "Getting new texture - I need one!");
 			resetTexture(gl, true);
 		}
 		return depthChanged;
@@ -705,7 +705,6 @@ public class Image implements ImagePlane {
 				moveToFloat(gl, time, realTime);
 			}
 		}
-		revivingTextureNulled = false;
 		return depthChanged;
 	}
 	
@@ -717,7 +716,7 @@ public class Image implements ImagePlane {
 	}
 	
 	private float getFocusedOffset(){
-		return RiverRenderer.mDisplay.getHeight() - RiverRenderer.mDisplay.getFocusedHeight();
+		return mDisplay.getHeight() - mDisplay.getFocusedHeight();
 	}
 
 	
@@ -777,16 +776,13 @@ public class Image implements ImagePlane {
 		
 		maspect = width / height;
 		boolean firstDraw = false;
-		if(largeTextureID == -1){
-			int[] textures = new int[1];
-			gl.glGenTextures(1, textures, 0);
-			largeTextureID = textures[0];
-		}
-		if(largeTextureSize != mFocusBmp.getWidth()){
-			largeTextureSize = mFocusBmp.getWidth();
+		
+		
+		if(mLargeTexture.getTextureSize() != mFocusBmp.getWidth()){
+			mLargeTexture.setTextureSize(mFocusBmp.getWidth());
 			firstDraw = true;
 		}
-		gl.glBindTexture(GL10.GL_TEXTURE_2D, largeTextureID);
+		gl.glBindTexture(GL10.GL_TEXTURE_2D, mLargeTexture.getTextureID(gl));
 
         gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER,
                 GL10.GL_NEAREST);
@@ -915,10 +911,10 @@ public class Image implements ImagePlane {
 		float scaleX;
 		float scaleY;
 		if(isTall()){ // Close enough, doing this right requires lots of work. :(
-			scaleY = RiverRenderer.mDisplay.getFocusedHeight() * RiverRenderer.mDisplay.getFill();
+			scaleY = mDisplay.getFocusedHeight() * mDisplay.getFill();
 			scaleX = maspect * scaleY;
 		}else{
-			scaleX = RiverRenderer.mDisplay.getWidth() * RiverRenderer.mDisplay.getFill();
+			scaleX = mDisplay.getWidth() * mDisplay.getFill();
 			scaleY = scaleX / maspect;
 		}
 		

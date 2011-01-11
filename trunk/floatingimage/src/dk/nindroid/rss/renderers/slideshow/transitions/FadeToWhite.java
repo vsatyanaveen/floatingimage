@@ -2,12 +2,18 @@ package dk.nindroid.rss.renderers.slideshow.transitions;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import dk.nindroid.rss.Display;
 import dk.nindroid.rss.gfx.Vec3f;
 import dk.nindroid.rss.renderers.Dimmer;
 import dk.nindroid.rss.renderers.slideshow.Image;
 
 public class FadeToWhite extends Transition {
 	float fraction = 0;
+	Display	mDisplay;
+	
+	public FadeToWhite(Display display){
+		this.mDisplay = display;
+	}
 	
 	@Override
 	public void init(Image previous, Image next, long now, long duration) {
@@ -32,6 +38,6 @@ public class FadeToWhite extends Transition {
 		intensity *= Math.PI;
 		intensity = (float)Math.sin(intensity);
 		Dimmer.setColor(1.0f, 1.0f, 1.0f);
-		Dimmer.draw(gl, intensity, 1.0f);
+		Dimmer.draw(gl, intensity, 1.0f, mDisplay);
 	}
 }

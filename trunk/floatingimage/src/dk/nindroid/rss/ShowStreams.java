@@ -68,7 +68,7 @@ public class ShowStreams extends Activity implements MainActivity {
 	public static final int				MISC_ROW_ID		= 201;
 	public static final String 			version 		= "2.5.1";
 	public static final int				CACHE_SIZE		= 15;
-	public static MainActivity 			current;
+	//public static MainActivity 			current;
 	private GLSurfaceView 				mGLSurfaceView;
 	private RiverRenderer 				renderer;
 	private PowerManager.WakeLock 		wl;
@@ -90,7 +90,7 @@ public class ShowStreams extends Activity implements MainActivity {
 			Toast error = Toast.makeText(this, "Error creating data folder (Do you have an SD card?)\nCache will not work, operations might be flaky!", Toast.LENGTH_LONG);
 			error.show();
 		}
-		try{
+		//try{
 			this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 			SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 			int rotation = InitialOritentationReflector.getRotation(getWindowManager().getDefaultDisplay());
@@ -102,21 +102,21 @@ public class ShowStreams extends Activity implements MainActivity {
 			this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 			PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 			wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "Floating Image");
-			ShowStreams.current = this;
+			//ShowStreams.current = this;
 			mTextureBank = setupFeeders();
 			cleanIfOld();
-			renderer = new RiverRenderer(true, mTextureBank, false);
+			renderer = new RiverRenderer(this, true, mTextureBank, false);
 			mFeedController.setRenderer(renderer);
 			OSD.init(this, renderer);
-			orientationManager.addSubscriber(RiverRenderer.mDisplay);
-			ClickHandler.init(renderer);
-			setContentView(R.layout.main);
+			orientationManager.addSubscriber(renderer.mDisplay);
+			ClickHandler.init(this, renderer);
+			setContentView(R.layout.main); 
 			mGLSurfaceView = new GLSurfaceView(this);
 			mGLSurfaceView.setRenderer(renderer);
 			setContentView(mGLSurfaceView);
-		}catch(Throwable t){
-			Log.e("Floating Image", "Unexpected exception caught!", t);
-		}
+		//}catch(Throwable t){
+		//	Log.e("Floating Image", "Unexpected exception caught!", t);
+		//}
 	}
 	
 	static void registerParsers(){
@@ -127,9 +127,9 @@ public class ShowStreams extends Activity implements MainActivity {
 	
 	TextureBank setupFeeders(){
 		TextureBank bank = new TextureBank();
-		mFeedController = new FeedController();
+		mFeedController = new FeedController(this);
 		BitmapDownloader bitmapDownloader = new BitmapDownloader(bank, mFeedController);
-		mImageCache = new ImageCache(bank);
+		mImageCache = new ImageCache(this, bank);
 		bank.setFeeders(bitmapDownloader, mImageCache);
 		return bank;
 	}
@@ -154,7 +154,8 @@ public class ShowStreams extends Activity implements MainActivity {
 			}
 			menu.add(0, CONTEXT_SHARE, 0, R.string.share_image);
 		}else{
-			Toast.makeText(this, "No image selected...", Toast.LENGTH_SHORT).show();
+			boolean paused = renderer.pause();
+			Toast.makeText(this, paused ? R.string.pause : R.string.resume, Toast.LENGTH_SHORT).show();
 		}
 	}
 	
@@ -180,11 +181,11 @@ public class ShowStreams extends Activity implements MainActivity {
 					return super.onContextItemSelected(item);
 				}
 				Toast.makeText(this, "Setting background, please be patient...", Toast.LENGTH_LONG).show();
-				ImageDownloader.setWallpaper(ir.getOriginalImageUrl(), ir.getTitle(), ir instanceof LocalImage);
+				ImageDownloader.setWallpaper(ir.getOriginalImageUrl(), ir.getTitle(), ir instanceof LocalImage, this);
 				return true;
 			case CONTEXT_SAVE:
 				ir = renderer.getSelected();
-				ImageDownloader.downloadImage(ir.getOriginalImageUrl(), ir.getTitle());
+				ImageDownloader.downloadImage(ir.getOriginalImageUrl(), ir.getTitle(), this);
 				return true;
 			case CONTEXT_SHARE:
 				Intent shareIntent = new Intent(android.content.Intent.ACTION_SEND);
@@ -245,12 +246,12 @@ public class ShowStreams extends Activity implements MainActivity {
 		if(dk.nindroid.rss.settings.Settings.mode == dk.nindroid.rss.settings.Settings.MODE_FLOATING_IMAGE){
 			if(!(defaultRenderer instanceof FloatingRenderer)){
 				Log.v("Floating Image", "Switching to floating renderer");
-				defaultRenderer = new FloatingRenderer(mTextureBank);
+				defaultRenderer = new FloatingRenderer(this, mTextureBank, renderer.mDisplay);
 			}
 		}else{
 			if(!(defaultRenderer instanceof SlideshowRenderer)){
 				Log.v("Floating Image", "Switching to slideshow renderer");
-				defaultRenderer = new SlideshowRenderer(mTextureBank);
+				defaultRenderer = new SlideshowRenderer(this, mTextureBank, renderer.mDisplay);
 			}
 		}
 		Log.v("Floating Image", "Resume texture bank done...");
@@ -282,9 +283,9 @@ public class ShowStreams extends Activity implements MainActivity {
 			showAbout();
 			return true;
 		case FULLSCREEN_ID:
-			RiverRenderer.mDisplay.toggleFullscreen();
-			item.setTitle(RiverRenderer.mDisplay.isFullscreen() ? R.string.show_details : R.string.fullscreen);
-			dk.nindroid.rss.settings.Settings.setFullscreen(RiverRenderer.mDisplay.isFullscreen());
+			renderer.mDisplay.toggleFullscreen();
+			item.setTitle(renderer.mDisplay.isFullscreen() ? R.string.show_details : R.string.fullscreen);
+			dk.nindroid.rss.settings.Settings.setFullscreen(renderer.mDisplay.isFullscreen());
 			return true;
 		case SHOW_FOLDER_ID:
 			showFolder();

@@ -19,18 +19,20 @@ public class ImageDownloader implements Runnable {
 	protected String name;
 	boolean isLocal = false;
 	protected boolean setWallpaper;
+	MainActivity mActivity;
 	
-	public static void downloadImage(String url, String name){
-		Thread t = new Thread(new ImageDownloader(url, name, false, false));
+	public static void downloadImage(String url, String name, MainActivity activity){
+		Thread t = new Thread(new ImageDownloader(activity, url, name, false, false));
 		t.start();
 	}
 	
-	public static void setWallpaper(String url, String name, boolean isLocal){
-		Thread t = new Thread(new ImageDownloader(url, name, true, isLocal));
+	public static void setWallpaper(String url, String name, boolean isLocal, MainActivity activity){
+		Thread t = new Thread(new ImageDownloader(activity, url, name, true, isLocal));
 		t.start();
 	}
 	
-	protected ImageDownloader(String url, String name, boolean setWallpaper, boolean isLocal){
+	protected ImageDownloader(MainActivity activity, String url, String name, boolean setWallpaper, boolean isLocal){
+		mActivity = activity;
 		this.url = url;
 		this.name = name;
 		this.setWallpaper = setWallpaper;
@@ -39,7 +41,6 @@ public class ImageDownloader implements Runnable {
 	
 	@Override
 	public void run() {
-		MainActivity activity = ShowStreams.current;
 		Toaster toaster = null;
 		String urlString = this.url;
 		URL url = null;
@@ -54,35 +55,35 @@ public class ImageDownloader implements Runnable {
 				f = new File(Settings.downloadDir + "/" + filename);
 				f.createNewFile();
 				OutputStream os = new FileOutputStream(f);
-				byte[] dl = DownloadUtil.fetchUrlBytes(url, activity.context().getString(R.string.user_agent), null);
+				byte[] dl = DownloadUtil.fetchUrlBytes(url, mActivity.context().getString(R.string.user_agent), null);
 				os.write(dl, 0, dl.length);
 			} catch (MalformedURLException e1) {
-				toaster = new Toaster("Cannot read image address: \"" + this.url + "\"");
-				activity.runOnUiThread(toaster);
+				toaster = new Toaster(mActivity.context(), "Cannot read image address: \"" + this.url + "\"");
+				mActivity.runOnUiThread(toaster);
 				return;
 			} catch (IOException e) {
 				Log.e("Floating Image", "Failed to get image", e);
-				toaster = new Toaster("Failed fetching image: \"" + name + "\"");
-				activity.runOnUiThread(toaster);
+				toaster = new Toaster(mActivity.context(), "Failed fetching image: \"" + name + "\"");
+				mActivity.runOnUiThread(toaster);
 				return;
 			}
 		}
 		if(setWallpaper){
 			try {
 				InputStream is = new FileInputStream(f);
-				activity.setWallpaper(is);
-				toaster = new Toaster(name + " set as wallpaper.");
+				mActivity.setWallpaper(is);
+				toaster = new Toaster(mActivity.context(), name + " set as wallpaper.");
 			} catch (FileNotFoundException e) {
 				Log.e("Floating Image", "Could not read file I just wrote!", e);
-				toaster = new Toaster("Error setting " + name + " as wallpaper :(");
+				toaster = new Toaster(mActivity.context(), "Error setting " + name + " as wallpaper :(");
 			} catch (IOException e) {
 				Log.e("Floating Image", "Error setting wallpaper", e);
-				toaster = new Toaster("Error setting " + name + " as wallpaper :(");
+				toaster = new Toaster(mActivity.context(), "Error setting " + name + " as wallpaper :(");
 			}
 		}else{
-			toaster = new Toaster(name + " saved to " + f.getAbsolutePath());
+			toaster = new Toaster(mActivity.context(), name + " saved to " + f.getAbsolutePath());
 		}
-		activity.runOnUiThread(toaster);
+		mActivity.runOnUiThread(toaster);
 	}
 	
 }

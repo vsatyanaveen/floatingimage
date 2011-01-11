@@ -4,17 +4,19 @@ import java.util.Arrays;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
+import dk.nindroid.rss.Display;
+import dk.nindroid.rss.MainActivity;
 import dk.nindroid.rss.R;
-import dk.nindroid.rss.RiverRenderer;
-import dk.nindroid.rss.ShowStreams;
 import dk.nindroid.rss.TextureBank;
 import dk.nindroid.rss.TextureSelector;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.Ray;
+import dk.nindroid.rss.data.Texture;
 import dk.nindroid.rss.gfx.Vec3f;
 import dk.nindroid.rss.renderers.Dimmer;
 import dk.nindroid.rss.renderers.OSD;
@@ -46,32 +48,38 @@ public class FloatingRenderer extends Renderer {
 	private boolean 		mCreateMiddle = true;
 	private boolean			mDoUnselect = false;
 	private boolean			mResetImages = false;
+	private Display 		mDisplay;
+	private Context			mContext;
+	private InfoBar			mInfoBar;
 	
 	
+	private static final Vec3f 		mCamPos = new Vec3f(0,0,0);
+	private Image					mSelected = null;
+	private int						mSelectedIndex;
+	private Image					mSplashImg;
+	private long					mDefocusSplashTime;
+	private boolean					mSelectingNext;
+	private boolean					mSelectingPrev;
+	private ImageDepthComparator 	mDepthComparator;
 	
-	private static final Vec3f mCamPos = new Vec3f(0,0,0);
-	private Image			mSelected = null;
-	private int				mSelectedIndex;
-	private Image			mSplashImg;
-	private long			mDefocusSplashTime;
-	private boolean			mSelectingNext;
-	private boolean			mSelectingPrev;
-	private ImageDepthComparator mDepthComparator;
-	
-	public FloatingRenderer(TextureBank bank){
-		mTextureSelector = new TextureSelector();
+	public FloatingRenderer(MainActivity activity, TextureBank bank, Display display){
+		this.mContext = activity.context();
+		mTextureSelector = new TextureSelector(display);
+		mInfoBar = new InfoBar();
+		this.mDisplay = display;
 		this.mBank = bank;
 		mImgs = new Image[mTotalImgRows * 3 / 2];
 		mInterval = Settings.floatingTraversal / mTotalImgRows;
+		Texture largeTexture = new Texture();
 		long curTime = System.currentTimeMillis();
 		long creationOffset = 0;
 		for(int i = 0; i < mTotalImgRows; ++i){
 			
 			if(mCreateMiddle){
-	        	mImgs[mImgCnt++] = new Image(mBank, Pos.MIDDLE, curTime - creationOffset);
+	        	mImgs[mImgCnt++] = new Image(activity, mBank, display, mInfoBar, Pos.MIDDLE, largeTexture, curTime - creationOffset);
 	        }else{
-	        	mImgs[mImgCnt++] = new Image(mBank, Pos.UP, curTime - creationOffset);
-	        	mImgs[mImgCnt++] = new Image(mBank, Pos.DOWN, curTime - creationOffset);
+	        	mImgs[mImgCnt++] = new Image(activity, mBank, display, mInfoBar, Pos.UP, largeTexture, curTime - creationOffset);
+	        	mImgs[mImgCnt++] = new Image(activity, mBank, display, mInfoBar, Pos.DOWN, largeTexture, curTime - creationOffset);
 	        }
 	        	mCreateMiddle ^= true;
 	        	creationOffset += mInterval;
@@ -145,7 +153,7 @@ public class FloatingRenderer extends Renderer {
 		// If new start, show splash!
 		if(mNewStart){
 			mSplashImg = mImgDepths[4];
-			Bitmap splash = BitmapFactory.decodeStream(ShowStreams.current.context().getResources().openRawResource(R.drawable.splash));
+			Bitmap splash = BitmapFactory.decodeStream(mContext.getResources().openRawResource(R.drawable.splash));
 			mSplashImg.setSelected(gl, splash, 343.0f/512.0f, 1.0f, frameTime);
 			mNewStart = false;
 			mDefocusSplashTime = realTime + SPLASHTIME;
@@ -216,7 +224,7 @@ public class FloatingRenderer extends Renderer {
 	public void render(GL10 gl, long time, long realTime){
 		initRender(gl);
 		// Background first, this is backmost
-		BackgroundPainter.draw(gl);
+		BackgroundPainter.draw(gl, mDisplay);
         //Image.setState(gl);
         for(int i = 0; i < mImgCnt; ++i){
         	if(mImgDepths[i] != mSelected){
@@ -226,22 +234,22 @@ public class FloatingRenderer extends Renderer {
         Image.unsetState(gl);
         float fraction = getFraction(realTime);
         if(mSelected != null){
-        	float dark = Settings.fullscreenBlack ? RiverRenderer.mDisplay.getFill() * RiverRenderer.mDisplay.getFill() : 0.8f;
+        	float dark = Settings.fullscreenBlack ? mDisplay.getFill() * mDisplay.getFill() : 0.8f;
         	Dimmer.setColor(0.0f, 0.0f, 0.0f);
         	if(mSelected.stateInFocus()){
-        		Dimmer.draw(gl, 1.0f, dark);
+        		Dimmer.draw(gl, 1.0f, dark, mDisplay);
         		fraction = 1.0f;
         	}else if (mSelected.stateFocusing()){
-        		Dimmer.draw(gl, fraction, dark);
+        		Dimmer.draw(gl, fraction, dark, mDisplay);
         		// Fraction is right!
         	}else{
-        		Dimmer.draw(gl, 1.0f - fraction, dark);
+        		Dimmer.draw(gl, 1.0f - fraction, dark, mDisplay);
         		fraction = 1.0f - fraction;
         	}
-        	if(!RiverRenderer.mDisplay.isTurning()){
-        		InfoBar.setState(gl);
-        		InfoBar.draw(gl, fraction);
-        		InfoBar.unsetState(gl);
+        	if(!mDisplay.isTurning()){
+        		mInfoBar.setState(gl);
+        		mInfoBar.draw(gl, mDisplay, fraction);
+        		mInfoBar.unsetState(gl);
     		}
         	
         	gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
@@ -251,8 +259,8 @@ public class FloatingRenderer extends Renderer {
         }
 	}
 	
-	public static float getFarRight(){
-		return RiverRenderer.mDisplay.getWidth() * 0.5f * (-mFloatZ + mJitterZ) * 1.2f + 1.3f + mJitterX;
+	public static float getFarRight(Display display){
+		return display.getWidth() * 0.5f * (-mFloatZ + mJitterZ) * 1.2f + 1.3f + mJitterX;
 	}
 	
 	public static float getFraction(long realTime){
@@ -265,7 +273,7 @@ public class FloatingRenderer extends Renderer {
 			mImgs[i].init(gl, time);
 		}
 		if(mSelected != null){
-			InfoBar.select(gl, mSelected.getShowing());
+			mInfoBar.select(gl, mDisplay, mSelected.getShowing());
 		}
 	}
 	

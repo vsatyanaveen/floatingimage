@@ -62,7 +62,6 @@ public class Play extends Button {
 		return mCurrentTex;
 	}
 
-	@Override
 	public void init(GL10 gl) {
 		int[] textures = new int[2];
 		gl.glGenTextures(2, textures, 0);

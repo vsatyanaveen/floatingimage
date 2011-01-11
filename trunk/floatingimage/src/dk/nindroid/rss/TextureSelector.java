@@ -15,19 +15,24 @@ import dk.nindroid.rss.renderers.ImagePlane;
 
 public class TextureSelector {
 	private Worker 		mWorker;
+	private Display		mDisplay;
 		
+	public TextureSelector(Display display){
+		this.mDisplay = display;
+	}
+	
 	public void startThread(){
 		if(mWorker != null) stopThread();
-		mWorker = new Worker();
+		mWorker = new Worker(mDisplay);
 		mWorker.mRun = true;
-		RiverRenderer.mDisplay.RegisterImageSizeChangedListener(mWorker);
+		mDisplay.RegisterImageSizeChangedListener(mWorker);
 		Thread t = new Thread(mWorker);
 		t.start();
 	}
 	
 	public void stopThread(){
 		synchronized (mWorker) {
-			RiverRenderer.mDisplay.deRegisterImageSizeChangedListener(mWorker);
+			mDisplay.deRegisterImageSizeChangedListener(mWorker);
 			mWorker.mRun = false;
 			mWorker.notifyAll();
 		}
@@ -75,9 +80,14 @@ public class TextureSelector {
 		private boolean				mDoApplyOriginal = false;
 		private int					mTextureResolution;
 		private boolean				mSwapSides = false;
+		private Display				mDisplay;
+		
+		public Worker(Display display){
+			this.mDisplay = display;
+		}
 		
 		private void setTextureResolution(){
-			int max = Math.max(RiverRenderer.mDisplay.getPortraitHeightPixels(), RiverRenderer.mDisplay.getPortraitWidthPixels());
+			int max = Math.max(mDisplay.getPortraitHeightPixels(), mDisplay.getPortraitWidthPixels());
 			if(max == 0) return; // Not ready yet!
 			if(max <= 512){
 				mTextureResolution = 512;
@@ -181,7 +191,7 @@ public class TextureSelector {
 		// Scale bmp to current screen size, and apply
 		private void applyLarge(){
 			if(mCurrentBitmap != null && !mCurrentBitmap.isRecycled() && mRef == null){
-				int displayMax = Math.max(RiverRenderer.mDisplay.getTargetHeightPixels(),RiverRenderer.mDisplay.getTargetWidthPixels());
+				int displayMax = Math.max(mDisplay.getTargetHeightPixels(), mDisplay.getTargetWidthPixels());
 				float aspect = mCurrentBitmap.getWidth() / (float)mCurrentBitmap.getHeight();
 				int height, width;
 				if(displayMax < mTextureResolution){
@@ -189,13 +199,13 @@ public class TextureSelector {
 						aspect = 1.0f / aspect;
 					}
 					if(isTall(aspect)){
-						height = (int)(RiverRenderer.mDisplay.getTargetHeightPixels() * (RiverRenderer.mDisplay.getFocusedHeight() / RiverRenderer.mDisplay.getHeight()));
-						height *= RiverRenderer.mDisplay.getFill();
+						height = (int)(mDisplay.getTargetHeightPixels() * (mDisplay.getFocusedHeight() / mDisplay.getHeight()));
+						height *= mDisplay.getFill();
 						
 						width = (int)(aspect * height);
 					}else{
-						width = RiverRenderer.mDisplay.getTargetWidthPixels();
-						width *= RiverRenderer.mDisplay.getFill();
+						width = mDisplay.getTargetWidthPixels();
+						width *= mDisplay.getFill();
 						
 						height = (int)(width / aspect);
 					}
@@ -238,7 +248,7 @@ public class TextureSelector {
 		}
 		
 		private boolean isTall(float aspect){
-			return aspect < RiverRenderer.mDisplay.getWidth() / RiverRenderer.mDisplay.getFocusedHeight();
+			return aspect < mDisplay.getWidth() / mDisplay.getFocusedHeight();
 		}
 		
 		@Override
