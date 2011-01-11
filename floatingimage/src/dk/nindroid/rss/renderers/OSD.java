@@ -7,10 +7,10 @@ import java.nio.IntBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
 
-import android.content.Context;
 import android.view.Surface;
+import dk.nindroid.rss.Display;
+import dk.nindroid.rss.MainActivity;
 import dk.nindroid.rss.RiverRenderer;
-import dk.nindroid.rss.ShowStreams;
 import dk.nindroid.rss.gfx.Vec3f;
 import dk.nindroid.rss.renderers.osd.Brightness;
 import dk.nindroid.rss.renderers.osd.Button;
@@ -36,6 +36,7 @@ public class OSD {
 	private static final int 	one = 0x10000;
 	private static IntBuffer	mVertexBuffer;
 	private static ByteBuffer	mIndexBuffer;
+	private Display 			mDisplay;
 	
 	private static Brightness								mBrightness;
 	private static Fullscreen								mFullscreen;
@@ -46,6 +47,7 @@ public class OSD {
 	private boolean 										mShowRotation;
 	private static RotateClockwise 							mRotateClockwise;
 	private static RotateCounterClockwise				 	mRotateCounterClockwise;
+	private MainActivity 									mActivity;
 	
 	
 	private static Button[]		mButtons;
@@ -94,23 +96,28 @@ public class OSD {
         mTexBuffer.position(0);
 	}
 	
-	public static void init(Context context, RiverRenderer renderer){
-		mBrightness = new Brightness(context);
+	public static void init(MainActivity activity, RiverRenderer renderer){
+		mBrightness = new Brightness(activity);
 		//mAbout = new About(context);
-		mImages = new Images(context);
-		mSettings = new dk.nindroid.rss.renderers.osd.Settings(context);
-		mFullscreen = new Fullscreen(context);
-		mPlay = new Play(context);
-		mRotateClockwise = new RotateClockwise(context, renderer);
-		mRotateCounterClockwise = new RotateCounterClockwise(context, renderer);
+		mImages = new Images(activity);
+		mSettings = new dk.nindroid.rss.renderers.osd.Settings(activity);
+		mFullscreen = new Fullscreen(activity.context());
+		mPlay = new Play(activity.context());
+		mRotateClockwise = new RotateClockwise(activity.context(), renderer);
+		mRotateCounterClockwise = new RotateCounterClockwise(activity.context(), renderer);
 	}
 	
-	public void init(GL10 gl){
+	public OSD(MainActivity activity){
+		this.mActivity = activity;
+	}
+	
+	public void init(GL10 gl, Display display){
+		this.mDisplay = display;
 		mBrightness.init(gl);
 		//mAbout.init(gl);
 		mImages.init(gl);
 		mSettings.init(gl);
-		mFullscreen.init(gl);
+		mFullscreen.init(gl, mDisplay);
 		mPlay.init(gl);
 		mRotateClockwise.init(gl);
 		mRotateCounterClockwise.init(gl);
@@ -167,7 +174,7 @@ public class OSD {
 			mFraction = ((float)t) / FADE_TIME;
 		}else if(t < FADE_TIME + SHOW_TIME){
 			if(!mShowing){
-				ShowStreams.current.runOnUiThread(new ToggleNotificationBar(true));
+				mActivity.runOnUiThread(new ToggleNotificationBar(mActivity, true));
 				mShowing = true;
 				mFraction = 1.0f;
 			}
@@ -178,7 +185,7 @@ public class OSD {
 			if(mShowing){
 				mFraction = 0.0f;
 				mShowing = false;
-				ShowStreams.current.runOnUiThread(new ToggleNotificationBar(false));
+				mActivity.runOnUiThread(new ToggleNotificationBar(mActivity, false));
 			}
 		}
 		if(isShowing()){
@@ -194,14 +201,14 @@ public class OSD {
 			
 			float barHeight = toScreenHeight(80);
 			barHeight = (mButtons.length > 4 ? barHeight * 2 : barHeight);
-			if(RiverRenderer.mDisplay.getOrientation() == Surface.ROTATION_180){
+			if(mDisplay.getOrientation() == Surface.ROTATION_180){
 				float offset = toScreenHeight(20);
 				gl.glTranslatef(0.0f, offset, 0.0f);
 			}
 			
 			gl.glColor4f(1.0f, 1.0f, 1.0f, mFraction * 0.5f);
 			drawBackBar(gl, barHeight);
-			float yPos = RiverRenderer.mDisplay.getHeight() * 0.5f;
+			float yPos = mDisplay.getHeight() * 0.5f;
 			if(showRotation){
 				drawRotationBoxes(gl, yPos);
 			}
@@ -219,10 +226,10 @@ public class OSD {
 	}
 	
 	private void drawIcons(GL10 gl){
-		float width = 64.0f / RiverRenderer.mDisplay.getWidthPixels() * RiverRenderer.mDisplay.getWidth();
+		float width = 64.0f / mDisplay.getWidthPixels() * mDisplay.getWidth();
 		float height = toScreenHeight(64);
-		float yPos = -RiverRenderer.mDisplay.getHeight() + toScreenHeight(40) + height * 0.5f;
-		float dx = RiverRenderer.mDisplay.getWidth() * 0.5f;
+		float yPos = -mDisplay.getHeight() + toScreenHeight(40) + height * 0.5f;
+		float dx = mDisplay.getWidth() * 0.5f;
 		gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
 		gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_MODULATE);
 		gl.glFrontFace(GL10.GL_CCW);
@@ -231,10 +238,10 @@ public class OSD {
 				
         gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
         
-        float outsideLeft = -RiverRenderer.mDisplay.getWidth() - width;
+        float outsideLeft = -mDisplay.getWidth() - width;
         float outsideBottom;
-        outsideBottom = -RiverRenderer.mDisplay.getHeight() - height;
-        float outsideRight = RiverRenderer.mDisplay.getWidth() + width;
+        outsideBottom = -mDisplay.getHeight() - height;
+        float outsideRight = mDisplay.getWidth() + width;
         
         int index = -1;
         int buttons = mButtons.length;
@@ -325,11 +332,11 @@ public class OSD {
 				
         gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
         
-		float width = 64.0f / RiverRenderer.mDisplay.getWidthPixels() * RiverRenderer.mDisplay.getWidth();
+		float width = 64.0f / mDisplay.getWidthPixels() * mDisplay.getWidth();
 		float height = toScreenHeight(64);
-		float dx = -RiverRenderer.mDisplay.getWidth() + width * 1.75f;
-		float outsideLeft = -RiverRenderer.mDisplay.getWidth() - width;
-        float outsideRight = RiverRenderer.mDisplay.getWidth() + width;
+		float dx = -mDisplay.getWidth() + width * 1.75f;
+		float outsideLeft = -mDisplay.getWidth() - width;
+        float outsideRight = mDisplay.getWidth() + width;
         
 		gl.glPushMatrix();
 			gl.glTranslatef(getPos(outsideLeft, dx), yPos, -1.0f);	
@@ -344,7 +351,7 @@ public class OSD {
 	}
 	
 	private float toScreenHeight(int pixels){
-		return ((float)pixels) / RiverRenderer.mDisplay.getHeightPixels() * RiverRenderer.mDisplay.getHeight();
+		return ((float)pixels) / mDisplay.getHeightPixels() * mDisplay.getHeight();
 	}
 	
 	private float getPos(float notShowing, float showing){
@@ -362,10 +369,10 @@ public class OSD {
 	}
 	
 	private void drawRotationBoxes(GL10 gl, float yPos){
-		float height = 80.0f / RiverRenderer.mDisplay.getWidthPixels() * RiverRenderer.mDisplay.getWidth();
+		float height = 80.0f / mDisplay.getWidthPixels() * mDisplay.getWidth();
 		float width = height;
-		float left = -RiverRenderer.mDisplay.getWidth() + width * 1.125f;
-        float right = RiverRenderer.mDisplay.getWidth() - width * 1.125f;
+		float left = -mDisplay.getWidth() + width * 1.125f;
+        float right = mDisplay.getWidth() - width * 1.125f;
         //gl.glDisable(GL10.GL_TEXTURE_2D);
         //gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
 		gl.glPushMatrix();
@@ -393,8 +400,8 @@ public class OSD {
 		gl.glPushMatrix();
 			//Point to our vertex buffer
 			gl.glVertexPointer(3, GL10.GL_FIXED, 0, mVertexBuffer);
-			gl.glTranslatef(0.0f, -RiverRenderer.mDisplay.getHeight() + height, -1.0f);
-			gl.glScalef(RiverRenderer.mDisplay.getWidth(), height, 1.0f);
+			gl.glTranslatef(0.0f, -mDisplay.getHeight() + height, -1.0f);
+			gl.glScalef(mDisplay.getWidth(), height, 1.0f);
 			gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
 			//Draw the vertices as triangle strip
 			gl.glBlendFunc(GL10.GL_ZERO, GL10.GL_ONE_MINUS_SRC_ALPHA);
@@ -422,27 +429,27 @@ public class OSD {
 	public boolean click(float x, float y, long time){
 		boolean inButtonArea = false;
 		int height = mButtons.length > 4 ? 160 : 80;
-		inButtonArea = y > RiverRenderer.mDisplay.getHeightPixels() - height;
+		inButtonArea = y > mDisplay.getHeightPixels() - height;
 		if(mFraction != 0.0f){
 			if(inButtonArea){
 				mExtendDisplayTime = true;
 				int buttons = mButtons.length;
-				if(y > RiverRenderer.mDisplay.getHeightPixels() - 80){
+				if(y > mDisplay.getHeightPixels() - 80){
 					// Bottom
-					int xPos = (int)(x / RiverRenderer.mDisplay.getWidthPixels() * (4 - buttons % 2));
+					int xPos = (int)(x / mDisplay.getWidthPixels() * (4 - buttons % 2));
 					if(xPos < mButtons.length && xPos >= 0){
 						mButtons[xPos].click(time);
 					}
 				}else{
 					int topButtons = buttons > 6 ? 4 : 2;
-					float xPos = x / RiverRenderer.mDisplay.getWidthPixels() * topButtons;
+					float xPos = x / mDisplay.getWidthPixels() * topButtons;
 					int buttonIndex = buttons - (topButtons - (int)xPos);
 					mButtons[buttonIndex].click(time);
 				}
 				return true;
 			}
 			if(mShowRotation && mRotateClockwise.doShow()){ // CounterClockwise is shown if clockwise is...
-				int middle = RiverRenderer.mDisplay.getHeightPixels() / 4;
+				int middle = mDisplay.getHeightPixels() / 4;
 				int top = middle - 50;
 				int bottom = middle + 50;
 				if(y > top && y < bottom){
@@ -450,7 +457,7 @@ public class OSD {
 						mExtendDisplayTime = true;
 						mRotateClockwise.click(time);
 						return true;
-					}else if (x > RiverRenderer.mDisplay.getWidthPixels() - 100){
+					}else if (x > mDisplay.getWidthPixels() - 100){
 						mExtendDisplayTime = true;
 						mRotateCounterClockwise.click(time);
 						return true;

@@ -33,7 +33,6 @@ public class RotateCounterClockwise extends Button {
 		return mTexId;
 	}
 
-	@Override
 	public void init(GL10 gl) {
 		int[] textures = new int[1];
 		gl.glGenTextures(1, textures, 0);

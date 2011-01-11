@@ -15,9 +15,8 @@ import android.graphics.Bitmap.Config;
 import android.opengl.GLU;
 import android.opengl.GLUtils;
 import android.util.Log;
+import dk.nindroid.rss.Display;
 import dk.nindroid.rss.R;
-import dk.nindroid.rss.RiverRenderer;
-import dk.nindroid.rss.ShowStreams;
 import dk.nindroid.rss.gfx.Vec3f;
 import dk.nindroid.rss.settings.Settings;
 
@@ -92,9 +91,8 @@ public class BackgroundPainter {
 		mIndexBuffer.position(0);
 	}
 	
-	public static void initTexture(GL10 gl){	
+	public static void initTexture(GL10 gl, Context context){	
 		InputStream shadowIS;
-		Context context = ShowStreams.current.context();
 		
 		switch(Settings.backgroundColor){
 		case GREY:
@@ -179,7 +177,7 @@ public class BackgroundPainter {
 	 * @param szY
 	 * @param szZ
 	 */
-	public static void draw(GL10 gl){
+	public static void draw(GL10 gl, Display display){
 		gl.glDisable(GL10.GL_BLEND);
 		
 		int error = gl.glGetError();
@@ -191,7 +189,7 @@ public class BackgroundPainter {
 		gl.glPushMatrix();
 			gl.glLoadIdentity();
 			gl.glTranslatef(0, 0, -zDepth);
-			gl.glScalef(RiverRenderer.mDisplay.getPortraitWidth() * zDepth, RiverRenderer.mDisplay.getPortraitHeight() * zDepth, 1);
+			gl.glScalef(display.getPortraitWidth() * zDepth, display.getPortraitHeight() * zDepth, 1);
 			gl.glActiveTexture(GL10.GL_TEXTURE0);
 	        gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
 			gl.glVertexPointer(3, GL10.GL_FIXED, 0, mVertexBuffer);

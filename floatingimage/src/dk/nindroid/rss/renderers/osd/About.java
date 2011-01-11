@@ -8,7 +8,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import dk.nindroid.rss.R;
-import dk.nindroid.rss.ShowStreams;
 
 public class About extends Button {
 	Bitmap 	mAbout;
@@ -29,7 +28,6 @@ public class About extends Button {
 		return mAboutTex;
 	}
 
-	@Override
 	public void init(GL10 gl) {
 		int[] textures = new int[1];
 		gl.glGenTextures(1, textures, 0);

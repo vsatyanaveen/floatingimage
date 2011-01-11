@@ -19,8 +19,6 @@ import org.xml.sax.XMLReader;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.location.Location;
-import android.location.LocationManager;
 import android.util.Log;
 import dk.nindroid.rss.DownloadUtil;
 import dk.nindroid.rss.HttpTools;
@@ -46,7 +44,7 @@ public class FlickrFeeder {
 	private static final String SEARCH = "http://api.flickr.com/services/rest/?api_key=" + API_KEY + "&auth_token=&method=flickr.photos.search&per_page=500&safe_search=1&tags=";
 	private static final String IMAGE_SIZES = "http://api.flickr.com/services/rest/?api_key=" + API_KEY + "&method=flickr.photos.getSizes&photo_id=";
 	private static final String CONTACTS_PHOTOS = "http://api.flickr.com/services/rest/?api_key=" + API_KEY + "&auth_token=&count=500&method=flickr.photos.getContactsPhotos";
-	private static final String PHOTOS_FROM_HERE = "http://api.flickr.com/services/rest/?accuracy=8&api_key=" + API_KEY + "&auth_token=&lat=&lon=&method=flickr.photos.search&per_page=500&radius=5";	
+	//private static final String PHOTOS_FROM_HERE = "http://api.flickr.com/services/rest/?accuracy=8&api_key=" + API_KEY + "&auth_token=&lat=&lon=&method=flickr.photos.search&per_page=500&radius=5";	
 	private static final String ALBUMS = "http://api.flickr.com/services/rest/?api_key=" + API_KEY + "&auth_token=&method=flickr.photosets.getList";
 	private static final String ALBUM_PHOTOS = "http://api.flickr.com/services/rest/?api_key=" + API_KEY + "&auth_token=&method=flickr.photosets.getPhotos&photoset_id=";
 	
@@ -178,17 +176,18 @@ public class FlickrFeeder {
 	public static String getContactsPhotos(){
 		return CONTACTS_PHOTOS;
 	}
-	
+	/*
 	public static String getPhotosFromHere(){
 		return PHOTOS_FROM_HERE_CONST;
 	}
-	
+	*/
 	public static String getAlbumPhotos(String id){
 		return ALBUM_PHOTOS + id;
 	}
 	
 	public static String finalizeUrl(Context context, String url){
 		readCode(context);
+		/*
 		if(url.equals(PHOTOS_FROM_HERE_CONST)){
 			LocationManager locManager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
 			List<String> providers = locManager.getAllProviders();
@@ -207,6 +206,7 @@ public class FlickrFeeder {
 				return null;
 			}
 		}
+		*/
 		return signUrl(url);
 	}
 	

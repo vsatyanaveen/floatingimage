@@ -7,7 +7,7 @@ import java.util.Stack;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
-import dk.nindroid.rss.ShowStreams;
+import android.content.Context;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.parser.XMLParser;
 import dk.nindroid.rss.picasa.PicasaImage;
@@ -25,8 +25,8 @@ public class PicasaParser extends XMLParser {
 		}
 		
 		@Override
-		protected String extendURL(String url) {
-			return PicasaFeeder.signUrl(url, ShowStreams.current.context());
+		protected String extendURL(String url, Context context) {
+			return PicasaFeeder.signUrl(url, context);
 		}
 		
 		@Override

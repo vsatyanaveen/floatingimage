@@ -18,7 +18,9 @@ public class TextureBank {
 	boolean 								stopThreads = false;
 	
 	public void initCache(int cacheSize, int activeImages){
-		this.images = new CircularList<ImageReference>(cacheSize, activeImages);
+		if(this.images == null){
+			this.images = new CircularList<ImageReference>(cacheSize, activeImages);
+		}
 	}
 	
 	public void setFeeders(BitmapDownloader bitmapDownloader, ImageCache ic){
@@ -48,11 +50,6 @@ public class TextureBank {
 	public void addFromCache(ImageReference ir, boolean next){
 		ic.addImage(ir, next);
 	}
-
-	public boolean isShowing(String id){
-		return false;
-		//return mActiveBitmaps.containsKey(id);
-	}
 		
 	public ImageReference getTexture(ImageReference previousImage, boolean next){
 		ImageReference ir = get(next);
@@ -75,21 +72,11 @@ public class TextureBank {
 	}
 	private ImageReference get(boolean next){
 		ImageReference ir = null;
-		synchronized (images) {
-			int attempts = 0;
-			do{				
-				if(!(next ? images.hasNext() : images.hasPrev())){
-					ir = null; 
-					break;
-				}
-				if(++attempts == 3){
-					ir = null;
-					break;
-				}
-				
+		synchronized (images) {	
+			if(next ? images.hasNext() : images.hasPrev()){
 				ir = next ? images.next() : images.prev();
-			}while(ir != null && isShowing(ir.getID()));
-			images.notify();
+			}
+			images.notifyAll();
 		}
 		return ir;
 	}

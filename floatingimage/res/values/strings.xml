@@ -26,4 +26,6 @@
 	<string name="share_url">Share image URL</string>
 	<string name="share_image">Share image</string>
 	<string name="loading_feeds">Loading feeds</string>
+	<string name="pause">Pause</string>
+	<string name="resume">Resume</string>
 </resources>

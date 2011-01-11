@@ -6,7 +6,7 @@ import java.nio.IntBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
 
-import dk.nindroid.rss.RiverRenderer;
+import dk.nindroid.rss.Display;
 import dk.nindroid.rss.gfx.Vec3f;
 
 public class ProgressBar {
@@ -77,10 +77,10 @@ public class ProgressBar {
 	 * @param szY
 	 * @param szZ
 	 */
-	public static void draw(GL10 gl, int percent){
+	public static void draw(GL10 gl, int percent, Display display){
 		gl.glPushMatrix();
-			gl.glTranslatef(0, -RiverRenderer.mDisplay.getHeight() + 90.0f / RiverRenderer.mDisplay.getHeightPixels() * 2.0f * RiverRenderer.mDisplay.getHeight(), -zDepth);
-			gl.glScalef(RiverRenderer.mDisplay.getWidth() * percent / 100, 0.02f, 1);
+			gl.glTranslatef(0, -display.getHeight() + 90.0f / display.getHeightPixels() * 2.0f * display.getHeight(), -zDepth);
+			gl.glScalef(display.getWidth() * percent / 100, 0.02f, 1);
 			gl.glFrontFace(GL10.GL_CCW);
 			gl.glDisable(GL10.GL_TEXTURE_2D);
 			gl.glEnableClientState(GL10.GL_COLOR_ARRAY);

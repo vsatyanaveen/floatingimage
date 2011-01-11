@@ -7,12 +7,13 @@ import javax.microedition.khronos.opengles.GL10;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import dk.nindroid.rss.Display;
 import dk.nindroid.rss.R;
-import dk.nindroid.rss.RiverRenderer;
 
-public class Fullscreen  extends Button {
+public class Fullscreen extends Button {
 	Bitmap 	mFullscreen;
 	int		mFullscreenTex;
+	Display mDisplay;
 
 	public Fullscreen(Context context) {
 		InputStream is = context.getResources().openRawResource(R.drawable.osd_toggle_full);
@@ -21,7 +22,7 @@ public class Fullscreen  extends Button {
 
 	@Override
 	public void click(long time) {
-		RiverRenderer.mDisplay.toggleFullscreen();
+		mDisplay.toggleFullscreen();
 	}
 
 	@Override
@@ -29,8 +30,8 @@ public class Fullscreen  extends Button {
 		return mFullscreenTex;
 	}
 
-	@Override
-	public void init(GL10 gl) {
+	public void init(GL10 gl, Display display) {
+		this.mDisplay = display;
 		int[] textures = new int[1];
 		gl.glGenTextures(1, textures, 0);
 		mFullscreenTex = textures[0];

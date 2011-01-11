@@ -1,0 +1,24 @@
+Custom backgrounds.
+
+--This line, and those below, will be ignored--
+
+M    AndroidManifest.xml
+M    src/dk/nindroid/rss/ImageCache.java
+M    src/dk/nindroid/rss/renderers/floating/BackgroundPainter.java
+M    src/dk/nindroid/rss/renderers/floating/Image.java
+M    src/dk/nindroid/rss/RiverRenderer.java
+M    src/dk/nindroid/rss/ShowStreams.java
+M    src/dk/nindroid/rss/picasa/PicasaImage.java
+M    src/dk/nindroid/rss/settings/Settings.java
+M    src/dk/nindroid/rss/data/ImageReference.java
+M    src/dk/nindroid/rss/data/LocalImage.java
+M    src/dk/nindroid/rss/facebook/FacebookImage.java
+M    src/dk/nindroid/rss/flickr/FlickrImage.java
+M    src/dk/nindroid/rss/BitmapDownloader.java
+M    src/dk/nindroid/rss/TextureBank.java
+AM   bin/FloatingImage.apk
+AM   bin/resources.ap_
+AM   bin/classes.dex
+M    res/values/settings_arrays.xml
+M    res/values/settingsStrings.xml
+M    res/xml/settings.xml

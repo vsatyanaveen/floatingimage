@@ -9,7 +9,7 @@ import android.util.Log;
 public abstract class Button {
 	public abstract void click(long time);
 	public abstract int getTextureID();
-	public abstract void init(GL10 gl);
+	//public abstract void init(GL10 gl);
 	
 	protected void setTexture(GL10 gl, Bitmap bmp, int textureID){
         gl.glBindTexture(GL10.GL_TEXTURE_2D, textureID);

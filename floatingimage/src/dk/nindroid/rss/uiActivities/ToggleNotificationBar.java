@@ -1,22 +1,25 @@
 package dk.nindroid.rss.uiActivities;
 
 import android.view.WindowManager;
-import dk.nindroid.rss.ShowStreams;
+import dk.nindroid.rss.MainActivity;
 
 public class ToggleNotificationBar implements Runnable {
 	boolean doshow;
-	public ToggleNotificationBar(boolean doshow) {
+	MainActivity mActivity;
+	
+	public ToggleNotificationBar(MainActivity activity, boolean doshow) {
+		this.mActivity = activity;
 		this.doshow = doshow;
 	}
 	
 	@Override
 	public void run() {
 		if(doshow){
-			ShowStreams.current.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN, WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+			mActivity.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN, WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
 		}else{
-			WindowManager.LayoutParams attrs = ShowStreams.current.getWindow().getAttributes();
+			WindowManager.LayoutParams attrs = mActivity.getWindow().getAttributes();
 			attrs.flags &= (~WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
-			ShowStreams.current.getWindow().setAttributes(attrs);
+			mActivity.getWindow().setAttributes(attrs);
 		}
 	}
 }

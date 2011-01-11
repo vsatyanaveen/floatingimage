@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
@@ -35,12 +36,12 @@ public class ImageCache {
 	File 					mExploreInfo;
 	byte[]					mBuf;
 	
-	public ImageCache(TextureBank bank){
+	public ImageCache(Context context, TextureBank bank){
 		this.bank = bank;
 		mBuf = new byte[1024];
-		String datafolder = ShowStreams.current.context().getString(R.string.dataFolder);
+		String datafolder = context.getString(R.string.dataFolder);
 		datafolder = Environment.getExternalStorageDirectory().getAbsolutePath() + datafolder;
-		mExploreInfoFolder = datafolder + ShowStreams.current.context().getString(R.string.exploreFolder);
+		mExploreInfoFolder = datafolder + context.getString(R.string.exploreFolder);
 		mExploreFolder = mExploreInfoFolder + "/bmp";
 		mRand = new Random(new Date().getTime());
 		mExploreInfo = new File(mExploreInfoFolder);

@@ -6,7 +6,7 @@ import java.util.List;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
-import dk.nindroid.rss.ShowStreams;
+import android.content.Context;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.flickr.FlickrFeeder;
 import dk.nindroid.rss.flickr.FlickrImage;
@@ -16,7 +16,7 @@ public class FlickrParser extends XMLParser {
 	List<ImageReference> imgs;
 	StringBuilder data = new StringBuilder();
 	String owner = null;
-	
+		
 	@Override
 	public void startElement(String uri, String localName, String name,
 			Attributes attributes) throws SAXException {
@@ -44,8 +44,8 @@ public class FlickrParser extends XMLParser {
 	}
 	
 	@Override
-	protected String extendURL(String url) {
-		return FlickrFeeder.finalizeUrl(ShowStreams.current.context(), url);
+	protected String extendURL(String url, Context context) {
+		return FlickrFeeder.finalizeUrl(context, url);
 	}
 	
 	public List<ImageReference> getData(){

@@ -32,11 +32,13 @@ public class FeedController {
 	private List<PositionInterval>			mPositions;
 	private Random 							mRand = new Random(System.currentTimeMillis());
 	private RiverRenderer					mRenderer;
+	private MainActivity					mActivity;
 	
-	public FeedController(){
+	public FeedController(MainActivity activity){
 		mFeeds = new ArrayList<FeedReference>();
 		mPositions = new ArrayList<PositionInterval>();
 		mReferences = new ArrayList<List<ImageReference>>();
+		mActivity = activity;
 	}
 	
 	public void setRenderer(RiverRenderer renderer){
@@ -53,6 +55,7 @@ public class FeedController {
 	
 	public ImageReference getImageReference(boolean forward){
 		ImageReference ir = null;
+		Log.v("Floating Image", "Feeds " + mPositions.size());
 		synchronized (mReferences) {
 			if(mReferences.size() == 0) return null;
 			int thisFeed = getFeed();
@@ -83,8 +86,8 @@ public class FeedController {
 	
 	public void readFeeds(int active){
 		List<FeedReference> newFeeds = new ArrayList<FeedReference>();
-		FeedsDbAdapter mDbHelper = new FeedsDbAdapter(ShowStreams.current.context());
-		SharedPreferences sp = ShowStreams.current.context().getSharedPreferences("dk.nindroid.rss_preferences", 0);
+		FeedsDbAdapter mDbHelper = new FeedsDbAdapter(mActivity.context());
+		SharedPreferences sp = mActivity.context().getSharedPreferences("dk.nindroid.rss_preferences", 0);
 		mDbHelper.open();
 		Cursor c = null;
 		try{
@@ -108,7 +111,7 @@ public class FeedController {
 			Log.e("FeedController", "Unhandled exception caught", e);
 		}finally{
 			if(c != null){
-				ShowStreams.current.stopManagingCursor(c);
+				mActivity.stopManagingCursor(c);
 				c.close();
 			}
 			mDbHelper.close();
@@ -126,19 +129,23 @@ public class FeedController {
 		});
 		
 		synchronized(mFeeds){
+			boolean reparseFeeds = false;
 			if(mFeeds.size() != newFeeds.size()){
 				feedsChanged();
+				reparseFeeds = true;
 			}else{
 				for(int i = 0; i < mFeeds.size(); ++i){
 					if(!(mFeeds.get(i).equals(newFeeds.get(i)))){
 						feedsChanged();
+						reparseFeeds = true;
 						break;
 					}
 				}
 			}
-			
-			mFeeds = newFeeds;
-			parseFeeds(active);
+			if(reparseFeeds){
+				mFeeds = newFeeds;
+				parseFeeds(active);
+			}
 		}
 	}
 	
@@ -194,8 +201,8 @@ public class FeedController {
 						Collections.shuffle(references);
 					}
 					synchronized(mReferences){
-						mReferences.add(references); // These two 
-						mPositions.add(new PositionInterval(active, references.size())); // are in sync!
+						mReferences.add(references); 										// These two 
+						mPositions.add(new PositionInterval(active, references.size()));	// are in sync!
 					}
 				}else{
 					Log.w("FeedController", "Reading feed failed too many times, giving up!");
@@ -207,9 +214,9 @@ public class FeedController {
 		}
 	}
 	
-	private static List<ImageReference> parseFeed(FeedReference feed){
+	private List<ImageReference> parseFeed(FeedReference feed){
 		try {
-			return feed.getParser().parseFeed(feed);
+			return feed.getParser().parseFeed(feed, mActivity.context());
 		} catch (IOException e) {
 			Log.e("FeedController", "Unexpected exception caught", e);
 		} catch (ParserConfigurationException e) {
@@ -287,6 +294,7 @@ public class FeedController {
 			if(isSpread()){
 				a = (a + 1) % space;
 			}
+			Log.v("Floating Image", "Read next image from index " + b);
 			return b;
 		}
 		
@@ -295,6 +303,7 @@ public class FeedController {
 			if(isSpread()){
 				b = ((b - 1) + space) % space;
 			}
+			Log.v("Floating Image", "Read prev image from index " + a);
 			return a;
 		}
 		
