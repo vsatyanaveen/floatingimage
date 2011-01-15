@@ -18,6 +18,7 @@ import org.xml.sax.XMLReader;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Process;
+import android.provider.ContactsContract.Contacts.Data;
 import android.util.Log;
 import dk.nindroid.rss.compatibility.Exif;
 import dk.nindroid.rss.data.ImageReference;
@@ -64,21 +65,25 @@ public class BitmapDownloader implements Runnable {
 							return;
 						}
 						ImageReference ir = i == 0 ? mFeedController.getNextImageReference() : mFeedController.getPrevImageReference();
-						if(ir == null || (ir.getBitmap() != null && !ir.getBitmap().isRecycled())){
-							// Nothing (new) to show just yet...
+						if(ir == null){
+							// No data
 							Thread.sleep(100);
 							break;
-						}
-						if(bank.doDownload(ir.getImageID())){
-							if(ir.getBitmap() != null && !ir.getBitmap().isRecycled()){ // Image is being shown, ignore!
-								break;
-							}else if(ir instanceof LocalImage){
-								addLocalImage((LocalImage)ir, i == 0);
-							}else {
-								addExternalImage(ir, i == 0);
-							}
 						}else{
-							bank.addFromCache(ir, i == 0);
+							if(ir.getBitmap() != null && !ir.getBitmap().isRecycled()){
+								continue; // Threading issue?
+							}
+							if(bank.doDownload(ir.getImageID())){
+								if(ir.getBitmap() != null && !ir.getBitmap().isRecycled()){ // Image is being shown, ignore!
+									break;
+								}else if(ir instanceof LocalImage){
+									addLocalImage((LocalImage)ir, i == 0);
+								}else {
+									addExternalImage(ir, i == 0);
+								}
+							}else{
+								bank.addFromCache(ir, i == 0);
+							}
 						}
 					}
 				}

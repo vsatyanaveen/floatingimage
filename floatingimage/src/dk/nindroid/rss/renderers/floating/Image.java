@@ -16,6 +16,7 @@ import android.util.Log;
 import dk.nindroid.rss.Display;
 import dk.nindroid.rss.MainActivity;
 import dk.nindroid.rss.TextureBank;
+import dk.nindroid.rss.TextureSelector;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.Ray;
 import dk.nindroid.rss.data.Texture;
@@ -37,7 +38,6 @@ public class Image implements ImagePlane {
 	
 	private Display			mDisplay;
 	
-	int						mID;
 	private IntBuffer   	mVertexBuffer;
 	private ByteBuffer  	mIndexBuffer;
 	private ByteBuffer  	mLineIndexBuffer;
@@ -54,7 +54,8 @@ public class Image implements ImagePlane {
 	private Vec3f[]			mVertices;
 	private int				mLastTextureSize;
 	private MainActivity	mActivity;
-	private InfoBar		mInfoBar;
+	private InfoBar			mInfoBar;
+	private TextureSelector mTextureSelector;
 	
 	// Selected vars
 	private Vec3f			mSelectedPos = new Vec3f();
@@ -191,12 +192,13 @@ public class Image implements ImagePlane {
 		return mYPos * mDisplay.getFocusedHeight();
 	}
 	
-	public Image(MainActivity activity, TextureBank bank, Display display, InfoBar infoBar, Pos layer, Texture largeTexture, long startTime){
+	public Image(MainActivity activity, TextureBank bank, Display display, InfoBar infoBar, Pos layer, Texture largeTexture, TextureSelector textureSelector, long startTime){
 		this.mDisplay = display;
 		mbank = bank;
 		this.mActivity = activity;
 		this.mInfoBar = infoBar;
-		mRand = new Random(startTime + mID);
+		this.mTextureSelector = textureSelector;
+		mRand = new Random(System.currentTimeMillis());
 		this.mLargeTexture = largeTexture;
 		switch(layer){
 			case UP: mYPos = 1.25f; break;
@@ -345,7 +347,7 @@ public class Image implements ImagePlane {
 		
 		float rotation = mRotation;
 		if(mShowingImage != null){
-			rotation += mShowingImage.getRotation(realTime);
+			rotation += mShowingImage.getRotation(mTextureSelector, realTime);
 		}
 		float userScale = mScale * mInitialScale;
 		float userMoveX = mX + mInitialX;
@@ -399,7 +401,7 @@ public class Image implements ImagePlane {
 		gl.glPopMatrix();
         
         if(mState == STATE_FOCUSED && !mLargeTex){
-        	ProgressBar.draw(gl, FloatingRenderer.mTextureSelector.getProgress(), mDisplay);
+        	ProgressBar.draw(gl, mTextureSelector.getProgress(), mDisplay);
         }
 	}
 	
@@ -466,13 +468,13 @@ public class Image implements ImagePlane {
 	private void updateTexture(){
 		if(isTransformed()){
 			if(!mUseOriginalTex){
-				FloatingRenderer.mTextureSelector.applyOriginal();
+				mTextureSelector.applyOriginal();
 				mUseOriginalTex = true;
 			}
 		}else{
 			if(mUseOriginalTex){
 				mUseOriginalTex = false;
-				FloatingRenderer.mTextureSelector.applyLarge();
+				mTextureSelector.applyLarge();
 			}
 		}
 	}
@@ -623,7 +625,7 @@ public class Image implements ImagePlane {
 		if(fraction > 1){
 			mRotation = 0.0f;
 			if(!mLargeTex){
-				FloatingRenderer.mTextureSelector.selectImage(this, this.mShowingImage);
+				mTextureSelector.selectImage(this, this.mShowingImage);
 			}
 			mState = STATE_FOCUSED;
 			return;
@@ -746,7 +748,7 @@ public class Image implements ImagePlane {
 				// Ignore, but set large texture instead.
 				if(texture != null){
 					texture.recycle();
-					FloatingRenderer.mTextureSelector.applyOriginal();
+					mTextureSelector.applyOriginal();
 				}
 				return;
 			}
