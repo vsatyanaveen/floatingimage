@@ -43,7 +43,7 @@ public class Image implements ImagePlane {
 	private boolean				mSetLargeTexture = false;
 	private boolean				mInFocus;
 	private Display				mDisplay;
-	MainActivity 				mActivity;
+	MainActivity 				mActivity; 
 	
 	private Vec3f				mPos;
 	
@@ -269,7 +269,7 @@ public class Image implements ImagePlane {
 		gl.glPushMatrix();
 				
 		gl.glTranslatef(x, y, z);
-		gl.glRotatef(mImage.getRotation(time), 0, 0, 1.0f);
+		gl.glRotatef(mImage.getRotation(mTextureSelector, time), 0, 0, 1.0f);
 		gl.glScalef(szX, szY, 1);
 		gl.glDrawElements(GL10.GL_TRIANGLE_STRIP, 4, GL10.GL_UNSIGNED_BYTE, mIndexBuffer);
 		

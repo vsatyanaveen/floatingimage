@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import dk.nindroid.rss.TextureSelector;
 import dk.nindroid.rss.renderers.Rotator;
 
 public abstract class ImageReference {
@@ -40,8 +41,8 @@ public abstract class ImageReference {
 	public void validate(){
 		mInvalidated = false;
 	}
-	public float getRotation(long time){
-		return mRotator.getRotation(time);
+	public float getRotation(TextureSelector textureSelector, long time){
+		return mRotator.getRotation(textureSelector, time);
 	}
 	public float getTargetOrientation(){
 		return mRotator.getTargetOrientation();

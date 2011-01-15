@@ -55,7 +55,6 @@ public class FeedController {
 	
 	public ImageReference getImageReference(boolean forward){
 		ImageReference ir = null;
-		Log.v("Floating Image", "Feeds " + mPositions.size());
 		synchronized (mReferences) {
 			if(mReferences.size() == 0) return null;
 			int thisFeed = getFeed();
@@ -294,7 +293,6 @@ public class FeedController {
 			if(isSpread()){
 				a = (a + 1) % space;
 			}
-			Log.v("Floating Image", "Read next image from index " + b);
 			return b;
 		}
 		
@@ -303,7 +301,6 @@ public class FeedController {
 			if(isSpread()){
 				b = ((b - 1) + space) % space;
 			}
-			Log.v("Floating Image", "Read prev image from index " + a);
 			return a;
 		}
 		

@@ -40,7 +40,7 @@ public class FloatingRenderer extends Renderer {
 	private Image[] 		mImgs;
 	private Image[] 		mImgDepths;
 	private TextureBank 	mBank;
-	public static TextureSelector mTextureSelector;
+	public 	TextureSelector mTextureSelector;
 	private long 			mInterval;
 	private long			mStartTime;
 	private int 			mTotalImgRows = 6;
@@ -76,10 +76,10 @@ public class FloatingRenderer extends Renderer {
 		for(int i = 0; i < mTotalImgRows; ++i){
 			
 			if(mCreateMiddle){
-	        	mImgs[mImgCnt++] = new Image(activity, mBank, display, mInfoBar, Pos.MIDDLE, largeTexture, curTime - creationOffset);
+	        	mImgs[mImgCnt++] = new Image(activity, mBank, display, mInfoBar, Pos.MIDDLE, largeTexture, mTextureSelector, curTime - creationOffset);
 	        }else{
-	        	mImgs[mImgCnt++] = new Image(activity, mBank, display, mInfoBar, Pos.UP, largeTexture, curTime - creationOffset);
-	        	mImgs[mImgCnt++] = new Image(activity, mBank, display, mInfoBar, Pos.DOWN, largeTexture, curTime - creationOffset);
+	        	mImgs[mImgCnt++] = new Image(activity, mBank, display, mInfoBar, Pos.UP, largeTexture, mTextureSelector, curTime - creationOffset);
+	        	mImgs[mImgCnt++] = new Image(activity, mBank, display, mInfoBar, Pos.DOWN, largeTexture, mTextureSelector, curTime - creationOffset);
 	        }
 	        	mCreateMiddle ^= true;
 	        	creationOffset += mInterval;

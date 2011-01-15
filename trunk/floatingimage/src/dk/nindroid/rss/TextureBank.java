@@ -4,14 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import android.util.Log;
-
 import dk.nindroid.rss.data.CircularList;
 import dk.nindroid.rss.data.ImageReference;
 
 public class TextureBank {
 	//Queue<ImageReference> 				unseen   = new LinkedList<ImageReference>();
 	CircularList<ImageReference>			images;
-	//Vector<String> 							streams  = new Vector<String>();
+	//Vector<String> 							streams  = new Vector<String>();		
 	ImageCache 								ic;
 	BitmapDownloader						bitmapDownloader; 
 	private Map<String, ImageReference> 	mActiveBitmaps = new HashMap<String, ImageReference>();
@@ -73,9 +72,10 @@ public class TextureBank {
 	private ImageReference get(boolean next){
 		ImageReference ir = null;
 		synchronized (images) {	
-			if(next ? images.hasNext() : images.hasPrev()){
+			do{
 				ir = next ? images.next() : images.prev();
-			}
+				if(ir == null) break;
+			}while(mActiveBitmaps.containsKey(ir.getID()));
 			images.notifyAll();
 		}
 		return ir;

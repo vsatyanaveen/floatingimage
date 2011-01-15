@@ -1,8 +1,8 @@
 package dk.nindroid.rss.renderers;
 
 import dk.nindroid.rss.Display;
+import dk.nindroid.rss.TextureSelector;
 import dk.nindroid.rss.gfx.ImageUtil;
-import dk.nindroid.rss.renderers.floating.FloatingRenderer;
 
 public class Rotator {
 	private long 	mTurnedAt;
@@ -14,12 +14,12 @@ public class Rotator {
 		return 1.0f - ((float)((mTurnedAt + Display.TURN_TIME) - time)) / Display.TURN_TIME;
 	}
 	
-	public float getRotation(long time){
+	public float getRotation(TextureSelector textureSelector, long time){
 		if(mTurning){
 			float fraction = getFraction(time);
 			if(fraction > 1.0f){
 				mTurning = false;
-				FloatingRenderer.mTextureSelector.setRotated(mTarget); // Ew
+				textureSelector.setRotated(mTarget);
 				return mTarget;
 			}else{
 				fraction = ImageUtil.smoothstep(fraction);
