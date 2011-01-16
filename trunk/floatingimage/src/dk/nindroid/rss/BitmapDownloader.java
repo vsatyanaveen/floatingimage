@@ -18,7 +18,6 @@ import org.xml.sax.XMLReader;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Process;
-import android.provider.ContactsContract.Contacts.Data;
 import android.util.Log;
 import dk.nindroid.rss.compatibility.Exif;
 import dk.nindroid.rss.data.ImageReference;

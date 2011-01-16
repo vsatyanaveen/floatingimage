@@ -582,7 +582,8 @@ public class Image implements ImagePlane {
 	}
 	
 	private float getXPos(long relativeTime){
-		return -FloatingRenderer.getFarRight(mDisplay) + (((float)(relativeTime % Settings.floatingTraversal) / Settings.floatingTraversal) * FloatingRenderer.getFarRight(mDisplay) * 2);
+		float curPos = (relativeTime  + (Settings.floatingTraversal << 10)) % Settings.floatingTraversal;
+		return -FloatingRenderer.getFarRight(mDisplay) + ((curPos / Settings.floatingTraversal) * FloatingRenderer.getFarRight(mDisplay) * 2);
 	}
 	
 	private boolean updateFloating(GL10 gl, long time){
