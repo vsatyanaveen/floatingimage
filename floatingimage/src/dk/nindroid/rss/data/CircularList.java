@@ -14,7 +14,7 @@ public class CircularList<ImageRefeference> {
 	int nextData;   // How far can we go and still find data?
 	
 	public CircularList(int capacity, int active){
-		Log.v("Floating Image", "Creating Circular list");
+		//Log.v("Floating Image", "Creating Circular list");
 		capacity += active;
 		data = new ImageReference[capacity];
 		position = capacity / 2;

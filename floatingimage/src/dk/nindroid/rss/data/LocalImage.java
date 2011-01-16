@@ -133,9 +133,11 @@ public class LocalImage extends ImageReference{
 		if(mFile == null){
 			mFile = new File(tokens[4]);
 		}
-		String rotation = tokens[5];
-		if(rotation != null){
-			setRotation(Float.parseFloat(rotation));
+		if(tokens.length > 5){
+			String rotation = tokens[5];
+			if(rotation != null){
+				setRotation(Float.parseFloat(rotation));
+			}
 		}
 		this.mBitmap = bmp;
 	}

@@ -60,6 +60,7 @@
 	<string-array name="backgroundColorDescriptions">
 		<item>Grey</item>
 		<item>Black</item>
+		<item>Pure black</item>
 		<item>White</item>
 		<item>Blue</item>
 		<item>Green</item>
@@ -71,6 +72,7 @@
 	<string-array name="backgroundColorValues">
 		<item>0</item>
 		<item>1</item>
+		<item>8</item>
 		<item>2</item>
 		<item>3</item>
 		<item>4</item>

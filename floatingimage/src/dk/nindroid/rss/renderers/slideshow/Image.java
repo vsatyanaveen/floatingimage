@@ -63,9 +63,6 @@ public class Image implements ImagePlane {
 	}
 	
 	public void clear(){
-		if(this.mBitmap != null){
-			this.mBitmap.recycle();
-		}
 		this.mBitmap = null;
 		this.mImage = null;
 		this.mBitmapHeight = 0;
@@ -127,9 +124,6 @@ public class Image implements ImagePlane {
 	public void setImage(GL10 gl, ImageReference image){
 		if(image == null)
 			return;
-		if(this.mBitmap != null){
-			this.mBitmap.recycle();
-		}
 		this.mImage = image;
 		this.mBitmap = image.getBitmap();
 		this.mBitmapWidth = image.getWidth();
@@ -304,13 +298,11 @@ public class Image implements ImagePlane {
                 GL10.GL_BLEND);
         
         try{
-        	if((isLarge &&  mLastLargeSize != mBitmap.getWidth()) || (!isLarge && mLastSmallSize != mBitmap.getWidth())){
+        	if((isLarge && mLastLargeSize != mBitmap.getWidth()) || (!isLarge && mLastSmallSize != mBitmap.getWidth())){
         		GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, mBitmap, 0);
         		if(isLarge){
-        			Log.v("Floating Image", "Replacing large texture texture: (" + mLastLargeSize + "," + mBitmap.getWidth() + ")");
         			mLastLargeSize = mBitmap.getWidth();
         		}else{
-        			Log.v("Floating Image", "Replacing small texture texture: (" + mLastSmallSize + "," + mBitmap.getWidth() + ")");
         			mLastSmallSize = mBitmap.getWidth();
         		}
         	}else{
@@ -354,9 +346,6 @@ public class Image implements ImagePlane {
 
 	@Override
 	public void setFocusTexture(Bitmap texture, float width, float height, int sizeType) {
-		if(this.mBitmap != null){
-			this.mBitmap.recycle();
-		}
 		this.mBitmap = texture;
 		this.mBitmapWidth = width;
 		this.mBitmapHeight = height;

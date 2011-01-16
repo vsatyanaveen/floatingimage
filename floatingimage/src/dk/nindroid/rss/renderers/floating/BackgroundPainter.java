@@ -29,6 +29,7 @@ public class BackgroundPainter {
 	public static final int RED = 5;
 	public static final int YELLOW = 6;
 	public static final int ALL = 7;
+	public static final int PURE_BLACK = 8;
 	
 	private static final float zDepth = 15.0f;
 	private static Bitmap bg;
@@ -119,51 +120,57 @@ public class BackgroundPainter {
 		case ALL:
 			shadowIS = context.getResources().openRawResource(R.drawable.background_all);
 			break;
+		case PURE_BLACK:
+			shadowIS = null;
+			break;
 		default:
 			shadowIS = context.getResources().openRawResource(R.drawable.background);
 			break;
 		}
 		
-		bg = BitmapFactory.decodeStream(shadowIS);		
+		if(shadowIS != null){
 		
-		int[] textures = new int[1];
-        gl.glGenTextures(1, textures, 0);
-		mTextureID = textures[0];		
-        gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
-
-        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER,
-                GL10.GL_NEAREST);
-        gl.glTexParameterf(GL10.GL_TEXTURE_2D,
-                GL10.GL_TEXTURE_MAG_FILTER,
-                GL10.GL_LINEAR);
-
-        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S,
-                GL10.GL_CLAMP_TO_EDGE);
-        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T,
-                GL10.GL_CLAMP_TO_EDGE);
-
-        gl.glTexEnvf(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE,
-                GL10.GL_BLEND);
-        
-        GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, canvas, 0);
-        GLUtils.texSubImage2D(GL10.GL_TEXTURE_2D, 0, 0, 0, bg);
-		
-        ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
-        tbb.order(ByteOrder.nativeOrder());
-        mTexBuffer = tbb.asFloatBuffer();
-        
-        float tex[] = {
-        	0.0f,  0.0f,
-        	0.0f,  1.0f,	
-        	1.0f,  0.0f,
-        	1.0f,  1.0f,
-        };
-        mTexBuffer.put(tex);
-        mTexBuffer.position(0);
-        
-        // Set drawing params
-        gl.glTexParameterx(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S,GL10.GL_REPEAT);
-        gl.glTexParameterx(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_REPEAT);
+			bg = BitmapFactory.decodeStream(shadowIS);		
+			
+			int[] textures = new int[1];
+	        gl.glGenTextures(1, textures, 0);
+			mTextureID = textures[0];		
+	        gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
+	
+	        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER,
+	                GL10.GL_NEAREST);
+	        gl.glTexParameterf(GL10.GL_TEXTURE_2D,
+	                GL10.GL_TEXTURE_MAG_FILTER,
+	                GL10.GL_LINEAR);
+	
+	        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S,
+	                GL10.GL_CLAMP_TO_EDGE);
+	        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T,
+	                GL10.GL_CLAMP_TO_EDGE);
+	
+	        gl.glTexEnvf(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE,
+	                GL10.GL_BLEND);
+	        
+	        GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, canvas, 0);
+	        GLUtils.texSubImage2D(GL10.GL_TEXTURE_2D, 0, 0, 0, bg);
+			
+	        ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
+	        tbb.order(ByteOrder.nativeOrder());
+	        mTexBuffer = tbb.asFloatBuffer();
+	        
+	        float tex[] = {
+	        	0.0f,  0.0f,
+	        	0.0f,  1.0f,	
+	        	1.0f,  0.0f,
+	        	1.0f,  1.0f,
+	        };
+	        mTexBuffer.put(tex);
+	        mTexBuffer.position(0);
+	        
+	        // Set drawing params
+	        gl.glTexParameterx(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S,GL10.GL_REPEAT);
+	        gl.glTexParameterx(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_REPEAT);
+		}
 	}
 	
 	/**
@@ -178,6 +185,9 @@ public class BackgroundPainter {
 	 * @param szZ
 	 */
 	public static void draw(GL10 gl, Display display){
+		if(Settings.backgroundColor == PURE_BLACK){
+			return;
+		}
 		gl.glDisable(GL10.GL_BLEND);
 		
 		int error = gl.glGetError();

@@ -444,7 +444,9 @@ public class OSD {
 					int topButtons = buttons > 6 ? 4 : 2;
 					float xPos = x / mDisplay.getWidthPixels() * topButtons;
 					int buttonIndex = buttons - (topButtons - (int)xPos);
-					mButtons[buttonIndex].click(time);
+					if(buttonIndex < mButtons.length && buttonIndex >= 0){
+						mButtons[buttonIndex].click(time);
+					}
 				}
 				return true;
 			}
