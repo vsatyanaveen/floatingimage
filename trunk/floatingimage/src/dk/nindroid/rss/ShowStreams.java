@@ -372,13 +372,20 @@ public class ShowStreams extends Activity implements MainActivity {
 
 	private void addDefaultLocalPaths() {
 		File phonePhotos = new File("/emmc");
-		
+		String sdcard = Environment.getExternalStorageDirectory().getAbsolutePath();
+		File defaultDir = new File(sdcard + "/DCIM");
+		if(!defaultDir.exists()){
+			defaultDir = new File(sdcard + "/photos"); // Something
+			if(!defaultDir.exists()){
+				defaultDir = new File(sdcard + "/external_sd/DCIM"); // Samsung
+			}
+		}
 		
 		FeedsDbAdapter mDbHelper = new FeedsDbAdapter(this);
 		mDbHelper.open();
-		mDbHelper.addFeed(getString(R.string.cameraPictures), Environment.getExternalStorageDirectory().getAbsolutePath() + "/DCIM", dk.nindroid.rss.settings.Settings.TYPE_LOCAL, "");
+		mDbHelper.addFeed(getString(R.string.cameraPictures), sdcard + "/DCIM", dk.nindroid.rss.settings.Settings.TYPE_LOCAL, "");
 		if(phonePhotos.exists()){
-			mDbHelper.addFeed(getString(R.string.moreCameraPictures), "/emmc/DCIM", dk.nindroid.rss.settings.Settings.TYPE_LOCAL, "");
+			mDbHelper.addFeed(getString(R.string.moreCameraPictures), "/emmc/DCIM", dk.nindroid.rss.settings.Settings.TYPE_LOCAL, ""); // Droid
 		}
 		mDbHelper.addFeed(getString(R.string.Downloads), Environment.getExternalStorageDirectory().getAbsolutePath() + "/download", dk.nindroid.rss.settings.Settings.TYPE_LOCAL, "");
 		mDbHelper.addFeed(getString(R.string.flickrExplore), FlickrFeeder.getExplore(), dk.nindroid.rss.settings.Settings.TYPE_FLICKR, "");
