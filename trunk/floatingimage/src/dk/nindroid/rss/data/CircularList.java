@@ -32,7 +32,9 @@ public class CircularList<ImageRefeference> {
 			if(hasNext()){
 				position = inc(position);
 				if(data[prevLimit] != null){
-					data[prevLimit].getBitmap().recycle();
+					if(data[prevLimit].getBitmap() != null){
+						data[prevLimit].getBitmap().recycle();
+					}
 					data[prevLimit] = null;
 				}
 				if(prevData == prevLimit){
@@ -55,7 +57,9 @@ public class CircularList<ImageRefeference> {
 			if(hasPrev()){
 				position = dec(position);
 				if(data[nextLimit] != null){
-					data[nextLimit].getBitmap().recycle();
+					if(data[nextLimit].getBitmap() != null){
+						data[nextLimit].getBitmap().recycle();
+					}
 					data[nextLimit] = null;
 				}
 				if(nextData == nextLimit){
@@ -111,7 +115,9 @@ public class CircularList<ImageRefeference> {
 
 				//visualize(prevData);
 			}else{
-				t.getBitmap().recycle();
+				if(t.getBitmap() != null){
+					t.getBitmap().recycle();
+				}
 				//Log.v("Floating List", "Wasted work...");
 			}
 		}
@@ -121,7 +127,9 @@ public class CircularList<ImageRefeference> {
 		synchronized(data){
 			for(int i = 0; i < data.length; ++i){
 				if(data[i] != null){
-					data[i].getBitmap().recycle();
+					if(data[i].getBitmap() != null){
+						data[i].getBitmap().recycle();
+					}
 					data[i] = null;
 				}
 			}

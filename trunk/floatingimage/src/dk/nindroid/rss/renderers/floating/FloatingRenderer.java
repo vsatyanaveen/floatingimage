@@ -4,7 +4,6 @@ import java.util.Arrays;
 
 import javax.microedition.khronos.opengles.GL10;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -22,7 +21,6 @@ import dk.nindroid.rss.renderers.Dimmer;
 import dk.nindroid.rss.renderers.OSD;
 import dk.nindroid.rss.renderers.Renderer;
 import dk.nindroid.rss.renderers.floating.Image.Pos;
-import dk.nindroid.rss.settings.Settings;
 
 public class FloatingRenderer extends Renderer {
 	public static final long 	mFocusDuration = 300;
@@ -41,17 +39,19 @@ public class FloatingRenderer extends Renderer {
 	private Image[] 		mImgDepths;
 	private TextureBank 	mBank;
 	public 	TextureSelector mTextureSelector;
-	private long 			mInterval;
 	private long			mStartTime;
 	private int 			mTotalImgRows = 6;
 	private int 			mImgCnt = 0;
-	private boolean 		mCreateMiddle = true;
 	private boolean			mDoUnselect = false;
 	private boolean			mResetImages = false;
 	private Display 		mDisplay;
-	private Context			mContext;
+	private MainActivity	mActivity;
 	private InfoBar			mInfoBar;
-	
+	private float			mStreamRotation;
+	private float			mRequestedStreamRotation;
+	private float			mStreamOffset;
+	private float			mRequestedStreamOffset;
+	private long			mUpTime;
 	
 	private static final Vec3f 		mCamPos = new Vec3f(0,0,0);
 	private Image					mSelected = null;
@@ -61,28 +61,30 @@ public class FloatingRenderer extends Renderer {
 	private boolean					mSelectingNext;
 	private boolean					mSelectingPrev;
 	private ImageDepthComparator 	mDepthComparator;
+	private boolean			mDoAdjustImagePositions = false;
 	
 	public FloatingRenderer(MainActivity activity, TextureBank bank, Display display){
-		this.mContext = activity.context();
+		this.mActivity = activity;
 		mTextureSelector = new TextureSelector(display);
 		mInfoBar = new InfoBar();
 		this.mDisplay = display;
 		this.mBank = bank;
 		mImgs = new Image[mTotalImgRows * 3 / 2];
-		mInterval = Settings.floatingTraversal / mTotalImgRows;
+		long interval = activity.getSettings().floatingTraversal / mTotalImgRows;
 		Texture largeTexture = new Texture();
 		long curTime = System.currentTimeMillis();
 		long creationOffset = 0;
+		boolean createMiddle = true;
 		for(int i = 0; i < mTotalImgRows; ++i){
 			
-			if(mCreateMiddle){
+			if(createMiddle){
 	        	mImgs[mImgCnt++] = new Image(activity, mBank, display, mInfoBar, Pos.MIDDLE, largeTexture, mTextureSelector, curTime - creationOffset);
 	        }else{
 	        	mImgs[mImgCnt++] = new Image(activity, mBank, display, mInfoBar, Pos.UP, largeTexture, mTextureSelector, curTime - creationOffset);
 	        	mImgs[mImgCnt++] = new Image(activity, mBank, display, mInfoBar, Pos.DOWN, largeTexture, mTextureSelector, curTime - creationOffset);
 	        }
-	        	mCreateMiddle ^= true;
-	        	creationOffset += mInterval;
+	        	createMiddle ^= true;
+	        	creationOffset += interval;
 		}
 		mImgDepths = new Image[mImgs.length];
 		for(int i = 0; i < mImgs.length; ++i){
@@ -150,10 +152,14 @@ public class FloatingRenderer extends Renderer {
 		if(mResetImages){
 			resetImages(gl, frameTime);
 		}
+		if(mDoAdjustImagePositions){
+			adjustImagePositions(frameTime); // If image speed has changed, image positions need to be reset!
+			mDoAdjustImagePositions = false;
+		}
 		// If new start, show splash!
 		if(mNewStart){
 			mSplashImg = mImgDepths[4];
-			Bitmap splash = BitmapFactory.decodeStream(mContext.getResources().openRawResource(R.drawable.splash));
+			Bitmap splash = BitmapFactory.decodeStream(mActivity.context().getResources().openRawResource(R.drawable.splash));
 			mSplashImg.setSelected(gl, splash, 343.0f/512.0f, 1.0f, frameTime);
 			mNewStart = false;
 			mDefocusSplashTime = realTime + SPLASHTIME;
@@ -206,6 +212,8 @@ public class FloatingRenderer extends Renderer {
         {
         	Arrays.sort(mImgDepths, mDepthComparator);
         }
+        updateRotation(realTime);
+        updateTranslation(realTime);
 	}
 	
 	void initRender(GL10 gl){
@@ -224,17 +232,21 @@ public class FloatingRenderer extends Renderer {
 	public void render(GL10 gl, long time, long realTime){
 		initRender(gl);
 		// Background first, this is backmost
-		BackgroundPainter.draw(gl, mDisplay);
+		BackgroundPainter.draw(gl, mDisplay, mActivity.getSettings().backgroundColor);
         //Image.setState(gl);
+		gl.glPushMatrix();
+		gl.glTranslatef(0, mStreamOffset, 0);
+		gl.glRotatef(mStreamRotation, 0.0f, 1.0f, 0.0f);
         for(int i = 0; i < mImgCnt; ++i){
         	if(mImgDepths[i] != mSelected){
         		mImgDepths[i].draw(gl, time, realTime);
         	}
         }
+        gl.glPopMatrix();
         Image.unsetState(gl);
         float fraction = getFraction(realTime);
         if(mSelected != null){
-        	float dark = Settings.fullscreenBlack ? mDisplay.getFill() * mDisplay.getFill() : 0.8f;
+        	float dark = mActivity.getSettings().fullscreenBlack ? mDisplay.getFill() * mDisplay.getFill() : 0.8f;
         	Dimmer.setColor(0.0f, 0.0f, 0.0f);
         	if(mSelected.stateInFocus()){
         		Dimmer.draw(gl, 1.0f, dark, mDisplay);
@@ -259,8 +271,28 @@ public class FloatingRenderer extends Renderer {
         }
 	}
 	
+	public void updateRotation(long realTime){
+		float timeFactor = (4000 - (realTime - mUpTime)) / 4000.0f;
+		if(timeFactor > 0){
+			float damping = timeFactor * timeFactor;
+			mStreamRotation = mRequestedStreamRotation * damping;
+		}else{
+			mRequestedStreamRotation = 0;
+		}
+	}
+	
+	public void updateTranslation(long realTime){
+		float timeFactor = (2000 - (realTime - mUpTime)) / 2000.0f;
+		if(timeFactor > 0){
+			float damping = timeFactor * timeFactor;
+			mStreamOffset = mRequestedStreamOffset * damping;
+		}else{
+			mRequestedStreamOffset = 0;
+		}
+	}
+	
 	public static float getFarRight(Display display){
-		return display.getWidth() * 0.5f * (-mFloatZ + mJitterZ) * 1.2f + 1.3f + mJitterX;
+		return display.getWidth() * 0.7f * (-mFloatZ + mJitterZ) * 1.2f + 1.3f + mJitterX;
 	}
 	
 	public static float getFraction(long realTime){
@@ -285,6 +317,24 @@ public class FloatingRenderer extends Renderer {
 	@Override
 	public void onResume(){
 		mTextureSelector.startThread();
+		mDoAdjustImagePositions = true;
+	}
+	
+	void adjustImagePositions(long time){
+		long interval = mActivity.getSettings().floatingTraversal / mTotalImgRows;
+		long prevNewStartTime = mImgs[0].getStartTime();
+		long prevOrgStartTime = mImgs[0].getStartTime();
+		for(Image img : mImgs){
+			long prevOrg = prevOrgStartTime;
+			prevOrgStartTime = img.getStartTime();
+			if(img.getStartTime() != prevOrg){
+				img.setStartTime(prevNewStartTime - interval, time);
+			}
+			else{
+				img.setStartTime(prevNewStartTime, time);
+			}
+			prevNewStartTime = img.getStartTime();
+		}
 	}
 
 	@Override
@@ -390,5 +440,22 @@ public class FloatingRenderer extends Renderer {
 	@Override
 	public int totalImages() {
 		return mImgs.length;
+	}
+	
+	@Override
+	public void streamMoved(float x, float y) {
+		if(y*y > x*x*x*x){
+			mUpTime = System.currentTimeMillis();
+			mRequestedStreamOffset = mStreamOffset;
+			mRequestedStreamOffset -= y / 100.0f;
+			mRequestedStreamOffset = Math.max(Math.min(1.0f, mRequestedStreamOffset), -1.0f);
+		}
+	}
+	
+	public void wallpaperMove(float x, float y){
+		mUpTime = System.currentTimeMillis();
+		mRequestedStreamRotation = mStreamRotation;
+		mRequestedStreamRotation += x / 50.0f;
+		mRequestedStreamRotation = Math.max(Math.min(15.0f, mRequestedStreamRotation), -15.0f);
 	}
 }

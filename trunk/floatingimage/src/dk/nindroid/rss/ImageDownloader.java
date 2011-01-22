@@ -11,7 +11,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import android.util.Log;
-import dk.nindroid.rss.settings.Settings;
 import dk.nindroid.rss.uiActivities.Toaster;
 
 public class ImageDownloader implements Runnable {
@@ -52,7 +51,7 @@ public class ImageDownloader implements Runnable {
 			try {
 				url = new URL(urlString);
 				String filename = urlString.substring(urlString.lastIndexOf('/'));
-				f = new File(Settings.downloadDir + "/" + filename);
+				f = new File(mActivity.getSettings().downloadDir + "/" + filename);
 				f.createNewFile();
 				OutputStream os = new FileOutputStream(f);
 				byte[] dl = DownloadUtil.fetchUrlBytes(url, mActivity.context().getString(R.string.user_agent), null);

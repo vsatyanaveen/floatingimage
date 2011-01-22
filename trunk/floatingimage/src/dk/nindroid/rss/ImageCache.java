@@ -187,8 +187,9 @@ public class ImageCache {
 	}
 	*/
 	public ImageReference getFile(int index, ImageReference ir){
+		File f_info = null;
 		try {
-			File f_info = mFiles.get(index);
+			f_info = mFiles.get(index);
 			int length = (int)f_info.length();
 			InputStream is_info = new FileInputStream(f_info);
 			if(mBuf.length < length){
@@ -202,6 +203,7 @@ public class ImageCache {
 			String bmpName = tokens[0];
 			if(bmpName == null){
 				f_info.delete();
+				mFiles.remove(index);
 				//return getRandomExplore();
 				return null;
 			}
@@ -214,10 +216,14 @@ public class ImageCache {
 			// Clean up
 			return ir;
 		} catch (FileNotFoundException e) {
-			//mExploreFiles.remove(index);
-			
+			if(f_info != null){
+				f_info.delete();
+				mCached.remove(mFiles.get(index));
+				mFiles.remove(index);
+			}
+			Log.w("Floating Image", "Image cache file not found: " + e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Log.w("Floating Image", "IOException reading Image cache!", e);
 		}
 		return null;
 	}

@@ -26,6 +26,10 @@ import dk.nindroid.rss.settings.FeedsDbAdapter;
 import dk.nindroid.rss.settings.Settings;
 
 public class FeedController {
+	private static long						REFRESH_INTERVAL = 7200000; // Every other hour;
+	private static long						RETRY_INTERVAL = 120000; // Every other minute;
+	private long							mLastFeedRead = 0;
+	
 	private List<List<ImageReference>> 		mReferences;
 	//private List<Integer>					mFeedIndex;
 	private List<FeedReference>				mFeeds;
@@ -33,6 +37,7 @@ public class FeedController {
 	private Random 							mRand = new Random(System.currentTimeMillis());
 	private RiverRenderer					mRenderer;
 	private MainActivity					mActivity;
+	private int								mCachedActive;
 	
 	public FeedController(MainActivity activity){
 		mFeeds = new ArrayList<FeedReference>();
@@ -57,8 +62,20 @@ public class FeedController {
 		ImageReference ir = null;
 		synchronized (mReferences) {
 			if(mReferences.size() == 0) return null;
+			if(System.currentTimeMillis() - mLastFeedRead > REFRESH_INTERVAL){
+				Log.v("Floating Image", "Refreshing feeds.");
+				readFeeds(mCachedActive);
+			}
 			int thisFeed = getFeed();
 			List<ImageReference> feed = mReferences.get(thisFeed);
+			
+			if(feed.size() == 0 && System.currentTimeMillis() - mLastFeedRead > RETRY_INTERVAL){
+				Log.v("Floating Image", "A feed is of zero length, trying to read again.");
+				mLastFeedRead = System.currentTimeMillis();
+				feed = parseFeed(mFeeds.get(thisFeed));
+				mReferences.set(thisFeed, feed);
+			}
+			
 			int index = forward ? mPositions.get(thisFeed).getNext() : mPositions.get(thisFeed).getPrev();
 			ir = feed.get(index);
 		}
@@ -84,6 +101,8 @@ public class FeedController {
 	}
 	
 	public void readFeeds(int active){
+		mCachedActive = active;
+		mLastFeedRead = System.currentTimeMillis();
 		List<FeedReference> newFeeds = new ArrayList<FeedReference>();
 		FeedsDbAdapter mDbHelper = new FeedsDbAdapter(mActivity.context());
 		SharedPreferences sp = mActivity.context().getSharedPreferences("dk.nindroid.rss_preferences", 0);
@@ -195,9 +214,11 @@ public class FeedController {
 						}
 					}
 				}
-				if(references != null && references.size() != 0){
-					if(Settings.shuffleImages){
-						Collections.shuffle(references);
+				if(references != null){
+					if(references.size() != 0){
+						if(mActivity.getSettings().shuffleImages){
+							Collections.shuffle(references);
+						}
 					}
 					synchronized(mReferences){
 						mReferences.add(references); 										// These two 
@@ -229,7 +250,7 @@ public class FeedController {
 	}
 	
 	// LOCAL
-	private static List<ImageReference> readLocalFeed(FeedReference feed){
+	private List<ImageReference> readLocalFeed(FeedReference feed){
 		File f = new File(feed.getFeedLocation());
 		List<ImageReference> images = new ArrayList<ImageReference>();
 		if(f.exists()){
@@ -238,11 +259,11 @@ public class FeedController {
 		return images;
 	}
 	
-	private static void buildImageIndex(List<ImageReference> images, File dir, int level){
+	private void buildImageIndex(List<ImageReference> images, File dir, int level){
 		File[] files = dir.listFiles();
 		if(files == null || files.length == 0) 
 			return;
-		if(!Settings.shuffleImages){
+		if(!mActivity.getSettings().shuffleImages){
 			Arrays.sort(files, new InverseComparator()); // Show last items first
 		}
 		for(File f : files){

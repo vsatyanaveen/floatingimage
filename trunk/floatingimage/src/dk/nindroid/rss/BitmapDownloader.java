@@ -29,8 +29,9 @@ import dk.nindroid.rss.settings.Settings;
 
 public class BitmapDownloader implements Runnable {
 	TextureBank bank;
-	FeedController mFeedController;
-	static boolean exifAvailable = false;
+	FeedController 	mFeedController;
+	static boolean 	exifAvailable = false;
+	Settings 		mSettings;
 	
 	// Do we have access to the Exif class?
 	static{
@@ -45,9 +46,10 @@ public class BitmapDownloader implements Runnable {
 		}
 	}
 	
-	public BitmapDownloader(TextureBank bank, FeedController feedController){
+	public BitmapDownloader(TextureBank bank, FeedController feedController, Settings settings){
 		this.bank = bank;
 		this.mFeedController = feedController;
+		this.mSettings = settings;
 	}
 	
 	@Override
@@ -105,12 +107,12 @@ public class BitmapDownloader implements Runnable {
 	}
 	
 	public void addExternalImage(ImageReference ir, boolean next){ 
-		String url = Settings.highResThumbs ? ir.get256ImageUrl() : ir.get128ImageUrl();
+		String url = mSettings.highResThumbs ? ir.get256ImageUrl() : ir.get128ImageUrl();
 		Bitmap bmp = downloadImage(url, null);
 		if(bmp == null){
 			return;
 		}
-		if(Settings.highResThumbs){
+		if(mSettings.highResThumbs){
 			int max = Math.max(bmp.getHeight(), bmp.getWidth());
 			if(max > 256){
 				float scale = (float)256 / max;
@@ -136,7 +138,7 @@ public class BitmapDownloader implements Runnable {
 	public void addLocalImage(LocalImage image, boolean next){
 		
 		File file = image.getFile();
-		int size = Settings.highResThumbs ? 256 : 128;
+		int size = mSettings.highResThumbs ? 256 : 128;
 		Bitmap bmp = ImageFileReader.readImage(file, size, null);
 		if(bmp != null){
 			if(exifAvailable){
@@ -164,7 +166,7 @@ public class BitmapDownloader implements Runnable {
 					Log.w("Floating Image", "Disabling Exif Interface, the device lied!");
 				}
 			}
-			if(Settings.highResThumbs){
+			if(mSettings.highResThumbs){
 				image.set256Bitmap(bmp);
 			}else{
 				image.set128Bitmap(bmp);

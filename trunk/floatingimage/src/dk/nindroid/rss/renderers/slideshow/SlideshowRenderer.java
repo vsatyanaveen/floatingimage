@@ -32,9 +32,11 @@ public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.rende
 	boolean			mStartPlaying = false;
 	boolean			mNextSet = false;
 	boolean			mResetImages = false;
+	MainActivity	mActivity;
 	
 	public SlideshowRenderer(MainActivity activity, TextureBank bank, Display display){
 		this.mDisplay = display;
+		this.mActivity = activity;
 		mPrevious = new Image(display, activity);
 		mCurrent = new Image(display, activity);
 		mNext = new Image(display, activity);
@@ -83,7 +85,7 @@ public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.rende
 	
 	@Override
 	public void onResume(){
-		setTransition(Settings.mode);
+		setTransition(this. mActivity.getSettings().mode);
 		if(!mDisplay.isFullscreen()){
 			mDisplay.toggleFullscreen();
 		}
@@ -163,7 +165,7 @@ public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.rende
 		}else if(mCurrent.hasBitmap() && mNext.getImage() == null){ // Load next image when first is done.
 				mNext.setImage(gl, mBank.getTexture(null, true));
 		}// Continue with normal slideshow
-		else if(realTime - mSlideTime > Settings.slideshowInterval + Settings.slideSpeed && mPlaying){
+		else if(realTime - mSlideTime > mActivity.getSettings().slideshowInterval + mActivity.getSettings().slideSpeed && mPlaying){
 			next(gl, realTime);
 		}
 		
@@ -179,11 +181,11 @@ public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.rende
 		mPrevious = temp;
 		mNextSet = false;
 		mSlideTime = realTime;
-		mCurrentTransition.init(mPrevious, mCurrent, realTime, Settings.slideSpeed);
+		mCurrentTransition.init(mPrevious, mCurrent, realTime, mActivity.getSettings().slideSpeed);
 	}
 	
 	private void updateNext(GL10 gl, long realTime){
-		if(!mNextSet && realTime - mSlideTime > Settings.slideSpeed){
+		if(!mNextSet && realTime - mSlideTime > mActivity.getSettings().slideSpeed){
 			ImageReference oldImage = mNext.getImage();
 			mNext.clear(); // Clean slate
 			mNext.setImage(gl, mBank.getTexture(oldImage, true));
@@ -263,5 +265,17 @@ public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.rende
 	@Override
 	public int totalImages() {
 		return 3;
+	}
+
+	@Override
+	public void streamMoved(float x, float y) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void wallpaperMove(float x, float y) {
+		// TODO Auto-generated method stub
+		
 	}
 }

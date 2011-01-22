@@ -24,7 +24,6 @@ import dk.nindroid.rss.gfx.ImageUtil;
 import dk.nindroid.rss.gfx.Vec3f;
 import dk.nindroid.rss.renderers.ImagePlane;
 import dk.nindroid.rss.renderers.ProgressBar;
-import dk.nindroid.rss.settings.Settings;
 import dk.nindroid.rss.uiActivities.Toaster;
 
 public class Image implements ImagePlane {
@@ -49,7 +48,7 @@ public class Image implements ImagePlane {
 	private Vec3f			mJitter = new Vec3f(0.0f, 0.0f, 0.0f);
 	private Random			mRand;
 	private TextureBank 	mbank;
-	private final long		mStartTime;
+	private long			mStartTime;
 	private ImageReference 	mShowingImage;
 	private Vec3f[]			mVertices;
 	private int				mLastTextureSize;
@@ -360,7 +359,7 @@ public class Image implements ImagePlane {
 		
 		gl.glEnable(GL10.GL_BLEND);
 		
-		if(Settings.imageDecorations){
+		if(mActivity.getSettings().imageDecorations){
 			/*
 			if(mCurImage != null && mCurImage.isNew()){
 				GlowImage.draw(gl, x, y, z, rotation, szX, szY);
@@ -578,12 +577,27 @@ public class Image implements ImagePlane {
 		mJitter.setX(mRand.nextFloat() * FloatingRenderer.mJitterX * 2 - FloatingRenderer.mJitterX);
 		mJitter.setY(mRand.nextFloat() * FloatingRenderer.mJitterY * 2 - FloatingRenderer.mJitterY);
 		mJitter.setZ(mRand.nextFloat() * FloatingRenderer.mJitterZ * 2 - FloatingRenderer.mJitterZ);
-		mRotation = Settings.rotateImages ? mRand.nextFloat() * 20.0f - 10.0f : 0;
+		mRotation = mActivity.getSettings().rotateImages ? mRand.nextFloat() * 20.0f - 10.0f : 0;
+	}
+	
+	public void setStartTime(long startTime, long frameTime){
+		this.mStartTime = startTime;
+		long totalTime = frameTime - mStartTime;
+		mRotations = (int)(totalTime / mActivity.getSettings().floatingTraversal) + 1;
+	}
+	
+	public long getStartTime(){
+		return this.mStartTime;
 	}
 	
 	private float getXPos(long relativeTime){
-		float curPos = (relativeTime  + (Settings.floatingTraversal << 10)) % Settings.floatingTraversal;
-		return -FloatingRenderer.getFarRight(mDisplay) + ((curPos / Settings.floatingTraversal) * FloatingRenderer.getFarRight(mDisplay) * 2);
+		float curPos = 0;
+		try{
+			curPos = (relativeTime  + (mActivity.getSettings().floatingTraversal << 10)) % mActivity.getSettings().floatingTraversal;
+		}catch(ArithmeticException e){
+			Log.e("Floating Image", "relativeTime: " + relativeTime + ", traversal: " + mActivity.getSettings().floatingTraversal);
+		}
+		return -FloatingRenderer.getFarRight(mDisplay) + ((curPos / mActivity.getSettings().floatingTraversal) * FloatingRenderer.getFarRight(mDisplay) * 2);
 	}
 	
 	private boolean updateFloating(GL10 gl, long time){
@@ -593,9 +607,9 @@ public class Image implements ImagePlane {
 		mPos.setZ(FloatingRenderer.mFloatZ);
 		mPos.setY(getYPos()); 
 		mPos.setX(getXPos(totalTime));
-		boolean isInRewind = totalTime < Settings.floatingTraversal * (mRotations - 1);
+		boolean isInRewind = totalTime < mActivity.getSettings().floatingTraversal * (mRotations - 1);
 		// Get new texture...
-		if(totalTime > Settings.floatingTraversal * mRotations && !isInRewind){
+		if(totalTime > mActivity.getSettings().floatingTraversal * mRotations && !isInRewind){
         	reJitter();
         	depthChanged = true;
         	//Log.v("Floating Image", "Getting new texture - forward!");
@@ -651,7 +665,7 @@ public class Image implements ImagePlane {
 		if(fraction > 1){
 			mRotation = mRotationSaved;
 			long totalTime = time - mStartTime;
-			mRotations = (int)(totalTime / Settings.floatingTraversal) + 1;
+			mRotations = (int)(totalTime / mActivity.getSettings().floatingTraversal) + 1;
 			mState = STATE_FLOATING;
 			if(mShowingImage != null){
 				setTexture(gl, mShowingImage);

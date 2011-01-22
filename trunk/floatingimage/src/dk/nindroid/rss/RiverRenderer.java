@@ -17,7 +17,6 @@ import dk.nindroid.rss.renderers.Renderer;
 import dk.nindroid.rss.renderers.floating.BackgroundPainter;
 import dk.nindroid.rss.renderers.floating.GlowImage;
 import dk.nindroid.rss.renderers.floating.ShadowPainter;
-import dk.nindroid.rss.settings.Settings;
 
 public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.helpers.GLWallpaperService.Renderer {
 	public Display			mDisplay;
@@ -51,7 +50,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 	public RiverRenderer(MainActivity activity, boolean useTranslucentBackground, TextureBank textureBank, boolean limitFramerate){
 		this.mActivity = activity;
 		this.mLimitFramerate = limitFramerate;
-		mDisplay = new Display();
+		mDisplay = new Display(activity.getSettings());
 		mTranslucentBackground = useTranslucentBackground;
 		mBank = textureBank;
 		mOSD = new OSD(activity);
@@ -75,7 +74,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 				mReinit = false;
 				GlowImage.initTexture(gl);
 		      	ShadowPainter.initTexture(gl);
-		      	BackgroundPainter.initTexture(gl, mActivity.context());
+		      	BackgroundPainter.initTexture(gl, mActivity.context(), mActivity.getSettings().backgroundColor);
 		      	mOSD.init(gl, mDisplay);
 		      	mRenderer.init(gl, System.currentTimeMillis() + mOffset, mOSD);
 				FeedProgress.init();
@@ -115,7 +114,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 	        }
 	        
 	        if(mLimitFramerate){
-	        	int targetFrametime = Settings.lowFps ? 80 : 40;
+	        	int targetFrametime = mActivity.getSettings().lowFps ? 80 : 40;
 		        if(timeDiff < targetFrametime){
 		        	try {
 						Thread.sleep(targetFrametime - timeDiff);
@@ -309,6 +308,10 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 	float lastX;
 	float lastY;
 	
+	public void wallpaperMove(float speedX, float speedY){
+		mRenderer.wallpaperMove(speedX, speedY);
+	}
+	
 	public void move(float x, float y, float speedX, float speedY){
 		// Transform event!
 		int orientation = mDisplay.getOrientation();
@@ -335,6 +338,8 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 			speedX *= -1;
 			speedY *= -1;
 		}
+		
+		mRenderer.streamMoved(speedX, speedY);
 		
 		// Free image movement, override gestures
 		if(mRenderer.freeMove()){
