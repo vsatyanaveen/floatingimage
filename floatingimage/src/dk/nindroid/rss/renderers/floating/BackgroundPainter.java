@@ -18,7 +18,6 @@ import android.util.Log;
 import dk.nindroid.rss.Display;
 import dk.nindroid.rss.R;
 import dk.nindroid.rss.gfx.Vec3f;
-import dk.nindroid.rss.settings.Settings;
 
 public class BackgroundPainter {
 	public static final int GREY = 0;
@@ -92,10 +91,10 @@ public class BackgroundPainter {
 		mIndexBuffer.position(0);
 	}
 	
-	public static void initTexture(GL10 gl, Context context){	
+	public static void initTexture(GL10 gl, Context context, int backgroundColor){	
 		InputStream shadowIS;
 		
-		switch(Settings.backgroundColor){
+		switch(backgroundColor){
 		case GREY:
 			shadowIS = context.getResources().openRawResource(R.drawable.background);
 			break;
@@ -184,8 +183,8 @@ public class BackgroundPainter {
 	 * @param szY
 	 * @param szZ
 	 */
-	public static void draw(GL10 gl, Display display){
-		if(Settings.backgroundColor == PURE_BLACK){
+	public static void draw(GL10 gl, Display display, int backgroundColor){
+		if(backgroundColor == PURE_BLACK){
 			return;
 		}
 		gl.glDisable(GL10.GL_BLEND);

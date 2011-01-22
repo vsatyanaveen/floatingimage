@@ -4,9 +4,11 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.Window;
 import dk.nindroid.rss.helpers.GLWallpaperService;
 import dk.nindroid.rss.launchers.ReadFeeds;
+import dk.nindroid.rss.menu.WallpaperSettings;
 import dk.nindroid.rss.renderers.OSD;
 import dk.nindroid.rss.renderers.floating.BackgroundPainter;
 import dk.nindroid.rss.renderers.floating.FloatingRenderer;
@@ -16,8 +18,11 @@ import dk.nindroid.rss.renderers.slideshow.SlideshowRenderer;
 import dk.nindroid.rss.settings.Settings;
 
 public class Wallpaper extends GLWallpaperService implements MainActivity{
+	Settings mSettings;
+	
 	public Engine onCreateEngine() {
-		MyEngine engine = new MyEngine(this);
+		mSettings = new Settings(WallpaperSettings.SHARED_PREFS_NAME);
+		MyEngine engine = new MyEngine(this, mSettings);
 		return engine;
 	}
 	
@@ -26,48 +31,62 @@ public class Wallpaper extends GLWallpaperService implements MainActivity{
 		RiverRenderer renderer;
 		FeedController mFeedController;
 		Wallpaper mContext;
+		Settings mSettings;
+		TextureBank mBank;
+		SharedPreferences mSp;
 		
-		public MyEngine(Wallpaper context) {
+		public MyEngine(Wallpaper context, Settings settings) {
 			super();
 			mContext = context;
+			this.mSettings = settings;
+			
 			GlowImage.init(context);
 			ShadowPainter.init(context);
 			BackgroundPainter.init();
 			
 			ShowStreams.registerParsers();
 			
-			TextureBank bank = setupFeeders();			
+			mBank = setupFeeders();			
 			
-			renderer = new RiverRenderer(context, false, bank, true);
+			renderer = new RiverRenderer(context, false, mBank, true);
 			mFeedController.setRenderer(renderer);
 			OSD.init(context, renderer);
 			
-			dk.nindroid.rss.settings.Settings.readSettings(context);
-			dk.nindroid.rss.renderers.Renderer defaultRenderer = renderer.getRenderer();
-			if(dk.nindroid.rss.settings.Settings.mode == dk.nindroid.rss.settings.Settings.MODE_FLOATING_IMAGE){
-				if(!(defaultRenderer instanceof FloatingRenderer)){
-					Log.v("Floating Image", "Switching to floating renderer");
-					defaultRenderer = new FloatingRenderer(context, bank, renderer.mDisplay);
-				}
-			}else{
-				if(!(defaultRenderer instanceof SlideshowRenderer)){
-					Log.v("Floating Image", "Switching to slideshow renderer");
-					defaultRenderer = new SlideshowRenderer(context, bank, renderer.mDisplay);
-				}
-			}
-			renderer.setRenderer(defaultRenderer);
-			bank.initCache(ShowStreams.CACHE_SIZE, defaultRenderer.totalImages());
-			renderer.onResume();
+			mSp = mContext.getSharedPreferences(WallpaperSettings.SHARED_PREFS_NAME, 0);
+			mSp.registerOnSharedPreferenceChangeListener(this);
+			onSharedPreferenceChanged(mSp, null);
 			
 			this.setRenderer(renderer);
-			setRenderMode(RENDERMODE_CONTINUOUSLY);
-			ReadFeeds.runAsync(mFeedController, defaultRenderer.totalImages() + ShowStreams.CACHE_SIZE);
+			this.setRenderMode(RENDERMODE_CONTINUOUSLY);
+			this.setTouchEventsEnabled(true);
+		}
+		
+		void init(){
+			if(renderer != null){
+				dk.nindroid.rss.renderers.Renderer defaultRenderer = renderer.getRenderer();
+				if(mSettings.mode == dk.nindroid.rss.settings.Settings.MODE_FLOATING_IMAGE){
+					if(!(defaultRenderer instanceof FloatingRenderer)){
+						Log.v("Floating Image", "Switching to floating renderer");
+						defaultRenderer = new FloatingRenderer(mContext, mBank, renderer.mDisplay);
+					}
+				}else{
+					if(!(defaultRenderer instanceof SlideshowRenderer)){
+						Log.v("Floating Image", "Switching to slideshow renderer");
+						defaultRenderer = new SlideshowRenderer(mContext, mBank, renderer.mDisplay);
+					}
+				}
+				renderer.setRenderer(defaultRenderer);
+				mBank.initCache(ShowStreams.CACHE_SIZE, defaultRenderer.totalImages());
+				renderer.onResume();
+				
+				ReadFeeds.runAsync(mFeedController, defaultRenderer.totalImages() + ShowStreams.CACHE_SIZE);
+			}
 		}
 		
 		TextureBank setupFeeders(){
 			TextureBank bank = new TextureBank();
 			mFeedController = new FeedController(mContext);
-			BitmapDownloader bitmapDownloader = new BitmapDownloader(bank, mFeedController);
+			BitmapDownloader bitmapDownloader = new BitmapDownloader(bank, mFeedController, mSettings);
 			ImageCache imageCache = new ImageCache(mContext, bank);
 			bank.setFeeders(bitmapDownloader, imageCache);
 			return bank;
@@ -85,8 +104,26 @@ public class Wallpaper extends GLWallpaperService implements MainActivity{
 		public void onSharedPreferenceChanged(
 				SharedPreferences sharedPreferences, String key) {
 			Log.v("Floating Image", "Live wallpaper, preference changed: " + key);
-			Settings.readSettings(mContext);
+			mSettings.readSettings(mContext);
+			init();
 		}
+		
+		float x, y;
+
+		public void onTouchEvent(android.view.MotionEvent e) 
+		{
+			if(e.getAction() == MotionEvent.ACTION_MOVE){
+				if(x != 0 || y != 0){
+					renderer.wallpaperMove(e.getX() - x, e.getY() - y);
+				}
+				x = e.getX();
+				y = e.getY();
+			}else{
+				x = 0;
+				y = 0;
+			}
+		}
+		
 	}
 
 	@Override
@@ -123,5 +160,10 @@ public class Wallpaper extends GLWallpaperService implements MainActivity{
 	@Override
 	public void stopManagingCursor(Cursor c) {
 		// Not used with wallpaper
+	}
+
+	@Override
+	public Settings getSettings() {
+		return mSettings;
 	}
 }

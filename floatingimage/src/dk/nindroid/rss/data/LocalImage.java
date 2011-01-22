@@ -137,6 +137,7 @@ public class LocalImage extends ImageReference{
 			String rotation = tokens[5];
 			if(rotation != null){
 				setRotation(Float.parseFloat(rotation));
+				validate();
 			}
 		}
 		this.mBitmap = bmp;

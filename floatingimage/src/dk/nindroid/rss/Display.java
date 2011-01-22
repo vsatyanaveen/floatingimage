@@ -15,6 +15,7 @@ public class Display implements OrientationSubscriber {
 	private final static float		INFOBAR_HEIGHT = 80.0f;
 	private static final float		NORMAL_FILL = 0.90f;
 	
+	private Settings				mSettings;
 	private long					mTurnedAt;
 	private long					mFullscreenAt;
 	private long					mFrameTime;
@@ -40,7 +41,7 @@ public class Display implements OrientationSubscriber {
 		mPreviousFill = mFill;
 		mTargetInfoBarHeight = mFullscreen ? 0 : INFOBAR_HEIGHT;
 		mTargetFill = mFullscreen ? 1.0f : NORMAL_FILL;
-		Settings.setFullscreen(mFullscreen);
+		mSettings.setFullscreen(mFullscreen);
 		Log.v("Display", "Fullscreen is " + mFullscreen);
 	}
 		
@@ -182,7 +183,8 @@ public class Display implements OrientationSubscriber {
 		return mFill;
 	}
 	
-	public Display(){
+	public Display(Settings settings){
+		this.mSettings = settings;
 		this.mOrientation = Surface.ROTATION_0;
 	}
 	
@@ -205,7 +207,7 @@ public class Display implements OrientationSubscriber {
 			setOrientation(mOrientation);
 		}
 		
-		if(Settings.fullscreen){
+		if(mSettings.fullscreen){
 			if(!mFullscreen){
 				toggleFullscreen();
 			}

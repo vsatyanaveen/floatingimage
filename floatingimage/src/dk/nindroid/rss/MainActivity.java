@@ -3,6 +3,8 @@ package dk.nindroid.rss;
 import java.io.IOException;
 import java.io.InputStream;
 
+import dk.nindroid.rss.settings.Settings;
+
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -18,4 +20,5 @@ public interface MainActivity {
 	public Window getWindow();
 	public void showFolder();
 	public void showSettings();
+	public Settings getSettings();
 }

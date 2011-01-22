@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen
-        xmlns:android="http://schemas.android.com/apk/res/android">
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:title="@string/settings"
+        android:key="wallpaper_settings">
 
     <PreferenceCategory
             android:title="@string/feeds">
@@ -60,11 +62,6 @@
                 android:summary="@string/rotateImagesSummary"
                 android:defaultValue="true" />
 			<CheckBoxPreference
-                android:key="fullscreenBlack"
-                android:title="@string/fullscreenBlack"
-                android:summary="@string/fullscreenBlackSummary"
-                android:defaultValue="true" />
-            <CheckBoxPreference
                 android:key="imageDecorations"
                 android:title="@string/imageDecorations"
                 android:summary="@string/imageDecorationsSummary"
@@ -90,6 +87,11 @@
                 android:entryValues="@array/backgroundColorValues"
                 android:dialogTitle="@string/backgroundColorTitle"
                 android:defaultValue="0" />
+           <CheckBoxPreference
+           		android:key="liveWallpaperLowFramerate"
+                android:title="@string/liveWallpaperLowFramerate"
+                android:summary="@string/liveWallpaperLowFramerateSummary"
+                android:defaultValue="false" />
 	</PreferenceCategory>
     <!-- 
     <PreferenceCategory

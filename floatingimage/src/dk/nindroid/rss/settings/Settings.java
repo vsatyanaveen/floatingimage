@@ -22,27 +22,33 @@ public class Settings {
 	public static final int MODE_RANDOM = 6;
 	public static final int MODE_FLOATING_IMAGE = 7;
 	
-	public static boolean 	shuffleImages;
-	public static boolean 	rotateImages;
-	public static boolean 	fullscreenBlack;
-	public static String  	downloadDir;
-	public static int 		mode;
-	public static long 		slideshowInterval;
-	public static long	 	slideSpeed;
-	public static boolean	imageDecorations;
-	public static boolean	highResThumbs;
-	public static long		floatingTraversal;
-	public static int		forceRotation;
+	public boolean 	shuffleImages;
+	public boolean 	rotateImages;
+	public boolean 	fullscreenBlack;
+	public String  	downloadDir;
+	public int 		mode;
+	public long 		slideshowInterval;
+	public long	 	slideSpeed;
+	public boolean	imageDecorations;
+	public boolean	highResThumbs;
+	public long		floatingTraversal = 30000;
+	public int		forceRotation;
 	
-	public static int		backgroundColor;
-	public static boolean	lowFps;
+	public int		backgroundColor;
+	public boolean	lowFps;
 	
-	public static boolean fullscreen;
+	public boolean fullscreen;
 
-	private static SharedPreferences sp;
+	private SharedPreferences sp;
 	
-	public static void readSettings(Context context) {
-		Settings.sp = context.getSharedPreferences("dk.nindroid.rss_preferences", 0);
+	private String settings;
+	
+	public Settings(String settings){
+		this.settings = settings;
+	}
+	
+	public void readSettings(Context context) {
+		this.sp = context.getSharedPreferences(settings, 0);
 		shuffleImages = sp.getBoolean("shuffleImages", true);
 		rotateImages = sp.getBoolean("rotateImages", true);
 		downloadDir = sp.getString("downloadDir", Environment.getExternalStorageDirectory().getAbsolutePath() + "/download/");
@@ -75,7 +81,7 @@ public class Settings {
 		lowFps = sp.getBoolean("liveWallpaperLowFramerate", false);
 	}
 	
-	public static void PreferenceChanged(SharedPreferences sp, String key){
+	public void PreferenceChanged(SharedPreferences sp, String key){
 		if(key.equals("lowFps")){
 			lowFps = sp.getBoolean("liveWallpaperLowFramerate", false);
 		}
@@ -108,14 +114,14 @@ public class Settings {
 		}
 	}
 	
-	public static void setFullscreen(boolean fullscreen){
-		Settings.fullscreen = fullscreen;
+	public void setFullscreen(boolean fullscreen){
+		this.fullscreen = fullscreen;
 		SharedPreferences.Editor editor = sp.edit();
 		editor.putBoolean("fullscreen", fullscreen);
 		editor.commit();
 	}
 	
-	public static String typeToString(int type){
+	public String typeToString(int type){
 		switch(type){
 		case TYPE_LOCAL:
 			return "Local";

@@ -14,14 +14,16 @@ import android.view.Surface;
 
 public class OrientationManager implements SensorEventListener {
 	private SensorManager				mSensorManager;
-	List<OrientationSubscriber> subscribers;
-	int currentOrientation = -1;
-	int settingOrientation = -1;
-	int initialRotation = 0;
+	List<OrientationSubscriber> 		subscribers;
+	Settings							mSettings;
+	int 								currentOrientation = -1;
+	int 								settingOrientation = -1;
+	int 								initialRotation = 0;
 	
-	public OrientationManager(SensorManager sensorManager, int initialRotation) {
+	public OrientationManager(Settings settings,SensorManager sensorManager, int initialRotation) {
 		subscribers = new ArrayList<OrientationSubscriber>();
 		mSensorManager = sensorManager;
+		this.mSettings = settings;
 		this.initialRotation = initialRotation != -1 ? initialRotation : 0;
 	}
 	
@@ -73,7 +75,7 @@ public class OrientationManager implements SensorEventListener {
 		}
 		// Adjust for rotated devices
 		if(orientation != -1){
-			orientation = (orientation + 4 - initialRotation + Settings.forceRotation) % 4;
+			orientation = (orientation + 4 - initialRotation + mSettings.forceRotation) % 4;
 			if(orientation != settingOrientation){
 				settingOrientation = orientation;
 				setOrientation();

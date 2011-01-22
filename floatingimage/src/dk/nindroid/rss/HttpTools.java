@@ -31,10 +31,10 @@ public class HttpTools {
 				in = httpConn.getInputStream();
 			}
 			else{
-				Log.v("dk.nindroid.rss.HttpTools", "Response not OK: " + response);
+				Log.v("Floating Image", "HttpTools: Response not OK: " + response);
 			}
 		} catch (Exception ex) {
-			Log.e("dk.nindroid.rss.HttpTools", "Error getting http stream", ex);
+			Log.e("Floating Image", "HttpTools: Error getting http stream", ex);
 			throw new IOException("Error connecting");
 		}
 		return in;

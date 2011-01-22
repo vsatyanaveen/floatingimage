@@ -3,7 +3,6 @@ package dk.nindroid.rss;
 import java.util.HashMap;
 import java.util.Map;
 
-import android.util.Log;
 import dk.nindroid.rss.data.CircularList;
 import dk.nindroid.rss.data.ImageReference;
 
@@ -15,6 +14,7 @@ public class TextureBank {
 	BitmapDownloader						bitmapDownloader; 
 	private Map<String, ImageReference> 	mActiveBitmaps = new HashMap<String, ImageReference>();
 	boolean 								stopThreads = false;
+	boolean 								running = false;
 	
 	public void initCache(int cacheSize, int activeImages){
 		if(this.images == null){
@@ -28,16 +28,16 @@ public class TextureBank {
 	}
 	
 	public void addBitmap(ImageReference ir, boolean doCache, boolean next){
-		if(ir != null){
+		if(ir != null && ir.getBitmap() != null){
+			if(doCache){
+				ic.saveImage(ir);
+			}
 			synchronized (images) {
 				if(next){
 					images.addNext(ir);
 				}else{
 					images.addPrev(ir);
 				}
-			}
-			if(doCache){
-				ic.saveImage(ir);
 			}
 		}
 	}
@@ -52,7 +52,7 @@ public class TextureBank {
 		
 	public ImageReference getTexture(ImageReference previousImage, boolean next){
 		ImageReference ir = get(next);
-		if(ir != null){
+		if(ir != null && ir.getBitmap() != null){ // What? The bitmap should NEVER be null!
 			// Remove previous image, if any
 			if(previousImage != null){
 				mActiveBitmaps.remove(previousImage.getID());
@@ -62,9 +62,6 @@ public class TextureBank {
 				}
 			}
 			mActiveBitmaps.put(ir.getID(), ir);
-			if(ir.getBitmap().isRecycled()){
-				Log.e("Floating Image", "Using recycled image!");
-			}
 			return ir;
 		}
 		return null;
@@ -74,7 +71,7 @@ public class TextureBank {
 		synchronized (images) {	
 			do{
 				ir = next ? images.next() : images.prev();
-				if(ir == null) break;
+				if(ir == null || ir.getBitmap() == null) break;
 			}while(mActiveBitmaps.containsKey(ir.getID()));
 			images.notifyAll();
 		}
@@ -84,7 +81,9 @@ public class TextureBank {
 		this.images.clear();
 		this.mActiveBitmaps.clear();
 	}
+	
 	public void stop(){
+		running = false;
 		stopThreads = true;
 		synchronized(images){
 			images.notifyAll();
@@ -97,7 +96,10 @@ public class TextureBank {
 	}
 	
 	public void start(){
-		stopThreads = false;
-		startExternal();
+		if(!running){
+			running = true;
+			stopThreads = false;
+			startExternal();
+		}
 	}
 }

@@ -76,6 +76,7 @@ public class ShowStreams extends Activity implements MainActivity {
 	private FeedController				mFeedController;
 	private ImageCache 					mImageCache;
 	private TextureBank					mTextureBank;
+	private dk.nindroid.rss.settings.Settings		mSettings;
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -86,6 +87,7 @@ public class ShowStreams extends Activity implements MainActivity {
 		File sdDir = Environment.getExternalStorageDirectory();
 		dataFolder = sdDir.getAbsolutePath() + dataFolder;
 		File dataFile = new File(dataFolder);
+		this.mSettings = new dk.nindroid.rss.settings.Settings("dk.nindroid.rss_preferences");
 		if(!dataFile.exists() && !dataFile.mkdirs()){
 			Toast error = Toast.makeText(this, "Error creating data folder (Do you have an SD card?)\nCache will not work, operations might be flaky!", Toast.LENGTH_LONG);
 			error.show();
@@ -94,7 +96,7 @@ public class ShowStreams extends Activity implements MainActivity {
 			this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 			SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 			int rotation = InitialOritentationReflector.getRotation(getWindowManager().getDefaultDisplay());
-			orientationManager = new OrientationManager(sensorManager, rotation);
+			orientationManager = new OrientationManager(mSettings, sensorManager, rotation);
 			saveVersion(dataFile);
 			GlowImage.init(this);
 			ShadowPainter.init(this);
@@ -128,7 +130,7 @@ public class ShowStreams extends Activity implements MainActivity {
 	TextureBank setupFeeders(){
 		TextureBank bank = new TextureBank();
 		mFeedController = new FeedController(this);
-		BitmapDownloader bitmapDownloader = new BitmapDownloader(bank, mFeedController);
+		BitmapDownloader bitmapDownloader = new BitmapDownloader(bank, mFeedController, mSettings);
 		mImageCache = new ImageCache(this, bank);
 		bank.setFeeders(bitmapDownloader, mImageCache);
 		return bank;
@@ -237,13 +239,13 @@ public class ShowStreams extends Activity implements MainActivity {
 		super.onResume();
 		//String loading = this.getString(dk.nindroid.rss.R.string.please_wait);
 		//ProgressDialog dialog = ProgressDialog.show(this, "", loading, true);
-		dk.nindroid.rss.settings.Settings.readSettings(this);
+		mSettings.readSettings(this);
 		try{
 			ButtonBrightness.setButtonBrightness(getWindow().getAttributes(), 0.0f);
 		}catch (Throwable t){}
 		Log.v("Floating Image", "Begin resume...");
 		Renderer defaultRenderer = renderer.getRenderer();
-		if(dk.nindroid.rss.settings.Settings.mode == dk.nindroid.rss.settings.Settings.MODE_FLOATING_IMAGE){
+		if(mSettings.mode == dk.nindroid.rss.settings.Settings.MODE_FLOATING_IMAGE){
 			if(!(defaultRenderer instanceof FloatingRenderer)){
 				Log.v("Floating Image", "Switching to floating renderer");
 				defaultRenderer = new FloatingRenderer(this, mTextureBank, renderer.mDisplay);
@@ -285,7 +287,7 @@ public class ShowStreams extends Activity implements MainActivity {
 		case FULLSCREEN_ID:
 			renderer.mDisplay.toggleFullscreen();
 			item.setTitle(renderer.mDisplay.isFullscreen() ? R.string.show_details : R.string.fullscreen);
-			dk.nindroid.rss.settings.Settings.setFullscreen(renderer.mDisplay.isFullscreen());
+			mSettings.setFullscreen(renderer.mDisplay.isFullscreen());
 			return true;
 		case SHOW_FOLDER_ID:
 			showFolder();
@@ -404,6 +406,11 @@ public class ShowStreams extends Activity implements MainActivity {
 		}catch(Throwable e){
 			super.setWallpaper(bitmap);
 		}
+	}
+	
+	@Override
+	public dk.nindroid.rss.settings.Settings getSettings() {
+		return mSettings;
 	}
 	
 	@Override
