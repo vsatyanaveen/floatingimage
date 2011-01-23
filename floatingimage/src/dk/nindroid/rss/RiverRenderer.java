@@ -308,8 +308,8 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 	float lastX;
 	float lastY;
 	
-	public void wallpaperMove(float speedX, float speedY){
-		mRenderer.wallpaperMove(speedX, speedY);
+	public void wallpaperMove(float fraction){
+		mRenderer.wallpaperMove(fraction);
 	}
 	
 	public void move(float x, float y, float speedX, float speedY){

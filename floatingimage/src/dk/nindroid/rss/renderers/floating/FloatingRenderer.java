@@ -212,7 +212,7 @@ public class FloatingRenderer extends Renderer {
         {
         	Arrays.sort(mImgDepths, mDepthComparator);
         }
-        updateRotation(realTime);
+        //updateRotation(realTime);
         updateTranslation(realTime);
 	}
 	
@@ -444,7 +444,7 @@ public class FloatingRenderer extends Renderer {
 	
 	@Override
 	public void streamMoved(float x, float y) {
-		if(y*y > x*x*x*x){
+		if(y*y > x*x*x*x){ // Cheap abs, also make sure this is intentionally a vertical movement!
 			mUpTime = System.currentTimeMillis();
 			mRequestedStreamOffset = mStreamOffset;
 			mRequestedStreamOffset -= y / 100.0f;
@@ -452,10 +452,13 @@ public class FloatingRenderer extends Renderer {
 		}
 	}
 	
-	public void wallpaperMove(float x, float y){
+	public void wallpaperMove(float fraction){
+		mStreamRotation = -fraction * 10.0f;
+		/*
 		mUpTime = System.currentTimeMillis();
 		mRequestedStreamRotation = mStreamRotation;
 		mRequestedStreamRotation += x / 50.0f;
 		mRequestedStreamRotation = Math.max(Math.min(15.0f, mRequestedStreamRotation), -15.0f);
+		*/
 	}
 }

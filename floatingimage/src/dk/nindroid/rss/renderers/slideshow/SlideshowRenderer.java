@@ -274,7 +274,7 @@ public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.rende
 	}
 
 	@Override
-	public void wallpaperMove(float x, float y) {
+	public void wallpaperMove(float fraction) {
 		// TODO Auto-generated method stub
 		
 	}
