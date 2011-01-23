@@ -58,7 +58,7 @@ public class Wallpaper extends GLWallpaperService implements MainActivity{
 			
 			this.setRenderer(renderer);
 			this.setRenderMode(RENDERMODE_CONTINUOUSLY);
-			this.setTouchEventsEnabled(true);
+			//this.setTouchEventsEnabled(true);
 		}
 		
 		void init(){
@@ -110,11 +110,21 @@ public class Wallpaper extends GLWallpaperService implements MainActivity{
 		
 		float x, y;
 
+		@Override
+		public void onOffsetsChanged(float xOffset, float yOffset,
+				float xOffsetStep, float yOffsetStep, int xPixelOffset,
+				int yPixelOffset) {
+			super.onOffsetsChanged(xOffset, yOffset, xOffsetStep, yOffsetStep,
+					xPixelOffset, yPixelOffset);
+			float offset = (xOffset - 0.5f) * 2.0f; 
+			renderer.wallpaperMove(offset);
+		}
+		
 		public void onTouchEvent(android.view.MotionEvent e) 
 		{
 			if(e.getAction() == MotionEvent.ACTION_MOVE){
 				if(x != 0 || y != 0){
-					renderer.wallpaperMove(e.getX() - x, e.getY() - y);
+					//renderer.wallpaperMove(e.getX() - x, e.getY() - y);
 				}
 				x = e.getX();
 				y = e.getY();
