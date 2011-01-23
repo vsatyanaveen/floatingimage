@@ -34,6 +34,9 @@ public class ManageFeeds extends PreferenceActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		// This works, just need to pass which preference to use
+		//PreferenceManager pm = this.getPreferenceManager();
+		//pm.setSharedPreferencesName(this.getIntent().getDataString());
 		setContentView(R.layout.manage_feeds);
 		mDbHelper = new FeedsDbAdapter(this);
 		registerForContextMenu(getListView());

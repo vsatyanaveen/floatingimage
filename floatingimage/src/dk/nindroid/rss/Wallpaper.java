@@ -33,7 +33,6 @@ public class Wallpaper extends GLWallpaperService implements MainActivity{
 		Wallpaper mContext;
 		Settings mSettings;
 		TextureBank mBank;
-		SharedPreferences mSp;
 		
 		public MyEngine(Wallpaper context, Settings settings) {
 			super();
@@ -52,9 +51,9 @@ public class Wallpaper extends GLWallpaperService implements MainActivity{
 			mFeedController.setRenderer(renderer);
 			OSD.init(context, renderer);
 			
-			mSp = mContext.getSharedPreferences(WallpaperSettings.SHARED_PREFS_NAME, 0);
-			mSp.registerOnSharedPreferenceChangeListener(this);
-			onSharedPreferenceChanged(mSp, null);
+			SharedPreferences sp = mContext.getSharedPreferences(WallpaperSettings.SHARED_PREFS_NAME, 0);
+			sp.registerOnSharedPreferenceChangeListener(this);
+			onSharedPreferenceChanged(sp, null);
 			
 			this.setRenderer(renderer);
 			this.setRenderMode(RENDERMODE_CONTINUOUSLY);
@@ -175,5 +174,10 @@ public class Wallpaper extends GLWallpaperService implements MainActivity{
 	@Override
 	public Settings getSettings() {
 		return mSettings;
+	}
+
+	@Override
+	public String getSettingsKey() {
+		return WallpaperSettings.SHARED_PREFS_NAME;
 	}
 }

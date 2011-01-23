@@ -9,9 +9,9 @@
             
          <PreferenceScreen android:title="@string/manageFeeds" android:summary="@string/manageFeedsSummary">
 			<intent 
-			android:action="android.intent.action.MAIN" 
-			android:targetClass="dk.nindroid.rss.settings.ManageFeeds" 
-			android:targetPackage="dk.nindroid.rss" />
+				android:action="android.intent.action.MAIN" 
+				android:targetClass="dk.nindroid.rss.settings.ManageFeeds" 
+				android:targetPackage="dk.nindroid.rss" />
         </PreferenceScreen>        
         <CheckBoxPreference
                 android:key="shuffleImages"
