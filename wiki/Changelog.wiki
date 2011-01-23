@@ -1,3 +1,83 @@
+_23/01-2011: 2.8.5_
+  * Live wallpaper, slight reaction to scrolling.
+  * In app, up/down movement moves pictures slightly.
+  * When feed appears empty, feed is refreshed in two minutes (Good for when sdcard is not ready).
+  * Feeds are refreshed every other hour.
+  * Live wallpaper settings separated from app settings.
+  * Live wallpaper reacts to settings changes.
+  * Bugfixes.
+  * Bugs (probably, please report!)
+
+_16/01-2011: 2.8.4_
+  * More bugfixes.
+  * Infinite rewind, not just back to start.
+  * Pure black background colour added.
+
+_11/01-2011: 2.8.3_
+  * Picasa feed was broken, now it is not.
+
+_11/01-2011: 2.8.2_
+  * Nasty snarling bug fixed.
+
+_11/01-2011: 2.8.1_
+  * Nasty bug fixed.
+
+_11/01-2011: 2.8.0_
+  * Long press on stream to pause.
+  * Live wallpaper rotation decoupled from app
+  * Single press to catch stream (no need to move your finger around any longer)
+  * "Photos from here removed", as "coarse location" makes people uneasy... (I never know who, where og why you are!)
+  * General bugfixes
+  * Grand try/catch removed. Please report crashes!!
+
+_09/01-2011: Rock steady_
+  * Avoid popping when returning to live wall paper.
+
+_09/01-2011: Live and free_
+  * Live wallpaper
+  * Rewinding now goes back to the beginning of the stream - slightly out of order, but it's there!
+  * Memory optimizations?
+
+_December-ish: Heartbeat. Badump!_
+  * Some work has been done to remove flickering.
+  * Rotation now stays the same, when lying on a table,
+
+_21/11-2010: Look ma, no hands!_
+  * Removed performance profiling that crashed some phones, and lowered performance on other.
+
+_20/11-2010: Hi mom!_
+  * Black, grey (default), white, green, yellow, red, blue and multicoloured background now available.
+  * ... That's it. I've been busy. :)
+
+_05/10-2010: 2.6.8_
+  * Re-enabled slide to pick next.
+  * Remember manual image rotation.
+  * Fixed automatic (Exif) image rotation bug. (2.0 and newer)
+  * When panning over the edge while zooming, the image no longer pops.
+  * Fixed bug that occurred when having forced a rotation.
+  * Reverted to forcing portrait mode
+  * Fixed minor bug in the text showing how many feeds were loaded.
+  * Fixed some crashes (I hope)
+
+_20/09-2010: 2.6.7_
+  * Fixed some crashes.
+
+_19/09-2010: 2.6.6_
+  * Fixed crash.
+  * Fixed some texture bugs.
+  * Slight optimizations.
+  * Disabled strange features: Random image cache lookup when lacking images, glow on new images.
+  * Image cache also works on local images.
+  * Using the image cache no longer deteriorates the cached image.
+
+_15/09-2010: 2.6.5_
+  * Multitouch tweaks. Should be less prone to accidental image switching now.
+  * Orientation fix once more.
+  * Wonky zoomed image fix.
+
+_13/09-2010: 2.6.4_
+  * Removed memory leak
+
 _13/09-2010: 2.6.3_
   * Improved zoom navigation (Spring action when exceeding bounds)
   * Removed some unused code and textures = slight optimization
