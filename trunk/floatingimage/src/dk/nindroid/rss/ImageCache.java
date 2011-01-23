@@ -35,18 +35,22 @@ public class ImageCache {
 	File 					mExplore;
 	File 					mExploreInfo;
 	byte[]					mBuf;
+	Context					mContext;
 	
 	public ImageCache(Context context, TextureBank bank){
 		this.bank = bank;
+		this.mContext = context;
 		mBuf = new byte[1024];
-		String datafolder = context.getString(R.string.dataFolder);
+		String datafolder = mContext.getString(R.string.dataFolder);
 		datafolder = Environment.getExternalStorageDirectory().getAbsolutePath() + datafolder;
 		mExploreInfoFolder = datafolder + context.getString(R.string.exploreFolder);
 		mExploreFolder = mExploreInfoFolder + "/bmp";
+	}
+	
+	void setupImageCache(){
 		mRand = new Random(new Date().getTime());
 		mExploreInfo = new File(mExploreInfoFolder);
 		mExplore = new File(mExploreFolder);
-		//mExplore = ShowStreams.current.getFileStreamPath(mExploreFolder);
 		mExploreInfo.mkdirs(); // Make dir if not exists
 		mExplore.mkdirs(); // Make dir if not exists
 		File[] exploreInfoArray = mExploreInfo.listFiles();
@@ -120,6 +124,9 @@ public class ImageCache {
 	}
 	
 	public void saveImage(ImageReference ir){
+		if(mFiles == null){
+			setupImageCache();
+		}
 		if(ir == null) return;
 		String name = ir.getID();
 		if(exists(name)) return;
@@ -239,6 +246,7 @@ public class ImageCache {
 	}
 	
 	public void addImage(ImageReference ir, boolean next){
+		
 		bank.addBitmap(getFile(mCached.get(ir.getID() + ".info"), ir), false, next);
 	}
 }

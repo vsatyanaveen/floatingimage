@@ -21,4 +21,5 @@ public interface MainActivity {
 	public void showFolder();
 	public void showSettings();
 	public Settings getSettings();
+	public String getSettingsKey();
 }

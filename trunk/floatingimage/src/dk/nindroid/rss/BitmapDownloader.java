@@ -102,6 +102,9 @@ public class BitmapDownloader implements Runnable {
 				}
 			}catch(Exception e){
 				Log.e("dk.nindroid.BitmapDownloader", "Unexpected exception caught...", e);
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException e1) {}
 			}
 		}
 	}

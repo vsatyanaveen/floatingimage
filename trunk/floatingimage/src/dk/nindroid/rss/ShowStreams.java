@@ -421,4 +421,9 @@ public class ShowStreams extends Activity implements MainActivity {
 			super.setWallpaper(data);
 		}
 	}
+
+	@Override
+	public String getSettingsKey() {
+		return Settings.SHARED_PREFS_NAME;
+	}
 }

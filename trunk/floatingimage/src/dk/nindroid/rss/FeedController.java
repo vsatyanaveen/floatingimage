@@ -69,15 +69,17 @@ public class FeedController {
 			int thisFeed = getFeed();
 			List<ImageReference> feed = mReferences.get(thisFeed);
 			
-			if(feed.size() == 0 && System.currentTimeMillis() - mLastFeedRead > RETRY_INTERVAL){
-				Log.v("Floating Image", "A feed is of zero length, trying to read again.");
+			if(mFeeds.get(thisFeed).getType() == Settings.TYPE_LOCAL && feed.size() == 0 && System.currentTimeMillis() - mLastFeedRead > RETRY_INTERVAL ){
+ 				Log.v("Floating Image", "A local feed is of zero length, trying to read again.");
 				mLastFeedRead = System.currentTimeMillis();
-				feed = parseFeed(mFeeds.get(thisFeed));
+				feed = readLocalFeed(mFeeds.get(thisFeed));
 				mReferences.set(thisFeed, feed);
+				mPositions.set(thisFeed, new PositionInterval(mCachedActive, feed.size()));
 			}
-			
-			int index = forward ? mPositions.get(thisFeed).getNext() : mPositions.get(thisFeed).getPrev();
-			ir = feed.get(index);
+			if(feed.size() != 0){
+				int index = forward ? mPositions.get(thisFeed).getNext() : mPositions.get(thisFeed).getPrev();
+				ir = feed.get(index);
+			}
 		}
 		return ir;
 	}
@@ -105,7 +107,7 @@ public class FeedController {
 		mLastFeedRead = System.currentTimeMillis();
 		List<FeedReference> newFeeds = new ArrayList<FeedReference>();
 		FeedsDbAdapter mDbHelper = new FeedsDbAdapter(mActivity.context());
-		SharedPreferences sp = mActivity.context().getSharedPreferences("dk.nindroid.rss_preferences", 0);
+		SharedPreferences sp = mActivity.context().getSharedPreferences(dk.nindroid.rss.menu.Settings.SHARED_PREFS_NAME, 0);
 		mDbHelper.open();
 		Cursor c = null;
 		try{
