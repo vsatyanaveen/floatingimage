@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
+import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -24,6 +25,8 @@ import dk.nindroid.rss.R;
 import dk.nindroid.rss.gfx.ImageUtil;
 
 public class ManageFeeds extends PreferenceActivity {
+	public static final String SHARED_PREFS_NAME = "SHARED_PREFS_NAME";
+	
 	public static final int ADD_ID = Menu.FIRST;
 	public static final int CLEAR_ALL_ID = Menu.FIRST + 1;
     private static final int DELETE_ID = Menu.FIRST + 1;
@@ -35,8 +38,8 @@ public class ManageFeeds extends PreferenceActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		// This works, just need to pass which preference to use
-		//PreferenceManager pm = this.getPreferenceManager();
-		//pm.setSharedPreferencesName(this.getIntent().getDataString());
+		PreferenceManager pm = this.getPreferenceManager();
+		pm.setSharedPreferencesName(this.getIntent().getExtras().getString(SHARED_PREFS_NAME));
 		setContentView(R.layout.manage_feeds);
 		mDbHelper = new FeedsDbAdapter(this);
 		registerForContextMenu(getListView());

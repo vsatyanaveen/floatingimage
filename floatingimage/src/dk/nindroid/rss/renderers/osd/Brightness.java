@@ -6,6 +6,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.view.Window;
 import android.view.WindowManager;
 import dk.nindroid.rss.MainActivity;
 import dk.nindroid.rss.R;
@@ -30,10 +31,13 @@ public class Brightness extends Button {
 
 	@Override
 	public void click(long time) {
-		WindowManager.LayoutParams lp = mActivity.getWindow().getAttributes();
-		mBrightnessIndex = (mBrightnessIndex + 1) % BRIGHTNESS.length;
-		lp.screenBrightness = BRIGHTNESS[mBrightnessIndex];
-		mActivity.getWindow().setAttributes(lp);
+		Window window = mActivity.getWindow();
+		if(window != null){
+			WindowManager.LayoutParams lp = window.getAttributes();
+			mBrightnessIndex = (mBrightnessIndex + 1) % BRIGHTNESS.length;
+			lp.screenBrightness = BRIGHTNESS[mBrightnessIndex];
+			window.setAttributes(lp);
+		}
 	}
 
 	@Override

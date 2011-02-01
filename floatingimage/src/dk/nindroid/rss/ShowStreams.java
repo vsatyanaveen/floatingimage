@@ -306,6 +306,7 @@ public class ShowStreams extends Activity implements MainActivity {
 	
 	public void showFolder(){
 		Intent showFolder = new Intent(this, ManageFeeds.class);
+		showFolder.putExtra(ManageFeeds.SHARED_PREFS_NAME, Settings.SHARED_PREFS_NAME);
 		startActivityForResult(showFolder, SHOW_ACTIVITY);
 	}
 	

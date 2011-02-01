@@ -8,7 +8,7 @@
          <PreferenceScreen android:title="@string/manageFeeds" android:summary="@string/manageFeedsSummary">
 			<intent 
 			android:action="android.intent.action.MAIN" 
-			android:targetClass="dk.nindroid.rss.settings.ManageFeeds" 
+			android:targetClass="dk.nindroid.rss.menu.ApplicationFeedManagerLauncher"
 			android:targetPackage="dk.nindroid.rss" />
         </PreferenceScreen>        
         <CheckBoxPreference

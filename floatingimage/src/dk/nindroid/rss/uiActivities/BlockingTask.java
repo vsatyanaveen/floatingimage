@@ -3,6 +3,7 @@ package dk.nindroid.rss.uiActivities;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.Toast;
 
 public abstract class BlockingTask<Params, Result> extends AsyncTask<Params, Integer, Result> {
@@ -26,7 +27,11 @@ public abstract class BlockingTask<Params, Result> extends AsyncTask<Params, Int
 	
 	protected void onPostExecute(Result result) {
 		if(mBusyDialog.isShowing()){
-			mBusyDialog.dismiss();
+			try{
+				mBusyDialog.dismiss();
+			}catch(IllegalArgumentException e){
+				Log.w("Floating Image", "Trying to dismiss window... Ignoring exception", e);
+			}
 		}
 		if(mError != -1){
 			Toast.makeText(mContext, mError, Toast.LENGTH_LONG).show();
