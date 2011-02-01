@@ -107,7 +107,7 @@ public class FeedController {
 		mLastFeedRead = System.currentTimeMillis();
 		List<FeedReference> newFeeds = new ArrayList<FeedReference>();
 		FeedsDbAdapter mDbHelper = new FeedsDbAdapter(mActivity.context());
-		SharedPreferences sp = mActivity.context().getSharedPreferences(dk.nindroid.rss.menu.Settings.SHARED_PREFS_NAME, 0);
+		SharedPreferences sp = mActivity.context().getSharedPreferences(mActivity.getSettingsKey(), 0);
 		mDbHelper.open();
 		Cursor c = null;
 		try{
