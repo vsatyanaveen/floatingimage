@@ -665,7 +665,8 @@ public class Image implements ImagePlane {
 		if(fraction > 1){
 			mRotation = mRotationSaved;
 			long totalTime = time - mStartTime;
-			mRotations = (int)(totalTime / mActivity.getSettings().floatingTraversal) + 1;
+			long offset = mActivity.getSettings().floatingTraversal * 1024;
+			mRotations = (int)((totalTime + offset) / mActivity.getSettings().floatingTraversal) + 1 - 1024;
 			mState = STATE_FLOATING;
 			if(mShowingImage != null){
 				setTexture(gl, mShowingImage);

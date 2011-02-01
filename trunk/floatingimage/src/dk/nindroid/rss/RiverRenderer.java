@@ -68,103 +68,96 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 	
 	@Override
 	public void onDrawFrame(GL10 gl) {
-		//try{
-			if(mReinit){
-				Log.v("Floating Image", "initting");
-				mReinit = false;
-				GlowImage.initTexture(gl);
-		      	ShadowPainter.initTexture(gl);
-		      	BackgroundPainter.initTexture(gl, mActivity.context(), mActivity.getSettings().backgroundColor);
-		      	mOSD.init(gl, mDisplay);
-		      	mRenderer.init(gl, System.currentTimeMillis() + mOffset, mOSD);
-				FeedProgress.init();
-				Log.v("Floating Image", "initting done!");
-			}
-			
-			gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE,
-	                GL10.GL_MODULATE);
-			gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
-			
-			gl.glMatrixMode(GL10.GL_MODELVIEW);
-	        gl.glLoadIdentity();
-	        gl.glMatrixMode(GL10.GL_PROJECTION);
-	        //gl.glLoadIdentity();
-	        gl.glMatrixMode(GL10.GL_MODELVIEW);
-	        //GLU.gluLookAt(gl, mCamDir.getX(), mCamDir.getY(), mCamDir.getZ(), mCamPos.getX(), mCamPos.getY(), mCamPos.getZ(), 0.0f, 1.0f, 0.0f);
-	        GLU.gluLookAt(gl, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f);
-	        gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
-	        gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
-	        
-	        
-	        gl.glHint(GL10.GL_PERSPECTIVE_CORRECTION_HINT,
-	                GL10.GL_FASTEST);
-	        //EGL10 egl = (EGL10)EGLContext.getEGL();
-	        //egl.eglGetConfigs(egl.eglGetCurrentDisplay(), egl.eglg, config_size, num_config)
-	        //gl.glEnable(GL10.GL_MULTISAMPLE);
-	        
-	        //gl.glScalef(0.25f, 0.25f, 1.0f);
-	        long realTime = System.currentTimeMillis();
-	        
-	        long timeDiff = realTime - mLastFrameTime;
-	        mLastFrameTime = realTime;
-	        if(mPause){
-	        	this.mOffset -= timeDiff;
-	        } else if(timeDiff > 200){ // We left the app, and have returned, or experienced a lag.
-	        	this.mOffset -= timeDiff + 80; 
-	        }
-	        
-	        if(mLimitFramerate){
-	        	int targetFrametime = mActivity.getSettings().lowFps ? 80 : 40;
-		        if(timeDiff < targetFrametime){
-		        	try {
-						Thread.sleep(targetFrametime - timeDiff);
-					} catch (InterruptedException e) {
-						Log.w("Floating Image", "Framerate limiting sleep interrupted.", e);
-					}
-		        }
-	        }
-	        
-	        //*
-	        ++mFrames;
-	        if(realTime - mLastFPSTime > 1000){
-	        	//Log.v("Floating Image", "Framerate is " + mFrames + " frames per second");
-	        	mFrames = 0;
-	        	mLastFPSTime = realTime;
-	        }
-	        //*/
-	        fadeOffset(realTime);
-	        //mOffset = mRenderer.editOffset(mOffset, realTime);
-	        long time = realTime + mOffset;
-	        
-	        mDisplay.setFrameTime(realTime);
-	        if(mShowOSD){
-	        	mShowOSD = false;
-	        	mOSD.show(realTime);
-	        }else if(mHideOSD){
-	        	mHideOSD = false;
-	        	if(mOSD.hide(realTime)){
-	        		mMoveEventHandled = true;
-	        	}
-	        }else if(mClicked){
-	        	mClicked = false;
-	        	mRenderer.click(gl, mClickedPos.getX(), mClickedPos.getY(), time, realTime);
-	        }
-	        
-	        mRenderer.update(gl, time, realTime);
-	        
-	        ///////// DRAWING /////////
-	        gl.glRotatef(mDisplay.getRotation(), 0.0f, 0.0f, 1.0f);
-	        mRenderer.render(gl, time, realTime);
-	        if(!mDisplay.isTurning()){
-	        	mFeedProgress.draw(gl, mFeedsLoaded, mFeedsTotal, mDisplay);
-	        	mOSD.draw(gl, realTime);
-	        }
-		/*	
-		}catch(Throwable t){
-			Log.e("Floating Image", "Unexpected exception caught!", t);
+		if(mReinit){
+			Log.v("Floating Image", "initting");
+			mReinit = false;
+			GlowImage.initTexture(gl);
+	      	ShadowPainter.initTexture(gl);
+	      	BackgroundPainter.initTexture(gl, mActivity.context(), mActivity.getSettings().backgroundColor);
+	      	mOSD.init(gl, mDisplay);
+	      	mRenderer.init(gl, System.currentTimeMillis() + mOffset, mOSD);
+			FeedProgress.init();
+			Log.v("Floating Image", "initting done!");
 		}
-		*/
 		
+		gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE,
+                GL10.GL_MODULATE);
+		gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
+		
+		gl.glMatrixMode(GL10.GL_MODELVIEW);
+        gl.glLoadIdentity();
+        gl.glMatrixMode(GL10.GL_PROJECTION);
+        //gl.glLoadIdentity();
+        gl.glMatrixMode(GL10.GL_MODELVIEW);
+        //GLU.gluLookAt(gl, mCamDir.getX(), mCamDir.getY(), mCamDir.getZ(), mCamPos.getX(), mCamPos.getY(), mCamPos.getZ(), 0.0f, 1.0f, 0.0f);
+        GLU.gluLookAt(gl, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f);
+        gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
+        gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+        
+        
+        gl.glHint(GL10.GL_PERSPECTIVE_CORRECTION_HINT,
+                GL10.GL_FASTEST);
+        //EGL10 egl = (EGL10)EGLContext.getEGL();
+        //egl.eglGetConfigs(egl.eglGetCurrentDisplay(), egl.eglg, config_size, num_config)
+        //gl.glEnable(GL10.GL_MULTISAMPLE);
+        
+        //gl.glScalef(0.25f, 0.25f, 1.0f);
+        long realTime = System.currentTimeMillis();
+        
+        long timeDiff = realTime - mLastFrameTime;
+        mLastFrameTime = realTime;
+        if(mPause){
+        	this.mOffset -= timeDiff;
+        } else if(timeDiff > 200){ // We left the app, and have returned, or experienced a lag.
+        	this.mOffset -= timeDiff - 80; 
+        }
+        
+        if(mLimitFramerate){
+        	int targetFrametime = mActivity.getSettings().lowFps ? 80 : 40;
+	        if(timeDiff < targetFrametime){
+	        	try {
+					Thread.sleep(targetFrametime - timeDiff);
+				} catch (InterruptedException e) {
+					Log.w("Floating Image", "Framerate limiting sleep interrupted.", e);
+				}
+	        }
+        }
+        
+        //*
+        ++mFrames;
+        if(realTime - mLastFPSTime > 1000){
+        	//Log.v("Floating Image", "Framerate is " + mFrames + " frames per second");
+        	mFrames = 0;
+        	mLastFPSTime = realTime;
+        }
+        //*/
+        fadeOffset(realTime);
+        //mOffset = mRenderer.editOffset(mOffset, realTime);
+        long time = realTime + mOffset;
+        
+        mDisplay.setFrameTime(realTime);
+        if(mShowOSD){
+        	mShowOSD = false;
+        	mOSD.show(realTime);
+        }else if(mHideOSD){
+        	mHideOSD = false;
+        	if(mOSD.hide(realTime)){
+        		mMoveEventHandled = true;
+        	}
+        }else if(mClicked){
+        	mClicked = false;
+        	mRenderer.click(gl, mClickedPos.getX(), mClickedPos.getY(), time, realTime);
+        }
+        
+        mRenderer.update(gl, time, realTime);
+        
+        ///////// DRAWING /////////
+        gl.glRotatef(mDisplay.getRotation(), 0.0f, 0.0f, 1.0f);
+        mRenderer.render(gl, time, realTime);
+        if(!mDisplay.isTurning()){
+        	mFeedProgress.draw(gl, mFeedsLoaded, mFeedsTotal, mDisplay);
+        	mOSD.draw(gl, realTime);
+        }
 	}
 	private void fadeOffset(long time) {
 		float timeFactor = (3000 - (time - mUpTime)) / 3000.0f;

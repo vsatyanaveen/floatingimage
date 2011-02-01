@@ -92,33 +92,29 @@ public class ShowStreams extends Activity implements MainActivity {
 			Toast error = Toast.makeText(this, "Error creating data folder (Do you have an SD card?)\nCache will not work, operations might be flaky!", Toast.LENGTH_LONG);
 			error.show();
 		}
-		//try{
-			this.requestWindowFeature(Window.FEATURE_NO_TITLE);
-			SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-			int rotation = InitialOritentationReflector.getRotation(getWindowManager().getDefaultDisplay());
-			orientationManager = new OrientationManager(mSettings, sensorManager, rotation);
-			saveVersion(dataFile);
-			GlowImage.init(this);
-			ShadowPainter.init(this);
-			BackgroundPainter.init();
-			this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-			PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-			wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "Floating Image");
-			//ShowStreams.current = this;
-			mTextureBank = setupFeeders();
-			cleanIfOld();
-			renderer = new RiverRenderer(this, true, mTextureBank, false);
-			mFeedController.setRenderer(renderer);
-			OSD.init(this, renderer);
-			orientationManager.addSubscriber(renderer.mDisplay);
-			ClickHandler.init(this, renderer);
-			setContentView(R.layout.main); 
-			mGLSurfaceView = new GLSurfaceView(this);
-			mGLSurfaceView.setRenderer(renderer);
-			setContentView(mGLSurfaceView);
-		//}catch(Throwable t){
-		//	Log.e("Floating Image", "Unexpected exception caught!", t);
-		//}
+		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+		int rotation = InitialOritentationReflector.getRotation(getWindowManager().getDefaultDisplay());
+		orientationManager = new OrientationManager(mSettings, sensorManager, rotation);
+		saveVersion(dataFile);
+		GlowImage.init(this);
+		ShadowPainter.init(this);
+		BackgroundPainter.init();
+		this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+		wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "Floating Image");
+		//ShowStreams.current = this;
+		mTextureBank = setupFeeders();
+		cleanIfOld();
+		renderer = new RiverRenderer(this, true, mTextureBank, false);
+		mFeedController.setRenderer(renderer);
+		OSD.init(this, renderer);
+		orientationManager.addSubscriber(renderer.mDisplay);
+		ClickHandler.init(this, renderer);
+		setContentView(R.layout.main); 
+		mGLSurfaceView = new GLSurfaceView(this);
+		mGLSurfaceView.setRenderer(renderer);
+		setContentView(mGLSurfaceView);
 	}
 	
 	static void registerParsers(){
