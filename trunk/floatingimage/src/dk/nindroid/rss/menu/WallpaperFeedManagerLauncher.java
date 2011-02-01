@@ -12,6 +12,12 @@ public class WallpaperFeedManagerLauncher extends Activity {
 		
 		Intent intent = new Intent(this, ManageFeeds.class);
 		intent.putExtra(ManageFeeds.SHARED_PREFS_NAME, WallpaperSettings.SHARED_PREFS_NAME);
-		startActivity(intent);
+		startActivityForResult(intent, 0);
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		this.finish();
 	}
 }
