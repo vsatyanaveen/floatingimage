@@ -49,7 +49,8 @@ public class FloatingRenderer extends Renderer {
 	private InfoBar			mInfoBar;
 	private float			mStreamRotation;
 	private float			mRequestedStreamRotation;
-	private float			mStreamOffset;
+	private float			mStreamOffsetX;
+	private float			mStreamOffsetY;
 	private float			mRequestedStreamOffset;
 	private long			mUpTime;
 	
@@ -235,7 +236,7 @@ public class FloatingRenderer extends Renderer {
 		BackgroundPainter.draw(gl, mDisplay, mActivity.getSettings().backgroundColor);
         //Image.setState(gl);
 		gl.glPushMatrix();
-		gl.glTranslatef(0, mStreamOffset, 0);
+		gl.glTranslatef(mStreamOffsetX, mStreamOffsetY, 0);
 		gl.glRotatef(mStreamRotation, 0.0f, 1.0f, 0.0f);
         for(int i = 0; i < mImgCnt; ++i){
         	if(mImgDepths[i] != mSelected){
@@ -285,7 +286,7 @@ public class FloatingRenderer extends Renderer {
 		float timeFactor = (2000 - (realTime - mUpTime)) / 2000.0f;
 		if(timeFactor > 0){
 			float damping = timeFactor * timeFactor;
-			mStreamOffset = mRequestedStreamOffset * damping;
+			mStreamOffsetY = mRequestedStreamOffset * damping;
 		}else{
 			mRequestedStreamOffset = 0;
 		}
@@ -446,7 +447,7 @@ public class FloatingRenderer extends Renderer {
 	public void streamMoved(float x, float y) {
 		if(y*y > x*x*x*x){ // Cheap abs, also make sure this is intentionally a vertical movement!
 			mUpTime = System.currentTimeMillis();
-			mRequestedStreamOffset = mStreamOffset;
+			mRequestedStreamOffset = mStreamOffsetY;
 			mRequestedStreamOffset -= y / 100.0f;
 			mRequestedStreamOffset = Math.max(Math.min(1.0f, mRequestedStreamOffset), -1.0f);
 		}
@@ -454,6 +455,7 @@ public class FloatingRenderer extends Renderer {
 	
 	public void wallpaperMove(float fraction){
 		mStreamRotation = -fraction * 10.0f;
+		mStreamOffsetX = -fraction * 1.0f;
 		/*
 		mUpTime = System.currentTimeMillis();
 		mRequestedStreamRotation = mStreamRotation;

@@ -116,7 +116,9 @@ public class Wallpaper extends GLWallpaperService implements MainActivity{
 			super.onOffsetsChanged(xOffset, yOffset, xOffsetStep, yOffsetStep,
 					xPixelOffset, yPixelOffset);
 			float offset = (xOffset - 0.5f) * 2.0f; 
-			renderer.wallpaperMove(offset);
+			if(renderer != null){
+				renderer.wallpaperMove(offset);
+			}
 		}
 		
 		public void onTouchEvent(android.view.MotionEvent e) 

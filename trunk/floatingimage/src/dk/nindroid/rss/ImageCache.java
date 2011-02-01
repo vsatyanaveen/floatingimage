@@ -226,7 +226,7 @@ public class ImageCache {
 			if(f_info != null){
 				f_info.delete();
 				mCached.remove(mFiles.get(index));
-				mFiles.remove(index);
+				mFiles.set(index, null);
 			}
 			Log.w("Floating Image", "Image cache file not found: " + e);
 		} catch (IOException e) {

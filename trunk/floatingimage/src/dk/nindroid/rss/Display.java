@@ -24,11 +24,15 @@ public class Display implements OrientationSubscriber {
 	private List<ImageSizeChanged>	mImageSizeChangedListeners = new ArrayList<ImageSizeChanged>();
 	
 	public void RegisterImageSizeChangedListener(ImageSizeChanged listener){
-		mImageSizeChangedListeners.add(listener);
+		synchronized (mImageSizeChangedListeners) {
+			mImageSizeChangedListeners.add(listener);
+		}
 	}
 	
 	public void deRegisterImageSizeChangedListener(ImageSizeChanged listener){
-		mImageSizeChangedListeners.remove(listener);
+		synchronized (mImageSizeChangedListeners) {
+			mImageSizeChangedListeners.remove(listener);
+		}
 	}
 	
 	public boolean isFullscreen(){
@@ -89,8 +93,10 @@ public class Display implements OrientationSubscriber {
 	private void onImageSizeChanged(){
 		// Make sure we're not transitioning
 		if(!mTurning && mInfoBarHeight == mTargetInfoBarHeight){
-			for(ImageSizeChanged listener : mImageSizeChangedListeners){
-				listener.imageSizeChanged();
+			synchronized (mImageSizeChangedListeners) {
+				for(ImageSizeChanged listener : mImageSizeChangedListeners){
+					listener.imageSizeChanged();
+				}
 			}
 		}
 	}
