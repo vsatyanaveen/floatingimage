@@ -21,6 +21,8 @@ public class WebAuth extends Activity {
 		webView = (WebView) findViewById(R.id.webauth);
 		webView.getSettings().setJavaScriptEnabled(true);
 		webView.setWebViewClient(new MyWebViewClient(this));
+		webView.getSettings().setBuiltInZoomControls(true);
+		webView.getSettings().setSupportZoom(true);
 		String url = getIntent().getExtras().getString("URL");
 		Log.v("Floating Image", "Visiting url: " + url);
 		webView.loadUrl(url);
