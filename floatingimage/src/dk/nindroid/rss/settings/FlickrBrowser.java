@@ -28,7 +28,7 @@ public class FlickrBrowser extends ListActivity {
 	private static final int	SEARCH 						= 1;
 	private static final int	EXPLORE						= 2;
 	//private static final int	PHOTOS_FROM_HERE 			= 3;
-	private static final int	AUTHORIZE   				= 4;
+	private static final int	AUTHORIZE   				= 3;
 	private static final int	MY_STREAM					= 0;
 	private static final int	MY_ALBUMS					= 1;
 	private static final int	MY_CONTACTS_PHOTOS			= 2;
@@ -36,7 +36,7 @@ public class FlickrBrowser extends ListActivity {
 	private static final int	SEARCH_AUTHORIZED 			= 4;
 	private static final int	EXPLORE_AUTHORIZED			= 5;
 	//private static final int	PHOTOS_FROM_HERE_AUTHORIZED = 6;
-	private static final int	UNAUTHORIZE 				= 7;
+	private static final int	UNAUTHORIZE 				= 6;
 	
 	@Override 
 	protected void onCreate(Bundle savedInstanceState) {
