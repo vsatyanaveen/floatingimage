@@ -23,6 +23,7 @@ public abstract class ImageReference {
 	public abstract String getTitle();
 	public abstract String getImageID();
 	public abstract Bitmap getBitmap();
+	public abstract void recycleBitmap();
 	public abstract void set128Bitmap(Bitmap bitmap);
 	public abstract void set256Bitmap(Bitmap bitmap);
 	public abstract float getWidth();

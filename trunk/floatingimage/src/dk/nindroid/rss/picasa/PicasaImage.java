@@ -82,6 +82,14 @@ public class PicasaImage extends ImageReference{
 	public Bitmap getBitmap() {
 		return bitmap;
 	}
+	
+	@Override
+	public void recycleBitmap() {
+		if(bitmap != null){
+			bitmap.recycle();
+			bitmap = null;
+		}
+	}
 
 	@Override
 	public void getExtended() {

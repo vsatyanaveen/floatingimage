@@ -113,10 +113,14 @@ public class ImageCache {
 					files[i] = null;
 				}
 			}
-			mFiles.clear();
+			synchronized(mFiles){
+				mFiles.clear();
+			}
 			int entries = Math.min(limit, files.length);
-			for(int i = 0; i < entries; ++i){
-				addFile(files[i]);
+			synchronized(mFiles){
+				for(int i = 0; i < entries; ++i){
+					addFile(files[i]);
+				}
 			}
 		}catch(Exception e){
 			Log.w("Floating Image", "Error removing old images...", e);
@@ -210,7 +214,8 @@ public class ImageCache {
 			String bmpName = tokens[0];
 			if(bmpName == null){
 				f_info.delete();
-				mFiles.remove(index);
+				mCached.remove(mFiles.get(index));
+				mFiles.set(index, null);
 				//return getRandomExplore();
 				return null;
 			}
@@ -225,8 +230,10 @@ public class ImageCache {
 		} catch (FileNotFoundException e) {
 			if(f_info != null){
 				f_info.delete();
-				mCached.remove(mFiles.get(index));
-				mFiles.set(index, null);
+				synchronized(mFiles){
+					mCached.remove(mFiles.get(index));
+					mFiles.set(index, null);
+				}
 			}
 			Log.w("Floating Image", "Image cache file not found: " + e);
 		} catch (IOException e) {
@@ -246,7 +253,6 @@ public class ImageCache {
 	}
 	
 	public void addImage(ImageReference ir, boolean next){
-		
 		bank.addBitmap(getFile(mCached.get(ir.getID() + ".info"), ir), false, next);
 	}
 }

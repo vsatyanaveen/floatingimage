@@ -1,8 +1,6 @@
 package dk.nindroid.rss;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import android.util.Log;
 import dk.nindroid.rss.data.CircularList;
 import dk.nindroid.rss.data.ImageReference;
 
@@ -12,13 +10,13 @@ public class TextureBank {
 	//Vector<String> 							streams  = new Vector<String>();		
 	ImageCache 								ic;
 	BitmapDownloader						bitmapDownloader; 
-	private Map<String, ImageReference> 	mActiveBitmaps = new HashMap<String, ImageReference>();
+	//private Map<String, ImageReference> 	mActiveBitmaps = new HashMap<String, ImageReference>();
 	boolean 								stopThreads = false;
 	boolean 								running = false;
 	
 	public void initCache(int cacheSize, int activeImages){
 		if(this.images == null){
-			this.images = new CircularList<ImageReference>(cacheSize, activeImages);
+			this.images = new CircularList<ImageReference>(cacheSize);
 		}
 	}
 	
@@ -51,35 +49,44 @@ public class TextureBank {
 	}
 		
 	public ImageReference getTexture(ImageReference previousImage, boolean next){
-		ImageReference ir = get(next);
+		ImageReference ir = get(next, previousImage);
 		if(ir != null && ir.getBitmap() != null){ // What? The bitmap should NEVER be null!
 			// Remove previous image, if any
 			if(previousImage != null){
-				mActiveBitmaps.remove(previousImage.getID());
+				//mActiveBitmaps.remove(previousImage.getID());
 				if(previousImage.isInvalidated()){
 					ic.updateMeta(previousImage);
 					previousImage.validate();
 				}
 			}
-			mActiveBitmaps.put(ir.getID(), ir);
+			//mActiveBitmaps.put(ir.getID(), ir);
 			return ir;
 		}
 		return null;
 	}
-	private ImageReference get(boolean next){
-		ImageReference ir = null;
+	private ImageReference get(boolean next, ImageReference last){
+		ImageReference ir = last;
 		synchronized (images) {	
-			do{
-				ir = next ? images.next() : images.prev();
-				if(ir == null || ir.getBitmap() == null) break;
-			}while(mActiveBitmaps.containsKey(ir.getID()));
+			ir = next ? images.next(ir) : images.prev(ir);
+			if(ir == null){
+				return null;
+			}
+			if(ir.getBitmap() == null) {
+				Log.v("Floating Image", "Bad data returned!");
+				return null;
+			}
+			/*
+			if(mActiveBitmaps.containsKey(ir.getID())){
+				Log.v("Floating Image", "Showing duplicate image");
+			}
+			*/
 			images.notifyAll();
 		}
 		return ir;
 	}
 	public void reset(){
 		this.images.clear();
-		this.mActiveBitmaps.clear();
+		//this.mActiveBitmaps.clear();
 	}
 	
 	public void stop(){

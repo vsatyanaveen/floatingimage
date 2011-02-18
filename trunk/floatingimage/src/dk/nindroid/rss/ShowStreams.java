@@ -382,7 +382,7 @@ public class ShowStreams extends Activity implements MainActivity {
 		
 		FeedsDbAdapter mDbHelper = new FeedsDbAdapter(this);
 		mDbHelper.open();
-		mDbHelper.addFeed(getString(R.string.cameraPictures), sdcard + "/DCIM", dk.nindroid.rss.settings.Settings.TYPE_LOCAL, "");
+		mDbHelper.addFeed(getString(R.string.cameraPictures), defaultDir.getAbsolutePath(), dk.nindroid.rss.settings.Settings.TYPE_LOCAL, "");
 		if(phonePhotos.exists()){
 			mDbHelper.addFeed(getString(R.string.moreCameraPictures), "/emmc/DCIM", dk.nindroid.rss.settings.Settings.TYPE_LOCAL, ""); // Droid
 		}

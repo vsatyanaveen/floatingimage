@@ -37,6 +37,15 @@ public class FlickrImage extends ImageReference{
 	public Bitmap getBitmap(){
 		return bitmap;
 	}
+	
+	@Override
+	public void recycleBitmap() {
+		if(bitmap != null){
+			bitmap.recycle();
+			bitmap = null;
+		}
+	}
+	
 	@Override
 	public void set128Bitmap(Bitmap bitmap){
 		this.bitmap = Bitmap.createBitmap(128, 128, Config.RGB_565);
