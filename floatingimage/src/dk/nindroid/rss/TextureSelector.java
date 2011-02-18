@@ -238,6 +238,7 @@ public class TextureSelector {
 			if(bmp == null) return;
 			int res = mTextureResolution;
 			Bitmap bitmap = Bitmap.createBitmap(res, res, Config.RGB_565);
+			if(bitmap == null) return; // WTFBBQ?!
 			Canvas canvas = new Canvas(bitmap);
 			canvas.drawBitmap(bmp, 0, 0, mPaint);
 			if(mRef != null){

@@ -223,6 +223,7 @@ public class FeedController {
 						}
 					}
 					synchronized(mReferences){
+						Log.v("Floating Image", "Adding feed: " + references.size() + " images");
 						mReferences.add(references); 										// These two 
 						mPositions.add(new PositionInterval(active, references.size()));	// are in sync!
 					}
@@ -231,7 +232,6 @@ public class FeedController {
 				}
 				mRenderer.setFeeds(++progress, mFeeds.size());
 			}
-			Log.v("Floating Image", "Showing images from " + mReferences.size() + " feeds");
 			return mReferences.size() > 0;
 		}
 	}

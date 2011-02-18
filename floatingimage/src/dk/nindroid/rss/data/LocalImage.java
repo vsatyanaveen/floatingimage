@@ -52,6 +52,14 @@ public class LocalImage extends ImageReference{
 	public Bitmap getBitmap() {
 		return mBitmap;
 	}
+	
+	@Override
+	public void recycleBitmap() {
+		if(mBitmap != null){
+			mBitmap.recycle();
+			mBitmap = null;
+		}
+	}
 
 	@Override
 	public void getExtended() {
