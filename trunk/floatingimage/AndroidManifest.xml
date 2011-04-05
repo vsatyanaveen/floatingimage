@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="dk.nindroid.rss"
-      android:installLocation="auto" android:versionCode="67" android:versionName="2.8.9">
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-feature android:name="android.software.live_wallpaper" />
+      android:installLocation="auto" android:versionCode="68" android:versionName="2.8.10">
      
     <application android:icon="@drawable/icon" android:label="@string/app_name" android:theme="@android:style/Theme.NoTitleBar" android:debuggable="true">
         <activity android:name=".ShowStreams" android:screenOrientation="portrait">
@@ -16,7 +14,6 @@
     	<activity android:name=".menu.Settings" />
 		<activity android:name=".ClearCache"></activity>
 		<activity android:name=".settings.ManageFeeds"></activity>
-		
 		<activity android:name=".settings.DirectoryBrowser"></activity>
 		<activity android:name=".settings.SourceSelector"></activity>
 		<activity android:name=".settings.FlickrBrowser"></activity>
@@ -41,7 +38,9 @@
 		<activity android:name=".parser.picasa.PicasaAlbumBrowser"></activity>
 		<activity android:name=".parser.picasa.PicasaUserView"></activity>
 		<activity android:name=".settings.About" android:theme="@android:style/Theme.Dialog"></activity>
-
+		<activity android:name=".menu.WallpaperSettings" android:exported="true" />
+		<activity android:name=".menu.ApplicationFeedManagerLauncher"></activity>
+		<activity android:name=".menu.WallpaperFeedManagerLauncher"></activity>
 
 		<service android:name="Wallpaper"
 				 android:label="Floating Image"
@@ -51,26 +50,23 @@
 				 </intent-filter>
 				 <meta-data android:name="android.service.wallpaper" android:resource="@xml/wallpaper" />
 		</service>
-	
-	<activity android:name=".menu.WallpaperSettings"
-			  android:exported="true" />
-<activity android:name=".menu.ApplicationFeedManagerLauncher"></activity>
-<activity android:name=".menu.WallpaperFeedManagerLauncher"></activity>
-</application>
-    <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="4" />
+	</application>
 
+    <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="4" />
 	<uses-permission android:name="android.permission.VIBRATE"></uses-permission>
 	<uses-permission android:name="android.permission.WAKE_LOCK"></uses-permission>
-
-	<support-screens>
-		
-	</support-screens>
 	<uses-permission android:name="android.permission.SET_WALLPAPER"></uses-permission>
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
 	<uses-permission android:name="android.permission.WRITE_SETTINGS"></uses-permission>
-
-	
-	<supports-screens android:largeScreens="true" android:anyDensity="true" android:normalScreens="true" android:smallScreens="true"></supports-screens>
-
 	<uses-permission android:name="android.permission.BIND_WALLPAPER"></uses-permission>
+	<uses-permission android:name="android.permission.INTERNET" />
+	<uses-feature android:name="android.software.live_wallpaper" />
+	
+	<supports-screens 
+		android:largeScreens="true" 
+		android:anyDensity="true" 
+		android:normalScreens="true" 
+		android:smallScreens="true"
+		android:xlargeScreens="true"
+		android:resizeable="true" />
 </manifest> 

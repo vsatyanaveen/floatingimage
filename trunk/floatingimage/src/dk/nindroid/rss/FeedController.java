@@ -27,7 +27,7 @@ import dk.nindroid.rss.settings.Settings;
 
 public class FeedController {
 	private static long						REFRESH_INTERVAL = 7200000; // Every other hour;
-	private static long						RETRY_INTERVAL = 120000; // Every other minute;
+	private static long						RETRY_INTERVAL = 30000; // Every half minute;
 	private long							mLastFeedRead = 0;
 	
 	private List<List<ImageReference>> 		mReferences;

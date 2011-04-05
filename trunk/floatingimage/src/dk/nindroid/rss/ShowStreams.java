@@ -35,7 +35,6 @@ import dk.nindroid.rss.compatibility.ButtonBrightness;
 import dk.nindroid.rss.compatibility.SetWallpaper;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.LocalImage;
-import dk.nindroid.rss.flickr.FlickrFeeder;
 import dk.nindroid.rss.launchers.ReadFeeds;
 import dk.nindroid.rss.menu.Settings;
 import dk.nindroid.rss.orientation.InitialOritentationReflector;
@@ -387,7 +386,7 @@ public class ShowStreams extends Activity implements MainActivity {
 			mDbHelper.addFeed(getString(R.string.moreCameraPictures), "/emmc/DCIM", dk.nindroid.rss.settings.Settings.TYPE_LOCAL, ""); // Droid
 		}
 		mDbHelper.addFeed(getString(R.string.Downloads), Environment.getExternalStorageDirectory().getAbsolutePath() + "/download", dk.nindroid.rss.settings.Settings.TYPE_LOCAL, "");
-		mDbHelper.addFeed(getString(R.string.flickrExplore), FlickrFeeder.getExplore(), dk.nindroid.rss.settings.Settings.TYPE_FLICKR, "");
+		// mDbHelper.addFeed(getString(R.string.flickrExplore), FlickrFeeder.getExplore(), dk.nindroid.rss.settings.Settings.TYPE_FLICKR, "");
 		mDbHelper.close();
 	}
 

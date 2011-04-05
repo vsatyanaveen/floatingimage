@@ -108,7 +108,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
         mLastFrameTime = realTime;
         if(mPause){
         	this.mOffset -= timeDiff;
-        } else if(timeDiff > 200){ // We left the app, and have returned, or experienced a lag.
+        } else if(timeDiff > 200){ // We left the app, and have returned, or experienced lag.
         	this.mOffset -= timeDiff - 80; 
         }
         
