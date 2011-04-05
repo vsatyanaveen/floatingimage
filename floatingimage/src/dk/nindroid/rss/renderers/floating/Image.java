@@ -118,10 +118,10 @@ public class Image implements ImagePlane {
 		
 		// Revive textures
 		if(mState == STATE_FOCUSED && mFocusBmp != null){
-			setFocusTexture(gl);
+			// Set large texture next time round.
+			mUpdateLargeTex = true;
 		}else{
 			if(mShowingImage != null){
-				//mRotations = (int)((time - mStartTime) / Settings.floatingTraversal) + 1;
 				setTexture(gl, mShowingImage);
 			}
 		}
@@ -389,13 +389,16 @@ public class Image implements ImagePlane {
 		
 		gl.glDrawElements(GL10.GL_TRIANGLE_STRIP, 4, GL10.GL_UNSIGNED_BYTE, mIndexBuffer);
 		
-		// Smooth images
-		gl.glEnable(GL10.GL_BLEND);
-		gl.glEnable(GL10.GL_POINT_SMOOTH);
-		gl.glEnable(GL10.GL_LINE_SMOOTH);
-		gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
-		gl.glLineWidth(1.0f);
-		gl.glDrawElements(GL10.GL_LINE_STRIP, 5, GL10.GL_UNSIGNED_BYTE, mLineIndexBuffer);
+		// Show smoothing
+		//if(realTime % 10000 < 5000){
+			// Smooth images
+			gl.glEnable(GL10.GL_BLEND);
+			gl.glEnable(GL10.GL_POINT_SMOOTH);
+			gl.glEnable(GL10.GL_LINE_SMOOTH);
+			gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+			gl.glLineWidth(1.0f);
+			gl.glDrawElements(GL10.GL_LINE_STRIP, 5, GL10.GL_UNSIGNED_BYTE, mLineIndexBuffer);
+		//}
 		
 		gl.glPopMatrix();
         

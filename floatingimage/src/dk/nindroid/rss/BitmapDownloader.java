@@ -54,7 +54,7 @@ public class BitmapDownloader implements Runnable {
 	
 	@Override
 	public void run() {
-		Log.v("Bitmap downloader", "*** Starting asynchronous downloader thread");
+		Log.v("Floating Image", "*** Starting asynchronous downloader thread");
 		Process.setThreadPriority(15);
 		while(true){
 			try{
@@ -62,7 +62,7 @@ public class BitmapDownloader implements Runnable {
 				for(int i = 0; i < 2; ++i){ // 0 = next, 1 = prev
 					while(i == 0 ? bank.images.needNext() : bank.images.needPrev()){
 						if(bank.stopThreads){
-							Log.i("Bitmap downloader", "*** Stopping asynchronous downloader thread per request");
+							Log.i("Floating Image", "*** Stopping asynchronous downloader thread per request");
 							return;
 						}
 						ImageReference ir = i == 0 ? mFeedController.getNextImageReference() : mFeedController.getPrevImageReference();
@@ -90,18 +90,18 @@ public class BitmapDownloader implements Runnable {
 				}
 				synchronized (bank.images) {
 					if(bank.stopThreads){
-						Log.v("Bitmap downloader", "*** Stopping asynchronous downloader thread per request");
+						Log.v("Floating Image", "*** Stopping asynchronous downloader thread per request");
 						return;
 					}
 					try {
 						bank.images.wait();
 					} catch (InterruptedException e) {
-						Log.v("Bitmap downloader", "*** Stopping asynchronous downloader thread", e);
+						Log.v("Floating Image", "*** Stopping asynchronous downloader thread", e);
 						return;
 					}
 				}
 			}catch(Exception e){
-				Log.e("dk.nindroid.BitmapDownloader", "Unexpected exception caught...", e);
+				Log.e("Floating Image", "Unexpected exception caught...", e);
 				try {
 					Thread.sleep(500);
 				} catch (InterruptedException e1) {}
@@ -196,7 +196,7 @@ public class BitmapDownloader implements Runnable {
 			Bitmap bm = BitmapFactory.decodeByteArray(bitmapByteArray, 0, bitmapByteArray.length);
 			return bm;
 		} catch (Exception e) {
-			Log.w("dk.nindroid.rss.BitmaDownloader", "Error handling URL \"" + URL + "\"", e);
+			Log.w("Floating Image", "Error handling URL \"" + URL + "\"", e);
 		}
 		return null;	
 	}
@@ -209,9 +209,9 @@ public class BitmapDownloader implements Runnable {
 			bitmap = BitmapFactory.decodeStream(in);
 			in.close();
 		} catch (IOException e) {
-			Log.e("Bitmap downloader", "Error downloading bitmap", e);
+			Log.e("Floating Image", "Error downloading bitmap", e);
 		} catch(NullPointerException e) {
-			Log.e("Bitmap downloader", "Error downloading bitmap", e);
+			Log.e("Floating Image", "Error downloading bitmap", e);
 		}
 		
 		return bitmap;

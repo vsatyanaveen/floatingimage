@@ -8,11 +8,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -29,8 +27,8 @@ public class ImageCache {
 	TextureBank bank;
 	private final String 	mExploreFolder;
 	private final String 	mExploreInfoFolder;
-	List<File>				mFiles;
-	Map<String, Integer>	mCached;
+	//List<File>				mFiles;
+	Map<String, File>		mCached;
 	Random 					mRand;
 	File 					mExplore;
 	File 					mExploreInfo;
@@ -55,8 +53,8 @@ public class ImageCache {
 		mExplore.mkdirs(); // Make dir if not exists
 		File[] exploreInfoArray = mExploreInfo.listFiles();
 		if(exploreInfoArray == null) return;
-		mFiles = new ArrayList<File>(exploreInfoArray.length);
-		mCached = new HashMap<String, Integer>(exploreInfoArray.length);
+		//mFiles = new ArrayList<File>(exploreInfoArray.length);
+		mCached = new HashMap<String, File>(exploreInfoArray.length);
 		Log.v("Floating Image", exploreInfoArray.length + " files in cache.");
 		for(int i = 0; i < exploreInfoArray.length; ++i){
 			File f = exploreInfoArray[i];
@@ -113,11 +111,11 @@ public class ImageCache {
 					files[i] = null;
 				}
 			}
-			synchronized(mFiles){
-				mFiles.clear();
+			synchronized(mCached){
+				mCached.clear();
 			}
 			int entries = Math.min(limit, files.length);
-			synchronized(mFiles){
+			synchronized(mCached){
 				for(int i = 0; i < entries; ++i){
 					addFile(files[i]);
 				}
@@ -128,7 +126,7 @@ public class ImageCache {
 	}
 	
 	public void saveImage(ImageReference ir){
-		if(mFiles == null){
+		if(mCached == null){
 			setupImageCache();
 		}
 		if(ir == null) return;
@@ -144,9 +142,9 @@ public class ImageCache {
 			if(f_info == null){
 				f.delete();
 			}else{
-				synchronized(mFiles){
+				synchronized(mCached){
 					addFile(f_info);
-					mCached.put(f_info.getName(), mFiles.size() - 1);
+					//mCached.put(f_info.getName(), mFiles.size() - 1);
 				}
 			}
 		} catch (FileNotFoundException e) {
@@ -179,8 +177,8 @@ public class ImageCache {
 	}
 	
 	protected void addFile(File file){
-		mFiles.add(file);
-		mCached.put(file.getName(), mFiles.size() - 1);
+		//mFiles.add(file);
+		mCached.put(file.getName(), file);
 	}
 	/*
 	public ImageReference getRandomExplore(){
@@ -197,10 +195,10 @@ public class ImageCache {
 		return getFile(mRand.nextInt(mExploreFiles.size()));
 	}
 	*/
-	public ImageReference getFile(int index, ImageReference ir){
-		File f_info = null;
+	public ImageReference getFile(File f_info, ImageReference ir){
+		//File f_info = null;
 		try {
-			f_info = mFiles.get(index);
+			//f_info = mFiles.get(index);
 			int length = (int)f_info.length();
 			InputStream is_info = new FileInputStream(f_info);
 			if(mBuf.length < length){
@@ -214,8 +212,8 @@ public class ImageCache {
 			String bmpName = tokens[0];
 			if(bmpName == null){
 				f_info.delete();
-				mCached.remove(mFiles.get(index));
-				mFiles.set(index, null);
+				mCached.remove(ir.getID() + ".info");
+				//mFiles.set(index, null);
 				//return getRandomExplore();
 				return null;
 			}
@@ -230,9 +228,9 @@ public class ImageCache {
 		} catch (FileNotFoundException e) {
 			if(f_info != null){
 				f_info.delete();
-				synchronized(mFiles){
-					mCached.remove(mFiles.get(index));
-					mFiles.set(index, null);
+				synchronized(mCached){
+					mCached.remove(ir.getID() + ".info");
+					//mFiles.set(index, null);
 				}
 			}
 			Log.w("Floating Image", "Image cache file not found: " + e);
@@ -243,8 +241,8 @@ public class ImageCache {
 	}
 	
 	public boolean exists(String name){
-		if(mFiles == null) return false;
-		synchronized(mFiles){
+		if(mCached == null) return false;
+		synchronized(mCached){
 			if(mCached.containsKey(name + ".info")){
 				return true;
 			}

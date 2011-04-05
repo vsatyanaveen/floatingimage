@@ -65,21 +65,15 @@ public class TextureBank {
 		return null;
 	}
 	private ImageReference get(boolean next, ImageReference last){
-		ImageReference ir = last;
+		ImageReference ir = null;
 		synchronized (images) {	
-			ir = next ? images.next(ir) : images.prev(ir);
-			if(ir == null){
-				return null;
+			ir = next ? images.next(last) : images.prev(last);
+			if(ir != null){
+				if(ir.getBitmap() == null) {
+					Log.v("Floating Image", "Bad data returned!");
+					ir = null;
+				}
 			}
-			if(ir.getBitmap() == null) {
-				Log.v("Floating Image", "Bad data returned!");
-				return null;
-			}
-			/*
-			if(mActiveBitmaps.containsKey(ir.getID())){
-				Log.v("Floating Image", "Showing duplicate image");
-			}
-			*/
 			images.notifyAll();
 		}
 		return ir;
