@@ -31,42 +31,55 @@ public class TextureSelector {
 	}
 	
 	public void stopThread(){
-		synchronized (mWorker) {
-			mDisplay.deRegisterImageSizeChangedListener(mWorker);
-			mWorker.mRun = false;
-			mWorker.notifyAll();
+		if(mWorker != null){
+			synchronized (mWorker) {
+				mDisplay.deRegisterImageSizeChangedListener(mWorker);
+				mWorker.mRun = false;
+				mWorker.notifyAll();
+			}
 		}
 	}
 	
 	public void selectImage(ImagePlane img, ImageReference ref){
-		synchronized (mWorker) {
-			mWorker.mCurSelected = img;
-			mWorker.mRef = ref;
-			mWorker.notify();
-		}		
+		if(mWorker != null){
+			synchronized (mWorker) {
+				mWorker.mCurSelected = img;
+				mWorker.mRef = ref;
+				mWorker.notify();
+			}		
+		}
 	}
 	
 	public void applyLarge(){
-		mWorker.mDoApplyLarge = true;
-		synchronized (mWorker) {
-			mWorker.notify();
+		if(mWorker != null){
+			mWorker.mDoApplyLarge = true;
+			synchronized (mWorker) {
+				mWorker.notify();
+			}
 		}
 	}
 	
 	public void setRotated(float rot){
-		mWorker.mSwapSides = rot % 180 == 90;
-		applyLarge();
+		if(mWorker != null){
+			mWorker.mSwapSides = rot % 180 == 90;
+			applyLarge();
+		}
 	}
 	
 	public void applyOriginal(){
-		mWorker.mDoApplyOriginal = true;
-		synchronized (mWorker) {
-			mWorker.notify();
+		if(mWorker != null){
+			mWorker.mDoApplyOriginal = true;
+			synchronized (mWorker) {
+				mWorker.notify();
+			}
 		}
 	}
 	
 	public int getProgress(){
-		return mWorker.progress.isKey(mWorker.mCurSelected) ? mWorker.progress.getPercentDone() : 2;
+		if(mWorker != null){
+			return mWorker.progress.isKey(mWorker.mCurSelected) ? mWorker.progress.getPercentDone() : 2;
+		}
+		return 0;
 	}
 	
 	private class Worker implements Runnable, Display.ImageSizeChanged{

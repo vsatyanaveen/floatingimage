@@ -47,6 +47,7 @@ public class FloatingRenderer extends Renderer {
 	private Display 		mDisplay;
 	private MainActivity	mActivity;
 	private InfoBar			mInfoBar;
+	private BackgroundPainter mBackgroundPainter;
 	private float			mStreamRotation;
 	private float			mRequestedStreamRotation;
 	private float			mStreamOffsetX;
@@ -68,6 +69,7 @@ public class FloatingRenderer extends Renderer {
 		this.mActivity = activity;
 		mTextureSelector = new TextureSelector(display);
 		mInfoBar = new InfoBar();
+		mBackgroundPainter = new BackgroundPainter();
 		this.mDisplay = display;
 		this.mBank = bank;
 		mImgs = new Image[mTotalImgRows * 3 / 2];
@@ -233,7 +235,7 @@ public class FloatingRenderer extends Renderer {
 	public void render(GL10 gl, long time, long realTime){
 		initRender(gl);
 		// Background first, this is backmost
-		BackgroundPainter.draw(gl, mDisplay, mActivity.getSettings().backgroundColor);
+		mBackgroundPainter.draw(gl, mDisplay, mActivity.getSettings().backgroundColor);
         //Image.setState(gl);
 		gl.glPushMatrix();
 		gl.glTranslatef(mStreamOffsetX, mStreamOffsetY, 0);
@@ -301,6 +303,7 @@ public class FloatingRenderer extends Renderer {
 	}
 	
 	public void init(GL10 gl, long time, OSD osd){
+		mBackgroundPainter.initTexture(gl, mActivity.context(), mActivity.getSettings().backgroundColor);
 		osd.setEnabled(false, true, true);
 		for(int i = 0; i < mImgCnt; ++i){
 			mImgs[i].init(gl, time);

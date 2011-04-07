@@ -31,23 +31,24 @@ public class BackgroundPainter {
 	public static final int PURE_BLACK = 8;
 	
 	private static final float zDepth = 15.0f;
-	private static Bitmap bg;
-	private static Bitmap canvas;
-	private static int mTextureID;
-	private static FloatBuffer mTexBuffer;
-	private static Vec3f[]		mVertices;
-	private static IntBuffer   mVertexBuffer;
-	private static ByteBuffer  mIndexBuffer;
+	
+	private Bitmap bg;
+	private Bitmap canvas;
+	private int mTextureID;
+	private FloatBuffer mTexBuffer;
+	private Vec3f[]		mVertices;
+	private IntBuffer   mVertexBuffer;
+	private ByteBuffer  mIndexBuffer;
 	
 	private static final int VERTS = 4;
 	
-	public static void init(){
+	public BackgroundPainter(){
 		canvas = Bitmap.createBitmap(512, 512, Config.RGB_565);
 		
 		initPlane();
 	}
 	
-	private static void initPlane(){
+	private void initPlane(){
 		ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
         tbb.order(ByteOrder.nativeOrder());
         mTexBuffer = tbb.asFloatBuffer();
@@ -91,7 +92,7 @@ public class BackgroundPainter {
 		mIndexBuffer.position(0);
 	}
 	
-	public static void initTexture(GL10 gl, Context context, int backgroundColor){	
+	public void initTexture(GL10 gl, Context context, int backgroundColor){	
 		InputStream shadowIS;
 		
 		switch(backgroundColor){
@@ -183,7 +184,7 @@ public class BackgroundPainter {
 	 * @param szY
 	 * @param szZ
 	 */
-	public static void draw(GL10 gl, Display display, int backgroundColor){
+	public void draw(GL10 gl, Display display, int backgroundColor){
 		if(backgroundColor == PURE_BLACK){
 			return;
 		}

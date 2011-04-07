@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="dk.nindroid.rss"
-      android:installLocation="auto" android:versionCode="68" android:versionName="2.8.10">
+      android:installLocation="auto" android:versionCode="70" android:versionName="2.8.12">
      
-    <application android:icon="@drawable/icon" android:label="@string/app_name" android:theme="@android:style/Theme.NoTitleBar" android:debuggable="true">
+    <application android:icon="@drawable/icon" android:label="@string/app_name" android:theme="@android:style/Theme.NoTitleBar" android:debuggable="false">
         <activity android:name=".ShowStreams" android:screenOrientation="portrait">
         	<intent-filter>
         		<action android:name="android.intent.action.MAIN"></action>
@@ -60,7 +60,6 @@
 	<uses-permission android:name="android.permission.WRITE_SETTINGS"></uses-permission>
 	<uses-permission android:name="android.permission.BIND_WALLPAPER"></uses-permission>
 	<uses-permission android:name="android.permission.INTERNET" />
-	<uses-feature android:name="android.software.live_wallpaper" />
 	
 	<supports-screens 
 		android:largeScreens="true" 
