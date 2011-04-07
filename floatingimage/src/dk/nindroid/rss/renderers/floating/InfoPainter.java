@@ -72,7 +72,7 @@ public class InfoPainter {
 					lastSpace = mTitle.lastIndexOf(" ");
 					while(title2Width > textWidth - mTitleContinuedWidth) {
 						lastSpace = mTitle.lastIndexOf(" ", lastSpace - 1);
-						if(lastSpace == -1) break;
+						if(lastSpace == -1 || lastSpace > mTitle.length()) break;
 						title2 = mTitle.substring(nextSpace, lastSpace);
 						title2Width = (int)Math.ceil(mPainter.measureText(title2));
 					}

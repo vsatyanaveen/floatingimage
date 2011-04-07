@@ -14,7 +14,6 @@ import dk.nindroid.rss.gfx.Vec2f;
 import dk.nindroid.rss.renderers.FeedProgress;
 import dk.nindroid.rss.renderers.OSD;
 import dk.nindroid.rss.renderers.Renderer;
-import dk.nindroid.rss.renderers.floating.BackgroundPainter;
 import dk.nindroid.rss.renderers.floating.GlowImage;
 import dk.nindroid.rss.renderers.floating.ShadowPainter;
 
@@ -73,7 +72,6 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 			mReinit = false;
 			GlowImage.initTexture(gl);
 	      	ShadowPainter.initTexture(gl);
-	      	BackgroundPainter.initTexture(gl, mActivity.context(), mActivity.getSettings().backgroundColor);
 	      	mOSD.init(gl, mDisplay);
 	      	mRenderer.init(gl, System.currentTimeMillis() + mOffset, mOSD);
 			FeedProgress.init();

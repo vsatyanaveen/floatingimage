@@ -45,7 +45,6 @@ import dk.nindroid.rss.parser.flickr.FlickrParser;
 import dk.nindroid.rss.parser.picasa.PicasaParser;
 import dk.nindroid.rss.renderers.OSD;
 import dk.nindroid.rss.renderers.Renderer;
-import dk.nindroid.rss.renderers.floating.BackgroundPainter;
 import dk.nindroid.rss.renderers.floating.FloatingRenderer;
 import dk.nindroid.rss.renderers.floating.GlowImage;
 import dk.nindroid.rss.renderers.floating.ShadowPainter;
@@ -98,7 +97,6 @@ public class ShowStreams extends Activity implements MainActivity {
 		saveVersion(dataFile);
 		GlowImage.init(this);
 		ShadowPainter.init(this);
-		BackgroundPainter.init();
 		this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "Floating Image");

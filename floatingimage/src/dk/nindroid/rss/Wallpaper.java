@@ -10,7 +10,6 @@ import dk.nindroid.rss.helpers.GLWallpaperService;
 import dk.nindroid.rss.launchers.ReadFeeds;
 import dk.nindroid.rss.menu.WallpaperSettings;
 import dk.nindroid.rss.renderers.OSD;
-import dk.nindroid.rss.renderers.floating.BackgroundPainter;
 import dk.nindroid.rss.renderers.floating.FloatingRenderer;
 import dk.nindroid.rss.renderers.floating.GlowImage;
 import dk.nindroid.rss.renderers.floating.ShadowPainter;
@@ -41,7 +40,6 @@ public class Wallpaper extends GLWallpaperService implements MainActivity{
 			
 			GlowImage.init(context);
 			ShadowPainter.init(context);
-			BackgroundPainter.init();
 			
 			ShowStreams.registerParsers();
 			
