@@ -5,7 +5,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.Random;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -24,6 +23,7 @@ import dk.nindroid.rss.gfx.ImageUtil;
 import dk.nindroid.rss.gfx.Vec3f;
 import dk.nindroid.rss.renderers.ImagePlane;
 import dk.nindroid.rss.renderers.ProgressBar;
+import dk.nindroid.rss.renderers.floating.positionControllers.PositionController;
 import dk.nindroid.rss.uiActivities.Toaster;
 
 public class Image implements ImagePlane {
@@ -36,17 +36,15 @@ public class Image implements ImagePlane {
 	private int				mState = STATE_FLOATING;
 	
 	private Display			mDisplay;
-	
 	private IntBuffer   	mVertexBuffer;
 	private ByteBuffer  	mIndexBuffer;
 	private ByteBuffer  	mLineIndexBuffer;
 	private float  			maspect;
-	private Vec3f			mPos;
 	private int				mRotations;
 	private float			mRotation;
+	private Vec3f			mPos;
 	private float			mRotationSaved;
-	private Vec3f			mJitter = new Vec3f(0.0f, 0.0f, 0.0f);
-	private Random			mRand;
+	private PositionController	mPositionController;
 	private TextureBank 	mbank;
 	private long			mStartTime;
 	private ImageReference 	mShowingImage;
@@ -58,7 +56,6 @@ public class Image implements ImagePlane {
 	
 	// Selected vars
 	private Vec3f			mSelectedPos = new Vec3f();
-	private float 			mYPos;
 	private boolean			mUpdateLargeTex = false;
 	private Bitmap			mFocusBmp;
 	private float			mFocusWidth;
@@ -66,9 +63,13 @@ public class Image implements ImagePlane {
 	private boolean			mLargeTex = false;
 	private boolean			mSetBackgroundWhenReady = false;
 	
-	public enum Pos {
-		UP, MIDDLE, DOWN
-	};
+	public void setPositionController(PositionController pc){
+		this.mPositionController = pc;
+	}
+	
+	public PositionController getPositionController(){
+		return this.mPositionController;
+	}
 	
 	public void init(GL10 gl, long time){
 		int[] textures = new int[1];
@@ -90,7 +91,7 @@ public class Image implements ImagePlane {
 	}
 	
 	public float getDepth(){
-		return mJitter.getZ() + mPos.getZ();
+		return mPos.getZ();
 	}
 	
 	public void setBackground(){
@@ -166,7 +167,7 @@ public class Image implements ImagePlane {
 			mShowingImage.setOld();
 			// Select
 			mState = STATE_FOCUSING;
-			mRotationSaved = mRotation;
+			mRotationSaved = mPositionController.getRotAngle(getInterval(mStartTime - time));
 			// Get large texture, if not already there.
 			mInfoBar.select(gl, mDisplay, this.mShowingImage);
 		}
@@ -180,32 +181,23 @@ public class Image implements ImagePlane {
 		mFocusWidth = width;
 		mFocusHeight = height;
 		mLargeTex = true;
+		mRotationSaved = mPositionController.getRotAngle(time - mStartTime);
 		setFocusTexture(gl);
 		if(mSetBackgroundWhenReady){
 			setBackground();
 		}
 		mSetBackgroundWhenReady = false;
 	}
-	
-	protected float getYPos(){
-		return mYPos * mDisplay.getFocusedHeight();
-	}
-	
-	public Image(MainActivity activity, TextureBank bank, Display display, InfoBar infoBar, Pos layer, Texture largeTexture, TextureSelector textureSelector, long startTime){
+		
+	public Image(MainActivity activity, TextureBank bank, Display display, InfoBar infoBar, Texture largeTexture, TextureSelector textureSelector, long startTime){
 		this.mDisplay = display;
 		mbank = bank;
 		this.mActivity = activity;
 		this.mInfoBar = infoBar;
 		this.mTextureSelector = textureSelector;
-		mRand = new Random(System.currentTimeMillis());
 		this.mLargeTexture = largeTexture;
-		switch(layer){
-			case UP: mYPos = 1.25f; break;
-			case MIDDLE: mYPos = 0.0f; break;
-			case DOWN: mYPos = -1.25f; break;
-		}
-		mPos = new Vec3f(-FloatingRenderer.getFarRight(mDisplay), mYPos, FloatingRenderer.mFloatZ);
-		reJitter();
+        mPos = new Vec3f(0, 0, 0);
+
 		mStartTime = startTime;
 		ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
         tbb.order(ByteOrder.nativeOrder());
@@ -315,9 +307,9 @@ public class Image implements ImagePlane {
 		}
 		
 		float x, y, z, szX, szY;
-		x = mPos.getX() + mJitter.getX();
-		y = mPos.getY() + mJitter.getY();
-		z = mPos.getZ() + mJitter.getZ();
+		x = mPos.getX();
+		y = mPos.getY();
+		z = mPos.getZ();
 		if(mShowingImage != null && (Math.min(mShowingImage.getRotationFraction(realTime), 1.0f) != 1.0f || mShowingImage.getTargetOrientation() != 0.0f)){
 			szY = 5.0f; // Huge, since we only scale down.
 			szX = szY * maspect;
@@ -357,24 +349,28 @@ public class Image implements ImagePlane {
 		szX *= userScale;
 		szY *= userScale;
 		
+		float interval = getInterval(time - mStartTime);
 		gl.glEnable(GL10.GL_BLEND);
+		Vec3f rot = mPositionController.getRotation(interval);
+		float alpha = mState == STATE_FLOATING ? mPositionController.getOpacity(interval) : 1;
 		
-		if(mActivity.getSettings().imageDecorations){
+		gl.glColor4f(1.0f, 1.0f, 1.0f, alpha);
+		if(mActivity.getSettings().imageDecorations && mPositionController.supportsShadow()){
 			/*
 			if(mCurImage != null && mCurImage.isNew()){
 				GlowImage.draw(gl, x, y, z, rotation, szX, szY);
 			}
 			else{
 			*/
-				ShadowPainter.draw(gl, x, y, z, rotation, szX, szY);
+				ShadowPainter.draw(gl, x, y, z, rotation, rot, szX, szY);
 			//}
 		}
-		
 		gl.glTranslatef(x, y, z);
-		gl.glRotatef(rotation, 0, 0, 1);
+		gl.glRotatef(rotation, rot.getX(), rot.getY(), rot.getZ());
 		gl.glScalef(szX, szY, 1);
 		
-		gl.glDisable(GL10.GL_BLEND);
+		gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+		gl.glEnable(GL10.GL_BLEND);
 		// Draw image
 		gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_REPLACE);
 		gl.glActiveTexture(GL10.GL_TEXTURE0);
@@ -392,7 +388,7 @@ public class Image implements ImagePlane {
 		// Show smoothing
 		//if(realTime % 10000 < 5000){
 			// Smooth images
-			gl.glEnable(GL10.GL_BLEND);
+			//gl.glEnable(GL10.GL_BLEND);
 			gl.glEnable(GL10.GL_POINT_SMOOTH);
 			gl.glEnable(GL10.GL_LINE_SMOOTH);
 			gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
@@ -577,10 +573,7 @@ public class Image implements ImagePlane {
 	
 	/************ Position functions ************/
 	private void reJitter(){
-		mJitter.setX(mRand.nextFloat() * FloatingRenderer.mJitterX * 2 - FloatingRenderer.mJitterX);
-		mJitter.setY(mRand.nextFloat() * FloatingRenderer.mJitterY * 2 - FloatingRenderer.mJitterY);
-		mJitter.setZ(mRand.nextFloat() * FloatingRenderer.mJitterZ * 2 - FloatingRenderer.mJitterZ);
-		mRotation = mActivity.getSettings().rotateImages ? mRand.nextFloat() * 20.0f - 10.0f : 0;
+		mPositionController.jitter();
 	}
 	
 	public void setStartTime(long startTime, long frameTime){
@@ -593,23 +586,28 @@ public class Image implements ImagePlane {
 		return this.mStartTime;
 	}
 	
-	private float getXPos(long relativeTime){
+	//private float getXPos(long relativeTime){
+		/*
 		float curPos = 0;
 		try{
 			curPos = (relativeTime  + (mActivity.getSettings().floatingTraversal << 10)) % mActivity.getSettings().floatingTraversal;
 		}catch(ArithmeticException e){
 			Log.e("Floating Image", "relativeTime: " + relativeTime + ", traversal: " + mActivity.getSettings().floatingTraversal);
 		}
-		return -FloatingRenderer.getFarRight(mDisplay) + ((curPos / mActivity.getSettings().floatingTraversal) * FloatingRenderer.getFarRight(mDisplay) * 2);
-	}
+		
+		//return -FloatingRenderer.getFarRight(mDisplay) + ((curPos / mActivity.getSettings().floatingTraversal) * FloatingRenderer.getFarRight(mDisplay) * 2);
+		*/
+		
+	//}
 	
 	private boolean updateFloating(GL10 gl, long time){
 		boolean depthChanged = false;
 		long totalTime = time - mStartTime;
+		float interval = getInterval(totalTime);
+		Vec3f pos = mPositionController.getPosition(interval);
+		mPos.set(pos);
+		mRotation = mPositionController.getRotAngle(interval);
 		
-		mPos.setZ(FloatingRenderer.mFloatZ);
-		mPos.setY(getYPos()); 
-		mPos.setX(getXPos(totalTime));
 		boolean isInRewind = totalTime < mActivity.getSettings().floatingTraversal * (mRotations - 1);
 		// Get new texture...
 		if(totalTime > mActivity.getSettings().floatingTraversal * mRotations && !isInRewind){
@@ -627,7 +625,7 @@ public class Image implements ImagePlane {
 			resetTexture(gl, false);
 			--mRotations;
         }
-		if(mShowingImage == null & mPos.getX() < -5.0f){
+		if(mShowingImage == null && getInterval(time - mStartTime) < 0.01f){
 			//Log.v("Floating Image", "Getting new texture - I need one!");
 			resetTexture(gl, true);
 		}
@@ -654,9 +652,9 @@ public class Image implements ImagePlane {
 		float selectedY = mSelectedPos.getY();
 		float selectedZ = mSelectedPos.getZ();
 		
-		float distX = FloatingRenderer.mFocusX - selectedX - mJitter.getX();
-		float distY = FloatingRenderer.mFocusY - selectedY - mJitter.getY() + getFocusedOffset();
-		float distZ = FloatingRenderer.mFocusZ - selectedZ - mJitter.getZ();
+		float distX = FloatingRenderer.mFocusX - selectedX;// - mJitter.getX();
+		float distY = FloatingRenderer.mFocusY - selectedY;// - mJitter.getY() + getFocusedOffset();
+		float distZ = FloatingRenderer.mFocusZ - selectedZ;// - mJitter.getZ();
 		
 		mPos.setX(distX * fraction + selectedX);
 		mPos.setY(distY * fraction + selectedY);
@@ -691,19 +689,24 @@ public class Image implements ImagePlane {
 		long timeToFloat = realTime - mStartTime - FloatingRenderer.mSelectedTime - FloatingRenderer.mFocusDuration;
 		
 		mRotation = fraction * mRotationSaved;
-		float floatX = getXPos(time + timeToFloat);
-		
-		float distX = floatX - selectedX;
-		float distY = getYPos() - selectedY;
-		float distZ = FloatingRenderer.mFloatZ - selectedZ;
+		Vec3f pos = mPositionController.getPosition(getInterval(time + timeToFloat));
+				
+		float distX = pos.getX() - selectedX;
+		float distY = pos.getY() - selectedY;
+		float distZ = pos.getZ() - selectedZ;
 		
 		mPos.setX(distX * fraction + selectedX);
 		mPos.setY(distY * fraction + selectedY);
 		mPos.setZ(distZ * fraction + selectedZ);
 	}
 	
+	float getInterval(long time){
+		return ((time  + (mActivity.getSettings().floatingTraversal << 10)) % mActivity.getSettings().floatingTraversal) / (float)mActivity.getSettings().floatingTraversal;
+	}
+	
 	public boolean update(GL10 gl, long time, long realTime){
 		boolean depthChanged = false;
+		// Make sure time is positive, then divide by traversal time to get how far image is
 		if(mState == STATE_FLOATING){
 			depthChanged = updateFloating(gl, time);		
 		}else{
@@ -733,7 +736,6 @@ public class Image implements ImagePlane {
 		mPos.setX(FloatingRenderer.mFocusX);
 		mPos.setY(FloatingRenderer.mFocusY + getFocusedOffset());
 		mPos.setZ(FloatingRenderer.mFocusZ);
-		mPos.minus(mJitter, mPos);
 	}
 	
 	private float getFocusedOffset(){
@@ -917,9 +919,9 @@ public class Image implements ImagePlane {
 	
 	public float intersect(Ray r){
 		if(mShowingImage == null) return -1;
-		float posX = mPos.getX() + mJitter.getX();
-		float posY = mPos.getY() + mJitter.getY();
-		float posZ = mPos.getZ() + mJitter.getZ();
+		float posX = mPos.getX();
+		float posY = mPos.getY();
+		float posZ = mPos.getZ();
 		Vec3f pos = new Vec3f(posX, posY, posZ);
 
 		float x0 = r.getO().getX();

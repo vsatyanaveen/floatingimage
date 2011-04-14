@@ -31,6 +31,7 @@ public class Settings {
 	public long	 	slideSpeed;
 	public boolean	imageDecorations;
 	public boolean	highResThumbs;
+	public int		floatingType = 0;
 	public long		floatingTraversal = 30000;
 	public int		forceRotation;
 	
@@ -59,6 +60,7 @@ public class Settings {
 		fullscreenBlack = sp.getBoolean("fullscreenBlack", true);
 		imageDecorations = sp.getBoolean("imageDecorations", true);
 		highResThumbs = sp.getBoolean("highResThumbs", false);
+		floatingType = Integer.parseInt(sp.getString("floatingType", "0"));
 		floatingTraversal = Long.parseLong(sp.getString("floatingSpeed", "30000"));
 		forceRotation = Integer.parseInt(sp.getString("forceRotation", "0"));
 		switch(forceRotation){

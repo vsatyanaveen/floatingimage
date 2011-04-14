@@ -262,6 +262,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 		}
 	}
 	
+	
 	private boolean showOSD(float x, float y){
 		if(y > 0){
 			mHideOSD = true;
@@ -342,10 +343,10 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 		}else{
 			if(!mMoveEventHandled){
 				// Pull up OSD?
-				if(isVertical(speedX, speedY)){
-					showOSD(speedX, speedY);
-				}else if(mRenderer.getCurrent() == null){
-					mFadeOffset = speedX;
+				//if(isVertical(speedX, speedY)){
+					//showOSD(speedX, speedY);
+				if(mRenderer.getCurrent() == null){
+					mFadeOffset = mRenderer.adjustOffset(speedX, speedY);
 					mUpTime = System.currentTimeMillis();
 				}
 			}

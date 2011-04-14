@@ -144,12 +144,12 @@ public class ShadowPainter {
 	 * @param szY
 	 * @param szZ
 	 */
-	public static void draw(GL10 gl, float x, float y, float z, float rot, float scaleX, float scaleY){
+	public static void draw(GL10 gl, float x, float y, float z, float rot, Vec3f rotVec, float scaleX, float scaleY){
 		gl.glBlendFunc(GL10.GL_ZERO, GL10.GL_SRC_COLOR);
-		// Draw glow
+		// Draw shadow
 		gl.glPushMatrix();
 			gl.glTranslatef(-0.2f + x, -0.2f + y, z);
-			gl.glRotatef(rot, 0, 0, 1);
+			gl.glRotatef(rot, rotVec.getX(), rotVec.getY(), rotVec.getZ());
 			gl.glScalef(0.15f + scaleX, 0.15f + scaleY, 1);
 			gl.glActiveTexture(GL10.GL_TEXTURE0);
 	        gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);

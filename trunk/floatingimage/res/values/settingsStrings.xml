@@ -16,6 +16,9 @@
 	<string name="fullscreenBlackSummary">Fade background to all black when in fullscreen mode</string>
 	<string name="imageDecorations">Decorate images</string>
 	<string name="imageDecorationsSummary">Show shadows and glow behind images</string>
+	<string name="floatingType">Movement</string>
+	<string name="floatingTypeSummary">How should the images move</string>
+	<string name="floatingTypeTitle">Floating images movement</string>
 	<string name="floatingSpeed">Speed</string>
 	<string name="floatingSpeedSummary">How fast do the images traverse the screen</string>
 	<string name="floatingSpeedTitle">Floating images speed</string>
