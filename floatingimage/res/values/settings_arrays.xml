@@ -93,6 +93,22 @@
 		<item>3000</item>
 	</string-array>
 	
+	<string-array name="floatingTypeDescriptions">
+		<item>Left</item>
+		<item>Right</item>
+		<item>Down</item>
+		<item>Up</item>
+		<item>Starspeed</item>
+	</string-array>
+	
+	<string-array name="floatingTypeValues">
+		<item>0</item>
+		<item>1</item>
+		<item>2</item>
+		<item>3</item>
+		<item>4</item>
+	</string-array>
+	
 	<string-array name="floatingSpeedDescriptions">
 		<item>very fast</item>
 		<item>fast</item>

@@ -278,4 +278,10 @@ public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.rende
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public float adjustOffset(float speedX, float speedY) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }

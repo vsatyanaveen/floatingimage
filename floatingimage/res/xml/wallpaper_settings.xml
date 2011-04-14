@@ -56,6 +56,14 @@
     </PreferenceCategory>
     <PreferenceCategory
             android:title="@string/floating">
+            <ListPreference
+                android:key="floatingType"
+                android:title="@string/floatingType"
+                android:summary="@string/floatingTypeSummary"
+                android:entries="@array/floatingTypeDescriptions"
+                android:entryValues="@array/floatingTypeValues"
+                android:dialogTitle="@string/floatingTypeTitle"
+                android:defaultValue="0" />
             <CheckBoxPreference
                 android:key="rotateImages"
                 android:title="@string/rotateImages"

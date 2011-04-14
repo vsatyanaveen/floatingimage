@@ -20,7 +20,11 @@ import dk.nindroid.rss.gfx.Vec3f;
 import dk.nindroid.rss.renderers.Dimmer;
 import dk.nindroid.rss.renderers.OSD;
 import dk.nindroid.rss.renderers.Renderer;
-import dk.nindroid.rss.renderers.floating.Image.Pos;
+import dk.nindroid.rss.renderers.floating.positionControllers.FloatDown;
+import dk.nindroid.rss.renderers.floating.positionControllers.FloatLeft;
+import dk.nindroid.rss.renderers.floating.positionControllers.FloatRight;
+import dk.nindroid.rss.renderers.floating.positionControllers.FloatUp;
+import dk.nindroid.rss.renderers.floating.positionControllers.StarSpeed;
 
 public class FloatingRenderer extends Renderer {
 	public static final long 	mFocusDuration = 300;
@@ -28,11 +32,16 @@ public class FloatingRenderer extends Renderer {
 	public static final float  	mFocusX = 0.0f;
 	public static final float  	mFocusY = 0.0f;
 	public static final float 	mFocusZ = -1.0f;
-	public static final float  	mFloatZ = -3.5f;
 	public static final float  	mJitterX = 0.8f;
 	public static final float  	mJitterY = 0.5f;
 	public static final float  	mJitterZ = 1.5f;
 	private static final long	SPLASHTIME = 2000l;
+	
+	public static final int		FLOATING_TYPE_LEFT = 0;
+	public static final int		FLOATING_TYPE_RIGHT = 1;
+	public static final int		FLOATING_TYPE_DOWN = 2;
+	public static final int		FLOATING_TYPE_UP = 3;
+	public static final int		FLOATING_TYPE_STARSPEED = 4;
 	
 	private boolean 		mNewStart = true;
 	private Image[] 		mImgs;
@@ -52,7 +61,8 @@ public class FloatingRenderer extends Renderer {
 	private float			mRequestedStreamRotation;
 	private float			mStreamOffsetX;
 	private float			mStreamOffsetY;
-	private float			mRequestedStreamOffset;
+	private float			mStreamOffsetZ;
+	private Vec3f			mRequestedStreamOffset;
 	private long			mUpTime;
 	
 	private static final Vec3f 		mCamPos = new Vec3f(0,0,0);
@@ -68,6 +78,7 @@ public class FloatingRenderer extends Renderer {
 	public FloatingRenderer(MainActivity activity, TextureBank bank, Display display){
 		this.mActivity = activity;
 		mTextureSelector = new TextureSelector(display);
+		mRequestedStreamOffset = new Vec3f();
 		mInfoBar = new InfoBar();
 		mBackgroundPainter = new BackgroundPainter();
 		this.mDisplay = display;
@@ -79,16 +90,16 @@ public class FloatingRenderer extends Renderer {
 		long creationOffset = 0;
 		boolean createMiddle = true;
 		for(int i = 0; i < mTotalImgRows; ++i){
-			
 			if(createMiddle){
-	        	mImgs[mImgCnt++] = new Image(activity, mBank, display, mInfoBar, Pos.MIDDLE, largeTexture, mTextureSelector, curTime - creationOffset);
+	        	mImgs[mImgCnt++] = new Image(activity, mBank, display, mInfoBar, largeTexture, mTextureSelector, curTime - creationOffset);
 	        }else{
-	        	mImgs[mImgCnt++] = new Image(activity, mBank, display, mInfoBar, Pos.UP, largeTexture, mTextureSelector, curTime - creationOffset);
-	        	mImgs[mImgCnt++] = new Image(activity, mBank, display, mInfoBar, Pos.DOWN, largeTexture, mTextureSelector, curTime - creationOffset);
+	        	mImgs[mImgCnt++] = new Image(activity, mBank, display, mInfoBar, largeTexture, mTextureSelector, curTime - creationOffset);
+	        	mImgs[mImgCnt++] = new Image(activity, mBank, display, mInfoBar, largeTexture, mTextureSelector, curTime - creationOffset);
 	        }
 	        	createMiddle ^= true;
 	        	creationOffset += interval;
 		}
+		setPositionController(mActivity.getSettings().floatingType);
 		mImgDepths = new Image[mImgs.length];
 		for(int i = 0; i < mImgs.length; ++i){
 			mImgDepths[i] = mImgs[i];
@@ -96,6 +107,36 @@ public class FloatingRenderer extends Renderer {
 		mDepthComparator = new ImageDepthComparator();
 		Arrays.sort(mImgDepths, mDepthComparator);
 		mStartTime = System.currentTimeMillis();
+	}
+	
+	public void setPositionController(int type){
+		switch(type){
+		case FLOATING_TYPE_LEFT:
+			for(int i = 0; i < mImgs.length; ++i){
+				mImgs[i].setPositionController(new FloatLeft(mActivity, mDisplay, i));
+			}
+		break;
+		case FLOATING_TYPE_RIGHT:
+			for(int i = 0; i < mImgs.length; ++i){
+				mImgs[i].setPositionController(new FloatRight(mActivity, mDisplay, i));
+			}
+		break;
+		case FLOATING_TYPE_DOWN:
+			for(int i = 0; i < mImgs.length; ++i){
+				mImgs[i].setPositionController(new FloatDown(mActivity, mDisplay, i));
+			}
+			break;
+		case FLOATING_TYPE_UP:
+			for(int i = 0; i < mImgs.length; ++i){
+				mImgs[i].setPositionController(new FloatUp(mActivity, mDisplay, i));
+			}
+			break;
+		case FLOATING_TYPE_STARSPEED:
+			for(int i = 0; i < mImgs.length; ++i){
+				mImgs[i].setPositionController(new StarSpeed(mActivity, mDisplay, i));
+			}
+			break;
+		}
 	}
 		
 	public void click(GL10 gl, float x, float y, long frameTime, long realTime){
@@ -238,7 +279,7 @@ public class FloatingRenderer extends Renderer {
 		mBackgroundPainter.draw(gl, mDisplay, mActivity.getSettings().backgroundColor);
         //Image.setState(gl);
 		gl.glPushMatrix();
-		gl.glTranslatef(mStreamOffsetX, mStreamOffsetY, 0);
+		gl.glTranslatef(mStreamOffsetX, mStreamOffsetY, mStreamOffsetZ);
 		gl.glRotatef(mStreamRotation, 0.0f, 1.0f, 0.0f);
         for(int i = 0; i < mImgCnt; ++i){
         	if(mImgDepths[i] != mSelected){
@@ -288,14 +329,14 @@ public class FloatingRenderer extends Renderer {
 		float timeFactor = (2000 - (realTime - mUpTime)) / 2000.0f;
 		if(timeFactor > 0){
 			float damping = timeFactor * timeFactor;
-			mStreamOffsetY = mRequestedStreamOffset * damping;
+			mStreamOffsetX = mRequestedStreamOffset.getX() * damping;
+			mStreamOffsetY = mRequestedStreamOffset.getY() * damping;
+			mStreamOffsetZ = mRequestedStreamOffset.getZ() * damping;
 		}else{
-			mRequestedStreamOffset = 0;
+			mRequestedStreamOffset.setX(0);
+			mRequestedStreamOffset.setY(0);
+			mRequestedStreamOffset.setZ(0);
 		}
-	}
-	
-	public static float getFarRight(Display display){
-		return display.getWidth() * 0.7f * (-mFloatZ + mJitterZ) * 1.2f + 1.3f + mJitterX;
 	}
 	
 	public static float getFraction(long realTime){
@@ -320,6 +361,7 @@ public class FloatingRenderer extends Renderer {
 	
 	@Override
 	public void onResume(){
+		setPositionController(mActivity.getSettings().floatingType);
 		mTextureSelector.startThread();
 		mDoAdjustImagePositions = true;
 	}
@@ -446,14 +488,22 @@ public class FloatingRenderer extends Renderer {
 		return mImgs.length;
 	}
 	
+	Vec3f tmpVar = new Vec3f();
+	
 	@Override
 	public void streamMoved(float x, float y) {
-		if(y*y > x*x*x*x){ // Cheap abs, also make sure this is intentionally a vertical movement!
-			mUpTime = System.currentTimeMillis();
-			mRequestedStreamOffset = mStreamOffsetY;
-			mRequestedStreamOffset -= y / 100.0f;
-			mRequestedStreamOffset = Math.max(Math.min(1.0f, mRequestedStreamOffset), -1.0f);
-		}
+		mUpTime = System.currentTimeMillis();
+		mRequestedStreamOffset.setX(mStreamOffsetX);
+		mRequestedStreamOffset.setY(mStreamOffsetY);
+		mRequestedStreamOffset.setZ(mStreamOffsetZ);
+		tmpVar.setX(0);
+		tmpVar.setY(0);
+		tmpVar.setZ(0);
+		mImgs[0].getPositionController().getGlobalOffset(x, y, tmpVar);
+		mRequestedStreamOffset.minus(tmpVar, mRequestedStreamOffset);
+		mRequestedStreamOffset.setX(Math.max(Math.min(1.0f, mRequestedStreamOffset.getX()), -1.0f));
+		mRequestedStreamOffset.setY(Math.max(Math.min(1.0f, mRequestedStreamOffset.getY()), -1.0f));
+		mRequestedStreamOffset.setZ(Math.max(Math.min(1.0f, mRequestedStreamOffset.getZ()), -1.0f));
 	}
 	
 	public void wallpaperMove(float fraction){
@@ -465,5 +515,10 @@ public class FloatingRenderer extends Renderer {
 		mRequestedStreamRotation += x / 50.0f;
 		mRequestedStreamRotation = Math.max(Math.min(15.0f, mRequestedStreamRotation), -15.0f);
 		*/
+	}
+
+	@Override
+	public float adjustOffset(float speedX, float speedY) {
+		return mImgs[0].getPositionController().getTimeAdjustment(speedX, speedY);
 	}
 }
