@@ -11,14 +11,14 @@ import javax.microedition.khronos.opengles.GL10;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Bitmap.Config;
 import android.opengl.GLUtils;
 import dk.nindroid.rss.R;
 import dk.nindroid.rss.gfx.Vec3f;
+import dk.nindroid.rss.renderers.floating.positionControllers.Rotation;
 
 public class ShadowPainter {
 	private static Bitmap shadow;
-	private static Bitmap canvas;
+	//private static Bitmap canvas;
 	private static int mTextureID;
 	private static FloatBuffer mTexBuffer;
 	private static Vec3f[]		mVertices;
@@ -28,10 +28,11 @@ public class ShadowPainter {
 	private static final int VERTS = 4;
 	
 	public static void init(Context context){
-		InputStream glowIS = context.getResources().openRawResource(R.drawable.image_shadow);
-		shadow = BitmapFactory.decodeStream(glowIS);
+		InputStream shadowIS = context.getResources().openRawResource(R.drawable.image_shadow);
+		shadow = BitmapFactory.decodeStream(shadowIS);
 		
-		canvas = Bitmap.createBitmap(128, 128, Config.RGB_565);
+		//canvas = Bitmap.createBitmap(128, 128, Config.RGB_565);
+		
 		
 		initPlane();
 	}
@@ -100,8 +101,8 @@ public class ShadowPainter {
         gl.glTexEnvf(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE,
                 GL10.GL_BLEND);
         
-        GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, canvas, 0);
-        GLUtils.texSubImage2D(GL10.GL_TEXTURE_2D, 0, 0, 0, shadow);
+        GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, shadow, 0);
+        //GLUtils.texSubImage2D(GL10.GL_TEXTURE_2D, 0, 0, 0, shadow);
 		
         ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
         tbb.order(ByteOrder.nativeOrder());
@@ -144,16 +145,16 @@ public class ShadowPainter {
 	 * @param szY
 	 * @param szZ
 	 */
-	public static void draw(GL10 gl, float x, float y, float z, float rot, Vec3f rotVec, float scaleX, float scaleY){
-		gl.glBlendFunc(GL10.GL_ZERO, GL10.GL_SRC_COLOR);
+	public static void draw(GL10 gl, float x, float y, float z, Rotation rotationA, Rotation rotationB, float imageRotation, float scaleX, float scaleY){
 		// Draw shadow
 		gl.glPushMatrix();
 			gl.glTranslatef(-0.2f + x, -0.2f + y, z);
-			gl.glRotatef(rot, rotVec.getX(), rotVec.getY(), rotVec.getZ());
+			gl.glRotatef(rotationA.getAngle(), rotationA.getX(), rotationA.getY(), rotationA.getZ());
+			gl.glRotatef(rotationB.getAngle(), rotationB.getX(), rotationB.getY(), rotationB.getZ());
+			gl.glRotatef(imageRotation, 0, 0, 1);
 			gl.glScalef(0.15f + scaleX, 0.15f + scaleY, 1);
 			gl.glActiveTexture(GL10.GL_TEXTURE0);
 	        gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
-			gl.glFrontFace(GL10.GL_CCW);
 			gl.glVertexPointer(3, GL10.GL_FIXED, 0, mVertexBuffer);
 			gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mTexBuffer);
 	        gl.glDrawElements(GL10.GL_TRIANGLE_STRIP, 4, GL10.GL_UNSIGNED_BYTE, mIndexBuffer);

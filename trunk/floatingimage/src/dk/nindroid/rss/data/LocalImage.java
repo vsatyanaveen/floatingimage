@@ -1,6 +1,7 @@
 package dk.nindroid.rss.data;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import android.content.Intent;
@@ -140,6 +141,9 @@ public class LocalImage extends ImageReference{
 		mHeight = Float.parseFloat(tokens[3]);
 		if(mFile == null){
 			mFile = new File(tokens[4]);
+		}
+		if(!mFile.exists()){
+			throw new FileNotFoundException();
 		}
 		if(tokens.length > 5){
 			String rotation = tokens[5];

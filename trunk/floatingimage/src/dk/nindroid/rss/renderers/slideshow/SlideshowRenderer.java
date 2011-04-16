@@ -284,4 +284,9 @@ public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.rende
 		// TODO Auto-generated method stub
 		return 0;
 	}
+
+	@Override
+	public void deleteCurrent() {
+		this.slideRight(System.currentTimeMillis());
+	}
 }
