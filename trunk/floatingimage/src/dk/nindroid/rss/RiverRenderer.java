@@ -45,6 +45,8 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 	private int				mFeedsLoaded;
 	private int				mFeedsTotal;
 	private boolean			mReinit = true;
+	
+	private long			mStartTime;
 		
 	public RiverRenderer(MainActivity activity, boolean useTranslucentBackground, TextureBank textureBank, boolean limitFramerate){
 		this.mActivity = activity;
@@ -54,7 +56,8 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 		mBank = textureBank;
 		mOSD = new OSD(activity);
 		mFeedProgress = new FeedProgress(activity.context());
-		mLastFrameTime = System.currentTimeMillis();
+		mStartTime = System.currentTimeMillis();
+		mLastFrameTime = mStartTime;
 	}
 	
 	public void setRenderer(Renderer renderer){
@@ -147,11 +150,11 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
         	mRenderer.click(gl, mClickedPos.getX(), mClickedPos.getY(), time, realTime);
         }
         
-        mRenderer.update(gl, time, realTime);
+        mRenderer.update(gl, time - mStartTime, realTime);
         
         ///////// DRAWING /////////
         gl.glRotatef(mDisplay.getRotation(), 0.0f, 0.0f, 1.0f);
-        mRenderer.render(gl, time, realTime);
+        mRenderer.render(gl, time - mStartTime, realTime);
         if(!mDisplay.isTurning()){
         	mFeedProgress.draw(gl, mFeedsLoaded, mFeedsTotal, mDisplay);
         	mOSD.draw(gl, realTime);
@@ -266,31 +269,15 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 		}
 	}
 	
-	
+	/*
 	private boolean showOSD(float x, float y){
 		if(y > 0){
 			mHideOSD = true;
 			return true;
 		}
-		/*
-		if(y < 150){
-			if(y < 0){
-				//mShowOSD = true;
-			}else{
-				mHideOSD = true;
-			}
-			return true;
-		}else if(y > mDisplay.getHeightPixels() - 150){
-			if(y > 0){
-				//mShowOSD = true;
-			}else{
-				mHideOSD = true;
-			}
-			return true;
-		}
-		*/
 		return false;
 	}
+	*/
 	
 	public boolean isVertical(float speedX, float speedY){
 		return Math.abs(speedY) > Math.abs(speedX);

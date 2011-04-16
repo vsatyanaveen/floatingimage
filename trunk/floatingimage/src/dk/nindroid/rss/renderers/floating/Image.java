@@ -51,7 +51,7 @@ public class Image implements ImagePlane {
 	private PositionController	mPositionController;
 	private float			mAlpha = 1;
 	private TextureBank 	mbank;
-	private long			mStartTime;
+	//private long			mStartTime;
 	private ImageReference 	mShowingImage;
 	private Vec3f[]			mVertices;
 	private int				mLastTextureSize;
@@ -177,7 +177,7 @@ public class Image implements ImagePlane {
 			mShowingImage.setOld();
 			// Select
 			mState = STATE_FOCUSING;
-			mPositionController.getRotation(getInterval(mStartTime - time), mRotationASaved, mRotationBSaved);
+			mPositionController.getRotation(getInterval(time), mRotationASaved, mRotationBSaved);
 			// Get large texture, if not already there.
 			mInfoBar.select(gl, mDisplay, this.mShowingImage);
 		}
@@ -192,7 +192,7 @@ public class Image implements ImagePlane {
 		mFocusWidth = width;
 		mFocusHeight = height;
 		mLargeTex = true; 
-		mPositionController.getRotation(getInterval(time - mStartTime), mRotationASaved, mRotationBSaved);
+		mPositionController.getRotation(getInterval(time), mRotationASaved, mRotationBSaved);
 		setFocusTexture(gl);
 		if(mSetBackgroundWhenReady){
 			setBackground();
@@ -200,7 +200,7 @@ public class Image implements ImagePlane {
 		mSetBackgroundWhenReady = false;
 	}
 		
-	public Image(MainActivity activity, TextureBank bank, Display display, InfoBar infoBar, Texture largeTexture, TextureSelector textureSelector, long startTime){
+	public Image(MainActivity activity, TextureBank bank, Display display, InfoBar infoBar, Texture largeTexture, TextureSelector textureSelector){
 		this.mDisplay = display;
 		mbank = bank;
 		this.mActivity = activity;
@@ -213,7 +213,6 @@ public class Image implements ImagePlane {
         mRotationASaved = new Rotation(0, 0, 0, 1);
         mRotationBSaved = new Rotation(0, 0, 0, 1);
 
-		mStartTime = startTime;
 		ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
         tbb.order(ByteOrder.nativeOrder());
         mTexBuffer = tbb.asFloatBuffer();
@@ -365,7 +364,7 @@ public class Image implements ImagePlane {
 		szX *= userScale;
 		szY *= userScale;
 		
-		float interval = getInterval(time - mStartTime);
+		float interval = getInterval(time);
 		gl.glEnable(GL10.GL_BLEND);
 		//Vec3f rot = mPositionController.getRotation(interval);
 		float alpha = (mState == STATE_FLOATING ? mPositionController.getOpacity(interval) : 1) * mAlpha;
@@ -588,16 +587,17 @@ public class Image implements ImagePlane {
 		mPositionController.jitter();
 	}
 	
-	public void setStartTime(long startTime, long frameTime){
-		this.mStartTime = startTime;
-		long totalTime = frameTime - mStartTime;
-		mRotations = (int)(totalTime / mActivity.getSettings().floatingTraversal) + 1;
+	public void traversalChanged(long frametime){
+		//this.mStartTime = startTime;
+		//long totalTime = frameTime - mStartTime;
+		//mRotations = (int)(totalTime / mActivity.getSettings().floatingTraversal) + 1;
+		mRotations = (int)mPositionController.adjustInterval(frametime / (float)mActivity.getSettings().floatingTraversal);
 	}
-	
+	/*
 	public long getStartTime(){
 		return this.mStartTime;
 	}
-	
+	*/
 	//private float getXPos(long relativeTime){
 		/*
 		float curPos = 0;
@@ -611,12 +611,13 @@ public class Image implements ImagePlane {
 		*/
 		
 	//}
-	
+		
 	private boolean updateFloating(GL10 gl, long time){
 		mAlpha = mDelete ? 0 : 1;
 		boolean depthChanged = false;
-		long totalTime = time - mStartTime;
-		float interval = getInterval(totalTime);
+		long totalTime = mPositionController.adjustTime(time, mActivity.getSettings().floatingTraversal);
+		float interval = getInterval(time);
+		
 		Vec3f pos = mPositionController.getPosition(interval);
 		mPos.set(pos);
 		mPositionController.getRotation(interval, mRotationA, mRotationB);
@@ -638,7 +639,7 @@ public class Image implements ImagePlane {
 			resetTexture(gl, false);
 			--mRotations;
         }
-		if(mShowingImage == null && getInterval(time - mStartTime) < 0.01f){
+		if(mShowingImage == null && getInterval(time) < 0.01f){
 			//Log.v("Floating Image", "Getting new texture - I need one!");
 			resetTexture(gl, true);
 		}
@@ -677,12 +678,12 @@ public class Image implements ImagePlane {
 	
 	private void moveToFloat(GL10 gl, long time, long realTime){
 		float fraction = FloatingRenderer.getFraction(realTime);
-		long timeToFloat = realTime - mStartTime - FloatingRenderer.mSelectedTime - FloatingRenderer.mFocusDuration;
+		long totalTime = mPositionController.adjustTime(time, mActivity.getSettings().floatingTraversal);
+		long timeToFloat = realTime - FloatingRenderer.mSelectedTime - FloatingRenderer.mFocusDuration;
 		float interval = getInterval(time + timeToFloat);
 		if(fraction > 1){
 			mAlpha = mDelete ? 0 : 1;
 			mPositionController.getRotation(interval, mRotationA, mRotationB);
-			long totalTime = time - mStartTime;
 			long offset = mActivity.getSettings().floatingTraversal * 1024;
 			mRotations = (int)((totalTime + offset) / mActivity.getSettings().floatingTraversal) + 1 - 1024;
 			mState = STATE_FLOATING;
@@ -719,7 +720,7 @@ public class Image implements ImagePlane {
 	}
 	
 	float getInterval(long time){
-		return ((time  + (mActivity.getSettings().floatingTraversal << 10)) % mActivity.getSettings().floatingTraversal) / (float)mActivity.getSettings().floatingTraversal;
+		return mPositionController.adjustInterval(((time  + (mActivity.getSettings().floatingTraversal << 10)) % mActivity.getSettings().floatingTraversal) / (float)mActivity.getSettings().floatingTraversal);
 	}
 	
 	public boolean update(GL10 gl, long time, long realTime){

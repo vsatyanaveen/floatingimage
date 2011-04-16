@@ -7,7 +7,7 @@ import dk.nindroid.rss.MainActivity;
 import dk.nindroid.rss.gfx.Vec3f;
 import dk.nindroid.rss.renderers.floating.FloatingRenderer;
 
-public class FloatDown implements PositionController {
+public class FloatDown extends GridController {
 	public enum Pos {
 		UP, MIDDLE, DOWN
 	};
@@ -26,7 +26,8 @@ public class FloatDown implements PositionController {
 	private final static Vec3f ROTATION = new Vec3f(0, 0, 1);
 	
 	
-	public FloatDown(MainActivity activity, Display display, int image){
+	public FloatDown(MainActivity activity, Display display, int image, int noImages){
+		super(image, noImages);
 		mRand = new Random(System.currentTimeMillis() + image);
 		this.mDisplay = display;
 		this.mActivity = activity;

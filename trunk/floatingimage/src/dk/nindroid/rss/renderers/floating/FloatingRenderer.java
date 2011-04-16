@@ -86,20 +86,9 @@ public class FloatingRenderer extends Renderer {
 		this.mDisplay = display;
 		this.mBank = bank;
 		mImgs = new Image[mTotalImgRows * 3 / 2];
-		long interval = activity.getSettings().floatingTraversal / mTotalImgRows;
 		Texture largeTexture = new Texture();
-		long curTime = System.currentTimeMillis();
-		long creationOffset = 0;
-		boolean createMiddle = true;
-		for(int i = 0; i < mTotalImgRows; ++i){
-			if(createMiddle){
-	        	mImgs[mImgCnt++] = new Image(activity, mBank, display, mInfoBar, largeTexture, mTextureSelector, curTime - creationOffset);
-	        }else{
-	        	mImgs[mImgCnt++] = new Image(activity, mBank, display, mInfoBar, largeTexture, mTextureSelector, curTime - creationOffset);
-	        	mImgs[mImgCnt++] = new Image(activity, mBank, display, mInfoBar, largeTexture, mTextureSelector, curTime - creationOffset);
-	        }
-	        	createMiddle ^= true;
-	        	creationOffset += interval;
+		for(int i = 0; i < mImgs.length; ++i){
+	        	mImgs[mImgCnt++] = new Image(activity, mBank, display, mInfoBar, largeTexture, mTextureSelector);
 		}
 		setPositionController(mActivity.getSettings().floatingType);
 		mImgDepths = new Image[mImgs.length];
@@ -115,32 +104,32 @@ public class FloatingRenderer extends Renderer {
 		switch(type){
 		case FLOATING_TYPE_LEFT:
 			for(int i = 0; i < mImgs.length; ++i){
-				mImgs[i].setPositionController(new FloatLeft(mActivity, mDisplay, i));
+				mImgs[i].setPositionController(new FloatLeft(mActivity, mDisplay, i, mImgs.length));
 			}
 		break;
 		case FLOATING_TYPE_RIGHT:
 			for(int i = 0; i < mImgs.length; ++i){
-				mImgs[i].setPositionController(new FloatRight(mActivity, mDisplay, i));
+				mImgs[i].setPositionController(new FloatRight(mActivity, mDisplay, i, mImgs.length));
 			}
 		break;
 		case FLOATING_TYPE_DOWN:
 			for(int i = 0; i < mImgs.length; ++i){
-				mImgs[i].setPositionController(new FloatDown(mActivity, mDisplay, i));
+				mImgs[i].setPositionController(new FloatDown(mActivity, mDisplay, i, mImgs.length));
 			}
 			break;
 		case FLOATING_TYPE_UP:
 			for(int i = 0; i < mImgs.length; ++i){
-				mImgs[i].setPositionController(new FloatUp(mActivity, mDisplay, i));
+				mImgs[i].setPositionController(new FloatUp(mActivity, mDisplay, i, mImgs.length));
 			}
 			break;
 		case FLOATING_TYPE_STARSPEED:
 			for(int i = 0; i < mImgs.length; ++i){
-				mImgs[i].setPositionController(new StarSpeed(mActivity, mDisplay, i));
+				mImgs[i].setPositionController(new StarSpeed(mActivity, mDisplay, i, mImgs.length));
 			}
 			break;
 		case FLOATING_TYPE_TABLETOP:
 			for(int i = 0; i < mImgs.length; ++i){
-				mImgs[i].setPositionController(new TableTop(mActivity, mDisplay, i));
+				mImgs[i].setPositionController(new TableTop(mActivity, mDisplay, i, mImgs.length));
 			}
 			break;
 		}
@@ -374,10 +363,14 @@ public class FloatingRenderer extends Renderer {
 	}
 	
 	void adjustImagePositions(long time){
+		/*
 		long interval = mActivity.getSettings().floatingTraversal / mTotalImgRows;
 		long prevNewStartTime = mImgs[0].getStartTime();
 		long prevOrgStartTime = mImgs[0].getStartTime();
+		*/
 		for(Image img : mImgs){
+			img.traversalChanged(time);
+			/*
 			long prevOrg = prevOrgStartTime;
 			prevOrgStartTime = img.getStartTime();
 			if(img.getStartTime() != prevOrg){
@@ -387,6 +380,7 @@ public class FloatingRenderer extends Renderer {
 				img.setStartTime(prevNewStartTime, time);
 			}
 			prevNewStartTime = img.getStartTime();
+			*/
 		}
 	}
 
