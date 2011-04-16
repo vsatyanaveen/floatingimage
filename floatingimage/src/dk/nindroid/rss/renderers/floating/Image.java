@@ -24,6 +24,7 @@ import dk.nindroid.rss.gfx.Vec3f;
 import dk.nindroid.rss.renderers.ImagePlane;
 import dk.nindroid.rss.renderers.ProgressBar;
 import dk.nindroid.rss.renderers.floating.positionControllers.PositionController;
+import dk.nindroid.rss.renderers.floating.positionControllers.Rotation;
 import dk.nindroid.rss.uiActivities.Toaster;
 
 public class Image implements ImagePlane {
@@ -34,6 +35,7 @@ public class Image implements ImagePlane {
 	
 	private Texture			mLargeTexture;
 	private int				mState = STATE_FLOATING;
+	private boolean			mDelete;
 	
 	private Display			mDisplay;
 	private IntBuffer   	mVertexBuffer;
@@ -41,10 +43,13 @@ public class Image implements ImagePlane {
 	private ByteBuffer  	mLineIndexBuffer;
 	private float  			maspect;
 	private int				mRotations;
-	private float			mRotation;
+	private Rotation		mRotationA;
+	private Rotation		mRotationB;
 	private Vec3f			mPos;
-	private float			mRotationSaved;
+	private Rotation		mRotationASaved;
+	private Rotation		mRotationBSaved;
 	private PositionController	mPositionController;
+	private float			mAlpha = 1;
 	private TextureBank 	mbank;
 	private long			mStartTime;
 	private ImageReference 	mShowingImage;
@@ -94,6 +99,10 @@ public class Image implements ImagePlane {
 		return mPos.getZ();
 	}
 	
+	public void delete(){
+		mDelete = true;
+	}
+	
 	public void setBackground(){
 		if(mLargeTex){
 			try {
@@ -122,6 +131,7 @@ public class Image implements ImagePlane {
 			// Set large texture next time round.
 			mUpdateLargeTex = true;
 		}else{
+			mLargeTex = false;
 			if(mShowingImage != null){
 				setTexture(gl, mShowingImage);
 			}
@@ -167,7 +177,7 @@ public class Image implements ImagePlane {
 			mShowingImage.setOld();
 			// Select
 			mState = STATE_FOCUSING;
-			mRotationSaved = mPositionController.getRotAngle(getInterval(mStartTime - time));
+			mPositionController.getRotation(getInterval(mStartTime - time), mRotationASaved, mRotationBSaved);
 			// Get large texture, if not already there.
 			mInfoBar.select(gl, mDisplay, this.mShowingImage);
 		}
@@ -176,12 +186,13 @@ public class Image implements ImagePlane {
 	public void setSelected(GL10 gl, Bitmap bmp, float width, float height, long time){
 		mState = STATE_FOCUSED;
 		setFocusedPosition();
-		mRotation = 0.0f;
+		mRotationA.setAngle(0.0f);
+		mRotationB.setAngle(0.0f);
 		mFocusBmp = bmp;
 		mFocusWidth = width;
 		mFocusHeight = height;
-		mLargeTex = true;
-		mRotationSaved = mPositionController.getRotAngle(time - mStartTime);
+		mLargeTex = true; 
+		mPositionController.getRotation(getInterval(time - mStartTime), mRotationASaved, mRotationBSaved);
 		setFocusTexture(gl);
 		if(mSetBackgroundWhenReady){
 			setBackground();
@@ -197,6 +208,10 @@ public class Image implements ImagePlane {
 		this.mTextureSelector = textureSelector;
 		this.mLargeTexture = largeTexture;
         mPos = new Vec3f(0, 0, 0);
+        mRotationA = new Rotation(0, 0, 0, 1);
+        mRotationB = new Rotation(0, 0, 0, 1);
+        mRotationASaved = new Rotation(0, 0, 0, 1);
+        mRotationBSaved = new Rotation(0, 0, 0, 1);
 
 		mStartTime = startTime;
 		ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
@@ -334,12 +349,13 @@ public class Image implements ImagePlane {
 		gl.glFrontFace(GL10.GL_CCW);
 		gl.glEnable(GL10.GL_TEXTURE_2D);
 		
+		float userRotation = 0;
+		if(mShowingImage != null){
+			userRotation = mShowingImage.getRotation(mTextureSelector, realTime);
+		}
+		
 		gl.glPushMatrix();
 		
-		float rotation = mRotation;
-		if(mShowingImage != null){
-			rotation += mShowingImage.getRotation(mTextureSelector, realTime);
-		}
 		float userScale = mScale * mInitialScale;
 		float userMoveX = mX + mInitialX;
 		float userMoveY = mY + mInitialY;
@@ -351,28 +367,23 @@ public class Image implements ImagePlane {
 		
 		float interval = getInterval(time - mStartTime);
 		gl.glEnable(GL10.GL_BLEND);
-		Vec3f rot = mPositionController.getRotation(interval);
-		float alpha = mState == STATE_FLOATING ? mPositionController.getOpacity(interval) : 1;
-		
-		gl.glColor4f(1.0f, 1.0f, 1.0f, alpha);
-		if(mActivity.getSettings().imageDecorations && mPositionController.supportsShadow()){
-			/*
-			if(mCurImage != null && mCurImage.isNew()){
-				GlowImage.draw(gl, x, y, z, rotation, szX, szY);
-			}
-			else{
-			*/
-				ShadowPainter.draw(gl, x, y, z, rotation, rot, szX, szY);
-			//}
-		}
-		gl.glTranslatef(x, y, z);
-		gl.glRotatef(rotation, rot.getX(), rot.getY(), rot.getZ());
-		gl.glScalef(szX, szY, 1);
+		//Vec3f rot = mPositionController.getRotation(interval);
+		float alpha = (mState == STATE_FLOATING ? mPositionController.getOpacity(interval) : 1) * mAlpha;
 		
 		gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
 		gl.glEnable(GL10.GL_BLEND);
+		gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_MODULATE);
+		gl.glColor4f(1.0f, 1.0f, 1.0f, alpha);
+		if(mActivity.getSettings().imageDecorations){
+			ShadowPainter.draw(gl, x, y, z, mRotationA, mRotationB, userRotation, szX, szY);
+		}
+		gl.glTranslatef(x, y, z);
+		gl.glRotatef(mRotationA.getAngle(), mRotationA.getX(), mRotationA.getY(), mRotationA.getZ());
+		gl.glRotatef(mRotationB.getAngle(), mRotationB.getX(), mRotationB.getY(), mRotationB.getZ());
+		gl.glRotatef(userRotation, 0, 0, 1);
+		gl.glScalef(szX, szY, 1);
+		
 		// Draw image
-		gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_REPLACE);
 		gl.glActiveTexture(GL10.GL_TEXTURE0);
 		if(mLargeTex){
 			gl.glBindTexture(GL10.GL_TEXTURE_2D, mLargeTexture.getTextureID(gl));
@@ -491,7 +502,8 @@ public class Image implements ImagePlane {
 			mInitialScale *= this.mScale;
 			this.mX = 0.0f;
 			this.mY = 0.0f;
-			this.mRotation = 0.0f;
+			this.mRotationA.setAngle(0.0f);
+			this.mRotationB.setAngle(0.0f);
 			this.mScale = 1.0f;
 			mRestoreX = mInitialX;
 			mRestoreY = mInitialY;
@@ -601,12 +613,13 @@ public class Image implements ImagePlane {
 	//}
 	
 	private boolean updateFloating(GL10 gl, long time){
+		mAlpha = mDelete ? 0 : 1;
 		boolean depthChanged = false;
 		long totalTime = time - mStartTime;
 		float interval = getInterval(totalTime);
 		Vec3f pos = mPositionController.getPosition(interval);
 		mPos.set(pos);
-		mRotation = mPositionController.getRotAngle(interval);
+		mPositionController.getRotation(interval, mRotationA, mRotationB);
 		
 		boolean isInRewind = totalTime < mActivity.getSettings().floatingTraversal * (mRotations - 1);
 		// Get new texture...
@@ -639,14 +652,15 @@ public class Image implements ImagePlane {
 	private void moveToFocus(GL10 gl, long realTime){
 		float fraction = FloatingRenderer.getFraction(realTime);
 		if(fraction > 1){
-			mRotation = 0.0f;
+			mRotationA.setAngle(0.0f);
+			mRotationB.setAngle(0.0f);
 			if(!mLargeTex){
 				mTextureSelector.selectImage(this, this.mShowingImage);
 			}
 			mState = STATE_FOCUSED;
 			return;
 		}
-		mRotation = (1.0f - fraction) * mRotationSaved;
+		mRotationA.setAngle((1.0f - fraction) * mRotationASaved.getAngle());
 		fraction = smoothstep(fraction);
 		float selectedX = mSelectedPos.getX();		
 		float selectedY = mSelectedPos.getY();
@@ -663,8 +677,11 @@ public class Image implements ImagePlane {
 	
 	private void moveToFloat(GL10 gl, long time, long realTime){
 		float fraction = FloatingRenderer.getFraction(realTime);
+		long timeToFloat = realTime - mStartTime - FloatingRenderer.mSelectedTime - FloatingRenderer.mFocusDuration;
+		float interval = getInterval(time + timeToFloat);
 		if(fraction > 1){
-			mRotation = mRotationSaved;
+			mAlpha = mDelete ? 0 : 1;
+			mPositionController.getRotation(interval, mRotationA, mRotationB);
 			long totalTime = time - mStartTime;
 			long offset = mActivity.getSettings().floatingTraversal * 1024;
 			mRotations = (int)((totalTime + offset) / mActivity.getSettings().floatingTraversal) + 1 - 1024;
@@ -679,17 +696,18 @@ public class Image implements ImagePlane {
 			}
 			return;
 		}
+		mAlpha = mDelete ? 1.0f - fraction : 1;
 		
 		float selectedX = mSelectedPos.getX();		
 		float selectedY = mSelectedPos.getY();
 		float selectedZ = mSelectedPos.getZ();
 		
 		fraction = smoothstep(fraction);
+		mPositionController.getRotation(interval, mRotationA, mRotationB);
 		
-		long timeToFloat = realTime - mStartTime - FloatingRenderer.mSelectedTime - FloatingRenderer.mFocusDuration;
-		
-		mRotation = fraction * mRotationSaved;
-		Vec3f pos = mPositionController.getPosition(getInterval(time + timeToFloat));
+		mRotationA.setAngle(fraction * mRotationA.getAngle());
+		mRotationB.setAngle(fraction * mRotationB.getAngle());
+		Vec3f pos = mPositionController.getPosition(interval);
 				
 		float distX = pos.getX() - selectedX;
 		float distY = pos.getY() - selectedY;
@@ -747,6 +765,7 @@ public class Image implements ImagePlane {
 	
 	private void resetTexture(GL10 gl, boolean next){
 		mFocusBmp = null;
+		mDelete = false;
 		ImageReference ir = mbank.getTexture(mShowingImage, next);
 		if(ir != null){
 			mShowingImage = ir;

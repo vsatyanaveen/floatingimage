@@ -8,8 +8,10 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -62,6 +64,7 @@ public class ShowStreams extends Activity implements MainActivity {
 	public static final int				CONTEXT_SAVE 	= Menu.FIRST + 1;
 	public static final int				CONTEXT_BACKGROUND = Menu.FIRST + 2;
 	public static final int				CONTEXT_SHARE 	= Menu.FIRST + 3;
+	public static final int				CONTEXT_DELETE 	= Menu.FIRST + 4;
 	public static final int				MENU_IMAGE_CONTEXT = 13;
 	public static final int				MISC_ROW_ID		= 201;
 	public static final String 			version 		= "2.5.1";
@@ -148,6 +151,9 @@ public class ShowStreams extends Activity implements MainActivity {
 				menu.add(0, CONTEXT_SAVE, 0, R.string.save_image);
 			}
 			menu.add(0, CONTEXT_SHARE, 0, R.string.share_image);
+			if(ir instanceof LocalImage){
+				menu.add(0, CONTEXT_DELETE, 0, R.string.delete_image);
+			}
 		}else{
 			boolean paused = renderer.pause();
 			Toast.makeText(this, paused ? R.string.pause : R.string.resume, Toast.LENGTH_SHORT).show();
@@ -197,6 +203,28 @@ public class ShowStreams extends Activity implements MainActivity {
 				}
 				shareIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, getString(R.string.share_subject));
 				startActivity(Intent.createChooser(shareIntent, shareString));
+				return true;
+			case CONTEXT_DELETE:
+				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				String question = this.getString(R.string.delete_image_are_you_sure);
+				final File file = ((LocalImage)renderer.getSelected()).getFile();
+				question += " " + file.getName() + "?";
+				builder.setMessage(question)
+				       .setCancelable(false)
+				       .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+				           public void onClick(DialogInterface dialog, int id) {
+				        	   file.delete();
+				        	   dialog.dismiss();
+				        	   renderer.deleteSelected();
+				           }
+				       })
+				       .setNegativeButton("No", new DialogInterface.OnClickListener() {
+				           public void onClick(DialogInterface dialog, int id) {
+				                dialog.cancel();
+				           }
+				       });
+				AlertDialog alert = builder.create();
+				alert.show();
 				return true;
 		}
 		return super.onContextItemSelected(item);

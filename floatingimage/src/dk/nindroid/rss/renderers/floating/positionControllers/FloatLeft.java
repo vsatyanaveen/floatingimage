@@ -64,13 +64,12 @@ public class FloatLeft implements PositionController {
 
 
 	@Override
-	public float getRotAngle(float interval) {
-		return mRotation;
-	}
-
-	@Override
-	public Vec3f getRotation(float interval) {
-		return ROTATION;
+	public void getRotation(float interval, Rotation a, Rotation b) {
+		a.setX(ROTATION.getX());
+		a.setY(ROTATION.getY());
+		a.setZ(ROTATION.getZ());
+		a.setAngle(mRotation);
+		b.setAngle(0.0f);
 	}
 
 	public float getFarRight(){
@@ -87,10 +86,5 @@ public class FloatLeft implements PositionController {
 	@Override
 	public float getTimeAdjustment(float speedX, float speedY) {
 		return speedX;
-	}
-
-	@Override
-	public boolean supportsShadow() {
-		return true;
 	}
 }

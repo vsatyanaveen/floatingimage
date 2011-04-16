@@ -25,6 +25,7 @@ import dk.nindroid.rss.renderers.floating.positionControllers.FloatLeft;
 import dk.nindroid.rss.renderers.floating.positionControllers.FloatRight;
 import dk.nindroid.rss.renderers.floating.positionControllers.FloatUp;
 import dk.nindroid.rss.renderers.floating.positionControllers.StarSpeed;
+import dk.nindroid.rss.renderers.floating.positionControllers.TableTop;
 
 public class FloatingRenderer extends Renderer {
 	public static final long 	mFocusDuration = 300;
@@ -42,6 +43,7 @@ public class FloatingRenderer extends Renderer {
 	public static final int		FLOATING_TYPE_DOWN = 2;
 	public static final int		FLOATING_TYPE_UP = 3;
 	public static final int		FLOATING_TYPE_STARSPEED = 4;
+	public static final int		FLOATING_TYPE_TABLETOP = 5;
 	
 	private boolean 		mNewStart = true;
 	private Image[] 		mImgs;
@@ -134,6 +136,11 @@ public class FloatingRenderer extends Renderer {
 		case FLOATING_TYPE_STARSPEED:
 			for(int i = 0; i < mImgs.length; ++i){
 				mImgs[i].setPositionController(new StarSpeed(mActivity, mDisplay, i));
+			}
+			break;
+		case FLOATING_TYPE_TABLETOP:
+			for(int i = 0; i < mImgs.length; ++i){
+				mImgs[i].setPositionController(new TableTop(mActivity, mDisplay, i));
 			}
 			break;
 		}
@@ -520,5 +527,13 @@ public class FloatingRenderer extends Renderer {
 	@Override
 	public float adjustOffset(float speedX, float speedY) {
 		return mImgs[0].getPositionController().getTimeAdjustment(speedX, speedY);
+	}
+
+	@Override
+	public void deleteCurrent() {
+		if(this.mSelected != null){
+			this.mSelected.delete();
+			this.mDoUnselect = true;
+		}
 	}
 }

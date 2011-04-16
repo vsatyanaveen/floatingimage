@@ -14,6 +14,7 @@ public abstract class Renderer {
 	public abstract void init(GL10 gl, long time, OSD osd);
 	public abstract Intent followCurrent();
 	public abstract ImageReference getCurrent();
+	public abstract void deleteCurrent();
 	public abstract boolean back();
 	public abstract void onPause();
 	public abstract void onResume();

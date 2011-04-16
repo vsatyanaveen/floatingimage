@@ -99,6 +99,7 @@
 		<item>Down</item>
 		<item>Up</item>
 		<item>Starspeed</item>
+		<item>TableTop</item>
 	</string-array>
 	
 	<string-array name="floatingTypeValues">
@@ -107,6 +108,7 @@
 		<item>2</item>
 		<item>3</item>
 		<item>4</item>
+		<item>5</item>
 	</string-array>
 	
 	<string-array name="floatingSpeedDescriptions">

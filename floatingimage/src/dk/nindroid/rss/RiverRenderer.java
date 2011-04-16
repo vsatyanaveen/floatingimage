@@ -180,6 +180,10 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 		return mRenderer.getCurrent();
 	}
 	
+	public void deleteSelected(){
+		mRenderer.deleteCurrent();
+	}
+	
 	public boolean unselect(){
 		return mRenderer.back();
 	}

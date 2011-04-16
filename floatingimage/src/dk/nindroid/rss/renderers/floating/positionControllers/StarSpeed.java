@@ -62,16 +62,14 @@ public class StarSpeed implements PositionController {
 		mPos.setZ(-12.0f + (interval * 12.0f) + mJitter.getZ());
 		return mPos;
 	}
-
-
+	
 	@Override
-	public float getRotAngle(float interval) {
-		return -45.0f;
-	}
-
-	@Override
-	public Vec3f getRotation(float interval) {
-		return ROTATION;
+	public void getRotation(float interval, Rotation a, Rotation b) {
+		a.setX(ROTATION.getX());
+		a.setY(ROTATION.getY());
+		a.setZ(ROTATION.getZ());
+		a.setAngle(-45.0f);
+		b.setAngle(0.0f);
 	}
 
 	public float getFarBottom(){
@@ -88,10 +86,5 @@ public class StarSpeed implements PositionController {
 	@Override
 	public float getTimeAdjustment(float speedX, float speedY) {
 		return speedY;
-	}
-
-	@Override
-	public boolean supportsShadow() {
-		return false;
 	}
 }
