@@ -224,6 +224,7 @@ public class ShowStreams extends Activity implements MainActivity {
 				           }
 				       });
 				AlertDialog alert = builder.create();
+				
 				alert.show();
 				return true;
 		}

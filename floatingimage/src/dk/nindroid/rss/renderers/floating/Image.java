@@ -588,30 +588,9 @@ public class Image implements ImagePlane {
 	}
 	
 	public void traversalChanged(long frametime){
-		//this.mStartTime = startTime;
-		//long totalTime = frameTime - mStartTime;
-		//mRotations = (int)(totalTime / mActivity.getSettings().floatingTraversal) + 1;
-		mRotations = (int)mPositionController.adjustInterval(frametime / (float)mActivity.getSettings().floatingTraversal);
+		mRotations = (int)(mPositionController.adjustTime(frametime, mActivity.getSettings().floatingTraversal) / (float)mActivity.getSettings().floatingTraversal) + 1;
 	}
-	/*
-	public long getStartTime(){
-		return this.mStartTime;
-	}
-	*/
-	//private float getXPos(long relativeTime){
-		/*
-		float curPos = 0;
-		try{
-			curPos = (relativeTime  + (mActivity.getSettings().floatingTraversal << 10)) % mActivity.getSettings().floatingTraversal;
-		}catch(ArithmeticException e){
-			Log.e("Floating Image", "relativeTime: " + relativeTime + ", traversal: " + mActivity.getSettings().floatingTraversal);
-		}
-		
-		//return -FloatingRenderer.getFarRight(mDisplay) + ((curPos / mActivity.getSettings().floatingTraversal) * FloatingRenderer.getFarRight(mDisplay) * 2);
-		*/
-		
-	//}
-		
+			
 	private boolean updateFloating(GL10 gl, long time){
 		mAlpha = mDelete ? 0 : 1;
 		boolean depthChanged = false;
