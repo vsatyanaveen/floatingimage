@@ -668,7 +668,7 @@ public class Image implements ImagePlane {
 		float selectedZ = mSelectedPos.getZ();
 		
 		float distX = FloatingRenderer.mFocusX - selectedX;// - mJitter.getX();
-		float distY = FloatingRenderer.mFocusY - selectedY;// - mJitter.getY() + getFocusedOffset();
+		float distY = FloatingRenderer.mFocusY + getFocusedOffset() - selectedY;// - mJitter.getY() + getFocusedOffset();
 		float distZ = FloatingRenderer.mFocusZ - selectedZ;// - mJitter.getZ();
 		
 		mPos.setX(distX * fraction + selectedX);
