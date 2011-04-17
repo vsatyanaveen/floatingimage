@@ -24,6 +24,7 @@ import dk.nindroid.rss.renderers.floating.positionControllers.FloatDown;
 import dk.nindroid.rss.renderers.floating.positionControllers.FloatLeft;
 import dk.nindroid.rss.renderers.floating.positionControllers.FloatRight;
 import dk.nindroid.rss.renderers.floating.positionControllers.FloatUp;
+import dk.nindroid.rss.renderers.floating.positionControllers.Stack;
 import dk.nindroid.rss.renderers.floating.positionControllers.StarSpeed;
 import dk.nindroid.rss.renderers.floating.positionControllers.TableTop;
 
@@ -44,6 +45,7 @@ public class FloatingRenderer extends Renderer {
 	public static final int		FLOATING_TYPE_UP = 3;
 	public static final int		FLOATING_TYPE_STARSPEED = 4;
 	public static final int		FLOATING_TYPE_TABLETOP = 5;
+	public static final int		FLOATING_TYPE_STACK = 6;
 	
 	private boolean 		mNewStart = true;
 	private Image[] 		mImgs;
@@ -130,6 +132,11 @@ public class FloatingRenderer extends Renderer {
 		case FLOATING_TYPE_TABLETOP:
 			for(int i = 0; i < mImgs.length; ++i){
 				mImgs[i].setPositionController(new TableTop(mActivity, mDisplay, i, mImgs.length));
+			}
+			break;
+		case FLOATING_TYPE_STACK:
+			for(int i = 0; i < mImgs.length; ++i){
+				mImgs[i].setPositionController(new Stack(mActivity, mDisplay, i, mImgs.length));
 			}
 			break;
 		}
