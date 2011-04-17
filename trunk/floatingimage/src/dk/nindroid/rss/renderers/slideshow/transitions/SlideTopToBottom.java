@@ -1,7 +1,6 @@
 package dk.nindroid.rss.renderers.slideshow.transitions;
 
 import dk.nindroid.rss.Display;
-import dk.nindroid.rss.RiverRenderer;
 import dk.nindroid.rss.renderers.slideshow.Image;
 
 public class SlideTopToBottom extends Transition {

@@ -2,7 +2,6 @@ package dk.nindroid.rss.renderers.floating.positionControllers;
 
 import java.util.Random;
 
-import android.util.Log;
 import dk.nindroid.rss.Display;
 import dk.nindroid.rss.MainActivity;
 import dk.nindroid.rss.gfx.Vec3f;
@@ -54,8 +53,6 @@ public class StarSpeed extends GridController {
 
 	@Override
 	public Vec3f getPosition(float interval) {
-		Log.v("Floating Image", "Interval: " + interval);
-		Log.v("Floating Image", "ID: " + mImageId);
 		float farBottom = getFarBottom();
 		mPos.setX(mXLayerPos * mDisplay.getWidth() + mJitter.getX());
 		mPos.setY(farBottom - (interval * farBottom * 1.5f) + mJitter.getY());

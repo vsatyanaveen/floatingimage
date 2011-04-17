@@ -160,9 +160,10 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
         	mOSD.draw(gl, realTime);
         }
 	}
+	
 	private void fadeOffset(long time) {
 		float timeFactor = (3000 - (time - mUpTime)) / 3000.0f;
-		float fadeOffset = mFadeOffset * timeFactor * timeFactor * mSensitivityX;
+		float fadeOffset = mFadeOffset * timeFactor * timeFactor;// * mSensitivityX;
 		if(timeFactor > 0){
 			mOffset += fadeOffset;
 		}else{

@@ -527,7 +527,9 @@ public class FloatingRenderer extends Renderer {
 
 	@Override
 	public float adjustOffset(float speedX, float speedY) {
-		return mImgs[0].getPositionController().getTimeAdjustment(speedX, speedY);
+		float offset = mImgs[0].getPositionController().getTimeAdjustment(speedX, speedY);
+		offset = offset * mActivity.getSettings().floatingTraversal / 1000;
+		return offset;
 	}
 
 	@Override
