@@ -65,9 +65,12 @@
 	<string name="flickrSearchNoText">Please search for something.</string>
 	<string name="flickrMyPhotos">My photos</string>
 	<string name="flickrMyAlbums">My albums</string>
+	<string name="flickrMyFavorites">My favorites</string>
 	<string name="flickrMyContactsPhotos">Photos by my Contacts</string>
 	<string name="flickrExplore">Top 500 (Explore)</string>
 	<string name="flickrPhotosFromHere">Photos from here</string>
+	<string name="flickrAllContactsStreams">All contacts\' streams</string>
+	<string name="flickr_search">Search: </string>
 	<string name="picasa">Picasa</string>
 	<string name="picasaShowStream">Show stream</string>
 	<string name="picasaShowUserUsername">Please enter the username of the desired user</string>

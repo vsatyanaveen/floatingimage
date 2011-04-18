@@ -13,6 +13,13 @@ public class Rotation {
 		this.y = y;
 		this.z = z;
 	}
+	public Rotation() {
+		super();
+		this.angle = 0;
+		this.x = 0;
+		this.y = 0;
+		this.z = 1;
+	}
 	public void set(Rotation b){
 		this.angle = b.angle;
 		this.x = b.x;

@@ -27,16 +27,15 @@ public class FlickrBrowser extends ListActivity {
 	private static final int	SHOW_STREAM 				= 0;
 	private static final int	SEARCH 						= 1;
 	private static final int	EXPLORE						= 2;
-	//private static final int	PHOTOS_FROM_HERE 			= 3;
 	private static final int	AUTHORIZE   				= 3;
 	private static final int	MY_STREAM					= 0;
 	private static final int	MY_ALBUMS					= 1;
 	private static final int	MY_CONTACTS_PHOTOS			= 2;
-	private static final int	SHOW_STREAM_AUTHORIZED 		= 3;
-	private static final int	SEARCH_AUTHORIZED 			= 4;
-	private static final int	EXPLORE_AUTHORIZED			= 5;
-	//private static final int	PHOTOS_FROM_HERE_AUTHORIZED = 6;
-	private static final int	UNAUTHORIZE 				= 6;
+	private static final int	MY_FAVORITES				= 3;
+	private static final int	SHOW_STREAM_AUTHORIZED 		= 4;
+	private static final int	SEARCH_AUTHORIZED 			= 5;
+	private static final int	EXPLORE_AUTHORIZED			= 6;
+	private static final int	UNAUTHORIZE 				= 7;
 	
 	@Override 
 	protected void onCreate(Bundle savedInstanceState) {
@@ -63,12 +62,13 @@ public class FlickrBrowser extends ListActivity {
 			String myStream = this.getResources().getString(R.string.flickrMyPhotos);
 			String myAlbums = this.getResources().getString(R.string.flickrMyAlbums);
 			String myContacts = this.getResources().getString(R.string.flickrMyContactsPhotos);
+			String myFavorites = this.getResources().getString(R.string.flickrMyFavorites);
 			String showStream = this.getResources().getString(R.string.flickrShowStream);
 			String search = this.getResources().getString(R.string.flickrSearch);
 			String explore = this.getResources().getString(R.string.flickrExplore);
 			//String photosFromHere = this.getResources().getString(R.string.flickrPhotosFromHere);
 			String unauthorize = this.getResources().getString(R.string.unauthorize);
-			String[] options = new String[]{myStream, myAlbums, myContacts, showStream, search, explore, unauthorize};
+			String[] options = new String[]{myStream, myAlbums, myContacts, myFavorites, showStream, search, explore, unauthorize};
 			setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, options));
 		}
 	}
@@ -86,14 +86,11 @@ public class FlickrBrowser extends ListActivity {
 				break;
 			case EXPLORE:
 				returnExplore();
-			/*case PHOTOS_FROM_HERE:
-				returnPhotosFromHere();
-				break;*/
 			case AUTHORIZE:
 				try {
 					FlickrFeeder.authorize(this);
 				} catch (IOException e) {
-					Toast.makeText(this, "Something strange happened when authorizing... Please try again!", Toast.LENGTH_LONG);
+					Toast.makeText(this, R.string.authorization_failed, Toast.LENGTH_LONG);
 					Log.w("Floating Image", "Exception thrown authorizing flickr", e);
 				}
 				break;
@@ -109,6 +106,9 @@ public class FlickrBrowser extends ListActivity {
 			case MY_CONTACTS_PHOTOS:
 				returnMyContactsPhotos();
 				break;
+			case MY_FAVORITES:
+				returnMyFavorites();
+				break;
 			case SHOW_STREAM_AUTHORIZED:
 				showStream();
 				break;
@@ -118,9 +118,6 @@ public class FlickrBrowser extends ListActivity {
 			case EXPLORE_AUTHORIZED:
 				returnExplore();
 				break;
-			/*case PHOTOS_FROM_HERE_AUTHORIZED:
-				returnPhotosFromHere();
-				break;*/
 			case UNAUTHORIZE:
 				FlickrFeeder.unauthorize(this);
 				fillMenu();
@@ -218,7 +215,7 @@ public class FlickrBrowser extends ListActivity {
 			Bundle b = new Bundle();
 			String streamURL = FlickrFeeder.getPublicPhotos(user.getNsid());
 			b.putString("PATH", streamURL);
-			b.putString("NAME", "Stream: " + user.getUsername());
+			b.putString("NAME", getString(R.string.stream) + " " + user.getUsername());
 			intent.putExtras(b);
 			setResult(RESULT_OK, intent);		
 			finish();
@@ -230,7 +227,18 @@ public class FlickrBrowser extends ListActivity {
 		Bundle b = new Bundle();
 		String streamURL = FlickrFeeder.getContactsPhotos();
 		b.putString("PATH", streamURL);
-		b.putString("NAME", "All contacts' streams");
+		b.putString("NAME", getString(R.string.flickrAllContactsStreams));
+		intent.putExtras(b);
+		setResult(RESULT_OK, intent);		
+		finish();
+	}
+	
+	private void returnMyFavorites(){
+		Intent intent = new Intent();
+		Bundle b = new Bundle();
+		String streamURL = FlickrFeeder.getFavorites();
+		b.putString("PATH", streamURL);
+		b.putString("NAME", getString(R.string.flickrMyFavorites));
 		intent.putExtras(b);
 		setResult(RESULT_OK, intent);		
 		finish();
@@ -272,7 +280,7 @@ public class FlickrBrowser extends ListActivity {
 		Bundle b = new Bundle();
 		String streamURL = FlickrFeeder.getPublicPhotos(uid);
 		b.putString("PATH", streamURL);
-		b.putString("NAME", "Stream: " + username);
+		b.putString("NAME", getString(R.string.stream) + " " + username);
 		intent.putExtras(b);
 		setResult(RESULT_OK, intent);		
 		finish();
@@ -287,7 +295,7 @@ public class FlickrBrowser extends ListActivity {
 		Bundle b = new Bundle();
 		String streamURL = FlickrFeeder.getSearch(criteria);
 		b.putString("PATH", streamURL);
-		b.putString("NAME", "Search: " + criteria);
+		b.putString("NAME", getString(R.string.flickr_search) + ": " + criteria);
 		intent.putExtras(b);
 		setResult(RESULT_OK, intent);		
 		finish();

@@ -34,8 +34,6 @@ import dk.nindroid.rss.parser.flickr.ImageSizesParser;
 import dk.nindroid.rss.parser.flickr.data.ImageSizes;
 
 public class FlickrFeeder {
-	private static final String PHOTOS_FROM_HERE_CONST = "HERE";
-	
 	private static final String API_KEY = "f6fdb5a636863d148afa8e7bb056bf1b";
 	private static final String SECRET = "3358b4c1619e1c98";
 	private static final String EXPLORE = "http://api.flickr.com/services/rest/?api_key=" + API_KEY + "&auth_token=&method=flickr.interestingness.getList&per_page=500";
@@ -47,6 +45,7 @@ public class FlickrFeeder {
 	//private static final String PHOTOS_FROM_HERE = "http://api.flickr.com/services/rest/?accuracy=8&api_key=" + API_KEY + "&auth_token=&lat=&lon=&method=flickr.photos.search&per_page=500&radius=5";	
 	private static final String ALBUMS = "http://api.flickr.com/services/rest/?api_key=" + API_KEY + "&auth_token=&method=flickr.photosets.getList";
 	private static final String ALBUM_PHOTOS = "http://api.flickr.com/services/rest/?api_key=" + API_KEY + "&auth_token=&method=flickr.photosets.getPhotos&photoset_id=";
+	private static final String FAVORITES = "http://api.flickr.com/services/rest/?api_key=" + API_KEY + "&auth_token=&method=flickr.favorites.getList&per_page=500";
 	
 	/*  Authentication */
 	private static final String AUTHENTICATION_URL = "http://flickr.com/services/auth/?api_key=" + API_KEY + "&perms=read&api_sig=";
@@ -92,7 +91,7 @@ public class FlickrFeeder {
 			String url = AUTHENTICATION_URL + signature;
 			Log.v("Floating Image", "Flickr authentication: " + url);
 			
-			Intent intent = new Intent(context, 	WebAuth.class);
+			Intent intent = new Intent(context, WebAuth.class);
 			intent.putExtra("URL", url);
 			context.startActivity(intent);
 		}
@@ -176,11 +175,11 @@ public class FlickrFeeder {
 	public static String getContactsPhotos(){
 		return CONTACTS_PHOTOS;
 	}
-	/*
-	public static String getPhotosFromHere(){
-		return PHOTOS_FROM_HERE_CONST;
+	
+	public static String getFavorites(){
+		return FAVORITES;
 	}
-	*/
+	
 	public static String getAlbumPhotos(String id){
 		return ALBUM_PHOTOS + id;
 	}
