@@ -24,6 +24,7 @@ import dk.nindroid.rss.renderers.floating.positionControllers.FloatDown;
 import dk.nindroid.rss.renderers.floating.positionControllers.FloatLeft;
 import dk.nindroid.rss.renderers.floating.positionControllers.FloatRight;
 import dk.nindroid.rss.renderers.floating.positionControllers.FloatUp;
+import dk.nindroid.rss.renderers.floating.positionControllers.Mixup;
 import dk.nindroid.rss.renderers.floating.positionControllers.Stack;
 import dk.nindroid.rss.renderers.floating.positionControllers.StarSpeed;
 import dk.nindroid.rss.renderers.floating.positionControllers.TableTop;
@@ -46,6 +47,7 @@ public class FloatingRenderer extends Renderer {
 	public static final int		FLOATING_TYPE_STARSPEED = 4;
 	public static final int		FLOATING_TYPE_TABLETOP = 5;
 	public static final int		FLOATING_TYPE_STACK = 6;
+	public static final int		FLOATING_TYPE_MIXUP = 20;
 	
 	private boolean 		mNewStart = true;
 	private Image[] 		mImgs;
@@ -139,6 +141,11 @@ public class FloatingRenderer extends Renderer {
 				mImgs[i].setPositionController(new Stack(mActivity, mDisplay, i, mImgs.length));
 			}
 			break;
+		case FLOATING_TYPE_MIXUP:
+			for(int i = 0; i < mImgs.length; ++i){
+				mImgs[i].setPositionController(new Mixup(mActivity, mDisplay, this, i, mImgs.length));
+			}
+			break;
 		}
 	}
 		
@@ -196,6 +203,7 @@ public class FloatingRenderer extends Renderer {
 	}
 	
 	public void update(GL10 gl, long frameTime, long realTime){
+		boolean sortArray = false;
 		if(mResetImages){
 			resetImages(gl, frameTime);
 		}
@@ -246,10 +254,10 @@ public class FloatingRenderer extends Renderer {
         		}else{
         			mSelected = null;
         		}
-        		Arrays.sort(mImgDepths, mDepthComparator);
+        		sortArray = true;
         	}
         }
-        boolean sortArray = false;
+        
         for(int i = 0; i < mImgCnt; ++i){
         	if(mImgDepths[i].update(gl, frameTime, realTime)){
         		sortArray = true;
@@ -257,10 +265,14 @@ public class FloatingRenderer extends Renderer {
         }
         if(sortArray)
         {
-        	Arrays.sort(mImgDepths, mDepthComparator);
+        	updateDepths();	
         }
         //updateRotation(realTime);
         updateTranslation(realTime);
+	}
+	
+	public void updateDepths(){
+		Arrays.sort(mImgDepths, mDepthComparator);
 	}
 	
 	void initRender(GL10 gl){

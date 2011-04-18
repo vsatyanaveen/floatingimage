@@ -5,4 +5,5 @@
     <string name="error_fetching_albums">Error fetching albums, please try again</string>
     <string name="error_fetching_friends">Error fetching friends, please try again</string>
     <string name="error_getting_flickr_user">Error getting your user, please try to sign in again.</string>
+    <string name="authorization_failed">Something strange happened when authorizing... Please try again!</string>
 </resources>

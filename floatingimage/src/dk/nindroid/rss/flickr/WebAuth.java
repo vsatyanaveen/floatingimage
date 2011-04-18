@@ -23,6 +23,8 @@ public class WebAuth extends Activity {
 		webView.setWebViewClient(new MyWebViewClient(this));
 		webView.getSettings().setBuiltInZoomControls(true);
 		webView.getSettings().setSupportZoom(true);
+		setProgressBarIndeterminateVisibility(true);
+	    setProgressBarVisibility(true);
 		String url = getIntent().getExtras().getString("URL");
 		Log.v("Floating Image", "Visiting url: " + url);
 		webView.loadUrl(url);
@@ -35,7 +37,7 @@ public class WebAuth extends Activity {
 			this.context = context;
 		}
 		
-	    @Override
+		@Override
 	    public boolean shouldOverrideUrlLoading(WebView view, String url) {
 	    	Log.v("Floating Image", "Visiting url: " + url);
 	    	if(url.startsWith("http") || url.startsWith("https")){
