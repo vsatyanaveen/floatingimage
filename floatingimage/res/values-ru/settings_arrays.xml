@@ -1,72 +1,82 @@
 <resources>
 	<string-array name="displayModeDescriptions">
-		<item>None</item>
-		<item>Slide horizontal</item>
-		<item>Slide vertical</item>
-		<item>Crossfade</item>
-		<item>Fade to black</item>
-		<item>Fade to white</item>
-		<item>Random from the above</item>
-		<item>Floating images</item>
+		<item>Без эффектов</item>
+		<item>Сдвигать горизонтально</item>
+		<item>Сдвигать вертикально</item>
+		<item>Перекрестный переход</item>
+		<item>Переход через черное</item>
+
+		<item>Переход через белое</item>
+		<item>Случайно из вышеуказанных</item>
+		<item>Плывущие изображения</item>
 	</string-array>
 	
 	<string-array name="displayModeValues">
 		<item>none</item>
 		<item>slideRightToLeft</item>
+
 		<item>SlideTopToBottom</item>
 		<item>crossFade</item>
 		<item>fadeToBlack</item>
 		<item>fadeToWhite</item>
 		<item>random</item>
 		<item>floatingImages</item>
+
 	</string-array>
 	
 	<string-array name="slideIntervalDescriptions">
-		<item>2 seconds</item>
-		<item>5 seconds</item>
-		<item>10 seconds</item>
-		<item>30 seconds</item>
-		<item>1 minute</item>
-		<item>2 minutes</item>
-		<item>5 minutes</item>
-		<item>10 minutes</item>
-		<item>30 minutes</item>
-		<item>1 hour</item>
-		<item>2 hours</item>
-		<item>6 hours</item>
-		<item>12 hours</item>
-		<item>1 day</item>
-		<item>1 week</item>
+		<item>2 секунды</item>
+		<item>5 секунд</item>
+		<item>10 секунд</item>
+		<item>30 секунд</item>
+		<item>1 минута</item>
+
+		<item>2 минуты</item>
+		<item>5 минут</item>
+		<item>10 минут</item>
+		<item>30 минут</item>
+		<item>1 час</item>
+		<item>2 часа</item>
+
+		<item>6 часов</item>
+		<item>12 часов</item>
+		<item>1 день</item>
+		<item>1 неделя</item>
 	</string-array>
 	
 	<string-array name="slideIntervalValues">
 		<item>2000</item>
+
 		<item>5000</item>
 		<item>10000</item>
 		<item>30000</item>
 		<item>60000</item>
 		<item>120000</item>
 		<item>300000</item>
+
 		<item>600000</item>
 		<item>1800000</item>
 		<item>3600000</item>
 		<item>7200000</item>
 		<item>21600000</item>
 		<item>43200000</item>
+
 		<item>86400000</item>
 		<item>604800000</item>
 	</string-array>
 	
 	<string-array name="backgroundColorDescriptions">
-		<item>Grey</item>
-		<item>Black</item>
-		<item>Pure black</item>
-		<item>White</item>
-		<item>Blue</item>
-		<item>Green</item>
-		<item>Red</item>
-		<item>Yellow</item>
-		<item>All</item>
+		<item>Серый</item>
+		<item>Почти черный</item>
+		<item>Черный</item>
+
+		<item>Белый</item>
+		<item>Синий</item>
+		<item>Зеленый</item>
+		<item>Красный</item>
+		<item>Желтый</item>
+		<item>Все цвета</item>
+
 	</string-array>
 	
 	<string-array name="backgroundColorValues">
@@ -75,6 +85,7 @@
 		<item>8</item>
 		<item>2</item>
 		<item>3</item>
+
 		<item>4</item>
 		<item>5</item>
 		<item>6</item>
@@ -82,45 +93,51 @@
 	</string-array>
 	
 	<string-array name="slideSpeedDescriptions">
-		<item>fast</item>
-		<item>slow</item>
-		<item>really slow</item>
+		<item>Быстро</item>
+
+		<item>Медленно</item>
+		<item>Очень медленно</item>
 	</string-array>
 	
 	<string-array name="slideSpeedValues">
 		<item>300</item>
 		<item>1000</item>
 		<item>3000</item>
+
 	</string-array>
 	
 	<string-array name="floatingTypeDescriptions">
-		<item>Left</item>
-		<item>Right</item>
-		<item>Down</item>
-		<item>Up</item>
-		<item>Hyperspeed</item>
-		<item>TableTop</item>
-		<item>Stack</item>
-		<item>Mix up</item>
+		<item>Влево</item>
+		<item>Вправо</item>
+		<item>Вниз</item>
+		<item>Вверх</item>
+		<item>Гиперскорость</item>
+
+		<item>Настольный</item>
+		<item>Наложение</item>
+		<item>Вперемешку</item>
 	</string-array>
 	
 	<string-array name="floatingTypeValues">
 		<item>0</item>
 		<item>1</item>
+
 		<item>2</item>
 		<item>3</item>
 		<item>4</item>
 		<item>5</item>
 		<item>6</item>
 		<item>20</item>
+
 	</string-array>
 	
 	<string-array name="floatingSpeedDescriptions">
-		<item>very fast</item>
-		<item>fast</item>
-		<item>normal</item>
-		<item>slow</item>
-		<item>very slow</item>
+		<item>Очень быстро</item>
+		<item>Быстро</item>
+		<item>Нормально</item>
+		<item>Медленно</item>
+		<item>Очень медленно</item>
+
 	</string-array>
 	
 	<string-array name="floatingSpeedValues">
@@ -129,14 +146,16 @@
 		<item>30000</item>
 		<item>60000</item>
 		<item>250000</item>
+
 	</string-array>
 	
 	<string-array name="forceRotationDescriptions">
-		<item>No rotation</item>
-		<item>90 degrees</item>
-		<item>180 degrees</item>
-		<item>270 degrees</item>
+		<item>Не поворачивать</item>
+		<item>90 градусов</item>
+		<item>180 градусов</item>
+		<item>270 градусов</item>
 	</string-array>
+
 	
 	<string-array name="forceRotationValues">
 		<item>0</item>
@@ -145,3 +164,4 @@
 		<item>270</item>
 	</string-array>
 </resources>
+

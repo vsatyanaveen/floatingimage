@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Schwebende Bilder</string>
+    <string name="about">Über</string>
+    <string name="aboutSummary">Charmlose Eigenwerbung</string>
+	<string name="dataFolder">/floatingImage</string>
+	<string name="exploreFolder">/.exploreCache</string>
+	<string name="fullscreen">Vollbild</string>
+	<string name="show_details">Details anzeigen</string>
+	<string name="show">Anzeigen</string>
+	<string name="show_folder">Ordner anzeigen</string>
+	<string name="show_flickr">Flickr anzeigen</string>
+	<string name="show_flickr_user">Flickr Benutzer anzeigen</string>
+	<string name="search_flickr">Flickrsuche</string>
+	<string name="cancel_show">Abbruch anzeigen</string>
+	<string name="go_to_source">Gehe zur Quelle</string>
+	<string name="save_image">Bilder speichern</string>
+	<string name="set_as_background">Als Hintergrundbild setzen</string>
+	<string name="user_agent">Floating image/Android</string>
+	<string name="empty_feed">Keine Bilder im Feed gefunden</string>
+	<string name="authorize">Anmelden</string>
+	<string name="unauthorize">Abmelden</string>
+	<string name="please_wait">Die Mühlen mahlen... Please wait</string>
+	<string name="share_subject">Siehe da, ein Bild!</string>
+	<string name="share_url">Bild URL teilen</string>
+	<string name="share_image">Bild teilen</string>
+	<string name="delete_image">Bild löschen</string>
+	<string name="delete_image_are_you_sure">Sind Sie sicher, dass Sie dieses Bild löschen wollen?</string>
+	<string name="loading_feeds">Feed laden</string>
+	<string name="pause">Pause</string>
+	<string name="resume">Fortfahren</string>
+	<string name="stream">Stream</string>
+	
+</resources>

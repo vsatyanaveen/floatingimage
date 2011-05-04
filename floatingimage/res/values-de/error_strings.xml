@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_showing_fetching_album_list">Fehler beim Herunterladen der Albumliste. Klicke hier um es noch einmal zu probieren.</string>
+    <string name="internal_error">Interner Fehler, bitte setze dich mit dem Entwickler in Verbindung.</string>
+    <string name="error_fetching_albums">Fehler beim Herunterladen des Albums, bitte probiere es erneut.</string>
+    <string name="error_fetching_friends">Fehler beim Herunterladen der Freundesliste, bitte probiere es erneut.</string>
+    <string name="error_getting_flickr_user">Fehler beim Herunterladen deines Users, bitte probiere es erneut.</string>
+    <string name="authorization_failed">Etwas seltsames passierte während der Authorisierung... Bitte probiere es erneut!</string>
+</resources>

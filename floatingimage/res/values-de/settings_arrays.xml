@@ -1,13 +1,13 @@
 <resources>
 	<string-array name="displayModeDescriptions">
-		<item>None</item>
-		<item>Slide horizontal</item>
-		<item>Slide vertical</item>
-		<item>Crossfade</item>
-		<item>Fade to black</item>
-		<item>Fade to white</item>
-		<item>Random from the above</item>
-		<item>Floating images</item>
+		<item>Keine</item>
+		<item>Horizontale Verschiebung</item>
+		<item>Vertikale Verschiebung</item>
+		<item>Überblendung</item>
+		<item>Überblendung nach schwarz</item>
+		<item>Überblendung nach weiß</item>
+		<item>Zufällig von oben</item>
+		<item>Schwebende Bilder</item>
 	</string-array>
 	
 	<string-array name="displayModeValues">
@@ -22,21 +22,21 @@
 	</string-array>
 	
 	<string-array name="slideIntervalDescriptions">
-		<item>2 seconds</item>
-		<item>5 seconds</item>
-		<item>10 seconds</item>
-		<item>30 seconds</item>
-		<item>1 minute</item>
-		<item>2 minutes</item>
-		<item>5 minutes</item>
-		<item>10 minutes</item>
-		<item>30 minutes</item>
-		<item>1 hour</item>
-		<item>2 hours</item>
-		<item>6 hours</item>
-		<item>12 hours</item>
-		<item>1 day</item>
-		<item>1 week</item>
+		<item>2 Sekunden</item>
+		<item>5 Sekunden</item>
+		<item>10 Sekunden</item>
+		<item>30 Sekunden</item>
+		<item>1 Minute</item>
+		<item>2 Minute</item>
+		<item>5 Minute</item>
+		<item>10 Minute</item>
+		<item>30 Minute</item>
+		<item>1 Stunde</item>
+		<item>2 Stunde</item>
+		<item>6 Stunde</item>
+		<item>12 Stunde</item>
+		<item>1 Tag</item>
+		<item>1 Woche</item>
 	</string-array>
 	
 	<string-array name="slideIntervalValues">
@@ -58,15 +58,15 @@
 	</string-array>
 	
 	<string-array name="backgroundColorDescriptions">
-		<item>Grey</item>
-		<item>Black</item>
-		<item>Pure black</item>
-		<item>White</item>
-		<item>Blue</item>
-		<item>Green</item>
-		<item>Red</item>
-		<item>Yellow</item>
-		<item>All</item>
+		<item>Grau</item>
+		<item>Schwarz</item>
+		<item>absolut Schwarz</item>
+		<item>Weiß</item>
+		<item>Blau</item>
+		<item>Grün</item>
+		<item>Rot</item>
+		<item>Gelb</item>
+		<item>Regenbogen</item>
 	</string-array>
 	
 	<string-array name="backgroundColorValues">
@@ -82,9 +82,9 @@
 	</string-array>
 	
 	<string-array name="slideSpeedDescriptions">
-		<item>fast</item>
-		<item>slow</item>
-		<item>really slow</item>
+		<item>schnell</item>
+		<item>langsam</item>
+		<item>sehr langsam</item>
 	</string-array>
 	
 	<string-array name="slideSpeedValues">
@@ -94,14 +94,14 @@
 	</string-array>
 	
 	<string-array name="floatingTypeDescriptions">
-		<item>Left</item>
-		<item>Right</item>
-		<item>Down</item>
-		<item>Up</item>
-		<item>Hyperspeed</item>
-		<item>TableTop</item>
-		<item>Stack</item>
-		<item>Mix up</item>
+		<item>Rechts</item>
+		<item>Links</item>
+		<item>Unten</item>
+		<item>Oben</item>
+		<item>Sterngeschwindigkeit</item>
+		<item>TabelleOben</item>
+		<item>Stapel</item>
+		<item>Durcheinander</item>
 	</string-array>
 	
 	<string-array name="floatingTypeValues">
@@ -116,11 +116,11 @@
 	</string-array>
 	
 	<string-array name="floatingSpeedDescriptions">
-		<item>very fast</item>
-		<item>fast</item>
+		<item>sehr schnell</item>
+		<item>schnell</item>
 		<item>normal</item>
-		<item>slow</item>
-		<item>very slow</item>
+		<item>langsam</item>
+		<item>sehr langsam</item>
 	</string-array>
 	
 	<string-array name="floatingSpeedValues">
@@ -132,10 +132,10 @@
 	</string-array>
 	
 	<string-array name="forceRotationDescriptions">
-		<item>No rotation</item>
-		<item>90 degrees</item>
-		<item>180 degrees</item>
-		<item>270 degrees</item>
+		<item>Keine Rotation</item>
+		<item>90 Grad</item>
+		<item>180 Grad</item>
+		<item>270 Grad</item>
 	</string-array>
 	
 	<string-array name="forceRotationValues">

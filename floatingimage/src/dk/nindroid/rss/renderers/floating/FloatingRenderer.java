@@ -250,7 +250,6 @@ public class FloatingRenderer extends Renderer {
         			mSelectingNext = false;
         			mSelectingPrev = false;
         			mSelected.select(gl, frameTime, realTime);
-        			Log.v("Floating Image", "SelectedIndex: " + mSelectedIndex);
         		}else{
         			mSelected = null;
         		}

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Floating Image</string>
+    <string name="about">О программе</string>
+    <string name="aboutSummary">Информация о программе пока на английском, по просьбе автора</string>
+	<string name="dataFolder">/floatingImage</string>
+	<string name="exploreFolder">/.exploreCache</string>
+
+	<string name="fullscreen">На весь экран</string>
+	<string name="show_details">Показать детали</string>
+	<string name="show">Начать показ</string>
+	<string name="show_folder">Show folder</string>
+	<string name="show_flickr">Show Flickr</string>
+	<string name="show_flickr_user">Show Flickr user</string>
+
+	<string name="search_flickr">Search Flickr</string>
+	<string name="cancel_show">Отменить показ</string>
+	<string name="go_to_source">Перейти к исходнику</string>
+	<string name="save_image">Сохранить изображение</string>
+	<string name="set_as_background">Установить как обои</string>
+	<string name="user_agent">Floating image/Android</string>
+
+	<string name="empty_feed">Не найдено изображений в этом канале</string>
+	<string name="authorize">Войти</string>
+	<string name="unauthorize">Выйти</string>
+	<string name="please_wait">Процесс идет... Подождите пожалуйста</string>
+	<string name="share_subject">Смотри какая картинка!</string>
+	<string name="share_url">Поделиться ссылкой на изображение</string>
+
+	<string name="share_image">Поделиться изображением</string>
+	<string name="delete_image">Удалить изображение</string>
+	<string name="delete_image_are_you_sure">Вы уверены, что хотите удалить это изображение?</string>
+	<string name="loading_feeds">Загрузка каналов</string>
+	<string name="pause">Пауза</string>
+	<string name="resume">Продолжить</string>
+
+	<string name="stream">Поток</string>
+</resources>
