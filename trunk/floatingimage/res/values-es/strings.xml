@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Floating Image</string>
+    <string name="about">Acerca de</string>
+    <string name="aboutSummary">Shameless self promotion</string>
+	<string name="dataFolder">/floatingImage</string>
+	<string name="exploreFolder">/.exploreCache</string>
+	<string name="fullscreen">Pantalla completa</string>
+	<string name="show_details">Mostrar detalles</string>
+	<string name="show">Mostrar</string>
+	<string name="show_folder">Mostrar carpetas</string>
+	<string name="show_flickr">Mostrar Flickr</string>
+	<string name="show_flickr_user">Mostrar usuario de Flickr</string>
+	<string name="search_flickr">Buscar Flickr</string>
+	<string name="cancel_show">Cancelar muestra</string>
+	<string name="go_to_source">Ir a fuentes</string>
+	<string name="save_image">Guardar imágen</string>
+	<string name="set_as_background">Utilizar como fondo de pantalla</string>
+	<string name="user_agent">Floating image/Android</string>
+	<string name="empty_feed">No se encontraron imágenes en esta fuente</string>
+	<string name="authorize">Registrarse</string>
+	<string name="unauthorize">Desregistrarse</string>
+	<string name="please_wait">Los engranajes están girando... Por favor espere</string>
+	<string name="share_subject">Mira, una foto!</string>
+	<string name="share_url">Compartir URL de imágen</string>
+	<string name="share_image">Compartir imágen</string>
+	<string name="delete_image">Borrar imágen</string>
+	<string name="delete_image_are_you_sure">Está seguro que desea borrar la imágen</string>
+	<string name="loading_feeds">Carfando fuentes</string>
+	<string name="pause">Pausar</string>
+	<string name="resume">Continuar</string>
+	<string name="stream">Flujo</string>
+</resources>

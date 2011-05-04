@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Floating Image</string>
+    <string name="about">본 어플에 관하여</string>
+    <string name="aboutSummary">제 자신을 소개합니다</string>
+	<string name="dataFolder">/floatingImage</string>
+	<string name="exploreFolder">/.exploreCache</string>
+
+	<string name="fullscreen">전체화면</string>
+	<string name="show_details">세부사항 표시</string>
+	<string name="show">보기</string>
+	<string name="show_folder">폴더 보기</string>
+	<string name="show_flickr">Flickr 보기</string>
+	<string name="show_flickr_user">Flickr 사용자 보기</string>
+
+	<string name="search_flickr">Flickr 검색</string>
+	<string name="cancel_show">보기 취소</string>
+	<string name="go_to_source">원 출처로 이동</string>
+	<string name="save_image">사진 저장</string>
+	<string name="set_as_background">배경화면으로 설정</string>
+	<string name="user_agent">Floating image/Android</string>
+
+	<string name="empty_feed">피드에서 사진을 찾을 수 없습니다</string>
+	<string name="authorize">로그인 하기</string>
+	<string name="unauthorize">로그아웃 하기</string>
+	<string name="please_wait">작동중입니다... 잠시만 기다리세요</string>
+	<string name="share_subject">보세요, 사진떳음!</string>
+	<string name="share_url">사진 주소 공유하기</string>
+
+	<string name="share_image">사진 공유</string>
+	<string name="delete_image">사진 삭제</string>
+	<string name="delete_image_are_you_sure">정말 이 사진을 지울까요?</string>
+	<string name="loading_feeds">피드 읽는중</string>
+	<string name="pause">정지</string>
+	<string name="resume">재이동</string>
+
+	<string name="stream">스트림</string>
+</resources>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_showing_fetching_album_list">Error al descargar listado de álbumes. Clic para intentar nuevamente.</string>
+    <string name="internal_error">Error interno, por favor contactar al desarrollador</string>
+    <string name="error_fetching_albums">Error descargando álbumes, por favor intente nuevamente</string>
+    <string name="error_fetching_friends">Error descargando amigos, por favor intente nuevamente</string>
+    <string name="error_getting_flickr_user">Error al obtener su usuario, por favor regístrese nuevamente.</string>
+    <string name="authorization_failed">Algo extraño pasó durante la autorización... Por favor intente nuevamente!</string>
+</resources>

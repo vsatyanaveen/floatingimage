@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_showing_fetching_album_list">Fejl ved hentning af album liste. Tryk for at prøve igen.</string>
+    <string name="internal_error">Intern fejl fanget, kontakt venligst udvikleren</string>
+    <string name="error_fetching_albums">Fejl ved hentning af album, prøv venligst igen</string>
+    <string name="error_fetching_friends">Fejl ved hentning af venner, prøv venligst igen</string>
+    <string name="error_getting_flickr_user">Fejl ved hentning af din bruger, prøv venligst at logge ind igen.</string>
+    <string name="authorization_failed">Der skete noget underligt ved login... Prøv venligst igen!</string>
+</resources>

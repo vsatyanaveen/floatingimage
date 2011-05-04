@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_showing_fetching_album_list">Ошибка выборки списка альбомов. Нажмите кнопку, чтобы повторить.</string>
+    <string name="internal_error">Словили внутреннюю ошибку, пожалуйста, свяжитесь с разработчиком.</string>
+    <string name="error_fetching_albums">Ошибка выборки альбомов. Пожалуйста, повторите снова.</string>
+    <string name="error_fetching_friends">Ошибка выборки списка друзей. Пожалуйста, повторите снова.</string>
+    <string name="error_getting_flickr_user">Ошибка получения вашего пользователя, пожалуйста, попробуйте снова войти в систему.</string>
+
+    <string name="authorization_failed">Что-то странное произошло при авторизации... Пожалуйста, попробуйте еще раз!</string>
+</resources>

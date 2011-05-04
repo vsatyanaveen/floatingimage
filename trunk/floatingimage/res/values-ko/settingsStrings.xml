@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="cancel">취소</string>
+	<string name="settings">설정</string>
+	<string name="dismiss">해제</string>
+	<string name="feeds">피드</string>
+	<string name="manageFeeds">피드 관리</string> 
+	<string name="manageFeedsSummary">어디서 사진을 받아올까요</string>
+
+	<string name="display">화면 설정</string>
+	<string name="floating">떠다니는 사진 관련 설정</string>
+	<string name="rotateImages">사진 기울이기</string>
+	<string name="rotateImagesSummary">사진을 약간 기울여 흩어놓은 효과를 줍니다</string>
+	<string name="fullscreenBlack">전체화면에서 검은색 배경 사용</string>
+	<string name="fullscreenBlackSummary">개별사진 선택시 배경을 검게 만듭니다</string>
+
+	<string name="imageDecorations">사진 장식효과</string>
+	<string name="imageDecorationsSummary">사진뒤에 그림자 및 광원효과를 추가합니다</string>
+	<string name="floatingType">전개방식</string>
+	<string name="floatingTypeSummary">사진이 자동으로 전개되는 방식을 설정합니다</string>
+	<string name="floatingTypeTitle">사진 전개방식</string>
+	<string name="floatingSpeed">속도</string>
+
+	<string name="floatingSpeedSummary">사진의 이동속도를 설정합니다</string>
+	<string name="floatingSpeedTitle">사진 이동속도</string>
+	<string name="internals">내부</string>
+	<string name="shuffle">사진 섞기</string>
+	<string name="shuffleSummary">사진을 무작위의 순서로 보여줍니다</string>
+	<string name="modeTitle">표시방식 설정하기</string>
+
+	<string name="mode">표시방식</string>
+	<string name="modeSummary">사진이 나타나는 방식을 설정합니다</string>
+	<string name="slideshow">슬라이드쇼</string>
+	<string name="slideInterval">슬라이드쇼 간격</string>
+	<string name="slideIntervalSummary">각각의 사진이 표시되는 시간을 설정합니다</string>
+	<string name="slideIntervalTitle">슬라이드쇼 간격 설정</string>
+
+	<string name="slideSpeed">슬라이드쇼 전환속도</string>
+	<string name="slideSpeedSummary">슬라이드 간의 전환속도를 설정합니다</string>
+	<string name="slideSpeedTitle">전환속도 설정</string>
+	<string name="backgroundColor">배경색</string>
+	<string name="backgroundColorSummary">사진이 흘러갈때의 배경색을 지정합니다</string>
+	<string name="backgroundColorTitle">배경색 지정</string>
+
+	<string name="liveWallpaperLowFramerate">라이브 월페이퍼는 프레임을 떨어뜨립니다</string>
+	<string name="liveWallpaperLowFramerateSummary">최고 프레임을 20으로 제한해 배터리소모를 줄입니다</string>
+	<string name="forceRotation">강제 화면회전</string>
+	<string name="forceRotationSummary">수동으로 화면을 회전시킵니다</string>
+	<string name="forceRotationTitle">화면회전</string>
+	<string name="useCache">캐시메모리에 저장</string>
+
+	<string name="useCacheSummary">사진이 흘러갈때 더 부드럽게 보입니다</string>
+	<string name="useHighResThumbs">고해상도 섬네일</string>
+	<string name="useHighResThumbsSummary">실험적 기능: 강제종료 될 수 있습니다! 고해상도 기기에서만 사용하세요.</string>
+	<string name="clearCache">캐시메모리 비우기</string>
+	<string name="clearCacheSummary">모든 캐시파일을 지웁니다</string>
+	<string name="feedMenuAdd">피드 추가</string>
+
+	<string name="feedMenuAddSummary">새로운 피드를 추가합니다</string>
+	<string name="feedMenuRemove">피드 제거</string>
+	<string name="selectFolder">폴더 선택</string>
+	<string name="selectCurrentFolder">현재 폴더 선택</string>
+	<string name="showHiddenFiles">숨겨진 파일보기 전환</string>
+	<string name="flickr">Flickr</string>
+
+	<string name="flickrShowStream">스트림 보기</string>
+	<string name="flickrShowStreamUsername">스트림의 사용자이름을 적어주세요</string>
+	<string name="flickrShowStreamBadUsername">해당 사용자를 찾지 못했습니다.</string>
+	<string name="flickrShowStreamNoUsername">사용자이름을 적어주세요</string>
+	<string name="flickrSearch">태그로 검색</string>
+	<string name="flickrSearchTerm">콤마(,)로 검색단어를 구분하여 검색하세요</string>
+
+	<string name="flickrSearchNoText">검색해 주세요.</string>
+	<string name="flickrMyPhotos">내 사진</string>
+	<string name="flickrMyAlbums">내 앨범</string>
+	<string name="flickrMyFavorites">내가 가장 좋아하는 것</string>
+	<string name="flickrMyContactsPhotos">내 연락처에 따른 사진들</string>
+	<string name="flickrExplore">탑 500 (구경하기)</string>
+
+	<string name="flickrPhotosFromHere">이곳의 사진</string>
+	<string name="flickrAllContactsStreams">모든 연락처의 스트림</string>
+	<string name="flickr_search">검색: </string>
+	<string name="picasa">Picasa</string>
+	<string name="picasaShowStream">스트림 보기</string>
+	<string name="picasaShowUserUsername">원하는 사용자의 이름을 입력하세요</string>
+
+	<string name="picasaShowStreamBadUsername">해당 사용자를 찾지 못했습니다</string>
+	<string name="picasaShowStreamNoUsername">사용자이름을 적어주세요.</string>
+	<string name="picasaShowAlbums">앨범 보기</string>
+	<string name="picasaShowUser">특정사용자 보기</string>
+	<string name="picasaShowMyStream">내 스트림 보기</string>
+	<string name="picasaShowMyAlbums">내 앨범 보기</string>
+
+	<string name="picasaSearch">키워드로 검색하기</string>
+	<string name="picasaSearchTerm">콤마(,)로 검색단어를 구분하여 검색하세요</string>
+	<string name="picasaSearchNoText">검색해 주세요.</string>
+	<string name="local">내 휴대폰</string>
+	<string name="facebook">Facebook</string>
+	<string name="facebookPhotosOfMe">내 사진 보기</string>
+
+	<string name="facebookMyAlbums">내 앨범</string>
+	<string name="facebookFriends">친구들</string>
+	<string name="facebookPhotosOfFriend">사진 보기</string>
+	<string name="facebookFriendsAlbums">앨범</string>
+	<string name="facebookShowAlbum">보기</string>
+	<string name="loadingAlbums">앨범 읽는중...</string>
+
+	<string name="loadingFriends">친구목록 읽는중...</string>
+	<string name="albumBy">앨범</string>
+	<string name="me">나</string>
+	<string name="cameraPictures">카메라 사진</string>
+	<string name="moreCameraPictures">더 많은 카메라 사진들</string>
+	<string name="Downloads">다운로드</string>
+
+</resources>

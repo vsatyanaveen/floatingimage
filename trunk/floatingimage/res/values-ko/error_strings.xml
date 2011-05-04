@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_showing_fetching_album_list">앨범목록 받기 실패. 다시 시도해 주세요.</string>
+    <string name="internal_error">내부 에러 발생. 개발자에게 문의해 주세요.</string>
+    <string name="error_fetching_albums">앨범 받기 실패. 다시 시도해 주세요.</string>
+    <string name="error_fetching_friends">친구목록 받기 실패. 다시 시도해 주세요.</string>
+    <string name="error_getting_flickr_user">사용자정보 획득 실패.  다시 로그인해 주세요.</string>
+
+    <string name="authorization_failed">인증과정에서 알수없는 오류 발생.  다시 시도해 주세요!</string>
+</resources>

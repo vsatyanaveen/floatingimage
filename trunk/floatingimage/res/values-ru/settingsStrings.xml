@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="cancel">Отмена</string>
+	<string name="settings">Настройки</string>
+	<string name="dismiss">Отмена</string>
+	<string name="feeds">Каналы</string>
+	<!--  <string name="manageFeeds">Управление каналами</string> 
+	<string name="manageFeedsSummary">Выбрать какие изображения показывать</string> -->
+	<string name="manageFeeds">Управление каналами</string> 
+	<string name="manageFeedsSummary">Выбрать откуда загружать изображения</string>
+
+	<string name="display">Отображение</string>
+	<string name="floating">Плывущие изображения</string>
+	<string name="rotateImages">Вращать изображения</string>
+	<string name="rotateImagesSummary">Наклонить изображения для придания более перемешанного эффекта</string>
+	<string name="fullscreenBlack">Зачернить фон на полном экране</string>
+	<string name="fullscreenBlackSummary">Полностью затемнить фон при переключении на полный экран</string>
+
+	<string name="imageDecorations">Оформление изображения</string>
+	<string name="imageDecorationsSummary">Показывать тени и свечение позади изображения</string>
+	<string name="floatingType">Перемещение</string>
+	<string name="floatingTypeSummary">Каким образом изображения должны двигаться</string>
+	<string name="floatingTypeTitle">Плывущие изображения перемещаются</string>
+	<string name="floatingSpeed">Скорость</string>
+
+	<string name="floatingSpeedSummary">Как быстро изображения перемещаются по экрану</string>
+	<string name="floatingSpeedTitle">Скорость перемещения изображений</string>
+	<string name="internals">Internals</string>
+	<string name="shuffle">Перемешать изображения</string>
+	<string name="shuffleSummary">Показывать изображения в случайном порядке</string>
+	<string name="modeTitle">Выберите режим отображения</string>
+
+	<string name="mode">Режим отображения</string>
+	<string name="modeSummary">Режим показа изображений</string>
+	<string name="slideshow">Слайд-шоу</string>
+	<string name="slideInterval">Интервал слайд-шоу</string>
+	<string name="slideIntervalSummary">Выберите время показа каждого изображения</string>
+	<string name="slideIntervalTitle">Выберите интервал слайд-шоу</string>
+
+	<string name="slideSpeed">Время перехода в слайд-шоу</string>
+	<string name="slideSpeedSummary">Как быстро будут выполняться переходы между изображениями</string>
+	<string name="slideSpeedTitle">Выберите скорость перехода</string>
+	<string name="backgroundColor">Цвет фона</string>
+	<string name="backgroundColorSummary">Цвет фона под изображениями</string>
+	<string name="backgroundColorTitle">Выберите цвет фона</string>
+
+	<string name="liveWallpaperLowFramerate">Снижение частоты кадров для Живых обоев</string>
+	<string name="liveWallpaperLowFramerateSummary">Принудительная установка макс 20 кадров/с для уменьшения потребления батареи</string>
+	<string name="forceRotation">Принудительное вращение экрана</string>
+	<string name="forceRotationSummary">Установка угла поворота экрана</string>
+	<string name="forceRotationTitle">Поворот экрана</string>
+	<string name="useCache">Кэшировать изображения</string>
+
+	<string name="useCacheSummary">Это дает более устойчивый поток при потоковой передаче</string>
+	<string name="useHighResThumbs">Использовать превью высокого качества</string>
+	<string name="useHighResThumbsSummary">ЭКСПЕРИМЕНТАЛЬНО: Это может испортить Ваш телефон! Только для устройств с экраном высокого разрешения</string>
+	<string name="clearCache">Очистить кэш</string>
+	<string name="clearCacheSummary">Полностью очистить кэш</string>
+	<string name="feedMenuAdd">Добавить новый канал</string>
+
+	<string name="feedMenuAddSummary">Добавить новый источник изображений</string>
+	<string name="feedMenuRemove">Удалить канал</string>
+	<string name="selectFolder">Выберите папку</string>
+	<string name="selectCurrentFolder">Выберите текущую папку</string>
+	<string name="showHiddenFiles">Показывать скрытые файлы</string>
+	<string name="flickr">Flickr</string>
+
+	<string name="flickrShowStream">Показать фото пользователя</string>
+	<string name="flickrShowStreamUsername">Пожалуйста, введите имя Flickr-пользователя</string>
+	<string name="flickrShowStreamBadUsername">Извините, такой Flickr-пользователь не найден.</string>
+	<string name="flickrShowStreamNoUsername">Пожалуйста, заполните поле имя пользователя.</string>
+	<string name="flickrSearch">Поиск по меткам</string>
+	<string name="flickrSearchTerm">Ищите, разделяя метки через запятые (,)</string>
+
+	<string name="flickrSearchNoText">Введите текст для поиска.</string>
+	<string name="flickrMyPhotos">Мои фото</string>
+	<string name="flickrMyAlbums">Мои альбомы</string>
+	<string name="flickrMyFavorites">Мое избранное</string>
+	<string name="flickrMyContactsPhotos">Фото моих контактов</string>
+	<string name="flickrExplore">Лучшие 500</string>
+
+	<string name="flickrPhotosFromHere">Фото отсюда</string>
+	<string name="flickrAllContactsStreams">Все фото\' контактов</string>
+	<string name="flickr_search">Поиск: </string>
+	<string name="picasa">Picasa</string>
+	<string name="picasaShowStream">Показать фото</string>
+	<string name="picasaShowUserUsername">Пожалуйста, укажите имя пользователя желаемого юзера</string>
+
+	<string name="picasaShowStreamBadUsername">Извините, Picasa-пользователь не найден.</string>
+	<string name="picasaShowStreamNoUsername">Пожалуйста, введите имя пользователя.</string>
+	<string name="picasaShowAlbums">Показать альбомы</string>
+	<string name="picasaShowUser">Показать пользователя</string>
+	<string name="picasaShowMyStream">Показать все мои фото</string>
+	<string name="picasaShowMyAlbums">Показать мои альбомы</string>
+
+	<string name="picasaSearch">Поиск по меткам</string>
+	<string name="picasaSearchTerm">Ищите, разделяя метки через запятые (,)</string>
+	<string name="picasaSearchNoText">Введите текст для поиска.</string>
+	<string name="local">Телефон</string>
+	<string name="facebook">Facebook</string>
+	<string name="facebookPhotosOfMe">Показать фото со мной</string>
+
+	<string name="facebookMyAlbums">Мои альбомы</string>
+	<string name="facebookFriends">Друзья</string>
+	<string name="facebookPhotosOfFriend">Показать фото пользователя </string>
+	<string name="facebookFriendsAlbums">Альбомы пользователя </string>
+	<string name="facebookShowAlbum">показать</string>
+	<string name="loadingAlbums">Загрузка альбомов...</string>
+
+	<string name="loadingFriends">Загрузка списка друзей...</string>
+	<string name="albumBy">Альбом </string>
+	<string name="me">мой</string>
+	<string name="cameraPictures">Изображения с камеры</string>
+	<string name="moreCameraPictures">Еще изображений с камеры</string>
+	<string name="Downloads">Загрузки</string>
+
+</resources>

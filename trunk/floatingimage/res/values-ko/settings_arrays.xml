@@ -1,13 +1,14 @@
 <resources>
 	<string-array name="displayModeDescriptions">
-		<item>None</item>
-		<item>Slide horizontal</item>
-		<item>Slide vertical</item>
-		<item>Crossfade</item>
-		<item>Fade to black</item>
-		<item>Fade to white</item>
-		<item>Random from the above</item>
-		<item>Floating images</item>
+		<item>미지정</item>
+		<item>평행이동</item>
+		<item>수직이동</item>
+		<item>크로스페이드 효과</item>
+		<item>흑색 페이드 효과</item>
+
+		<item>백색 페이드 효과</item>
+		<item>위 방식중 무작위로</item>
+		<item>떠다니는 사진</item>
 	</string-array>
 	
 	<string-array name="displayModeValues">
@@ -22,51 +23,58 @@
 	</string-array>
 	
 	<string-array name="slideIntervalDescriptions">
-		<item>2 seconds</item>
-		<item>5 seconds</item>
-		<item>10 seconds</item>
-		<item>30 seconds</item>
-		<item>1 minute</item>
-		<item>2 minutes</item>
-		<item>5 minutes</item>
-		<item>10 minutes</item>
-		<item>30 minutes</item>
-		<item>1 hour</item>
-		<item>2 hours</item>
-		<item>6 hours</item>
-		<item>12 hours</item>
-		<item>1 day</item>
-		<item>1 week</item>
+		<item>2초</item>
+		<item>5초</item>
+		<item>10초</item>
+		<item>30초</item>
+		<item>1분</item>
+
+		<item>2분</item>
+		<item>5분</item>
+		<item>10분</item>
+		<item>30분</item>
+		<item>1시간</item>
+		<item>2시간</item>
+
+		<item>6시간</item>
+		<item>12시간</item>
+		<item>1일</item>
+		<item>1주</item>
 	</string-array>
 	
 	<string-array name="slideIntervalValues">
 		<item>2000</item>
+
 		<item>5000</item>
 		<item>10000</item>
 		<item>30000</item>
 		<item>60000</item>
 		<item>120000</item>
 		<item>300000</item>
+
 		<item>600000</item>
 		<item>1800000</item>
 		<item>3600000</item>
 		<item>7200000</item>
 		<item>21600000</item>
 		<item>43200000</item>
+
 		<item>86400000</item>
 		<item>604800000</item>
 	</string-array>
 	
 	<string-array name="backgroundColorDescriptions">
-		<item>Grey</item>
-		<item>Black</item>
-		<item>Pure black</item>
-		<item>White</item>
-		<item>Blue</item>
-		<item>Green</item>
-		<item>Red</item>
-		<item>Yellow</item>
-		<item>All</item>
+		<item>회색</item>
+		<item>검은색</item>
+		<item>완전 검은색</item>
+
+		<item>하얀색</item>
+		<item>파란색</item>
+		<item>초록색</item>
+		<item>빨간색</item>
+		<item>노란색</item>
+		<item>모든 색깔</item>
+
 	</string-array>
 	
 	<string-array name="backgroundColorValues">
@@ -75,6 +83,7 @@
 		<item>8</item>
 		<item>2</item>
 		<item>3</item>
+
 		<item>4</item>
 		<item>5</item>
 		<item>6</item>
@@ -82,45 +91,51 @@
 	</string-array>
 	
 	<string-array name="slideSpeedDescriptions">
-		<item>fast</item>
-		<item>slow</item>
-		<item>really slow</item>
+		<item>빠름</item>
+
+		<item>느림</item>
+		<item>매우 느림</item>
 	</string-array>
 	
 	<string-array name="slideSpeedValues">
 		<item>300</item>
 		<item>1000</item>
 		<item>3000</item>
+
 	</string-array>
 	
 	<string-array name="floatingTypeDescriptions">
-		<item>Left</item>
-		<item>Right</item>
-		<item>Down</item>
-		<item>Up</item>
-		<item>Hyperspeed</item>
-		<item>TableTop</item>
-		<item>Stack</item>
-		<item>Mix up</item>
+		<item>오른쪽으로</item>
+		<item>왼쪽으로</item>
+		<item>아래로</item>
+		<item>위로</item>
+		<item>안에서 밖으로</item>
+
+		<item>탁자위에 놓듯이</item>
+		<item>포개기</item>
+		<item>뒤섞기</item>
 	</string-array>
 	
 	<string-array name="floatingTypeValues">
 		<item>0</item>
 		<item>1</item>
+
 		<item>2</item>
 		<item>3</item>
 		<item>4</item>
 		<item>5</item>
 		<item>6</item>
 		<item>20</item>
+
 	</string-array>
 	
 	<string-array name="floatingSpeedDescriptions">
-		<item>very fast</item>
-		<item>fast</item>
-		<item>normal</item>
-		<item>slow</item>
-		<item>very slow</item>
+		<item>매우 빠르게</item>
+		<item>빠르게</item>
+		<item>보통 속도로</item>
+		<item>느리게</item>
+		<item>매우 느리게</item>
+
 	</string-array>
 	
 	<string-array name="floatingSpeedValues">
@@ -129,14 +144,16 @@
 		<item>30000</item>
 		<item>60000</item>
 		<item>250000</item>
+
 	</string-array>
 	
 	<string-array name="forceRotationDescriptions">
-		<item>No rotation</item>
-		<item>90 degrees</item>
-		<item>180 degrees</item>
-		<item>270 degrees</item>
+		<item>회전 없음</item>
+		<item>90도 회전</item>
+		<item>180도 회전</item>
+		<item>270도 회전</item>
 	</string-array>
+
 	
 	<string-array name="forceRotationValues">
 		<item>0</item>
@@ -145,3 +162,4 @@
 		<item>270</item>
 	</string-array>
 </resources>
+
