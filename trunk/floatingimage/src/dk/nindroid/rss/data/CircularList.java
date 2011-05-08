@@ -13,6 +13,7 @@ public class CircularList<ImageRefeference> {
 	
 	public CircularList(int capacity){
 		//Log.v("Floating List", "Creating Circular list");
+		capacity += 3; // The two extremes, and ..?
 		data = new ImageReference[capacity];
 		position = capacity / 2;
 		prevLimit = 0;
@@ -24,61 +25,60 @@ public class CircularList<ImageRefeference> {
 	
 	public ImageReference next(ImageReference last){
 		synchronized(data){
-			if(hasNext()){
+			while(position != dec(nextData)){
 				position = inc(position);
-				if(data[prevLimit] != null){
-					data[prevLimit].recycleBitmap();
-					data[prevLimit] = null;
-				}
+				
 				if(prevData == prevLimit){
 					prevData = inc(prevData);
 				}
 				prevLimit = inc(prevLimit);
 				nextLimit = inc(nextLimit);
 				
-				ImageReference res = data[position];
-				data[position] = last;
+				if(data[prevLimit] != null){
+					data[prevLimit].recycleBitmap();
+					data[prevLimit] = null;
+				}
 				
 				//Log.v("Floating List", "next()");
-				//visualize(position);
-				return res;
-			}else{
-				return null;
+				if(data[position] != null){
+					ImageReference res = data[position];
+					data[position] = last;
+					//visualize(position);
+					return res;
+				}
+				
 			}
 		}
+		return null;
 	}
 	
 	public ImageReference prev(ImageReference last){
 		synchronized(data){
-			if(hasPrev()){
-				if(data[nextLimit] != null){
-					data[nextLimit].recycleBitmap();
-					data[nextLimit] = null;
-				}
+			while(position != prevData){
+				
 				if(nextData == nextLimit){
 					nextData = dec(nextData);
 				}
 				prevLimit = dec(prevLimit);
 				nextLimit = dec(nextLimit);
 				
-				ImageReference res = data[position];
-				data[position] = last;
-				position = dec(position);
+				if(data[nextLimit] != null){
+					data[nextLimit].recycleBitmap();
+					data[nextLimit] = null;
+				}
+				
 				//Log.v("Floating List", "prev()");
-				//visualize(position);
-				return res;
-			}else{
-				return null;
+				if(data[position] != null){
+					ImageReference res = data[position];
+					data[position] = last;
+					position = dec(position);
+					//visualize(position);
+					return res;
+				}
+				position = dec(position);
 			}
 		}
-	}
-	
-	private boolean hasNext(){
-		return data[inc(position)] != null;
-	}
-	
-	private boolean hasPrev(){
-		return data[position] != null;
+		return null;
 	}
 	
 	public boolean needPrev(){
@@ -95,6 +95,7 @@ public class CircularList<ImageRefeference> {
 				data[nextData] = t;
 				nextData = inc(nextData);
 
+				//Log.v("Floating List", "addNext()");
 				//visualize(nextData);
 			}else{
 				//Log.v("Floating List", "Wasted work...");
@@ -109,6 +110,7 @@ public class CircularList<ImageRefeference> {
 				data[prevData] = t;
 				prevData = dec(prevData);
 
+				//Log.v("Floating List", "addPrev()");
 				//visualize(prevData);
 			}else{
 				if(t.getBitmap() != null){
@@ -182,9 +184,17 @@ public class CircularList<ImageRefeference> {
 				}
 				
 				if(i == (prevData)){
-					sb2.append('<');
+					if(data[i] != null){
+						sb2.append('[');
+					}else{
+						sb2.append('<');
+					}
 				}else if(i == (nextData)){
-					sb2.append('>');
+					if(data[i] != null){
+						sb2.append(']');
+					}else{
+						sb2.append('>');
+					}
 				}else if(data[i] == null){
 					sb2.append('0');
 				}else if(data[i].getBitmap().isRecycled()){

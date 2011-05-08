@@ -94,8 +94,8 @@
 	</string-array>
 	
 	<string-array name="floatingTypeDescriptions">
-		<item>Venstre</item>
 		<item>Højre</item>
+		<item>Venstre</item>
 		<item>Ned</item>
 		<item>Op</item>
 		<item>Hyperrum</item>
