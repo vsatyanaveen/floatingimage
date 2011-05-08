@@ -399,11 +399,13 @@ public class Image implements ImagePlane {
 		//if(realTime % 10000 < 5000){
 			// Smooth images
 			//gl.glEnable(GL10.GL_BLEND);
+		//*
 			gl.glEnable(GL10.GL_POINT_SMOOTH);
 			gl.glEnable(GL10.GL_LINE_SMOOTH);
 			gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
 			gl.glLineWidth(1.0f);
 			gl.glDrawElements(GL10.GL_LINE_STRIP, 5, GL10.GL_UNSIGNED_BYTE, mLineIndexBuffer);
+			//*/
 		//}
 		
 		gl.glPopMatrix();
@@ -588,7 +590,7 @@ public class Image implements ImagePlane {
 	}
 	
 	public void traversalChanged(long frametime){
-		mRotations = (int)(mPositionController.adjustTime(frametime, mActivity.getSettings().floatingTraversal) / (float)mActivity.getSettings().floatingTraversal) + 1;
+		mRotations = (int)((mPositionController.adjustTime(frametime, mActivity.getSettings().floatingTraversal) + 300 * mActivity.getSettings().floatingTraversal) / (float)mActivity.getSettings().floatingTraversal) - 299;
 	}
 			
 	private boolean updateFloating(GL10 gl, long time){

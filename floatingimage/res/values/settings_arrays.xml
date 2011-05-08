@@ -94,8 +94,8 @@
 	</string-array>
 	
 	<string-array name="floatingTypeDescriptions">
-		<item>Left</item>
 		<item>Right</item>
+		<item>Left</item>
 		<item>Down</item>
 		<item>Up</item>
 		<item>Hyperspeed</item>

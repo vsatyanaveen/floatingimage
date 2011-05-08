@@ -104,48 +104,54 @@ public class FloatingRenderer extends Renderer {
 		mStartTime = System.currentTimeMillis();
 	}
 	
+	int mCurPositionController = -1;
+	
 	public void setPositionController(int type){
-		switch(type){
-		case FLOATING_TYPE_LEFT:
-			for(int i = 0; i < mImgs.length; ++i){
-				mImgs[i].setPositionController(new FloatLeft(mActivity, mDisplay, i, mImgs.length));
-			}
-		break;
-		case FLOATING_TYPE_RIGHT:
-			for(int i = 0; i < mImgs.length; ++i){
-				mImgs[i].setPositionController(new FloatRight(mActivity, mDisplay, i, mImgs.length));
-			}
-		break;
-		case FLOATING_TYPE_DOWN:
-			for(int i = 0; i < mImgs.length; ++i){
-				mImgs[i].setPositionController(new FloatDown(mActivity, mDisplay, i, mImgs.length));
-			}
+		if(mCurPositionController != type){
+			mCurPositionController = type;
+			
+			switch(type){
+			case FLOATING_TYPE_LEFT:
+				for(int i = 0; i < mImgs.length; ++i){
+					mImgs[i].setPositionController(new FloatLeft(mActivity, mDisplay, i, mImgs.length));
+				}
 			break;
-		case FLOATING_TYPE_UP:
-			for(int i = 0; i < mImgs.length; ++i){
-				mImgs[i].setPositionController(new FloatUp(mActivity, mDisplay, i, mImgs.length));
-			}
+			case FLOATING_TYPE_RIGHT:
+				for(int i = 0; i < mImgs.length; ++i){
+					mImgs[i].setPositionController(new FloatRight(mActivity, mDisplay, i, mImgs.length));
+				}
 			break;
-		case FLOATING_TYPE_STARSPEED:
-			for(int i = 0; i < mImgs.length; ++i){
-				mImgs[i].setPositionController(new StarSpeed(mActivity, mDisplay, i, mImgs.length));
+			case FLOATING_TYPE_DOWN:
+				for(int i = 0; i < mImgs.length; ++i){
+					mImgs[i].setPositionController(new FloatDown(mActivity, mDisplay, i, mImgs.length));
+				}
+				break;
+			case FLOATING_TYPE_UP:
+				for(int i = 0; i < mImgs.length; ++i){
+					mImgs[i].setPositionController(new FloatUp(mActivity, mDisplay, i, mImgs.length));
+				}
+				break;
+			case FLOATING_TYPE_STARSPEED:
+				for(int i = 0; i < mImgs.length; ++i){
+					mImgs[i].setPositionController(new StarSpeed(mActivity, mDisplay, i, mImgs.length));
+				}
+				break;
+			case FLOATING_TYPE_TABLETOP:
+				for(int i = 0; i < mImgs.length; ++i){
+					mImgs[i].setPositionController(new TableTop(mActivity, mDisplay, i, mImgs.length));
+				}
+				break;
+			case FLOATING_TYPE_STACK:
+				for(int i = 0; i < mImgs.length; ++i){
+					mImgs[i].setPositionController(new Stack(mActivity, mDisplay, i, mImgs.length));
+				}
+				break;
+			case FLOATING_TYPE_MIXUP:
+				for(int i = 0; i < mImgs.length; ++i){
+					mImgs[i].setPositionController(new Mixup(mActivity, mDisplay, this, i, mImgs.length));
+				}
+				break;
 			}
-			break;
-		case FLOATING_TYPE_TABLETOP:
-			for(int i = 0; i < mImgs.length; ++i){
-				mImgs[i].setPositionController(new TableTop(mActivity, mDisplay, i, mImgs.length));
-			}
-			break;
-		case FLOATING_TYPE_STACK:
-			for(int i = 0; i < mImgs.length; ++i){
-				mImgs[i].setPositionController(new Stack(mActivity, mDisplay, i, mImgs.length));
-			}
-			break;
-		case FLOATING_TYPE_MIXUP:
-			for(int i = 0; i < mImgs.length; ++i){
-				mImgs[i].setPositionController(new Mixup(mActivity, mDisplay, this, i, mImgs.length));
-			}
-			break;
 		}
 	}
 		
