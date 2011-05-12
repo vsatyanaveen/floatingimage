@@ -36,6 +36,14 @@ public abstract class ImageReference {
 	public abstract boolean isPersonal();
 	public abstract String getAuthor();
 	public abstract void getExtended();
+	boolean deleted = false;
+	public boolean isDeleted(){
+		return deleted;
+	}
+	public void setDeleted(){
+		deleted = true;
+	}
+	
 	public boolean isInvalidated(){
 		return mInvalidated;
 	}

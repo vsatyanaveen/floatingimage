@@ -69,7 +69,6 @@ public class ShowStreams extends Activity implements MainActivity {
 	public static final int				MISC_ROW_ID		= 201;
 	public static final String 			version 		= "2.5.1";
 	public static final int				CACHE_SIZE		= 15;
-	//public static MainActivity 			current;
 	private GLSurfaceView 				mGLSurfaceView;
 	private RiverRenderer 				renderer;
 	private PowerManager.WakeLock 		wl;
@@ -207,7 +206,8 @@ public class ShowStreams extends Activity implements MainActivity {
 			case CONTEXT_DELETE:
 				AlertDialog.Builder builder = new AlertDialog.Builder(this);
 				String question = this.getString(R.string.delete_image_are_you_sure);
-				final File file = ((LocalImage)renderer.getSelected()).getFile();
+				final LocalImage li = (LocalImage)renderer.getSelected();
+				final File file = li.getFile();
 				question += " " + file.getName() + "?";
 				builder.setMessage(question)
 				       .setCancelable(false)
