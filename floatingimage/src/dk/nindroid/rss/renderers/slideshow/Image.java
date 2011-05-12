@@ -209,6 +209,7 @@ public class Image implements ImagePlane {
 	}
 	
 	public void render(GL10 gl, long time){
+		if(mPos == null) return;
 		if(this.mSetLargeTexture){
 			setTexture(gl, mLargeTextureID, true);
 			mSetLargeTexture = false;

@@ -5,6 +5,7 @@ import java.io.File;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
+import android.util.Log;
 import dk.nindroid.rss.data.Progress;
 
 public class ImageFileReader{
@@ -21,11 +22,20 @@ public class ImageFileReader{
 		int largerSide = Math.max(width, height);
 		setProgress(progress, 20);
 		opts.inJustDecodeBounds = false;
-		if(largerSide > size * 2){
+		if(width + height > size * 1.5f){
 			int sampleSize = getSampleSize(size, largerSide);
 			opts.inSampleSize = sampleSize;
+			//Log.v("Floating Image", "Reading image (" + width + ", " + height + ") at " + (width / sampleSize) + ", " + (height / sampleSize));
 		}
-		Bitmap bmp = BitmapFactory.decodeFile(path, opts);
+		Bitmap bmp = null;
+		try{
+			bmp = BitmapFactory.decodeFile(path, opts);
+		}catch(Throwable t){
+			Log.w("Floating Image", "Oops, image too large. Let's try that again, a bit smaller.", t);
+			setProgress(progress, 40);
+			opts.inSampleSize = opts.inSampleSize * 2;
+			bmp = BitmapFactory.decodeFile(path, opts);
+		}
 		setProgress(progress, 60);
 		if(bmp == null) return null;
 		width = bmp.getWidth();

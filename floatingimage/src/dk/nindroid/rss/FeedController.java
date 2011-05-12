@@ -24,6 +24,7 @@ import dk.nindroid.rss.parser.FeedParser;
 import dk.nindroid.rss.parser.ParserProvider;
 import dk.nindroid.rss.settings.FeedsDbAdapter;
 import dk.nindroid.rss.settings.Settings;
+import dk.nindroid.rss.uiActivities.Toaster;
 
 public class FeedController {
 	private static long						REFRESH_INTERVAL = 7200000; // Every other hour;
@@ -247,6 +248,10 @@ public class FeedController {
 			Log.e("FeedController", "Unexpected exception caught", e);
 		} catch (FactoryConfigurationError e) {
 			Log.e("FeedController", "Unexpected exception caught", e);
+		} catch (Throwable t){
+			Log.e("FeedController", "Too large feed received", t);
+			String msg = mActivity.context().getString(R.string.cannot_read_feed) + "(" + feed.getName() + ")";
+			mActivity.runOnUiThread(new Toaster(mActivity.context(), msg));
 		}
 		return null;
 	}
@@ -276,6 +281,10 @@ public class FeedController {
 				if(isImage(f)){
 					ImageReference ir = new LocalImage(f);
 					images.add(ir);
+					if(images.size() > 1500){
+						Log.v("Floating Image", "Too many files (" + files.length + ") found, bailing!");
+						return; // Some people are insane, bail at 1500 images!
+					}
 				}
 			}
 		}

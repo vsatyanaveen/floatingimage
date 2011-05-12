@@ -148,7 +148,12 @@ public class TextureSelector {
 						res = mTextureResolution;
 					}
 					if(ref instanceof LocalImage){ // Special case, read from disk
-						Bitmap bmp = ImageFileReader.readImage(new File(url), res, progress);
+						Bitmap bmp = null;
+						try{
+							bmp = ImageFileReader.readImage(new File(url), res, progress);
+						}catch(Throwable t){
+							Log.e("Floating Image", "Unexpected nastyness caught!", t);
+						}
 						if(bmp != null){
 							applyLarge(bmp);
 						}
@@ -234,10 +239,21 @@ public class TextureSelector {
 						width  = (int)(aspect * height);
 					}
 				}
-				Bitmap bmp = Bitmap.createScaledBitmap(mCurrentBitmap, width, height, true);
-				
-				applyBitmap(bmp, ImagePlane.SIZE_LARGE);
-				bmp.recycle();
+				Bitmap bmp = null;
+				try{
+					bmp = Bitmap.createScaledBitmap(mCurrentBitmap, width, height, true);
+				}catch(Throwable t){
+					Log.w("Floating Image", "Oops, let's try again with a smaller image", t);
+					try{
+						bmp = Bitmap.createScaledBitmap(mCurrentBitmap, width / 2, height / 2, true);
+					}catch(Throwable tr){
+						Log.e("Floating Image", "Shit, that didn't work either. Bailing!", tr);
+					}
+				}
+				if(bmp != null){
+					applyBitmap(bmp, ImagePlane.SIZE_LARGE);
+					bmp.recycle();
+				}
 			}
 		}
 		
@@ -250,8 +266,13 @@ public class TextureSelector {
 		private void applyBitmap(Bitmap bmp, int sizeType){
 			if(bmp == null) return;
 			int res = mTextureResolution;
-			Bitmap bitmap = Bitmap.createBitmap(res, res, Config.RGB_565);
-			if(bitmap == null) return; // WTFBBQ?!
+			Bitmap bitmap = null;
+			try{
+				bitmap = Bitmap.createBitmap(res, res, Config.RGB_565);
+			}catch(Throwable t){
+				Log.e("Floating Image", "Couldn't apply bitmap.", t);
+			}
+			if(bitmap == null) return;
 			Canvas canvas = new Canvas(bitmap);
 			canvas.drawBitmap(bmp, 0, 0, mPaint);
 			if(mRef != null){

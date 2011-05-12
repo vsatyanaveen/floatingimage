@@ -316,8 +316,14 @@ public class Image implements ImagePlane {
 	}
 	
 	public void draw(GL10 gl, long time, long realTime){
-		if(mShowingImage == null && !mLargeTex){
-			return;
+		if(mShowingImage == null){
+			if(!mLargeTex){
+				return;
+			}
+		}else{
+			if(mShowingImage.isDeleted()){
+				return;
+			}
 		}
 		
 		float x, y, z, szX, szY;
@@ -663,7 +669,11 @@ public class Image implements ImagePlane {
 		long timeToFloat = realTime - FloatingRenderer.mSelectedTime - FloatingRenderer.mFocusDuration;
 		float interval = getInterval(time + timeToFloat);
 		if(fraction > 1){
-			mAlpha = mDelete ? 0 : 1;
+			if(mDelete){
+				mAlpha = 0;
+				mShowingImage.setDeleted();
+			}
+			
 			mPositionController.getRotation(interval, mRotationA, mRotationB);
 			long offset = mActivity.getSettings().floatingTraversal * 1024;
 			mRotations = (int)((totalTime + offset) / mActivity.getSettings().floatingTraversal) + 1 - 1024;

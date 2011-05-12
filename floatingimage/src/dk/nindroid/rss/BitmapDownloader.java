@@ -197,6 +197,8 @@ public class BitmapDownloader implements Runnable {
 			return bm;
 		} catch (Exception e) {
 			Log.w("Floating Image", "Error handling URL \"" + URL + "\"", e);
+		}catch (Throwable t){
+			Log.e("Floating Image", "Horrible error handling URL \"" + URL + "\"", t);
 		}
 		return null;	
 	}
