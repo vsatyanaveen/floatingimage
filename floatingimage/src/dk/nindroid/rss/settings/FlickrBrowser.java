@@ -254,18 +254,7 @@ public class FlickrBrowser extends ListActivity {
 		setResult(RESULT_OK, intent);		
 		finish();
 	}
-	/*
-	private void returnPhotosFromHere(){
-		Intent intent = new Intent();
-		Bundle b = new Bundle();
-		String streamURL = FlickrFeeder.getPhotosFromHere();
-		b.putString("PATH", streamURL);
-		b.putString("NAME", "Photos from here");
-		intent.putExtras(b);
-		setResult(RESULT_OK, intent);		
-		finish();
-	}
-*/
+
 	private void returnStream(String username){
 		String uid = FlickrFeeder.findByUsername(username);
 		if(username.length() == 0){ // This actually returns a user with no images!

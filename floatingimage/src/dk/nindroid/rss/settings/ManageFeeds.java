@@ -60,6 +60,7 @@ public class ManageFeeds extends PreferenceActivity {
 		List<Feed> facebook = data.get(Settings.TYPE_FACEBOOK);
 		List<Feed> flickr = data.get(Settings.TYPE_FLICKR);
 		List<Feed> picasa = data.get(Settings.TYPE_PICASA);
+		List<Feed> photobucket = data.get(Settings.TYPE_PHOTOBUCKET);
 		
 		if(local.size() != 0){
 			Bitmap bmp = readBitmap(R.drawable.phone_icon);
@@ -109,6 +110,18 @@ public class ManageFeeds extends PreferenceActivity {
 			}
 		}
 		
+		if(photobucket.size() != 0){
+			Bitmap bmp = readBitmap(R.drawable.photobucket_icon);
+			PreferenceCategory photobucketCat = new PreferenceCategory(this);
+			mRowList.add(null);
+			photobucketCat.setTitle(R.string.photobucket);
+			root.addPreference(photobucketCat);
+			for(Feed f : photobucket){
+				photobucketCat.addPreference(createCheckbox(f, bmp));
+				mRowList.add(f);
+			}
+		}
+		
 		PreferenceCategory newCat = new PreferenceCategory(this);
 		newCat.setTitle("");
 		root.addPreference(newCat);
@@ -144,6 +157,7 @@ public class ManageFeeds extends PreferenceActivity {
 		data.put(Settings.TYPE_FLICKR, new ArrayList<Feed>());
 		data.put(Settings.TYPE_FACEBOOK, new ArrayList<Feed>());
 		data.put(Settings.TYPE_PICASA, new ArrayList<Feed>());
+		data.put(Settings.TYPE_PHOTOBUCKET, new ArrayList<Feed>());
 		int idi = c.getColumnIndex(FeedsDbAdapter.KEY_ROWID);
 		int typei = c.getColumnIndex(FeedsDbAdapter.KEY_TYPE);
 		int namei = c.getColumnIndex(FeedsDbAdapter.KEY_TITLE);
@@ -153,7 +167,6 @@ public class ManageFeeds extends PreferenceActivity {
 			String title = c.getString(namei);
 			int id = c.getInt(idi);
 			String extras = c.getString(extrasi);
-			Log.v("Floating Image", "Feed ID: " + id);
 			Feed feed = new Feed(title, id, extras);
 			data.get(type).add(feed);
 		}

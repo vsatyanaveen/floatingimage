@@ -4,6 +4,7 @@ import java.io.File;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
 import android.util.Log;
 import dk.nindroid.rss.data.Progress;
@@ -22,6 +23,7 @@ public class ImageFileReader{
 		int largerSide = Math.max(width, height);
 		setProgress(progress, 20);
 		opts.inJustDecodeBounds = false;
+		opts.inPreferredConfig = Config.RGB_565;
 		if(width + height > size * 1.5f){
 			int sampleSize = getSampleSize(size, largerSide);
 			opts.inSampleSize = sampleSize;

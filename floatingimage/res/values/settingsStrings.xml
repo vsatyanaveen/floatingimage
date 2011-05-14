@@ -91,6 +91,11 @@
 	<string name="facebookPhotosOfFriend">Show photos of</string>
 	<string name="facebookFriendsAlbums">Albums by</string>
 	<string name="facebookShowAlbum">show</string>
+	<string name="photobucket">Photobucket</string>
+	<string name="photobucketShowUser">Show user</string>
+	<string name="photobucketShowUserBadUsername">Sorry, Photobucket user not found.</string>
+	<string name="photobucketShowRecent">Show recent photos</string>
+	<string name="photobucketShowFollowing">Show followed photos</string>
 	<string name="loadingAlbums">Loading albums...</string>
 	<string name="loadingFriends">Loading friends...</string>
 	<string name="albumBy">Album by</string>
@@ -98,4 +103,7 @@
 	<string name="cameraPictures">Camera pictures</string>
 	<string name="moreCameraPictures">More camera pictures</string>
 	<string name="Downloads">Downloads</string>
+	<string name="misc">Misc</string>
+	<string name="LiveWallpapers">Live wallpapers</string>
+	<string name="LiveWallpapersSummary">Manage live wallpapers to set Floating Image as wallpaper</string>
 </resources>

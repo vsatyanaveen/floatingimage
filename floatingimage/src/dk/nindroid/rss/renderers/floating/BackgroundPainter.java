@@ -11,7 +11,6 @@ import javax.microedition.khronos.opengles.GL10;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Bitmap.Config;
 import android.opengl.GLU;
 import android.opengl.GLUtils;
 import android.util.Log;
@@ -33,7 +32,6 @@ public class BackgroundPainter {
 	private static final float zDepth = 15.0f;
 	
 	private Bitmap bg;
-	private Bitmap canvas;
 	private int mTextureID;
 	private FloatBuffer mTexBuffer;
 	private Vec3f[]		mVertices;
@@ -43,7 +41,6 @@ public class BackgroundPainter {
 	private static final int VERTS = 4;
 	
 	public BackgroundPainter(){
-		canvas = Bitmap.createBitmap(512, 512, Config.RGB_565);
 		
 		initPlane();
 	}
@@ -151,8 +148,8 @@ public class BackgroundPainter {
 	        gl.glTexEnvf(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE,
 	                GL10.GL_BLEND);
 	        
-	        GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, canvas, 0);
-	        GLUtils.texSubImage2D(GL10.GL_TEXTURE_2D, 0, 0, 0, bg);
+	        GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, bg, 0);
+	        //GLUtils.texSubImage2D(GL10.GL_TEXTURE_2D, 0, 0, 0, bg);
 			
 	        ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
 	        tbb.order(ByteOrder.nativeOrder());
