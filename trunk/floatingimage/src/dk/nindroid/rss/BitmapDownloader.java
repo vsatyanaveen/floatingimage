@@ -17,6 +17,8 @@ import org.xml.sax.XMLReader;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Bitmap.Config;
+import android.graphics.BitmapFactory.Options;
 import android.os.Process;
 import android.util.Log;
 import dk.nindroid.rss.compatibility.Exif;
@@ -193,7 +195,9 @@ public class BitmapDownloader implements Runnable {
 		try {
 			url = new URL(URL);		
 			bitmapByteArray = DownloadUtil.fetchUrlBytes(url, "Floating image/Android", progress);
-			Bitmap bm = BitmapFactory.decodeByteArray(bitmapByteArray, 0, bitmapByteArray.length);
+			Options opts = new Options();
+			opts.inPreferredConfig = Config.RGB_565;
+			Bitmap bm = BitmapFactory.decodeByteArray(bitmapByteArray, 0, bitmapByteArray.length, opts);
 			return bm;
 		} catch (Exception e) {
 			Log.w("Floating Image", "Error handling URL \"" + URL + "\"", e);

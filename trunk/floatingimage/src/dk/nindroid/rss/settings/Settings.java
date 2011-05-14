@@ -12,6 +12,7 @@ public class Settings {
 	public static final int TYPE_FLICKR = 2;
 	public static final int TYPE_PICASA = 3;
 	public static final int TYPE_FACEBOOK = 4;
+	public static final int TYPE_PHOTOBUCKET = 5;
 	
 	public static final int MODE_NONE = 0;
 	public static final int MODE_SLIDE_RIGHT_TO_LEFT = 1;

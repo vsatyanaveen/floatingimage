@@ -11,14 +11,12 @@ import javax.microedition.khronos.opengles.GL10;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Bitmap.Config;
 import android.opengl.GLUtils;
 import dk.nindroid.rss.R;
 import dk.nindroid.rss.gfx.Vec3f;
 
 public class GlowImage {
 	private static Bitmap glow;
-	private static Bitmap canvas;
 	private static int mTextureID;
 	private static FloatBuffer mTexBuffer;
 	private static Vec3f[]		mVertices;
@@ -30,8 +28,6 @@ public class GlowImage {
 	public static void init(Context context){
 		InputStream glowIS = context.getResources().openRawResource(R.drawable.glow_trans);
 		glow = BitmapFactory.decodeStream(glowIS);
-		
-		canvas = Bitmap.createBitmap(128, 128, Config.RGB_565);
 		
 		initPlane();
 	}
@@ -105,8 +101,7 @@ public class GlowImage {
         gl.glTexEnvf(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE,
                 GL10.GL_BLEND);
         
-        GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, canvas, 0);
-        GLUtils.texSubImage2D(GL10.GL_TEXTURE_2D, 0, 0, 0, glow);
+        GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, glow, 0);
 		
         ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
         tbb.order(ByteOrder.nativeOrder());

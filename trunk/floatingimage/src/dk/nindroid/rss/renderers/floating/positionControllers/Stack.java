@@ -30,26 +30,6 @@ public class Stack extends SequentialController {
 		this.mDisplay = display;
 		this.mActivity = activity;
 		mPos = new Vec3f();
-		/*
-		switch(image % 4){
-			case 0: 
-				mXLayerPos = -1.0f; 
-				mYLayerPos = -1.0f;
-				break;	
-			case 1: 
-				mXLayerPos = -1.0f;
-				mYLayerPos =  1.0f;
-				break;
-			case 2: 
-				mXLayerPos =  1.0f;
-				mYLayerPos = -1.0f;
-				break;
-			case 3: 
-				mXLayerPos =  1.0f;
-				mYLayerPos =  1.0f;
-				break;
-		}
-		*/
 		mXLayerPos = 0.0f;
 		mYLayerPos = 0.0f;
 		jitter();
@@ -58,15 +38,14 @@ public class Stack extends SequentialController {
 	@Override
 	public void jitter() {
 		mRotationOffset = mActivity.getSettings().rotateImages ? mRand.nextFloat() * 60.0f - 30.0f : 0;
-		//mRotationAmount = mActivity.getSettings().rotateImages ? mRand.nextFloat() * 60.0f - 30.0f : 0;
 	}
 
 	@Override
 	public float getOpacity(float interval) {
 		if(interval < 0.01f){
 			return 0;
-		}else if(interval < 0.03f){
-			return (interval - 0.01f) * (1 / 0.02f);	
+		}else if(interval < 0.025f){
+			return (interval - 0.01f) * (1.0f / 0.015f);	
 		}else if(interval > 0.95f){
 			return (1.0f - interval) * (1 / 0.05f);
 		}else{

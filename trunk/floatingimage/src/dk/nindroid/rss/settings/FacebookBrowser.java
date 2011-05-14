@@ -7,11 +7,8 @@ import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 import dk.nindroid.rss.R;
@@ -49,15 +46,15 @@ public class FacebookBrowser extends ListActivity {
 	private void fillMenu(){
 		if(FacebookFeeder.needsAuthorization()){
 			showAuthorize = true;
-			String authorize = this.getResources().getString(R.string.authorize);
+			String authorize = this.getString(R.string.authorize);
 			String[] options = new String[]{authorize};
 			setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, options));
 		}else{
 			showAuthorize = false;
-			String photosOfMe = this.getResources().getString(R.string.facebookPhotosOfMe);
-			String albums = this.getResources().getString(R.string.facebookMyAlbums);
-			String friends = this.getResources().getString(R.string.facebookFriends);
-			String unauthorize = this.getResources().getString(R.string.unauthorize);
+			String photosOfMe = this.getString(R.string.facebookPhotosOfMe);
+			String albums = this.getString(R.string.facebookMyAlbums);
+			String friends = this.getString(R.string.facebookFriends);
+			String unauthorize = this.getString(R.string.unauthorize);
 			String[] options = new String[]{photosOfMe, albums, friends, unauthorize};
 			setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, options));
 		}
@@ -66,11 +63,6 @@ public class FacebookBrowser extends ListActivity {
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
-		FrameLayout fl = new FrameLayout(this);
-		final EditText input = new EditText(this);
-
-		fl.addView(input, FrameLayout.LayoutParams.FILL_PARENT);
-		input.setGravity(Gravity.CENTER);
 		if(showAuthorize){
 			if(position == AUTHORIZE){
 				authorize();

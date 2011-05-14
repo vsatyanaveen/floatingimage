@@ -127,7 +127,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
         //*
         ++mFrames;
         if(realTime - mLastFPSTime > 1000){
-        	//Log.v("Floating Image", "Framerate is " + mFrames + " frames per second");
+        	Log.v("Floating Image", "Framerate is " + mFrames + " frames per second");
         	mFrames = 0;
         	mLastFPSTime = realTime;
         }
@@ -506,7 +506,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
          gl.glEnable(GL10.GL_TEXTURE_2D);
          
          gl.glHint(GL10.GL_LINE_SMOOTH_HINT, GL10.GL_NICEST);
- 		 gl.glHint(GL10.GL_POINT_SMOOTH_HINT, GL10.GL_NICEST);
+ 		 gl.glHint(GL10.GL_POINT_SMOOTH_HINT, GL10.GL_FASTEST);
          
 
          if (mTranslucentBackground) {
@@ -514,8 +514,8 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
          } else {
              gl.glClearColor(0,0,0,1);
          }
-         gl.glEnable(GL10.GL_CULL_FACE);
-         gl.glShadeModel(GL10.GL_SMOOTH);
-         gl.glEnable(GL10.GL_DEPTH_TEST);
+         gl.glDisable(GL10.GL_CULL_FACE);
+         gl.glShadeModel(GL10.GL_FLAT);
+         gl.glDisable(GL10.GL_DEPTH_TEST);
 	}
 }

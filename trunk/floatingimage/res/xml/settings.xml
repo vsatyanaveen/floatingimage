@@ -10,7 +10,7 @@
 			android:action="android.intent.action.MAIN" 
 			android:targetClass="dk.nindroid.rss.menu.ApplicationFeedManagerLauncher"
 			android:targetPackage="dk.nindroid.rss" />
-        </PreferenceScreen>        
+        </PreferenceScreen>
         <CheckBoxPreference
                 android:key="shuffleImages"
                 android:title="@string/shuffle"
@@ -117,10 +117,17 @@
 
     </PreferenceCategory>
      -->
-    <PreferenceScreen android:title="@string/about" android:summary="@string/aboutSummary">
-			<intent 
-			android:action="android.intent.action.MAIN" 
-			android:targetClass="dk.nindroid.rss.settings.About" 
-			android:targetPackage="dk.nindroid.rss" />
-    </PreferenceScreen>
+     <PreferenceCategory
+            android:title="@string/misc">
+	     <PreferenceScreen android:title="@string/LiveWallpapers" android:summary="@string/LiveWallpapersSummary">
+				<intent 
+				android:action="android.service.wallpaper.LIVE_WALLPAPER_CHOOSER"  />
+	    	</PreferenceScreen>
+	    <PreferenceScreen android:title="@string/about" android:summary="@string/aboutSummary">
+				<intent 
+				android:action="android.intent.action.MAIN" 
+				android:targetClass="dk.nindroid.rss.settings.About" 
+				android:targetPackage="dk.nindroid.rss" />
+	    </PreferenceScreen>
+    </PreferenceCategory>
 </PreferenceScreen>
