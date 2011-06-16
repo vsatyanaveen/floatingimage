@@ -31,7 +31,7 @@ public class HttpTools {
 				in = httpConn.getInputStream();
 			}
 			else{
-				Log.v("Floating Image", "HttpTools: Response not OK: " + response);
+				Log.w("Floating Image", "HttpTools: Response not OK: " + response);
 			}
 		} catch (Exception ex) {
 			Log.e("Floating Image", "HttpTools: Error getting http stream", ex);

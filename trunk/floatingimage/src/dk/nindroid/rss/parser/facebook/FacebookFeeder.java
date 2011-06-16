@@ -23,7 +23,7 @@ public class FacebookFeeder {
 	
 	private static final String BASEURL		  	= "https://graph.facebook.com/";
 	private static final String ME				= "me/";
-	private static final String PHOTOS_URL 		= "photos?limit=500";
+	private static final String PHOTOS_URL 		= "photos";
 	private static final String ALBUMS_URL 		= "albums";
 	private static final String FRIENDS_URL 	= "friends";
 		

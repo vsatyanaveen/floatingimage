@@ -45,7 +45,7 @@ public class SourceSelector extends ListActivity {
 		Bitmap photobucketBmp = ImageUtil.readBitmap(this, R.drawable.photobucket_icon);
 		SourceSelectorAdapter.Source photobucketS = new Source(photobucket, photobucketBmp, PHOTOBUCKET_ACTIVITY);		
 		
-		SourceSelectorAdapter.Source[] options = new Source[] {localS, flickrS, picasaS, facebookS, photobucketS};
+		SourceSelectorAdapter.Source[] options = new Source[] {localS, flickrS, picasaS, facebookS};
 		setListAdapter(new SourceSelectorAdapter(this, options));
 	}
 	

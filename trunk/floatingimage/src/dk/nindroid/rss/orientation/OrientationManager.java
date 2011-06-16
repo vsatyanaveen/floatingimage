@@ -40,7 +40,7 @@ public class OrientationManager implements SensorEventListener {
 	public void onResume(){
 		currentOrientation = -1; // Resend orientation info!
 		settingOrientation = -1; // Resend orientation info!
-		mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(SensorManager.SENSOR_ORIENTATION), SensorManager.SENSOR_DELAY_NORMAL);
+		mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
 		Log.v("Orientation manager", "Resume!");
 	}
 	
@@ -75,7 +75,7 @@ public class OrientationManager implements SensorEventListener {
 		}
 		// Adjust for rotated devices
 		if(orientation != -1){
-			orientation = (orientation + 4 - initialRotation + mSettings.forceRotation) % 4;
+			orientation = (orientation + 4 + initialRotation + mSettings.forceRotation) % 4;
 			if(orientation != settingOrientation){
 				settingOrientation = orientation;
 				setOrientation();
