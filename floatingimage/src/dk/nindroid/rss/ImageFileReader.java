@@ -23,7 +23,7 @@ public class ImageFileReader{
 		int largerSide = Math.max(width, height);
 		setProgress(progress, 20);
 		opts.inJustDecodeBounds = false;
-		opts.inPreferredConfig = Config.RGB_565;
+		opts.inPreferredConfig = Config.ARGB_8888;
 		if(width + height > size * 1.5f){
 			int sampleSize = getSampleSize(size, largerSide);
 			opts.inSampleSize = sampleSize;

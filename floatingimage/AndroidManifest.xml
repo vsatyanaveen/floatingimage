@@ -3,8 +3,8 @@
       package="dk.nindroid.rss"
       android:installLocation="auto" android:versionCode="75" android:versionName="3.0.4">
      
-    <application android:icon="@drawable/icon" android:label="@string/app_name" android:theme="@android:style/Theme.NoTitleBar" android:debuggable="false">
-        <activity android:name=".ShowStreams" android:screenOrientation="portrait">
+    <application android:icon="@drawable/icon" android:label="@string/app_name" android:debuggable="false">
+        <activity android:name=".ShowStreams" android:screenOrientation="nosensor">
         	<intent-filter>
         		<action android:name="android.intent.action.MAIN"></action>
 				<category android:name="android.intent.category.LAUNCHER"></category>
@@ -15,8 +15,8 @@
 		<activity android:name=".ClearCache"></activity>
 		<activity android:name=".settings.ManageFeeds"></activity>
 		<activity android:name=".settings.DirectoryBrowser"></activity>
-		<activity android:name=".settings.SourceSelector"></activity>
-		<activity android:name=".settings.FlickrBrowser"></activity>
+		<activity android:name=".settings.SourceSelectorFragmentActivity"></activity>
+		<activity android:name=".settings.FlickrBrowser$AlbumActivity"></activity>
 		<activity android:name=".settings.PicasaBrowser"></activity>
 		<activity android:name=".parser.facebook.FacebookAuth">
 			<intent-filter>
@@ -26,7 +26,7 @@
 		         <data android:scheme="floatingimage"/>
 			</intent-filter>
 		</activity>
-		<activity android:name=".settings.FacebookBrowser">
+		<activity android:name=".settings.FacebookBrowser$SubActivity">
 		</activity>
 		<activity android:name=".parser.facebook.WebAuth"></activity>
 		<activity android:name=".parser.facebook.FacebookAlbumBrowser"></activity>
@@ -36,7 +36,7 @@
 		<activity android:name=".parser.flickr.FlickrAlbumBrowser"></activity>
 		<activity android:name=".parser.picasa.PicasaWebAuth"></activity>
 		<activity android:name=".parser.picasa.PicasaAlbumBrowser"></activity>
-		<activity android:name=".parser.picasa.PicasaUserView"></activity>
+		<activity android:name=".settings.PicasaBrowser$UserActivity"></activity>
 		<activity android:name=".settings.About" android:theme="@android:style/Theme.Dialog"></activity>
 		<activity android:name=".menu.WallpaperSettings" android:exported="true" />
 		<activity android:name=".menu.ApplicationFeedManagerLauncher"></activity>
@@ -52,9 +52,10 @@
 		</service>
 	<activity android:name=".settings.PhotobucketBrowser"></activity>
 <activity android:name=".parser.photobucket.PhotobucketShowUser"></activity>
+<activity android:name=".settings.SourceSelector$SourceActivity"></activity>
 </application>
 
-    <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="4" />
+    <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="11"/>
 	<uses-permission android:name="android.permission.VIBRATE"></uses-permission>
 	<uses-permission android:name="android.permission.WAKE_LOCK"></uses-permission>
 	<uses-permission android:name="android.permission.SET_WALLPAPER"></uses-permission>

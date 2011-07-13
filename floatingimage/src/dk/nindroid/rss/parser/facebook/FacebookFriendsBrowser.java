@@ -4,20 +4,30 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import android.app.ListActivity;
+import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.ListFragment;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import dk.nindroid.rss.R;
 
-public class FacebookFriendsBrowser extends ListActivity implements GetFriendsTask.Callback {
+public class FacebookFriendsBrowser extends ListFragment implements GetFriendsTask.Callback {
 	private List<Friend> friends = null;
 	
+	boolean mDualPane;
+	
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
 		fillMenu();
+		View sourceFrame = getActivity().findViewById(R.id.source);
+        mDualPane = sourceFrame != null && sourceFrame.getVisibility() == View.VISIBLE;
 	}
 	
 	private void fillMenu(){
@@ -25,25 +35,36 @@ public class FacebookFriendsBrowser extends ListActivity implements GetFriendsTa
 	}
 	
 	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
+	public void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
-		Intent intent = new Intent(this, FacebookFriendView.class);
+		//Intent intent = new Intent(this, FacebookFriendView.class);
 		Friend friend = friends.get(position);
-		intent.putExtra("ID", friend.getId());
-		intent.putExtra("Name", friend.getName());
-		this.startActivityForResult(intent, 0);
+		//intent.putExtra("ID", friend.getId());
+		//intent.putExtra("Name", friend.getName());
+		//this.startActivityForResult(intent, 0);
+		if(mDualPane){
+			FragmentTransaction ft = getFragmentManager().beginTransaction();
+	        ft.replace(R.id.source, FacebookFriendView.getInstance(friend.getId(), friend.getName()));
+	        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+	        ft.commit();
+		}else{
+			Intent intent = new Intent(this.getActivity(), SubActivity.class);
+			intent.putExtra("ID", friend.getId());
+			intent.putExtra("Name", friend.getName());
+			this.startActivityForResult(intent, 0);
+		}
 	}
 	
 	private void getFriends(){
-		new GetFriendsTask(this, this).execute();
+		new GetFriendsTask(getActivity(), this).execute();
 	}
 	
 	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		if(resultCode == RESULT_OK){
-			setResult(RESULT_OK, data);
-			finish();
+		if(resultCode == Activity.RESULT_OK){
+			getActivity().setResult(Activity.RESULT_OK, data);
+			getActivity().finish();
 		}
 	}
 	
@@ -80,7 +101,7 @@ public class FacebookFriendsBrowser extends ListActivity implements GetFriendsTa
 	@Override
 	public void friendsFetched(List<Friend> param) {
 		if(param == null) {
-			finish();
+			getActivity().finish();
 			return;
 		}
 		
@@ -90,6 +111,29 @@ public class FacebookFriendsBrowser extends ListActivity implements GetFriendsTa
 		for(int i = 0; i < friends.size(); ++i){
 			options[i] = friends.get(i).name;
 		}
-		setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, options));
+		setListAdapter(new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, options));
+	}
+	
+	public static class SubActivity extends FragmentActivity{
+		@Override
+		protected void onCreate(Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
+
+			if (getResources().getConfiguration().orientation
+					== Configuration.ORIENTATION_LANDSCAPE) {
+				// If the screen is now in landscape mode, we can show the
+				// dialog in-line with the list so we don't need this activity.
+				finish();
+				return;
+			}
+
+			if (savedInstanceState == null) {
+				// During initial setup, plug in the details fragment.
+				Fragment f = FacebookFriendView.getInstance(this.getIntent().getStringExtra("ID"), this.getIntent().getStringExtra("Name"));
+				
+				f.setArguments(getIntent().getExtras());
+				getSupportFragmentManager().beginTransaction().add(android.R.id.content, f).commit();
+			}
+		}
 	}
 }

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+	android:title="@string/floating">
+             <ListPreference
+                android:key="floatingType"
+                android:title="@string/floatingType"
+                android:summary="@string/floatingTypeSummary"
+                android:entries="@array/floatingTypeDescriptions"
+                android:entryValues="@array/floatingTypeValues"
+                android:dialogTitle="@string/floatingTypeTitle"
+                android:defaultValue="0" />
+            <CheckBoxPreference
+                android:key="rotateImages"
+                android:title="@string/rotateImages"
+                android:summary="@string/rotateImagesSummary"
+                android:defaultValue="true" />
+			<CheckBoxPreference
+                android:key="fullscreenBlack"
+                android:title="@string/fullscreenBlack"
+                android:summary="@string/fullscreenBlackSummary"
+                android:defaultValue="true" />
+            <CheckBoxPreference
+                android:key="imageDecorations"
+                android:title="@string/imageDecorations"
+                android:summary="@string/imageDecorationsSummary"
+                android:defaultValue="true" />
+            <CheckBoxPreference
+            	android:key="highResThumbs"
+            	android:title="@string/useHighResThumbs"
+            	android:summary="@string/useHighResThumbsSummary"
+            	android:defaultValue="false" />
+            <ListPreference
+                android:key="floatingSpeed"
+                android:title="@string/floatingSpeed"
+                android:summary="@string/floatingSpeedSummary"
+                android:entries="@array/floatingSpeedDescriptions"
+                android:entryValues="@array/floatingSpeedValues"
+                android:dialogTitle="@string/floatingSpeedTitle"
+                android:defaultValue="30000" />
+           <ListPreference
+                android:key="backgroundColor"
+                android:title="@string/backgroundColor"
+                android:summary="@string/backgroundColorSummary"
+                android:entries="@array/backgroundColorDescriptions"
+                android:entryValues="@array/backgroundColorValues"
+                android:dialogTitle="@string/backgroundColorTitle"
+                android:defaultValue="0" />
+</PreferenceScreen>

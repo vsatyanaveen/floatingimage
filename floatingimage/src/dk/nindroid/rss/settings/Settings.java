@@ -50,6 +50,9 @@ public class Settings {
 	}
 	
 	public void readSettings(Context context) {
+		Display display = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+		int max = Math.max(display.getWidth(), display.getHeight());
+		
 		this.sp = context.getSharedPreferences(settings, 0);
 		shuffleImages = sp.getBoolean("shuffleImages", true);
 		rotateImages = sp.getBoolean("rotateImages", true);
@@ -60,7 +63,7 @@ public class Settings {
 		slideSpeed = Long.parseLong(sp.getString("slideSpeed", "300"));
 		fullscreenBlack = sp.getBoolean("fullscreenBlack", true);
 		imageDecorations = sp.getBoolean("imageDecorations", true);
-		highResThumbs = sp.getBoolean("highResThumbs", false);
+		highResThumbs = sp.getBoolean("highResThumbs", max > 799);
 		floatingType = Integer.parseInt(sp.getString("floatingType", "0"));
 		floatingTraversal = Long.parseLong(sp.getString("floatingSpeed", "30000"));
 		forceRotation = Integer.parseInt(sp.getString("forceRotation", "0"));
@@ -76,8 +79,7 @@ public class Settings {
 			break;
 		}
 		
-		Display display = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-		if(display.getWidth() < 400){
+		if(max < 500){
 			highResThumbs = false;
 		}
 		backgroundColor = Integer.parseInt(sp.getString("backgroundColor", "0"));

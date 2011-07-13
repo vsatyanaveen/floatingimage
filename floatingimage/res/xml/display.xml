@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+  			android:title="@string/display">
+	<ListPreference
+	    android:key="mode"
+	    android:title="@string/mode"
+	    android:summary="@string/modeSummary"
+	    android:entries="@array/displayModeDescriptions"
+	    android:entryValues="@array/displayModeValues"
+	    android:dialogTitle="@string/modeTitle"
+	    android:defaultValue="floatingImages" />
+	<ListPreference
+	    android:key="slideInterval"
+	    android:title="@string/slideInterval"
+	    android:summary="@string/slideIntervalSummary"
+	    android:entries="@array/slideIntervalDescriptions"
+	    android:entryValues="@array/slideIntervalValues"
+	    android:dialogTitle="@string/slideIntervalTitle"
+	    android:defaultValue="10000" />
+	<ListPreference
+	    android:key="slideSpeed"
+	    android:title="@string/slideSpeed"
+	    android:summary="@string/slideSpeedSummary"
+	    android:entries="@array/slideSpeedDescriptions"
+	    android:entryValues="@array/slideSpeedValues"
+	    android:dialogTitle="@string/slideSpeedTitle"
+	    android:defaultValue="300" />
+	<ListPreference
+		android:key="forceRotation"
+	    android:title="@string/forceRotation"
+	    android:summary="@string/forceRotationSummary"
+	    android:entries="@array/forceRotationDescriptions"
+	    android:entryValues="@array/forceRotationValues"
+	    android:dialogTitle="@string/forceRotationTitle"
+	    android:defaultValue="0" />
+</PreferenceScreen>
+             

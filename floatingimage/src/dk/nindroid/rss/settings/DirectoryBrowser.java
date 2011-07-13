@@ -7,15 +7,15 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Stack;
 
-import android.app.ListActivity;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.view.ContextMenu;
-import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -24,10 +24,9 @@ import android.view.View.OnTouchListener;
 import android.widget.ListView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import dk.nindroid.rss.R;
+import dk.nindroid.rss.settings.SourceSelector.SourceFragment;
 
-public class DirectoryBrowser extends ListActivity implements OnTouchListener{
-	public static final int SHOW_HIDDEN = Menu.FIRST;
-	public static final int PARENT_ID = Menu.FIRST + 1;
+public class DirectoryBrowser extends SourceFragment implements OnTouchListener{
 	public static final int SELECT_ID = Menu.FIRST;
 	public static final String ID = "local";
 	private boolean showHidden = false;
@@ -36,10 +35,16 @@ public class DirectoryBrowser extends ListActivity implements OnTouchListener{
 	
 	private List<String> directories;
 	File currentDirectory;
+	
+	public DirectoryBrowser(){
+		super(0);
+	}
+	
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		SharedPreferences sp = getSharedPreferences("dk.nindroid.rss_preferences", 0);
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		
+		SharedPreferences sp = getActivity().getSharedPreferences("dk.nindroid.rss_preferences", 0);
 		showHidden = sp.getBoolean("folderShowHiddenFiles", false);
 		directories = new ArrayList<String>();
 		registerForContextMenu(getListView());
@@ -50,8 +55,18 @@ public class DirectoryBrowser extends ListActivity implements OnTouchListener{
 		}
 		browseTo(currentDirectory.getAbsolutePath());
 		history.add(currentDirectory);
+		this.setHasOptionsMenu(true);
+		getActivity().invalidateOptionsMenu();
 	}
-
+	
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		super.onCreateOptionsMenu(menu, inflater);
+		inflater.inflate(R.menu.file_menu, menu);
+		//menu.add(0, PARENT_ID, 0, R.string.selectCurrentFolder);
+		//menu.add(0, SHOW_HIDDEN, 0, R.string.showHiddenFiles);
+	}
+	
 	private void browseTo(String curDir) {
 		Log.v("Floating Image", "Browse to " + curDir);
 		File current = new File(curDir);
@@ -81,7 +96,7 @@ public class DirectoryBrowser extends ListActivity implements OnTouchListener{
 	}
 	
 	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
+	public void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
 		if(position == 0){
 			oneDirUp();
@@ -106,25 +121,17 @@ public class DirectoryBrowser extends ListActivity implements OnTouchListener{
 		returnResult(currentDirectory.getAbsolutePath() + "/" + path);
 		return false;
 	}
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		boolean res = super.onCreateOptionsMenu(menu);
-		menu.add(0, PARENT_ID, 0, R.string.selectCurrentFolder);
-		menu.add(0, SHOW_HIDDEN, 0, R.string.showHiddenFiles);
-		return res;
-	}
 	
-
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch(item.getItemId()){
-		case PARENT_ID:
+		case R.id.set_current:
 			returnResult(currentDirectory.getAbsolutePath());
-			finish();
+			getActivity().finish();
 			return super.onOptionsItemSelected(item);
-		case SHOW_HIDDEN:
+		case R.id.show_hidden:
 			this.showHidden ^= true;
-			SharedPreferences sp = getSharedPreferences("dk.nindroid.rss_preferences", 0);
+			SharedPreferences sp = getActivity().getSharedPreferences("dk.nindroid.rss_preferences", 0);
 			SharedPreferences.Editor editor = sp.edit();
 			editor.putBoolean("folderShowHiddenFiles", this.showHidden);
 			editor.commit();
@@ -133,7 +140,6 @@ public class DirectoryBrowser extends ListActivity implements OnTouchListener{
 		}
 		return super.onOptionsItemSelected(item);
 	}
-	
 	void returnResult(String path){
 		Intent intent = new Intent();
 		Bundle b = new Bundle();
@@ -141,10 +147,10 @@ public class DirectoryBrowser extends ListActivity implements OnTouchListener{
 		b.putString("NAME", path);
 		b.putString("EXTRAS", "");
 		intent.putExtras(b);
-		setResult(RESULT_OK, intent);		
-		finish();
+		getActivity().setResult(Activity.RESULT_OK, intent);		
+		getActivity().finish();
 	}
-	
+	/*
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		switch(keyCode){
@@ -158,7 +164,7 @@ public class DirectoryBrowser extends ListActivity implements OnTouchListener{
 		}
 		return super.onKeyDown(keyCode, event);
 	}
-
+*/
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 		

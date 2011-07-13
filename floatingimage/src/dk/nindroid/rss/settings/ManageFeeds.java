@@ -168,7 +168,10 @@ public class ManageFeeds extends PreferenceActivity {
 			int id = c.getInt(idi);
 			String extras = c.getString(extrasi);
 			Feed feed = new Feed(title, id, extras);
-			data.get(type).add(feed);
+			List<Feed> feeds = data.get(type);
+			if(feeds != null){
+				feeds.add(feed);
+			}
 		}
 		stopManagingCursor(c);
 		c.close();
@@ -222,7 +225,7 @@ public class ManageFeeds extends PreferenceActivity {
 	private class AddClickListener implements Preference.OnPreferenceClickListener{
 		@Override
 		public boolean onPreferenceClick(Preference preference) {
-			Intent intent = new Intent(ManageFeeds.this, SourceSelector.class);
+			Intent intent = new Intent(ManageFeeds.this, SourceSelectorFragmentActivity.class);
 			startActivityForResult(intent, SELECT_FOLDER);
 			return true;
 		}

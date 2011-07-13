@@ -268,7 +268,7 @@ public class TextureSelector {
 			int res = mTextureResolution;
 			Bitmap bitmap = null;
 			try{
-				bitmap = Bitmap.createBitmap(res, res, Config.RGB_565);
+				bitmap = Bitmap.createBitmap(res, res, Config.ARGB_8888);
 			}catch(Throwable t){
 				Log.e("Floating Image", "Couldn't apply bitmap.", t);
 			}

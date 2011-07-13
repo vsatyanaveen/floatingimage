@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.Window;
 import dk.nindroid.rss.helpers.GLWallpaperService;
 import dk.nindroid.rss.launchers.ReadFeeds;
@@ -179,5 +180,10 @@ public class Wallpaper extends GLWallpaperService implements MainActivity{
 	@Override
 	public String getSettingsKey() {
 		return WallpaperSettings.SHARED_PREFS_NAME;
+	}
+
+	@Override
+	public View getView() {
+		return null;
 	}
 }

@@ -2,11 +2,15 @@ package dk.nindroid.rss.settings;
 
 import java.io.IOException;
 
+import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -22,7 +26,7 @@ import dk.nindroid.rss.parser.flickr.FlickrAlbumBrowser;
 import dk.nindroid.rss.parser.flickr.FlickrUser;
 import dk.nindroid.rss.uiActivities.Toaster;
 
-public class FlickrBrowser extends ListActivity {
+public class FlickrBrowser extends SourceSelector.SourceFragment {
 	// Positions
 	private static final int	SHOW_STREAM 				= 0;
 	private static final int	SEARCH 						= 1;
@@ -37,14 +41,22 @@ public class FlickrBrowser extends ListActivity {
 	private static final int	EXPLORE_AUTHORIZED			= 6;
 	private static final int	UNAUTHORIZE 				= 7;
 	
-	@Override 
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		FlickrFeeder.readCode(this);
+	public FlickrBrowser() {
+		super(1);
+	}
+	
+	boolean mDualPane;
+	
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		FlickrFeeder.readCode(this.getActivity());
+		View sourceFrame = getActivity().findViewById(R.id.source);
+        mDualPane = sourceFrame != null && sourceFrame.getVisibility() == View.VISIBLE;
 	}
 	
 	@Override
-	protected void onResume() {
+	public void onResume() {
 		super.onResume();
 		fillMenu();
 	}
@@ -57,7 +69,7 @@ public class FlickrBrowser extends ListActivity {
 			//String photosFromHere = this.getResources().getString(R.string.flickrPhotosFromHere);
 			String authorize = this.getResources().getString(R.string.authorize);
 			String[] options = new String[]{showStream, search, explore, authorize};
-			setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, options));
+			setListAdapter(new ArrayAdapter<String>(this.getActivity(), android.R.layout.simple_list_item_1, options));
 		}else{
 			String myStream = this.getResources().getString(R.string.flickrMyPhotos);
 			String myAlbums = this.getResources().getString(R.string.flickrMyAlbums);
@@ -69,12 +81,12 @@ public class FlickrBrowser extends ListActivity {
 			//String photosFromHere = this.getResources().getString(R.string.flickrPhotosFromHere);
 			String unauthorize = this.getResources().getString(R.string.unauthorize);
 			String[] options = new String[]{myStream, myAlbums, myContacts, myFavorites, showStream, search, explore, unauthorize};
-			setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, options));
+			setListAdapter(new ArrayAdapter<String>(this.getActivity(), android.R.layout.simple_list_item_1, options));
 		}
 	}
 	
 	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
+	public void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
 		if(FlickrFeeder.needsAuthorization()){
 			switch(position){
@@ -88,9 +100,9 @@ public class FlickrBrowser extends ListActivity {
 				returnExplore();
 			case AUTHORIZE:
 				try {
-					FlickrFeeder.authorize(this);
+					FlickrFeeder.authorize(this.getActivity());
 				} catch (IOException e) {
-					Toast.makeText(this, R.string.authorization_failed, Toast.LENGTH_LONG);
+					Toast.makeText(this.getActivity(), R.string.authorization_failed, Toast.LENGTH_LONG);
 					Log.w("Floating Image", "Exception thrown authorizing flickr", e);
 				}
 				break;
@@ -119,7 +131,7 @@ public class FlickrBrowser extends ListActivity {
 				returnExplore();
 				break;
 			case UNAUTHORIZE:
-				FlickrFeeder.unauthorize(this);
+				FlickrFeeder.unauthorize(this.getActivity());
 				fillMenu();
 				break;
 			}
@@ -127,32 +139,40 @@ public class FlickrBrowser extends ListActivity {
 	}
 	
 	private void showMyAlbums(){
-		Intent intent = new Intent(this, FlickrAlbumBrowser.class);
-		startActivityForResult(intent, MY_ALBUMS);
+		if(mDualPane){
+			FragmentTransaction ft = getFragmentManager().beginTransaction();
+	        ft.replace(R.id.source, FlickrAlbumBrowser.getInstance(null));
+	        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+	        ft.commit();
+		}else{
+			Intent intent = new Intent(this.getActivity(), AlbumActivity.class);
+			startActivityForResult(intent, MY_ALBUMS);
+		}
 	}
 	
 	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		if(resultCode == RESULT_OK){
+		if(resultCode == Activity.RESULT_OK){
 			switch(requestCode){
 			case MY_ALBUMS:
-				setResult(RESULT_OK, data);
+				this.getActivity().setResult(Activity.RESULT_OK, data);
 				Bundle b = data.getExtras();
 				b.putString("EXTRAS", getString(R.string.albumBy) + " " + getString(R.string.me));
-				finish();
+				b.putInt("TYPE", Settings.TYPE_FLICKR);
+				this.getActivity().finish();
 				break;
 			}
 		}
 	}
 	
 	private void search(){
-		FrameLayout fl = new FrameLayout(this);
-		final EditText input = new EditText(this);
+		FrameLayout fl = new FrameLayout(this.getActivity());
+		final EditText input = new EditText(this.getActivity());
 
 		fl.addView(input, FrameLayout.LayoutParams.FILL_PARENT);
 		input.setGravity(Gravity.CENTER);
-		final AlertDialog searchDialog = new AlertDialog.Builder(this)
+		final AlertDialog searchDialog = new AlertDialog.Builder(this.getActivity())
 		.setView(fl)
 		.setTitle(R.string.flickrSearchTerm)
 		.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
@@ -172,12 +192,12 @@ public class FlickrBrowser extends ListActivity {
 	}
 	
 	private void showStream(){
-		FrameLayout fl = new FrameLayout(this);
-		final EditText input = new EditText(this);
+		FrameLayout fl = new FrameLayout(this.getActivity());
+		final EditText input = new EditText(this.getActivity());
 
 		fl.addView(input, FrameLayout.LayoutParams.FILL_PARENT);
 		input.setGravity(Gravity.CENTER);
-		final AlertDialog streamDialog = new AlertDialog.Builder(this)
+		final AlertDialog streamDialog = new AlertDialog.Builder(this.getActivity())
 		.setView(fl)
 		.setTitle(R.string.flickrShowStreamUsername)
 		.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
@@ -209,16 +229,17 @@ public class FlickrBrowser extends ListActivity {
 	private void returnMyStream(){
 		FlickrUser user = FlickrFeeder.getAuthorizedUser();
 		if(user == null){
-			runOnUiThread(new Toaster(this, R.string.error_getting_flickr_user));
+			this.getActivity().runOnUiThread(new Toaster(this.getActivity(), R.string.error_getting_flickr_user));
 		}else{
 			Intent intent = new Intent();
 			Bundle b = new Bundle();
 			String streamURL = FlickrFeeder.getPublicPhotos(user.getNsid());
 			b.putString("PATH", streamURL);
 			b.putString("NAME", getString(R.string.stream) + " " + user.getUsername());
+			b.putInt("TYPE", Settings.TYPE_FLICKR);
 			intent.putExtras(b);
-			setResult(RESULT_OK, intent);		
-			finish();
+			this.getActivity().setResult(Activity.RESULT_OK, intent);		
+			this.getActivity().finish();
 		}
 	}
 	
@@ -228,9 +249,10 @@ public class FlickrBrowser extends ListActivity {
 		String streamURL = FlickrFeeder.getContactsPhotos();
 		b.putString("PATH", streamURL);
 		b.putString("NAME", getString(R.string.flickrAllContactsStreams));
+		b.putInt("TYPE", Settings.TYPE_FLICKR);
 		intent.putExtras(b);
-		setResult(RESULT_OK, intent);		
-		finish();
+		this.getActivity().setResult(Activity.RESULT_OK, intent);		
+		this.getActivity().finish();
 	}
 	
 	private void returnMyFavorites(){
@@ -239,9 +261,10 @@ public class FlickrBrowser extends ListActivity {
 		String streamURL = FlickrFeeder.getFavorites();
 		b.putString("PATH", streamURL);
 		b.putString("NAME", getString(R.string.flickrMyFavorites));
+		b.putInt("TYPE", Settings.TYPE_FLICKR);
 		intent.putExtras(b);
-		setResult(RESULT_OK, intent);		
-		finish();
+		this.getActivity().setResult(Activity.RESULT_OK, intent);		
+		this.getActivity().finish();
 	}
 	
 	private void returnExplore(){
@@ -250,19 +273,20 @@ public class FlickrBrowser extends ListActivity {
 		String streamURL = FlickrFeeder.getExplore();
 		b.putString("PATH", streamURL);
 		b.putString("NAME", getString(R.string.flickrExplore));
+		b.putInt("TYPE", Settings.TYPE_FLICKR);
 		intent.putExtras(b);
-		setResult(RESULT_OK, intent);		
-		finish();
+		this.getActivity().setResult(Activity.RESULT_OK, intent);		
+		this.getActivity().finish();
 	}
 
 	private void returnStream(String username){
 		String uid = FlickrFeeder.findByUsername(username);
 		if(username.length() == 0){ // This actually returns a user with no images!
-			Toast.makeText(this, R.string.flickrShowStreamNoUsername, Toast.LENGTH_LONG).show();
+			Toast.makeText(this.getActivity(), R.string.flickrShowStreamNoUsername, Toast.LENGTH_LONG).show();
 			return;
 		}
 		if(uid == null) {// Bad username.
-			Toast.makeText(this, R.string.flickrShowStreamBadUsername, Toast.LENGTH_LONG).show();
+			Toast.makeText(this.getActivity(), R.string.flickrShowStreamBadUsername, Toast.LENGTH_LONG).show();
 			return; 
 		}
 		Intent intent = new Intent();
@@ -270,14 +294,15 @@ public class FlickrBrowser extends ListActivity {
 		String streamURL = FlickrFeeder.getPublicPhotos(uid);
 		b.putString("PATH", streamURL);
 		b.putString("NAME", getString(R.string.stream) + " " + username);
+		b.putInt("TYPE", Settings.TYPE_FLICKR);
 		intent.putExtras(b);
-		setResult(RESULT_OK, intent);		
-		finish();
+		this.getActivity().setResult(Activity.RESULT_OK, intent);		
+		this.getActivity().finish();
 	}
 	
 	private void returnSearch(String criteria){
 		if(criteria.length() == 0){
-			Toast.makeText(this, R.string.flickrSearchNoText, Toast.LENGTH_LONG).show();
+			Toast.makeText(this.getActivity(), R.string.flickrSearchNoText, Toast.LENGTH_LONG).show();
 			return;
 		}
 		Intent intent = new Intent();
@@ -285,8 +310,32 @@ public class FlickrBrowser extends ListActivity {
 		String streamURL = FlickrFeeder.getSearch(criteria);
 		b.putString("PATH", streamURL);
 		b.putString("NAME", getString(R.string.flickr_search) + ": " + criteria);
+		b.putInt("TYPE", Settings.TYPE_FLICKR);
 		intent.putExtras(b);
-		setResult(RESULT_OK, intent);		
-		finish();
+		this.getActivity().setResult(Activity.RESULT_OK, intent);		
+		this.getActivity().finish();
+	}
+	
+	public static class AlbumActivity extends FragmentActivity{
+		@Override
+		protected void onCreate(Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
+
+			if (getResources().getConfiguration().orientation
+					== Configuration.ORIENTATION_LANDSCAPE) {
+				// If the screen is now in landscape mode, we can show the
+				// dialog in-line with the list so we don't need this activity.
+				finish();
+				return;
+			}
+
+			if (savedInstanceState == null) {
+				// During initial setup, plug in the details fragment.
+
+				Fragment f = FlickrAlbumBrowser.getInstance(this.getIntent().getStringExtra(FlickrAlbumBrowser.OWNER));
+				f.setArguments(getIntent().getExtras());
+				getSupportFragmentManager().beginTransaction().add(android.R.id.content, f).commit();
+			}
+		}
 	}
 }

@@ -87,6 +87,9 @@ public class ImageCache {
 	*/
 	// Will not delete directory, just fail when trying to...
 	public void cleanCache(){
+		if(mCached == null){
+			setupImageCache();
+		}
 		try{
 			int limit = 500;
 			File[] files = mExploreInfo.listFiles();

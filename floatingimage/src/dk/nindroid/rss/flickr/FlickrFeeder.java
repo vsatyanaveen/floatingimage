@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
-import dk.nindroid.rss.DownloadUtil;
 import dk.nindroid.rss.HttpTools;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.parser.Crypto;
@@ -56,22 +55,9 @@ public class FlickrFeeder {
 	
 	static String token = null;
 	
-	public static void setFrob(String frob, Context c) throws MalformedURLException, IOException{
-		Log.v("Floating image", "Flickr frob: " + frob);
-		String signature = SECRET + "api_key" + API_KEY + "frob" + frob + "methodflickr.auth.getToken";
-		signature = getMD5(signature);
-		String getToken = GET_TOKEN_URL + frob + "&api_sig=" + signature;
-		Log.v("Floating Image", "Getting token:" + getToken);
-		String resp = DownloadUtil.readStreamToEnd(getToken);
-		Log.v("Floating Image", "Token response:\n" + resp);
-		int start = resp.indexOf("<token>") + 7;
-		int end = resp.indexOf("</token>");
-		token = resp.substring(start, end);
-		
-		SharedPreferences sp = c.getSharedPreferences("dk.nindroid.rss_preferences", 0);
-		SharedPreferences.Editor e = sp.edit();
-		e.putString("FLICKR_CODE", token);
-		e.commit();
+	public static void setFrob(String frob, Context c, SetFrobTask.Callback callback) throws MalformedURLException, IOException{
+		SetFrobTask task = new SetFrobTask(c, frob, SECRET, API_KEY, GET_TOKEN_URL, callback);
+		task.execute();
 	}
 	
 	public static void readCode(Context context){
@@ -119,7 +105,7 @@ public class FlickrFeeder {
 		return url;
 	}
 	
-	private static String getMD5(String s){
+	public static String getMD5(String s){
 		byte[] digest ;
 		try {
 			digest = MessageDigest.getInstance("MD5").digest(s.getBytes());

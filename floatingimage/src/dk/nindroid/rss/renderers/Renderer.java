@@ -18,7 +18,8 @@ public abstract class Renderer {
 	public abstract boolean back();
 	public abstract void onPause();
 	public abstract void onResume();
-	public abstract void click(GL10 gl, float x, float y, long frameTime, long realTime);
+	public abstract boolean click(GL10 gl, float x, float y, long frameTime, long realTime);
+	public abstract boolean doubleClick(GL10 gl, float x, float y, long frameTime, long realTime);
 	public abstract boolean slideRight(long realtime);
 	public abstract boolean slideLeft(long realtime);
 	public abstract void setBackground();

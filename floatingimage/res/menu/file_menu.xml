@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+	<item android:id="@+id/set_current"
+          android:title="@string/selectCurrentFolder" />
+    <item android:id="@+id/show_hidden"
+          android:title="@string/showHiddenFiles" />
+</menu>

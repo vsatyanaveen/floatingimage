@@ -3,12 +3,12 @@ package dk.nindroid.rss;
 import java.io.IOException;
 import java.io.InputStream;
 
-import dk.nindroid.rss.settings.Settings;
-
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.view.View;
 import android.view.Window;
+import dk.nindroid.rss.settings.Settings;
 
 public interface MainActivity {
 	public Context context();
@@ -22,4 +22,5 @@ public interface MainActivity {
 	public void showSettings();
 	public Settings getSettings();
 	public String getSettingsKey();
+	public View getView();
 }

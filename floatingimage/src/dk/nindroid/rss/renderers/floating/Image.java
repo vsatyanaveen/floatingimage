@@ -901,7 +901,13 @@ public class Image implements ImagePlane {
         	
         	int error = gl.glGetError();
         	if(error != 0){
-        		Log.e("Floating Image", "GL error in Image when setting small texture: " + GLU.gluErrorString(error));
+        		Log.w("Floating Image", "GL error in Image when setting small texture: " + GLU.gluErrorString(error));
+        		GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, ir.getBitmap(), 0);
+        		mLastTextureSize = ir.getBitmap().getWidth();
+        		error = gl.glGetError();
+            	if(error != 0){
+            		Log.e("Floating Image", "GL error persistant in Image when setting small texture: " + GLU.gluErrorString(error));
+            	}
         	}
 	        
 	        ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
@@ -953,15 +959,37 @@ public class Image implements ImagePlane {
 		}
 		
 		// o is for origo :)
-		float ox1 = mVertices[0].getX() * scaleX;
-		float ox2 = mVertices[2].getX() * scaleX;
-		float ox3 = mVertices[3].getX() * scaleX;
-		float oy1 = mVertices[0].getY() * scaleY;
-		float oy2 = mVertices[2].getY() * scaleY;
-		float oy3 = mVertices[3].getY() * scaleY;
-		float oz1 = mVertices[0].getZ();
-		float oz2 = mVertices[2].getZ();
-		float oz3 = mVertices[3].getZ();
+		float ox1;
+		float ox2;
+		float ox3;
+		float oy1;
+		float oy2;
+		float oy3;
+		float oz1;
+		float oz2;
+		float oz3;
+		
+		if(mShowingImage.getTargetOrientation() == 90 || mShowingImage.getTargetOrientation() == 270){
+			oy1 = mVertices[0].getX() * scaleX;
+			oy2 = mVertices[2].getX() * scaleX;
+			oy3 = mVertices[3].getX() * scaleX;
+			ox1 = mVertices[0].getY() * scaleY;
+			ox2 = mVertices[2].getY() * scaleY;
+			ox3 = mVertices[3].getY() * scaleY;
+			oz1 = mVertices[0].getZ();
+			oz2 = mVertices[2].getZ();
+			oz3 = mVertices[3].getZ();
+		}else{
+			ox1 = mVertices[0].getX() * scaleX;
+			ox2 = mVertices[2].getX() * scaleX;
+			ox3 = mVertices[3].getX() * scaleX;
+			oy1 = mVertices[0].getY() * scaleY;
+			oy2 = mVertices[2].getY() * scaleY;
+			oy3 = mVertices[3].getY() * scaleY;
+			oz1 = mVertices[0].getZ();
+			oz2 = mVertices[2].getZ();
+			oz3 = mVertices[3].getZ();
+		}		
 		
 		float x1 = ox1 + posX;
 		float x2 = ox2 + posX;

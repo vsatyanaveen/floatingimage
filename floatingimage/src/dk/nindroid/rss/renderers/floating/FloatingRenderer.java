@@ -155,16 +155,21 @@ public class FloatingRenderer extends Renderer {
 		}
 	}
 		
-	public void click(GL10 gl, float x, float y, long frameTime, long realTime){
+	public boolean click(GL10 gl, float x, float y, long frameTime, long realTime){
+		Vec3f rayDir = new Vec3f(x, y, -1);
+    	rayDir.normalize();
+    	Ray r = new Ray(mCamPos, rayDir);
+    	
 		if(mSelected != null){
-			deselect(gl, frameTime, realTime);
+			if(mSelected.intersect(r) <= 0){
+				deselect(gl, frameTime, realTime);
+				return true;
+			}
+			return false; // Single click for menu when has selection
 		}else{
 			// Ignore click if we're at the splash
-        	if(mSplashImg == null){
+	    	if(mSplashImg == null){
 	        	// Only works for camera looking directly at (0, 0, -1)...
-	        	Vec3f rayDir = new Vec3f(x, y, -1);
-	        	rayDir.normalize();
-	        	Ray r = new Ray(mCamPos, rayDir);
 	        	int i = mImgCnt - 1;
 	        	Image selected = null;
 	        	float closest = Float.MAX_VALUE;
@@ -185,9 +190,24 @@ public class FloatingRenderer extends Renderer {
 	        			if(mImgs[i - 1] == selected)
 	        				mSelectedIndex = i - 1;
 	        		}
+	        		return true;
+	        	}else{
+	        		return false;
 	        	}
+	        }else{
+	        	return false;
 	        }
-        }
+		}
+	}
+	
+	@Override
+	public boolean doubleClick(GL10 gl, float x, float y, long frameTime,
+			long realTime) {
+		if(mSelected != null){
+			deselect(gl, frameTime, realTime);
+			return true;
+		}
+		return false;
 	}
 	
 	private void deselect(GL10 gl, long frameTime, long realTime){

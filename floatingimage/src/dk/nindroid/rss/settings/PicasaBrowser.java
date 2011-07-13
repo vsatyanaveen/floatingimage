@@ -1,10 +1,14 @@
 package dk.nindroid.rss.settings;
 
+import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
@@ -17,8 +21,9 @@ import dk.nindroid.rss.R;
 import dk.nindroid.rss.parser.picasa.PicasaAlbumBrowser;
 import dk.nindroid.rss.parser.picasa.PicasaFeeder;
 import dk.nindroid.rss.parser.picasa.PicasaUserView;
+import dk.nindroid.rss.settings.SourceSelector.SourceFragment;
 
-public class PicasaBrowser extends ListActivity {
+public class PicasaBrowser extends SourceFragment {
 	// Positions
 	private static final int	UNAUTHD_SIGN_IN		= 0;
 	private static final int	UNAUTHD_SHOW_USER 	= 1;
@@ -34,21 +39,28 @@ public class PicasaBrowser extends ListActivity {
 	private static final int	SHOW_ALBUMS				= 41;
 	
 	boolean signedIn = false;
+	boolean mDualPane;
 	
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+	public PicasaBrowser() {
+		super(2);
 	}
 	
 	@Override
-	protected void onResume() {
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		View sourceFrame = getActivity().findViewById(R.id.source);
+        mDualPane = sourceFrame != null && sourceFrame.getVisibility() == View.VISIBLE;
+	}
+	
+	@Override
+	public void onResume() {
 		super.onResume();
 		fillMenu();
 	}
 	
 	private void fillMenu(){
 		String[] options = null;
-		if(!PicasaFeeder.isSignedIn(this)){
+		if(!PicasaFeeder.isSignedIn(this.getActivity())){
 			signedIn = false;
 			String signin = this.getResources().getString(R.string.authorize);
 			String showUser = this.getResources().getString(R.string.picasaShowUser);
@@ -64,11 +76,11 @@ public class PicasaBrowser extends ListActivity {
 			options = new String[]{showMyRecent, showMyAlbums, showUser, search, signout};
 		}
 		
-		setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, options));
+		setListAdapter(new ArrayAdapter<String>(this.getActivity(), android.R.layout.simple_list_item_1, options));
 	}
 	
 	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
+	public void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
 		if(!signedIn){
 			switch(position){
@@ -79,7 +91,7 @@ public class PicasaBrowser extends ListActivity {
 				search();
 				break;
 			case UNAUTHD_SIGN_IN:
-				PicasaFeeder.signIn(this);
+				PicasaFeeder.signIn(this.getActivity());
 				fillMenu();
 				break;
 			}
@@ -98,7 +110,7 @@ public class PicasaBrowser extends ListActivity {
 				search();
 				break;
 			case AUTHD_SIGN_OUT:
-				PicasaFeeder.signOut(this);
+				PicasaFeeder.signOut(this.getActivity());
 				fillMenu();
 				break;
 			}
@@ -110,24 +122,32 @@ public class PicasaBrowser extends ListActivity {
 		Bundle b = new Bundle();
 		String streamURL = PicasaFeeder.getMyRecent();
 		b.putString("PATH", streamURL);
+		b.putInt("TYPE", Settings.TYPE_PICASA);
 		b.putString("NAME", "Stream: My stream");
 		intent.putExtras(b);
-		setResult(RESULT_OK, intent);		
-		finish();
+		this.getActivity().setResult(Activity.RESULT_OK, intent);		
+		this.getActivity().finish();
 	}
 	
 	private void showMyAlbums(){
-		Intent intent = new Intent(this, PicasaAlbumBrowser.class);
-		startActivityForResult(intent, SHOW_ALBUMS);
+		if(mDualPane){
+			FragmentTransaction ft = getFragmentManager().beginTransaction();
+	        ft.replace(R.id.source, PicasaAlbumBrowser.getInstance(null));
+	        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+	        ft.commit();
+		}else{
+			Intent intent = new Intent(this.getActivity(), AlbumActivity.class);
+			startActivityForResult(intent, SHOW_ALBUMS);
+		}
 	}
 	
 	private void search(){
-		FrameLayout fl = new FrameLayout(this);
-		final EditText input = new EditText(this);
+		FrameLayout fl = new FrameLayout(this.getActivity());
+		final EditText input = new EditText(this.getActivity());
 
 		fl.addView(input, FrameLayout.LayoutParams.FILL_PARENT);
 		input.setGravity(Gravity.CENTER);
-		final AlertDialog searchDialog = new AlertDialog.Builder(this)
+		final AlertDialog searchDialog = new AlertDialog.Builder(this.getActivity())
 		.setView(fl)
 		.setTitle(R.string.picasaSearchTerm)
 		.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
@@ -147,12 +167,12 @@ public class PicasaBrowser extends ListActivity {
 	}
 	
 	private void showUser(){
-		FrameLayout fl = new FrameLayout(this);
-		final EditText input = new EditText(this);
+		FrameLayout fl = new FrameLayout(this.getActivity());
+		final EditText input = new EditText(this.getActivity());
 
 		fl.addView(input, FrameLayout.LayoutParams.FILL_PARENT);
 		input.setGravity(Gravity.CENTER);
-		final AlertDialog streamDialog = new AlertDialog.Builder(this)
+		final AlertDialog streamDialog = new AlertDialog.Builder(this.getActivity())
 		.setView(fl)
 		.setTitle(R.string.picasaShowUserUsername)
 		.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
@@ -173,16 +193,24 @@ public class PicasaBrowser extends ListActivity {
 	
 	private void showUser(String user){
 		if(user.length() == 0){ // This actually returns a user with no images!
-			Toast.makeText(this, R.string.picasaShowStreamNoUsername, Toast.LENGTH_LONG).show();
+			Toast.makeText(this.getActivity(), R.string.picasaShowStreamNoUsername, Toast.LENGTH_LONG).show();
 			return;
 		}
 		if(user == null) {// Bad username.
-			Toast.makeText(this, R.string.picasaShowStreamBadUsername, Toast.LENGTH_LONG).show();
+			Toast.makeText(this.getActivity(), R.string.picasaShowStreamBadUsername, Toast.LENGTH_LONG).show();
 			return; 
 		}
-		Intent intent = new Intent(this, PicasaUserView.class);
-		intent.putExtra("ID", user);
-		startActivityForResult(intent, SHOW_USER);
+		if(mDualPane){
+			FragmentTransaction ft = getFragmentManager().beginTransaction();
+	        ft.replace(R.id.source, PicasaAlbumBrowser.getInstance(null));
+	        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+	        ft.commit();
+		}else{
+			Intent intent = new Intent(this.getActivity(), UserActivity.class);
+			intent.putExtra("ID", user);
+			startActivityForResult(intent, SHOW_USER);
+		}
+		
 	}
 	
 	protected static void showKeyboard(final AlertDialog dialog, EditText editText){
@@ -197,34 +225,82 @@ public class PicasaBrowser extends ListActivity {
 	}
 	
 	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		if(resultCode == RESULT_OK){
+		if(resultCode == Activity.RESULT_OK){
+			data.putExtra("TYPE", Settings.TYPE_PICASA);
 			switch(requestCode){
 			case SHOW_USER:
-				setResult(RESULT_OK, data);
-				finish();
+				this.getActivity().setResult(Activity.RESULT_OK, data);
+				this.getActivity().finish();
 				break;
 			case SHOW_ALBUMS:
 				data.putExtra("EXTRAS", getString(R.string.albumBy) + " " + getString(R.string.me));
-				setResult(RESULT_OK, data);
-				finish();
+				this.getActivity().setResult(Activity.RESULT_OK, data);
+				this.getActivity().finish();
 				break;
 			}
 		}
 	}
 	private void returnSearch(String criteria){
 		if(criteria.length() == 0){
-			Toast.makeText(this, R.string.picasaSearchNoText, Toast.LENGTH_LONG).show();
+			Toast.makeText(this.getActivity(), R.string.picasaSearchNoText, Toast.LENGTH_LONG).show();
 			return;
 		}
 		Intent intent = new Intent();
 		Bundle b = new Bundle();
 		String streamURL = PicasaFeeder.getSearchUrl(criteria);
 		b.putString("PATH", streamURL);
+		b.putInt("TYPE", Settings.TYPE_PICASA);
 		b.putString("NAME", "Search: " + criteria);
 		intent.putExtras(b);
-		setResult(RESULT_OK, intent);		
-		finish();
+		this.getActivity().setResult(Activity.RESULT_OK, intent);		
+		this.getActivity().finish();
+	}
+
+	public static class AlbumActivity extends FragmentActivity{
+		@Override
+		protected void onCreate(Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
+
+			if (getResources().getConfiguration().orientation
+					== Configuration.ORIENTATION_LANDSCAPE) {
+				// If the screen is now in landscape mode, we can show the
+				// dialog in-line with the list so we don't need this activity.
+				finish();
+				return;
+			}
+
+			if (savedInstanceState == null) {
+				// During initial setup, plug in the details fragment.
+
+				Fragment f = PicasaAlbumBrowser.getInstance(this.getIntent().getStringExtra(PicasaAlbumBrowser.OWNER));
+				f.setArguments(getIntent().getExtras());
+				getSupportFragmentManager().beginTransaction().add(android.R.id.content, f).commit();
+			}
+		}
+	}
+	
+	public static class UserActivity extends FragmentActivity{
+		 @Override
+	        protected void onCreate(Bundle savedInstanceState) {
+	            super.onCreate(savedInstanceState);
+
+	            if (getResources().getConfiguration().orientation
+	                    == Configuration.ORIENTATION_LANDSCAPE) {
+	                // If the screen is now in landscape mode, we can show the
+	                // dialog in-line with the list so we don't need this activity.
+	                finish();
+	                return;
+	            }
+
+	            if (savedInstanceState == null) {
+	                // During initial setup, plug in the details fragment.
+	            	
+	            	Fragment f = PicasaUserView.getInstance(this.getIntent().getStringExtra("ID"));
+	            	f.setArguments(getIntent().getExtras());
+		            getSupportFragmentManager().beginTransaction().add(android.R.id.content, f).commit();
+	            }
+	        }
 	}
 }

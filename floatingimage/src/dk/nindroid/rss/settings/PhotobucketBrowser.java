@@ -1,7 +1,6 @@
 package dk.nindroid.rss.settings;
 
 import android.app.AlertDialog;
-import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,13 +14,19 @@ import android.widget.ListView;
 import dk.nindroid.rss.R;
 import dk.nindroid.rss.parser.photobucket.PhotobucketFeeder;
 import dk.nindroid.rss.parser.photobucket.PhotobucketShowUser;
+import dk.nindroid.rss.settings.SourceSelector.SourceFragment;
 
-public class PhotobucketBrowser extends ListActivity {
+public class PhotobucketBrowser extends SourceFragment {
 	public final static int SHOW_USER = 0;
 	
+	public PhotobucketBrowser() {
+		super(4);
+	}
+	
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		
 		fillMenu();
 		PhotobucketFeeder.test();
 	}
@@ -29,11 +34,11 @@ public class PhotobucketBrowser extends ListActivity {
 	void fillMenu(){
 		String showUser = getString(R.string.photobucketShowUser);
 		String[] options = new String[]{showUser};
-		setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, options));
+		setListAdapter(new ArrayAdapter<String>(this.getActivity(), android.R.layout.simple_list_item_1, options));
 	}
 	
 	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
+	public void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
 		switch(position){
 		case SHOW_USER:
@@ -43,12 +48,12 @@ public class PhotobucketBrowser extends ListActivity {
 	}
 	
 	void showUser(){
-		FrameLayout fl = new FrameLayout(this);
-		final EditText input = new EditText(this);
+		FrameLayout fl = new FrameLayout(this.getActivity());
+		final EditText input = new EditText(this.getActivity());
 
 		fl.addView(input, FrameLayout.LayoutParams.FILL_PARENT);
 		input.setGravity(Gravity.CENTER);
-		final AlertDialog streamDialog = new AlertDialog.Builder(this)
+		final AlertDialog streamDialog = new AlertDialog.Builder(this.getActivity())
 		.setView(fl)
 		.setTitle(R.string.flickrShowStreamUsername)
 		.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
@@ -68,7 +73,7 @@ public class PhotobucketBrowser extends ListActivity {
 	}
 	
 	void showUser(String user){
-		Intent intent = new Intent(this, PhotobucketShowUser.class);
+		Intent intent = new Intent(this.getActivity(), PhotobucketShowUser.class);
 		Bundle b = new Bundle();
 		b.putString(PhotobucketShowUser.USER, user);
 		intent.putExtras(b);

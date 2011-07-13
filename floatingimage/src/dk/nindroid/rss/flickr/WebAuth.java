@@ -11,7 +11,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import dk.nindroid.rss.R;
 
-public class WebAuth extends Activity {
+public class WebAuth extends Activity implements SetFrobTask.Callback{
 	WebView webView;
 	
 	@Override
@@ -47,14 +47,18 @@ public class WebAuth extends Activity {
 	    	Uri uri = Uri.parse(url);
 	    	String code = uri.getQueryParameter("frob");
 	    	try {
-				FlickrFeeder.setFrob(code, context);
+				FlickrFeeder.setFrob(code, context, WebAuth.this);
 			} catch (MalformedURLException e) {
 				Log.e("Floating Image", "Error parsing URL from Facebook", e);
 			} catch (IOException e) {
 				Log.e("Floating Image", "Error parsing URL from Facebook", e);
 			}
-			context.finish();
 	    	return true;
 	    }
+	}
+
+	@Override
+	public void setFrobFinished(Boolean result) {
+		finish();
 	}
 }

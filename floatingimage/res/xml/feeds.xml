@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+	android:title="@string/feeds">
+            
+         <PreferenceScreen android:title="@string/manageFeeds" android:summary="@string/manageFeedsSummary">
+			<intent 
+			android:action="android.intent.action.MAIN" 
+			android:targetClass="dk.nindroid.rss.menu.ApplicationFeedManagerLauncher"
+			android:targetPackage="dk.nindroid.rss" />
+        </PreferenceScreen>
+        <CheckBoxPreference
+                android:key="shuffleImages"
+                android:title="@string/shuffle"
+                android:summary="@string/shuffleSummary" 
+                android:defaultValue="true" />
+</PreferenceScreen>
