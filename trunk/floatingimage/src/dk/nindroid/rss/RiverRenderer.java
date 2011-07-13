@@ -26,6 +26,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 	private long			mUpTime;
 	private Vec2f 			mClickedPos = new Vec2f();
 	private boolean 		mClicked = false;
+	private boolean			mDoubleClicked = false;
 	private boolean 		mShowOSD = false;
 	private boolean 		mHideOSD = false;
 	private long 			mOffset = 0;
@@ -147,7 +148,14 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
         	}
         }else if(mClicked){
         	mClicked = false;
-        	mRenderer.click(gl, mClickedPos.getX(), mClickedPos.getY(), time, realTime);
+        	if (!mRenderer.click(gl, mClickedPos.getX(), mClickedPos.getY(), time, realTime)){
+        		toggleMenu();
+        	}
+        }else if(mDoubleClicked){
+        	mDoubleClicked = false;
+        	if(!mRenderer.doubleClick(gl, mClickedPos.getX(), mClickedPos.getY(), time, realTime)){
+        		toggleMenu();
+        	}
         }
         
         mRenderer.update(gl, time - mStartTime, realTime);
@@ -449,6 +457,27 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 	
 	public void onClick(float x, float y){
 		// Transform coordinates!
+		Vec2f pos = transformClick(x, y);
+		x = pos.getX();
+		y = pos.getY();
+		
+		if(!mOSD.click(x, y, System.currentTimeMillis())){ // This is ok, we're using realtime for the OSD
+			mClicked = true;
+			toScreenSpace(pos);
+			mClickedPos = pos;
+		}
+		
+		Log.v("RiverRenderer", "Clicked position: " + mClickedPos.toString());
+	}
+	
+	public void onDoubleClick(float x, float y){
+		mDoubleClicked = true;
+		Vec2f pos = transformClick(x, y);
+		toScreenSpace(pos);
+		mClickedPos = pos;
+	}
+	
+	private Vec2f transformClick(float x, float y){
 		int orientation = mDisplay.getOrientation();
 		float tmp;
 		switch(orientation){
@@ -468,13 +497,14 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 			y = mDisplay.getHeightPixels() - y;
 		}
 		
-		if(!mOSD.click(x, y, System.currentTimeMillis())){ // This is ok, we're using realtime for the OSD
-			mClicked = true;
-			mClickedPos = new Vec2f((x/mDisplay.getWidthPixels() * 2.0f - 1.0f) * mDisplay.getWidth() / 2.0f, -(y / mDisplay.getHeightPixels() * 2.0f - 1.0f) * mDisplay.getHeight() / 2.0f);
-		}
-		
-		Log.v("RiverRenderer", "Clicked position: " + mClickedPos.toString());
+		return new Vec2f(x, y);
 	}
+	
+	private void toScreenSpace(Vec2f pos){
+		pos.setX((pos.getX()/mDisplay.getWidthPixels() * 2.0f - 1.0f) * mDisplay.getWidth() / 2.0f);
+		pos.setY(-(pos.getY() / mDisplay.getHeightPixels() * 2.0f - 1.0f) * mDisplay.getHeight() / 2.0f);
+	}
+	
 	
 	public void toggleMenu(){
 		if(mOSD.isShowing()){

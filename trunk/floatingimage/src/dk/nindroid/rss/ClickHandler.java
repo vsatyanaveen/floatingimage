@@ -11,7 +11,7 @@ import android.view.MotionEvent;
 import dk.nindroid.rss.gfx.Vec2f;
 import dk.nindroid.rss.uiActivities.OpenContextMenu;
 
-public class ClickHandler extends TimerTask {
+public class ClickHandler {
 	private static MultitouchHandler mtHandler;
 	
 	
@@ -20,6 +20,7 @@ public class ClickHandler extends TimerTask {
 	private static Vec2f	mTouchStartPos;
 	private static Timer	mClickTimer;
 	private static final int LONGCLICKTIME = 1000;
+	private static final int DOUBLECLICKTIME = 200;
 	private static long 	mMoveTime;
 	private static float[]	mLastSpeedX = new float[2];
 	private static float[]	mLastSpeedY = new float[2];
@@ -31,6 +32,7 @@ public class ClickHandler extends TimerTask {
 	private final static int ACTION_NOTHING 	= 0;
 	private final static int ACTION_MOVE    	= 1;
 	private final static int ACTION_LONG_CLICK	= 2;
+	private final static int ACTION_CLICK		= 3;
 	
 	public static void init(MainActivity activity, RiverRenderer renderer){
 		ClickHandler.renderer = renderer;
@@ -40,11 +42,27 @@ public class ClickHandler extends TimerTask {
 		mtHandler = new MultitouchHandler();
 	}
 	
+	private static class LongClickTimer extends TimerTask { 	
+		@Override
+		public void run() {
+			mAction = ACTION_LONG_CLICK;
+			mActivity.runOnUiThread(new OpenContextMenu(mActivity));
+		}
+	}
+	
+	private static class SingleClickTimer extends TimerTask {
+		private float x, y;
 		
-	@Override
-	public void run() {
-		mAction = ACTION_LONG_CLICK;
-		mActivity.runOnUiThread(new OpenContextMenu(mActivity));
+		public SingleClickTimer(float x, float y){
+			this.x = x;
+			this.y = y;
+		}
+		
+		@Override
+		public void run() {
+			mAction = ACTION_NOTHING;
+			renderer.onClick(x, y); 
+		}
 	}
 	
 	public static boolean onTouchEvent(MotionEvent event) {
@@ -57,17 +75,28 @@ public class ClickHandler extends TimerTask {
 		float lastX = mTouchLastPos.getX();
 		float lastY = mTouchLastPos.getY();
 		if(action ==  MotionEvent.ACTION_DOWN){
-			renderer.moveInit();
-			mMoveTime = -1;
-			mAction = ACTION_NOTHING;
-			mTouchStartPos.set(x, y);
-			mTouchLastPos.set(mTouchStartPos);
-			mClickTimer = new Timer();
-			mClickTimer.schedule(new ClickHandler(), LONGCLICKTIME);
-		}else if(action ==  MotionEvent.ACTION_UP && mAction == ACTION_NOTHING){
+			if(mAction == ACTION_CLICK){
+				renderer.onDoubleClick(x,y);
+				mClickTimer.cancel();
+			}else{
+				renderer.moveInit();
+				mMoveTime = -1;
+				mAction = ACTION_NOTHING;
+				mTouchStartPos.set(x, y);
+				mTouchLastPos.set(mTouchStartPos);
+				mClickTimer = new Timer();
+				mClickTimer.schedule(new LongClickTimer(), LONGCLICKTIME);
+			}
+		}else if(action ==  MotionEvent.ACTION_UP){
 			// Click
-			mClickTimer.cancel();
-			renderer.onClick(x,y);
+			if(mAction == ACTION_NOTHING){
+				mAction = ACTION_CLICK;
+				mClickTimer.cancel();
+				mClickTimer = new Timer();
+				mClickTimer.schedule(new SingleClickTimer(x, y), DOUBLECLICKTIME);
+			}else if(mAction == ACTION_CLICK){
+				mAction = ACTION_NOTHING;
+			}
 		}else if(action == MotionEvent.ACTION_MOVE){
 			if(Math.abs(mTouchStartPos.getX() - x) > 40.0f || Math.abs(mTouchStartPos.getY() - y) > 40.0f){
 				mClickTimer.cancel();

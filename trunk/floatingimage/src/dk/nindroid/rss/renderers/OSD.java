@@ -175,6 +175,7 @@ public class OSD {
 		}else if(t < FADE_TIME + SHOW_TIME){
 			if(!mShowing){
 				mActivity.runOnUiThread(new ToggleNotificationBar(mActivity, true));
+				mActivity.runOnUiThread(new ToggleNotificationBar(mActivity, true));
 				mShowing = true;
 				mFraction = 1.0f;
 			}
@@ -182,7 +183,7 @@ public class OSD {
 			// Fade out
 			mFraction = 1.0f - (((float)t - FADE_TIME - SHOW_TIME)) / FADE_TIME;
 		}else{
-			if(mShowing){
+			if(mShowing || isShowing()){
 				mFraction = 0.0f;
 				mShowing = false;
 				mActivity.runOnUiThread(new ToggleNotificationBar(mActivity, false));

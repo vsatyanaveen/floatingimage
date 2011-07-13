@@ -3,33 +3,44 @@ package dk.nindroid.rss.parser.picasa;
 import java.util.Collections;
 import java.util.List;
 
-import android.app.ListActivity;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.ListFragment;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import dk.nindroid.rss.R;
+import dk.nindroid.rss.settings.Settings;
 
-public class PicasaAlbumBrowser extends ListActivity implements GetAlbumsTask.Callback{
+public class PicasaAlbumBrowser extends ListFragment implements GetAlbumsTask.Callback{
 	public final static String OWNER = "OWNER";
 	List<PicasaAlbum> albums;
 	String owner;
 	boolean error = false;
 	
+	public static PicasaAlbumBrowser getInstance(String owner){
+		PicasaAlbumBrowser pab = new PicasaAlbumBrowser();
+		
+		Bundle b = new Bundle();
+		b.putString(OWNER, owner);
+		pab.setArguments(b);
+		return pab;
+	}
+	
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		owner = getIntent().getStringExtra(OWNER);
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		owner = getArguments().getString(OWNER);
 		fillMenu();
 	}
 	
 	private void fillMenu(){
-		new GetAlbumsTask(this, this).execute(owner);
+		new GetAlbumsTask(this.getActivity(), this).execute(owner);
 	}
 	
 	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
+	public void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
 		if(error){
 			error = false;
@@ -39,18 +50,19 @@ public class PicasaAlbumBrowser extends ListActivity implements GetAlbumsTask.Ca
 			Intent intent = new Intent();
 			Bundle b = new Bundle();
 			b.putString("PATH", url);
+			b.putInt("TYPE", Settings.TYPE_PICASA);
 			b.putString("NAME", albums.get(position).getTitle());
 			b.putString("EXTRAS", getString(R.string.albumBy) + " " + owner);
 			intent.putExtras(b);
-			setResult(RESULT_OK, intent);
-			finish();
+			this.getActivity().setResult(Activity.RESULT_OK, intent);
+			this.getActivity().finish();
 		}
 	}
 
 	@Override
 	public void albumsFetched(List<PicasaAlbum> param) {
 		if(param == null){
-			finish();
+			this.getActivity().finish();
 			return;
 		}
 		albums = param;
@@ -65,6 +77,6 @@ public class PicasaAlbumBrowser extends ListActivity implements GetAlbumsTask.Ca
 				albumStrings[i] = albums.get(i).getTitle();
 			}
 		}
-		setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, albumStrings));
+		setListAdapter(new ArrayAdapter<String>(this.getActivity(), android.R.layout.simple_list_item_1, albumStrings));
 	}
 }

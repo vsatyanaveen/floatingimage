@@ -181,7 +181,7 @@ public class FacebookImage extends ImageReference {
 
 	@Override
 	public void set128Bitmap(Bitmap bitmap) {
-		this.bitmap = Bitmap.createBitmap(128, 128, Config.RGB_565);
+		this.bitmap = Bitmap.createBitmap(128, 128, Config.ARGB_8888);
 		Canvas cvs = new Canvas(this.bitmap);
 		cvs.drawBitmap(bitmap, 0, 0, paint);
 		this.width = bitmap.getWidth() / 128.0f;
@@ -191,7 +191,7 @@ public class FacebookImage extends ImageReference {
 
 	@Override
 	public void set256Bitmap(Bitmap bitmap) {
-		this.bitmap = Bitmap.createBitmap(256, 256, Config.RGB_565);
+		this.bitmap = Bitmap.createBitmap(256, 256, Config.ARGB_8888);
 		Canvas cvs = new Canvas(this.bitmap);
 		cvs.drawBitmap(bitmap, 0, 0, paint);
 		this.width = bitmap.getWidth() / 256.0f;

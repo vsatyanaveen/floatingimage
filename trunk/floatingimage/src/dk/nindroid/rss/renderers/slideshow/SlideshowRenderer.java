@@ -101,10 +101,16 @@ public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.rende
 	}
 
 	@Override
-	public void click(GL10 gl, float x, float y, long frameTime,
+	public boolean click(GL10 gl, float x, float y, long frameTime,
+			long realTime) {
+		return false;
+	}
+	
+	@Override
+	public boolean doubleClick(GL10 gl, float x, float y, long frameTime,
 			long realTime) {
 		// TODO Auto-generated method stub
-
+		return false;
 	}
 
 	@Override

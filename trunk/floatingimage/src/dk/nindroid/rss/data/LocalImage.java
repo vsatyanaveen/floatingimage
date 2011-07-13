@@ -157,7 +157,7 @@ public class LocalImage extends ImageReference{
 
 	@Override
 	public void set128Bitmap(Bitmap bmp) {
-		this.mBitmap = Bitmap.createBitmap(128, 128, Config.RGB_565);
+		this.mBitmap = Bitmap.createBitmap(128, 128, Config.ARGB_8888);
 		Canvas cvs = new Canvas(this.mBitmap);
 		cvs.drawBitmap(bmp, 0, 0, paint);
 		this.mWidth = bmp.getWidth() / 128.0f;
@@ -166,7 +166,7 @@ public class LocalImage extends ImageReference{
 	}
 	
 	public void set256Bitmap(Bitmap bmp){
-		this.mBitmap = Bitmap.createBitmap(256, 256, Config.RGB_565);
+		this.mBitmap = Bitmap.createBitmap(256, 256, Config.ARGB_8888);
 		Canvas cvs = new Canvas(this.mBitmap);
 		cvs.drawBitmap(bmp, 0, 0, paint);
 		this.mWidth = bmp.getWidth() / 256.0f;

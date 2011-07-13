@@ -1,8 +1,9 @@
 package dk.nindroid.rss.parser.picasa;
 
-import android.app.ListActivity;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.ListFragment;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -10,17 +11,28 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 import dk.nindroid.rss.R;
+import dk.nindroid.rss.settings.Settings;
 
-public class PicasaUserView extends ListActivity {
+public class PicasaUserView extends ListFragment {
 	private static final int	STREAM		 		= 0;
 	private static final int	ALBUMS				= 1;
 	
 	String id;
 	
+	public static PicasaUserView getInstance(String id){
+		PicasaUserView puv = new PicasaUserView();
+		
+		Bundle b = new Bundle();
+		b.putString("ID", id);
+		puv.setArguments(b);
+		
+		return puv;
+	}
+	
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		id = getIntent().getExtras().getString("ID");
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		id = getArguments().getString("ID");
 		fillMenu();
 	}
 	
@@ -28,14 +40,14 @@ public class PicasaUserView extends ListActivity {
 		String photosOf = this.getResources().getString(R.string.picasaShowStream);
 		String albums = this.getResources().getString(R.string.picasaShowAlbums);
 		String[] options = new String[]{photosOf, albums};
-		setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, options));
+		setListAdapter(new ArrayAdapter<String>(this.getActivity(), android.R.layout.simple_list_item_1, options));
 	}
 	
 	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
+	public void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
-		FrameLayout fl = new FrameLayout(this);
-		final EditText input = new EditText(this);
+		FrameLayout fl = new FrameLayout(this.getActivity());
+		final EditText input = new EditText(this.getActivity());
 
 		fl.addView(input, FrameLayout.LayoutParams.FILL_PARENT);
 		input.setGravity(Gravity.CENTER);
@@ -58,19 +70,19 @@ public class PicasaUserView extends ListActivity {
 	}
 	
 	private void showAlbums() {
-		Intent intent = new Intent(this, PicasaAlbumBrowser.class);
+		Intent intent = new Intent(this.getActivity(), PicasaAlbumBrowser.class);
 		intent.putExtra(PicasaAlbumBrowser.OWNER, id);
 		startActivityForResult(intent, ALBUMS);
 	}
 	
 	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		if(resultCode == RESULT_OK){
+		if(resultCode == Activity.RESULT_OK){
 			switch(requestCode){
 			case ALBUMS:
-				setResult(RESULT_OK, data);
-				finish();
+				this.getActivity().setResult(Activity.RESULT_OK, data);
+				this.getActivity().finish();
 				break;
 			}
 		}
@@ -82,8 +94,9 @@ public class PicasaUserView extends ListActivity {
 		
 		b.putString("PATH", url);
 		b.putString("NAME", name);
+		b.putInt("TYPE", Settings.TYPE_PICASA);
 		intent.putExtras(b);
-		setResult(RESULT_OK, intent);		
-		finish();
+		this.getActivity().setResult(Activity.RESULT_OK, intent);		
+		this.getActivity().finish();
 	}
 }

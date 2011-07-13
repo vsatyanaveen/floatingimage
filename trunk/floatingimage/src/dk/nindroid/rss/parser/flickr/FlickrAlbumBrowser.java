@@ -3,46 +3,63 @@ package dk.nindroid.rss.parser.flickr;
 import java.util.Collections;
 import java.util.List;
 
-import android.app.ListActivity;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.ListFragment;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import dk.nindroid.rss.flickr.FlickrFeeder;
+import dk.nindroid.rss.settings.Settings;
 
-public class FlickrAlbumBrowser extends ListActivity implements GetAlbumsTask.Callback {
+public class FlickrAlbumBrowser extends ListFragment implements GetAlbumsTask.Callback {
 	public final static String OWNER = "OWNER";
 	List<FlickrAlbum> albums;
 	
+	public static FlickrAlbumBrowser getInstance(String owner){
+		FlickrAlbumBrowser fab = new FlickrAlbumBrowser();
+		Bundle args = new Bundle();
+        args.putString(OWNER, owner);
+        fab.setArguments(args);
+        
+        return fab;
+	}
+	
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+	
 		fillMenu();
 	}
 	
 	private void fillMenu(){
-		String owner = getIntent().getStringExtra(OWNER);
-		new GetAlbumsTask(this, this).execute(owner);
+		Bundle b = getArguments();
+		String owner = null;
+		if(b != null){
+			owner = b.getString(OWNER);
+		}
+		new GetAlbumsTask(this.getActivity(), this).execute(owner);
 	}
 	
 	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
+	public void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
 		String url = FlickrFeeder.getAlbumPhotos(albums.get(position).getId());
 		Intent intent = new Intent();
 		Bundle b = new Bundle();
 		b.putString("PATH", url);
 		b.putString("NAME", albums.get(position).getName());
+		b.putInt("TYPE", Settings.TYPE_FLICKR);
 		intent.putExtras(b);
-		setResult(RESULT_OK, intent);
-		finish();
+		getActivity().setResult(Activity.RESULT_OK, intent);
+		getActivity().finish();
 	}
 
 	@Override
 	public void albumsFetched(List<FlickrAlbum> param) {
 		if(param == null){
-			finish();
+			getActivity().finish();
 			return;
 		}
 		albums = param;
@@ -51,6 +68,6 @@ public class FlickrAlbumBrowser extends ListActivity implements GetAlbumsTask.Ca
 		for(int i = 0; i < albums.size(); ++i){
 			albumStrings[i] = albums.get(i).getName();
 		}
-		setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, albumStrings));
+		setListAdapter(new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, albumStrings));
 	}
 }

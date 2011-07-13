@@ -196,7 +196,7 @@ public class BitmapDownloader implements Runnable {
 			url = new URL(URL);		
 			bitmapByteArray = DownloadUtil.fetchUrlBytes(url, "Floating image/Android", progress);
 			Options opts = new Options();
-			opts.inPreferredConfig = Config.RGB_565;
+			opts.inPreferredConfig = Config.ARGB_8888;
 			Bitmap bm = BitmapFactory.decodeByteArray(bitmapByteArray, 0, bitmapByteArray.length, opts);
 			return bm;
 		} catch (Exception e) {
