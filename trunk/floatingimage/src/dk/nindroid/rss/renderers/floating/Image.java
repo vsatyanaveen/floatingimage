@@ -399,13 +399,18 @@ public class Image implements ImagePlane {
         
 		gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mTexBuffer);
 		
-		gl.glDrawElements(GL10.GL_TRIANGLE_STRIP, 4, GL10.GL_UNSIGNED_BYTE, mIndexBuffer);
+		gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
+		
 		
 		// Show smoothing
+		drawSideSmoothing(gl, 0, 1, true, szX, szY);
+		drawSideSmoothing(gl, 1, 3, false, szX, szY);
+		drawSideSmoothing(gl, 0, 2, false, szX, szY);
+		drawSideSmoothing(gl, 2, 3, true, szX, szY);
 		//if(realTime % 10000 < 5000){
 			// Smooth images
 			//gl.glEnable(GL10.GL_BLEND);
-		//*
+		/*
 			gl.glEnable(GL10.GL_POINT_SMOOTH);
 			gl.glEnable(GL10.GL_LINE_SMOOTH);
 			gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
@@ -413,12 +418,88 @@ public class Image implements ImagePlane {
 			gl.glDrawElements(GL10.GL_LINE_STRIP, 5, GL10.GL_UNSIGNED_BYTE, mLineIndexBuffer);
 			//*/
 		//}
-		
 		gl.glPopMatrix();
+		
         
         if(mState == STATE_FOCUSED && !mLargeTex){
         	ProgressBar.draw(gl, mTextureSelector.getProgress(), mDisplay);
         }
+	}
+	
+	void drawSideSmoothing(GL10 gl, int indexA, int indexB, boolean vertical, float scaleX, float scaleY){
+		// Scale is added to counteract openGL scaling.
+		
+		Vec3f a = new Vec3f(mVertices[indexA]);
+		Vec3f b = new Vec3f(mVertices[indexB]);
+		
+		final float lineWidth = 10; // Off by ^2 for some reason. :(
+		
+		int one = 0x10000;
+		int aX = (int)(a.getX() * one);
+		int aY = (int)(a.getY() * one);
+		int aZ = (int)(a.getZ() * one);
+		int bX = (int)(b.getX() * one);
+		int bY = (int)(b.getY() * one);
+		int bZ = (int)(b.getZ() * one);
+		
+		float z = mPos.getZ() - 1; // WTF er min z? 
+		
+		float planeHeightA = -z; // Near plane distance is hardcoded to one, height is also one, but we only need half.
+		float planeWidthA = -z * mDisplay.getPortraitWidthPixels() / mDisplay.getPortraitHeightPixels(); // Near plane is still one. Division by one is silly!
+		
+		float pixelHeightA = planeHeightA / mDisplay.getPortraitHeightPixels() * lineWidth / scaleY;
+		float pixelWidthA = planeWidthA / mDisplay.getPortraitWidthPixels() * lineWidth / scaleX;
+		
+		float halfWidthA = pixelWidthA / 2.0f;
+		float halfHeightA = pixelHeightA / 2.0f;
+		
+		float planeHeightB = -z; // Near plane is hardcoded to one, height is also one, but we only need half.
+		float planeWidthB = -z * mDisplay.getPortraitWidthPixels() / mDisplay.getPortraitHeightPixels(); // Near plane is still one. Division by one is silly!
+		
+		float pixelHeightB = planeHeightB / mDisplay.getPortraitHeightPixels() * lineWidth / scaleY;
+		float pixelWidthB = planeWidthB / mDisplay.getPortraitWidthPixels() * lineWidth / scaleX;
+		
+		float halfWidthB = pixelWidthB / 2.0f;
+		float halfHeightB = pixelHeightB / 2.0f;
+		
+		int[] pixelVertices;
+		if(vertical){
+			pixelVertices = new int[]{				
+					aX + (int)(halfWidthA * one), aY - (int)(halfHeightA * one), aZ,
+					aX - (int)(halfWidthA * one), aY - (int)(halfHeightA * one), aZ,
+					aX + (int)(halfWidthA * one), aY + (int)(halfHeightA * one), aZ,
+					aX - (int)(halfWidthA * one), aY + (int)(halfHeightA * one), aZ,
+								
+					bX + (int)(halfWidthB * one), bY - (int)(halfHeightB * one), bZ,
+					bX - (int)(halfWidthB * one), bY - (int)(halfHeightB * one), bZ,
+					bX + (int)(halfWidthB * one), bY + (int)(halfHeightB * one), bZ,
+					bX - (int)(halfWidthB * one), bY + (int)(halfHeightB * one), bZ};
+		}else{
+			pixelVertices = new int[]{				
+					aX - (int)(halfWidthA * one), aY + (int)(halfHeightA * one), aZ,
+					aX - (int)(halfWidthA * one), aY - (int)(halfHeightA * one), aZ,
+					aX + (int)(halfWidthA * one), aY + (int)(halfHeightA * one), aZ,
+					aX + (int)(halfWidthA * one), aY - (int)(halfHeightA * one), aZ,
+
+					bX - (int)(halfWidthB * one), bY + (int)(halfHeightB * one), bZ,
+					bX - (int)(halfWidthB * one), bY - (int)(halfHeightB * one), bZ,
+					bX + (int)(halfWidthB * one), bY + (int)(halfHeightB * one), bZ,
+					bX + (int)(halfWidthB * one), bY - (int)(halfHeightB * one), bZ};
+		}
+		
+		ByteBuffer vbb = ByteBuffer.allocateDirect(pixelVertices.length*4);
+		vbb.order(ByteOrder.nativeOrder());
+		IntBuffer vertexBuffer = vbb.asIntBuffer();
+		vertexBuffer.put(pixelVertices);
+		vertexBuffer.position(0);
+		
+		gl.glVertexPointer(3, GL10.GL_FIXED, 0, vertexBuffer);
+		
+		gl.glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
+		gl.glDisable(GL10.GL_TEXTURE_2D);
+		gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 7);
+		//gl.glDrawElements(GL10.GL_TRIANGLE_STRIP, 4, GL10.GL_UNSIGNED_BYTE, mIndexBuffer);
+		gl.glEnable(GL10.GL_TEXTURE_2D);
 	}
 	
 	public static void setState(GL10 gl){

@@ -56,7 +56,9 @@ public class DirectoryBrowser extends SourceFragment implements OnTouchListener{
 		browseTo(currentDirectory.getAbsolutePath());
 		history.add(currentDirectory);
 		this.setHasOptionsMenu(true);
-		getActivity().invalidateOptionsMenu();
+		try{
+			getActivity().invalidateOptionsMenu();
+		}catch (Throwable t){}
 	}
 	
 	@Override

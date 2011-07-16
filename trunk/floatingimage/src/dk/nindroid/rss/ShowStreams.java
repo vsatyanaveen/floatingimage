@@ -34,7 +34,7 @@ import android.view.WindowManager;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.Toast;
 import dk.nindroid.rss.compatibility.ButtonBrightness;
-import dk.nindroid.rss.compatibility.HoneycombButtons;
+import dk.nindroid.rss.compatibility.Honeycomb;
 import dk.nindroid.rss.compatibility.SetWallpaper;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.LocalImage;
@@ -266,7 +266,7 @@ public class ShowStreams extends Activity implements MainActivity {
 		try{
 			ButtonBrightness.setButtonBrightness(getWindow().getAttributes(), 0.0f);
 			if(android.os.Build.VERSION.SDK_INT>=android.os.Build.VERSION_CODES.HONEYCOMB) {
-				HoneycombButtons.HideButtons(mGLSurfaceView);
+				Honeycomb.HideButtons(mGLSurfaceView);
 			}else{
 				Log.v("Floating Image", "Not Honeycomb!");
 			}
