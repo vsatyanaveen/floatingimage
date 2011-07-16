@@ -50,6 +50,7 @@ public class SourceSelector extends ListFragment {
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putInt("selected", mSelected);
+		Thread t;
 	}
 	
 	protected void fillMenu(){

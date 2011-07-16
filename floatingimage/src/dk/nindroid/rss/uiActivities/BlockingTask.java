@@ -37,7 +37,7 @@ public abstract class BlockingTask<Params, Result> extends AsyncTask<Params, Int
 			Toast.makeText(mContext, mError, Toast.LENGTH_LONG).show();
 		}
 	}
-	
+		
 	protected final void setError(int res){
 		mError = res;
 	}
