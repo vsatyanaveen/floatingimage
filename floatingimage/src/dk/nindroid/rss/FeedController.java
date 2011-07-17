@@ -241,15 +241,15 @@ public class FeedController {
 		try {
 			return feed.getParser().parseFeed(feed, mActivity.context());
 		} catch (IOException e) {
-			Log.e("FeedController", "Unexpected exception caught", e);
+			Log.e("Floating Image", "Unexpected exception caught", e);
 		} catch (ParserConfigurationException e) {
-			Log.e("FeedController", "Unexpected exception caught", e);
+			Log.e("Floating Image", "Unexpected exception caught", e);
 		} catch (SAXException e) {
-			Log.e("FeedController", "Unexpected exception caught", e);
+			Log.e("Floating Image", "Unexpected exception caught", e);
 		} catch (FactoryConfigurationError e) {
-			Log.e("FeedController", "Unexpected exception caught", e);
+			Log.e("Floating Image", "Unexpected exception caught", e);
 		} catch (Throwable t){
-			Log.e("FeedController", "Too large feed received", t);
+			Log.e("Floating Image", "Too large feed received", t);
 			String msg = mActivity.context().getString(R.string.cannot_read_feed) + "(" + feed.getName() + ")";
 			mActivity.runOnUiThread(new Toaster(mActivity.context(), msg));
 		}

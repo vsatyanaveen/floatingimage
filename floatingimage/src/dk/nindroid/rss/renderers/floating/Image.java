@@ -36,6 +36,7 @@ public class Image implements ImagePlane {
 	private Texture			mLargeTexture;
 	private int				mState = STATE_FLOATING;
 	private boolean			mDelete;
+	private Bitmap			mLineSmoothBitmap;
 	
 	private Display			mDisplay;
 	private IntBuffer   	mVertexBuffer;
@@ -77,9 +78,10 @@ public class Image implements ImagePlane {
 	}
 	
 	public void init(GL10 gl, long time){
-		int[] textures = new int[1];
-		gl.glGenTextures(1, textures, 0);
+		int[] textures = new int[2];
+		gl.glGenTextures(2, textures, 0);
 		mTextureID = textures[0];
+		mSmoothTextureID = textures[1];
 		revive(gl, time);
 	}
 	
@@ -200,9 +202,16 @@ public class Image implements ImagePlane {
 		mSetBackgroundWhenReady = false;
 	}
 		
-	public Image(MainActivity activity, TextureBank bank, Display display, InfoBar infoBar, Texture largeTexture, TextureSelector textureSelector){
+	public Image(MainActivity activity, 
+				 TextureBank bank, 
+				 Display display, 
+				 InfoBar infoBar, 
+				 Texture largeTexture, 
+				 TextureSelector textureSelector,
+				 Bitmap lineSmoothBitmap){
 		this.mDisplay = display;
 		mbank = bank;
+		this.mLineSmoothBitmap = lineSmoothBitmap;
 		this.mActivity = activity;
 		this.mInfoBar = infoBar;
 		this.mTextureSelector = textureSelector;
@@ -426,13 +435,15 @@ public class Image implements ImagePlane {
         }
 	}
 	
+	boolean textureSet = false;
+	
 	void drawSideSmoothing(GL10 gl, int indexA, int indexB, boolean vertical, float scaleX, float scaleY){
 		// Scale is added to counteract openGL scaling.
 		
 		Vec3f a = new Vec3f(mVertices[indexA]);
 		Vec3f b = new Vec3f(mVertices[indexB]);
 		
-		final float lineWidth = 10; // Off by ^2 for some reason. :(
+		final float lineWidth = 5; // Off by ^2 for some reason. :(
 		
 		int one = 0x10000;
 		int aX = (int)(a.getX() * one);
@@ -444,7 +455,7 @@ public class Image implements ImagePlane {
 		
 		float z = mPos.getZ() - 1; // WTF er min z? 
 		
-		float planeHeightA = -z; // Near plane distance is hardcoded to one, height is also one, but we only need half.
+		float planeHeightA = -z; // Near plane distance is hardcoded to one, height is also one.
 		float planeWidthA = -z * mDisplay.getPortraitWidthPixels() / mDisplay.getPortraitHeightPixels(); // Near plane is still one. Division by one is silly!
 		
 		float pixelHeightA = planeHeightA / mDisplay.getPortraitHeightPixels() * lineWidth / scaleY;
@@ -453,7 +464,7 @@ public class Image implements ImagePlane {
 		float halfWidthA = pixelWidthA / 2.0f;
 		float halfHeightA = pixelHeightA / 2.0f;
 		
-		float planeHeightB = -z; // Near plane is hardcoded to one, height is also one, but we only need half.
+		float planeHeightB = -z; // Near plane is hardcoded to one, height is also one.
 		float planeWidthB = -z * mDisplay.getPortraitWidthPixels() / mDisplay.getPortraitHeightPixels(); // Near plane is still one. Division by one is silly!
 		
 		float pixelHeightB = planeHeightB / mDisplay.getPortraitHeightPixels() * lineWidth / scaleY;
@@ -463,17 +474,29 @@ public class Image implements ImagePlane {
 		float halfHeightB = pixelHeightB / 2.0f;
 		
 		int[] pixelVertices;
+		float[] tex;
 		if(vertical){
 			pixelVertices = new int[]{				
-					aX + (int)(halfWidthA * one), aY - (int)(halfHeightA * one), aZ,
-					aX - (int)(halfWidthA * one), aY - (int)(halfHeightA * one), aZ,
 					aX + (int)(halfWidthA * one), aY + (int)(halfHeightA * one), aZ,
 					aX - (int)(halfWidthA * one), aY + (int)(halfHeightA * one), aZ,
-								
-					bX + (int)(halfWidthB * one), bY - (int)(halfHeightB * one), bZ,
-					bX - (int)(halfWidthB * one), bY - (int)(halfHeightB * one), bZ,
+					aX + (int)(halfWidthA * one), aY - (int)(halfHeightA * one), aZ,
+					aX - (int)(halfWidthA * one), aY - (int)(halfHeightA * one), aZ,
+					
 					bX + (int)(halfWidthB * one), bY + (int)(halfHeightB * one), bZ,
-					bX - (int)(halfWidthB * one), bY + (int)(halfHeightB * one), bZ};
+					bX - (int)(halfWidthB * one), bY + (int)(halfHeightB * one), bZ,
+					bX + (int)(halfWidthB * one), bY - (int)(halfHeightB * one), bZ,
+					bX - (int)(halfWidthB * one), bY - (int)(halfHeightB * one), bZ};
+			tex = new float[]{
+					1.0f,  0.0f,
+		        	0.0f,  0.0f,
+					1.0f,  0.5f,
+		        	0.0f,  0.5f,	
+		        	
+		        	1.0f,  0.5f,
+		        	0.0f,  0.5f,
+		        	1.0f,  1.0f,
+		        	0.0f,  1.0f,
+		        };
 		}else{
 			pixelVertices = new int[]{				
 					aX - (int)(halfWidthA * one), aY + (int)(halfHeightA * one), aZ,
@@ -485,7 +508,37 @@ public class Image implements ImagePlane {
 					bX - (int)(halfWidthB * one), bY - (int)(halfHeightB * one), bZ,
 					bX + (int)(halfWidthB * one), bY + (int)(halfHeightB * one), bZ,
 					bX + (int)(halfWidthB * one), bY - (int)(halfHeightB * one), bZ};
+			tex = new float[]{
+		        	0.0f,  0.0f,
+		        	0.0f,  1.0f,	
+		        	0.5f,  0.0f,
+		        	0.5f,  1.0f,
+		        	
+		        	0.5f,  0.0f,
+		        	0.5f,  1.0f,
+		        	1.0f,  0.0f,
+		        	1.0f,  1.0f
+		        };
 		}
+		
+		ByteBuffer tbb = ByteBuffer.allocateDirect(pixelVertices.length / 3 * 2 * 4);
+        tbb.order(ByteOrder.nativeOrder());
+        FloatBuffer texBuffer = tbb.asFloatBuffer();
+        
+        texBuffer.put(tex);
+        texBuffer.position(0);	
+        
+        if(!textureSet){
+        	textureSet = true;
+        	gl.glBindTexture(GL10.GL_TEXTURE_2D, mSmoothTextureID);
+            gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
+            gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
+            gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S, GL10.GL_CLAMP_TO_EDGE);
+            gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_CLAMP_TO_EDGE);
+            gl.glTexEnvf(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_BLEND);
+            
+        	GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, mLineSmoothBitmap, 0);
+        }
 		
 		ByteBuffer vbb = ByteBuffer.allocateDirect(pixelVertices.length*4);
 		vbb.order(ByteOrder.nativeOrder());
@@ -493,11 +546,12 @@ public class Image implements ImagePlane {
 		vertexBuffer.put(pixelVertices);
 		vertexBuffer.position(0);
 		
+		gl.glBindTexture(GL10.GL_TEXTURE_2D, mSmoothTextureID);
+	    gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, texBuffer);
+		
 		gl.glVertexPointer(3, GL10.GL_FIXED, 0, vertexBuffer);
 		
-		gl.glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
-		gl.glDisable(GL10.GL_TEXTURE_2D);
-		gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 7);
+		gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 8);
 		//gl.glDrawElements(GL10.GL_TRIANGLE_STRIP, 4, GL10.GL_UNSIGNED_BYTE, mIndexBuffer);
 		gl.glEnable(GL10.GL_TEXTURE_2D);
 	}
@@ -1009,6 +1063,7 @@ public class Image implements ImagePlane {
         //setState(gl);
 	}
 	private int mTextureID;
+	private int mSmoothTextureID;
 	private FloatBuffer mTexBuffer;
 	
 	private int VERTS = 4;

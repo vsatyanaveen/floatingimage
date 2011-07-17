@@ -1,5 +1,6 @@
 package dk.nindroid.rss.renderers.floating;
 
+import java.io.InputStream;
 import java.util.Arrays;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -91,8 +92,10 @@ public class FloatingRenderer extends Renderer {
 		this.mBank = bank;
 		mImgs = new Image[mTotalImgRows * 3 / 2];
 		Texture largeTexture = new Texture();
+		InputStream smoothIS = activity.context().getResources().openRawResource(R.drawable.smooth_circle);
+		Bitmap smoothImage = BitmapFactory.decodeStream(smoothIS);
 		for(int i = 0; i < mImgs.length; ++i){
-	        	mImgs[mImgCnt++] = new Image(activity, mBank, display, mInfoBar, largeTexture, mTextureSelector);
+			mImgs[mImgCnt++] = new Image(activity, mBank, display, mInfoBar, largeTexture, mTextureSelector, smoothImage);
 		}
 		setPositionController(mActivity.getSettings().floatingType);
 		mImgDepths = new Image[mImgs.length];
@@ -239,7 +242,7 @@ public class FloatingRenderer extends Renderer {
 		}
 		// If new start, show splash!
 		if(mNewStart){
-			mSplashImg = mImgDepths[4];
+			mSplashImg = mImgDepths[4]; 
 			Bitmap splash = BitmapFactory.decodeStream(mActivity.context().getResources().openRawResource(R.drawable.splash));
 			mSplashImg.setSelected(gl, splash, 343.0f/512.0f, 1.0f, frameTime);
 			mNewStart = false;
