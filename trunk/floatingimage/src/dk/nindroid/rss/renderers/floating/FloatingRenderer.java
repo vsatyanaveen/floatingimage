@@ -330,6 +330,7 @@ public class FloatingRenderer extends Renderer {
         	}
         }
         gl.glPopMatrix();
+        
         Image.unsetState(gl);
         float fraction = getFraction(realTime);
         if(mSelected != null){
