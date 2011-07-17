@@ -7,6 +7,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
+import javax.microedition.khronos.opengles.GL11;
 
 import android.graphics.Bitmap;
 import android.opengl.GLU;
@@ -68,6 +69,14 @@ public class Image implements ImagePlane {
 	private float			mFocusHeight;
 	private boolean			mLargeTex = false;
 	private boolean			mSetBackgroundWhenReady = false;
+	
+	// Smoothing vars
+	int[] mPixelVertices;
+	float[] mImageTex;
+	float[] mSmoothTex;
+	FloatBuffer mSmoothTexBuffer;
+	FloatBuffer mImageTexBuffer;
+	IntBuffer mSmoothingVertexBuffer;
 	
 	public void setPositionController(PositionController pc){
 		this.mPositionController = pc;
@@ -201,6 +210,24 @@ public class Image implements ImagePlane {
 		}
 		mSetBackgroundWhenReady = false;
 	}
+	
+	void initSmoothing(){
+		mPixelVertices = new int[8 * 3];
+		mImageTex = new float[8 * 2];
+		mSmoothTex = new float[8 * 2];
+        
+		ByteBuffer tbb = ByteBuffer.allocateDirect(8 * 2 * 4);
+		tbb.order(ByteOrder.nativeOrder());
+		mSmoothTexBuffer = tbb.asFloatBuffer();
+		
+		tbb = ByteBuffer.allocateDirect(8 * 2 * 4);
+		tbb.order(ByteOrder.nativeOrder()); 
+		mImageTexBuffer = tbb.asFloatBuffer();
+		
+		ByteBuffer vbb = ByteBuffer.allocateDirect(8 * 3 * 4);
+		vbb.order(ByteOrder.nativeOrder());
+		mSmoothingVertexBuffer = vbb.asIntBuffer();
+	}
 		
 	public Image(MainActivity activity, 
 				 TextureBank bank, 
@@ -221,10 +248,12 @@ public class Image implements ImagePlane {
         mRotationB = new Rotation(0, 0, 0, 1);
         mRotationASaved = new Rotation(0, 0, 0, 1);
         mRotationBSaved = new Rotation(0, 0, 0, 1);
-
-		ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
+        
+        ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
         tbb.order(ByteOrder.nativeOrder());
         mTexBuffer = tbb.asFloatBuffer();
+
+		initSmoothing();
         
         float tex[] = {
         	0.0f,  0.0f,
@@ -412,10 +441,12 @@ public class Image implements ImagePlane {
 		
 		
 		// Show smoothing
-		drawSideSmoothing(gl, 0, 1, true, szX, szY);
-		drawSideSmoothing(gl, 1, 3, false, szX, szY);
-		drawSideSmoothing(gl, 0, 2, false, szX, szY);
-		drawSideSmoothing(gl, 2, 3, true, szX, szY);
+		if(mShowingImage != null && mState != Image.STATE_FOCUSED){
+			drawSideSmoothing(gl, 0, 1, 0, true, szX, szY); // Left
+			drawSideSmoothing(gl, 1, 3, mShowingImage.getHeight(), false, szX, szY); // Bottom
+			drawSideSmoothing(gl, 0, 2, 0, false, szX, szY); // Top
+			drawSideSmoothing(gl, 2, 3, mShowingImage.getWidth(), true, szX, szY); // Right
+		}
 		//if(realTime % 10000 < 5000){
 			// Smooth images
 			//gl.glEnable(GL10.GL_BLEND);
@@ -437,14 +468,27 @@ public class Image implements ImagePlane {
 	
 	boolean textureSet = false;
 	
-	void drawSideSmoothing(GL10 gl, int indexA, int indexB, boolean vertical, float scaleX, float scaleY){
+	void drawSideSmoothing(GL10 gl, int indexA, int indexB, float uvSide, boolean vertical, float scaleX, float scaleY){
 		// Scale is added to counteract openGL scaling.
+
+		GL11 gl11 = (GL11)gl;
 		
-		Vec3f a = new Vec3f(mVertices[indexA]);
-		Vec3f b = new Vec3f(mVertices[indexB]);
+		Vec3f a = mVertices[indexA];
+		Vec3f b = mVertices[indexB];
+
 		
-		final float lineWidth = 5; // Off by ^2 for some reason. :(
 		
+		float lineWidth = 8; // Off by ^2 for some reason. :(
+		
+		long time = (System.currentTimeMillis() / 1000) % 8;
+		if(time < 2){
+			return;
+		}else if(time < 4){
+			lineWidth = 8;
+		}else if(time < 6){
+			lineWidth = 30;
+		}		
+
 		int one = 0x10000;
 		int aX = (int)(a.getX() * one);
 		int aY = (int)(a.getY() * one);
@@ -452,108 +496,288 @@ public class Image implements ImagePlane {
 		int bX = (int)(b.getX() * one);
 		int bY = (int)(b.getY() * one);
 		int bZ = (int)(b.getZ() * one);
-		
-		float z = mPos.getZ() - 1; // WTF er min z? 
-		
+
+		float z = mPos.getZ(); // WTF er min z? 
+
 		float planeHeightA = -z; // Near plane distance is hardcoded to one, height is also one.
 		float planeWidthA = -z * mDisplay.getPortraitWidthPixels() / mDisplay.getPortraitHeightPixels(); // Near plane is still one. Division by one is silly!
-		
+
 		float pixelHeightA = planeHeightA / mDisplay.getPortraitHeightPixels() * lineWidth / scaleY;
 		float pixelWidthA = planeWidthA / mDisplay.getPortraitWidthPixels() * lineWidth / scaleX;
-		
+
 		float halfWidthA = pixelWidthA / 2.0f;
 		float halfHeightA = pixelHeightA / 2.0f;
-		
+
 		float planeHeightB = -z; // Near plane is hardcoded to one, height is also one.
 		float planeWidthB = -z * mDisplay.getPortraitWidthPixels() / mDisplay.getPortraitHeightPixels(); // Near plane is still one. Division by one is silly!
-		
+
 		float pixelHeightB = planeHeightB / mDisplay.getPortraitHeightPixels() * lineWidth / scaleY;
 		float pixelWidthB = planeWidthB / mDisplay.getPortraitWidthPixels() * lineWidth / scaleX;
-		
+
 		float halfWidthB = pixelWidthB / 2.0f;
 		float halfHeightB = pixelHeightB / 2.0f;
-		
-		int[] pixelVertices;
-		float[] tex;
-		if(vertical){
-			pixelVertices = new int[]{				
-					aX + (int)(halfWidthA * one), aY + (int)(halfHeightA * one), aZ,
-					aX - (int)(halfWidthA * one), aY + (int)(halfHeightA * one), aZ,
-					aX + (int)(halfWidthA * one), aY - (int)(halfHeightA * one), aZ,
-					aX - (int)(halfWidthA * one), aY - (int)(halfHeightA * one), aZ,
-					
-					bX + (int)(halfWidthB * one), bY + (int)(halfHeightB * one), bZ,
-					bX - (int)(halfWidthB * one), bY + (int)(halfHeightB * one), bZ,
-					bX + (int)(halfWidthB * one), bY - (int)(halfHeightB * one), bZ,
-					bX - (int)(halfWidthB * one), bY - (int)(halfHeightB * one), bZ};
-			tex = new float[]{
-					1.0f,  0.0f,
-		        	0.0f,  0.0f,
-					1.0f,  0.5f,
-		        	0.0f,  0.5f,	
-		        	
-		        	1.0f,  0.5f,
-		        	0.0f,  0.5f,
-		        	1.0f,  1.0f,
-		        	0.0f,  1.0f,
-		        };
-		}else{
-			pixelVertices = new int[]{				
-					aX - (int)(halfWidthA * one), aY + (int)(halfHeightA * one), aZ,
-					aX - (int)(halfWidthA * one), aY - (int)(halfHeightA * one), aZ,
-					aX + (int)(halfWidthA * one), aY + (int)(halfHeightA * one), aZ,
-					aX + (int)(halfWidthA * one), aY - (int)(halfHeightA * one), aZ,
 
-					bX - (int)(halfWidthB * one), bY + (int)(halfHeightB * one), bZ,
-					bX - (int)(halfWidthB * one), bY - (int)(halfHeightB * one), bZ,
-					bX + (int)(halfWidthB * one), bY + (int)(halfHeightB * one), bZ,
-					bX + (int)(halfWidthB * one), bY - (int)(halfHeightB * one), bZ};
-			tex = new float[]{
-		        	0.0f,  0.0f,
-		        	0.0f,  1.0f,	
-		        	0.5f,  0.0f,
-		        	0.5f,  1.0f,
-		        	
-		        	0.5f,  0.0f,
-		        	0.5f,  1.0f,
-		        	1.0f,  0.0f,
-		        	1.0f,  1.0f
-		        };
+		float vertexDistance = -z * (vertical ? scaleY : scaleX);
+		float pixelPartA = pixelWidthA / vertexDistance * 0.5f;
+		float pixelPartB = pixelWidthB / vertexDistance * 0.5f;
+
+		
+
+		if(vertical){
+			float imageHeight = mShowingImage.getHeight();
+			pixelPartA /= imageHeight;
+			pixelPartB /= imageHeight;
+			float offset = imageHeight / 128.0f;
+
+			mPixelVertices[0] = aX + (int)(halfWidthA * one);
+			mPixelVertices[1] = aY + (int)(halfHeightA * one);
+			mPixelVertices[2] = aZ;
+			
+			mPixelVertices[3] = aX - (int)(halfWidthA * one);
+			mPixelVertices[4] = aY + (int)(halfHeightA * one);
+			mPixelVertices[5] = aZ;
+			
+			mPixelVertices[6] = aX + (int)(halfWidthA * one);
+			mPixelVertices[7] = aY - (int)(halfHeightA * one);
+			mPixelVertices[8] = aZ;
+			
+			mPixelVertices[9] = aX - (int)(halfWidthA * one);
+			mPixelVertices[10] = aY - (int)(halfHeightA * one);
+			mPixelVertices[11] = aZ;
+
+			mPixelVertices[12] = bX + (int)(halfWidthB * one);
+			mPixelVertices[13] = bY + (int)(halfHeightB * one);
+			mPixelVertices[14] = bZ;
+			
+			mPixelVertices[15] = bX - (int)(halfWidthB * one);
+			mPixelVertices[16] = bY + (int)(halfHeightB * one);
+			mPixelVertices[17] = bZ;
+			
+			mPixelVertices[18] = bX + (int)(halfWidthB * one);
+			mPixelVertices[19] = bY - (int)(halfHeightB * one);
+			mPixelVertices[20] = bZ;
+			
+			mPixelVertices[21] = bX - (int)(halfWidthB * one);
+			mPixelVertices[22] = bY - (int)(halfHeightB * one);
+			mPixelVertices[23] = bZ;
+			
+			mSmoothTex[0] = 1.0f;
+			mSmoothTex[1] = 0.0f;
+			
+			mSmoothTex[2] = 0.0f;
+			mSmoothTex[3] = 0.0f;
+			
+			mSmoothTex[4] = 1.0f;
+			mSmoothTex[5] = 0.5f;
+			
+			mSmoothTex[6] = 0.0f;
+			mSmoothTex[7] = 0.5f;	
+
+			mSmoothTex[8] = 1.0f;
+			mSmoothTex[9] = 0.5f;
+			
+			mSmoothTex[10] = 0.0f;
+			mSmoothTex[11] = 0.5f;
+			
+			mSmoothTex[12] = 1.0f;
+			mSmoothTex[13] = 1.0f;
+			
+			mSmoothTex[14] = 0.0f;
+			mSmoothTex[15] = 1.0f;
+			
+			mImageTex[0] = uvSide - offset;
+			mImageTex[1] = 0.0f;
+			
+			mImageTex[2] = uvSide - offset;
+			mImageTex[3] = 0.0f;
+			
+			mImageTex[4] = uvSide - offset;
+			mImageTex[5] = pixelPartA;
+			
+			mImageTex[6] = uvSide - offset;
+			mImageTex[7] = pixelPartA;	
+
+			mImageTex[8] = uvSide - offset;
+			mImageTex[9] = imageHeight - pixelPartB;
+			
+			mImageTex[10] = uvSide - offset;
+			mImageTex[11] = imageHeight - pixelPartB;
+			
+			mImageTex[12] = uvSide - offset;
+			mImageTex[13] = imageHeight;
+			
+			mImageTex[14] = uvSide - offset;
+			mImageTex[15] = imageHeight;
+		}else{
+			float imageWidth = mShowingImage.getWidth();
+			pixelPartA /= imageWidth;
+			pixelPartB /= imageWidth;
+
+			float offset = imageWidth / 128;
+
+			mPixelVertices[0] = aX - (int)(halfWidthA * one);
+			mPixelVertices[1] = aY + (int)(halfHeightA * one);
+			mPixelVertices[2] = aZ;
+			
+			mPixelVertices[3] = aX - (int)(halfWidthA * one);
+			mPixelVertices[4] = aY - (int)(halfHeightA * one);
+			mPixelVertices[5] = aZ;
+			
+			mPixelVertices[6] = aX + (int)(halfWidthA * one);
+			mPixelVertices[7] = aY + (int)(halfHeightA * one);
+			mPixelVertices[8] = aZ;
+			
+			mPixelVertices[9] = aX + (int)(halfWidthA * one);
+			mPixelVertices[10] = aY - (int)(halfHeightA * one);
+			mPixelVertices[11] = aZ;
+
+			mPixelVertices[12] = bX - (int)(halfWidthB * one);
+			mPixelVertices[13] = bY + (int)(halfHeightB * one);
+			mPixelVertices[14] = bZ;
+			
+			mPixelVertices[15] = bX - (int)(halfWidthB * one);
+			mPixelVertices[16] = bY - (int)(halfHeightB * one);
+			mPixelVertices[17] = bZ;
+			
+			mPixelVertices[18] = bX + (int)(halfWidthB * one);
+			mPixelVertices[19] = bY + (int)(halfHeightB * one);
+			mPixelVertices[20] = bZ;
+			
+			mPixelVertices[21] = bX - (int)(halfWidthB * one);
+			mPixelVertices[22] = bY - (int)(halfHeightB * one);
+			mPixelVertices[23] = bZ;
+			
+			mSmoothTex[0] = 0.0f;
+			mSmoothTex[1] = 0.0f;
+			
+			mSmoothTex[2] = 0.0f;
+			mSmoothTex[3] = 1.0f;
+			
+			mSmoothTex[4] = 0.5f;
+			mSmoothTex[5] = 0.0f;
+			
+			mSmoothTex[6] = 0.5f;
+			mSmoothTex[7] = 1.0f;	
+
+			mSmoothTex[8] = 0.5f;
+			mSmoothTex[9] = 0.0f;
+			
+			mSmoothTex[10] = 0.5f;
+			mSmoothTex[11] = 1.0f;
+			
+			mSmoothTex[12] = 1.0f;
+			mSmoothTex[13] = 0.0f;
+			
+			mSmoothTex[14] = 1.0f;
+			mSmoothTex[15] = 1.0f;
+			
+			mImageTex[0] = 0.0f;
+			mImageTex[1] = uvSide - offset;
+			
+			mImageTex[2] = 0.0f;
+			mImageTex[3] = uvSide - offset;
+			
+			mImageTex[4] = pixelPartA;
+			mImageTex[5] = uvSide - offset;
+			
+			mImageTex[6] = pixelPartA;
+			mImageTex[7] = uvSide - offset;	
+
+			mImageTex[8] = imageWidth - pixelPartB;
+			mImageTex[9] = uvSide - offset;
+			
+			mImageTex[10] = imageWidth - pixelPartB;
+			mImageTex[11] = uvSide - offset;
+			
+			mImageTex[12] = imageWidth;
+			mImageTex[13] = uvSide - offset;
+			
+			mImageTex[14] = imageWidth;
+			mImageTex[15] = uvSide - offset;
+		}
+
+		mSmoothTexBuffer.put(mSmoothTex);
+		mSmoothTexBuffer.position(0);
+
+		mImageTexBuffer.put(mImageTex);
+		mImageTexBuffer.position(0);
+
+		if(!textureSet){
+			textureSet = true;
+			gl11.glBindTexture(GL11.GL_TEXTURE_2D, mSmoothTextureID);
+			gl11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
+			gl11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+			gl11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_CLAMP_TO_EDGE);
+			gl11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_CLAMP_TO_EDGE);
+			gl11.glTexEnvf(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_BLEND);
+
+			GLUtils.texImage2D(GL11.GL_TEXTURE_2D, 0, mLineSmoothBitmap, 0);
+		}
+
+		
+		mSmoothingVertexBuffer.put(mPixelVertices);
+		mSmoothingVertexBuffer.position(0);
+
+		gl11.glActiveTexture( GL11.GL_TEXTURE0 );
+		
+		gl11.glTexEnvf( GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_REPLACE );
+		gl11.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
+		
+		gl11.glClientActiveTexture( GL11.GL_TEXTURE1 );
+		gl11.glActiveTexture( GL11.GL_TEXTURE1 );
+		
+		gl11.glEnableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
+		
+		gl11.glEnable(GL11.GL_TEXTURE_2D);
+		gl11.glBindTexture(GL10.GL_TEXTURE_2D, mSmoothTextureID);	
+		
+		if(time > 6){
+			gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_MODULATE);
+		}else{
+			gl11.glTexEnvi( GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_COMBINE );
+			gl11.glTexEnvi( GL11.GL_TEXTURE_ENV, GL11.GL_COMBINE_RGB, GL11.GL_REPLACE );
+			gl11.glTexEnvi( GL11.GL_TEXTURE_ENV, GL11.GL_SRC0_RGB, GL11.GL_PREVIOUS ); //note: just use same rgb
+			gl11.glTexEnvi( GL11.GL_TEXTURE_ENV, GL11.GL_OPERAND0_RGB, GL11.GL_SRC_COLOR );
+	
+			/**/
+			//note: replace alpha with tex-alpha
+			gl11.glTexEnvi( GL11.GL_TEXTURE_ENV, GL11.GL_COMBINE_ALPHA, GL11.GL_REPLACE );
+			gl11.glTexEnvi( GL11.GL_TEXTURE_ENV, GL11.GL_SRC0_ALPHA, GL11.GL_TEXTURE );
+			gl11.glTexEnvi( GL11.GL_TEXTURE_ENV, GL11.GL_OPERAND0_ALPHA, GL11.GL_SRC_ALPHA );
+			/*/
+			//note: modulate image-alpha (1.0) with tex-alpha
+			gl11.glTexEnvi( GL11.GL_TEXTURE_ENV, GL11.GL_COMBINE_ALPHA, GL11.GL_MODULATE );
+			gl11.glTexEnvi( GL11.GL_TEXTURE_ENV, GL11.GL_SRC0_ALPHA, GL11.GL_PREVIOUS );
+			gl11.glTexEnvi( GL11.GL_TEXTURE_ENV, GL11.GL_OPERAND0_ALPHA, GL11.GL_SRC_ALPHA );
+			gl11.glTexEnvi( GL11.GL_TEXTURE_ENV, GL11.GL_SRC1_ALPHA, GL11.GL_TEXTURE );
+			gl11.glTexEnvi( GL11.GL_TEXTURE_ENV, GL11.GL_OPERAND1_ALPHA, GL11.GL_SRC_ALPHA );
+			/**/
+			
+			//gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, texBuffer);
+		}
+		gl11.glClientActiveTexture( GL11.GL_TEXTURE0 );
+		gl11.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mImageTexBuffer);
+		
+		gl11.glClientActiveTexture( GL11.GL_TEXTURE1 );
+		gl11.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mSmoothTexBuffer);
+		
+		gl11.glActiveTexture( GL11.GL_TEXTURE1 );
+
+		gl11.glVertexPointer(3, GL10.GL_FIXED, 0, mSmoothingVertexBuffer);
+
+		gl11.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 8);
+		
+		gl11.glActiveTexture( GL11.GL_TEXTURE1 );
+		gl11.glDisable(GL11.GL_TEXTURE_2D);
+		gl11.glActiveTexture( GL11.GL_TEXTURE0 );
+		gl11.glEnable(GL11.GL_TEXTURE_2D);
+		gl11.glClientActiveTexture( GL11.GL_TEXTURE0 );
+		
+		int error = gl11.glGetError();
+		if(error != 0){
+			Log.w("Floating Image", "Error: " + gl.glGetString(error));
 		}
 		
-		ByteBuffer tbb = ByteBuffer.allocateDirect(pixelVertices.length / 3 * 2 * 4);
-        tbb.order(ByteOrder.nativeOrder());
-        FloatBuffer texBuffer = tbb.asFloatBuffer();
-        
-        texBuffer.put(tex);
-        texBuffer.position(0);	
-        
-        if(!textureSet){
-        	textureSet = true;
-        	gl.glBindTexture(GL10.GL_TEXTURE_2D, mSmoothTextureID);
-            gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
-            gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
-            gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S, GL10.GL_CLAMP_TO_EDGE);
-            gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_CLAMP_TO_EDGE);
-            gl.glTexEnvf(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_BLEND);
-            
-        	GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, mLineSmoothBitmap, 0);
-        }
-		
-		ByteBuffer vbb = ByteBuffer.allocateDirect(pixelVertices.length*4);
-		vbb.order(ByteOrder.nativeOrder());
-		IntBuffer vertexBuffer = vbb.asIntBuffer();
-		vertexBuffer.put(pixelVertices);
-		vertexBuffer.position(0);
-		
-		gl.glBindTexture(GL10.GL_TEXTURE_2D, mSmoothTextureID);
-	    gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, texBuffer);
-		
-		gl.glVertexPointer(3, GL10.GL_FIXED, 0, vertexBuffer);
-		
-		gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 8);
-		//gl.glDrawElements(GL10.GL_TRIANGLE_STRIP, 4, GL10.GL_UNSIGNED_BYTE, mIndexBuffer);
-		gl.glEnable(GL10.GL_TEXTURE_2D);
 	}
 	
 	public static void setState(GL10 gl){

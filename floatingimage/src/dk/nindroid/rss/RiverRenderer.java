@@ -526,7 +526,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
          * but reduce performance. One might want to tweak that
          * especially on software renderer.
          */
-        gl.glDisable(GL10.GL_DITHER);
+        gl.glEnable(GL10.GL_DITHER);
         /*
          * Some one-time OpenGL initialization can be made here
          * probably based on features of this particular context
