@@ -10,6 +10,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import dk.nindroid.rss.MainActivity;
 import dk.nindroid.rss.R;
+import dk.nindroid.rss.uiActivities.AdjustBrightness;
 
 public class Brightness extends Button {
 	private static final float		BRIGHTNESS_LOW  = 0.1f;
@@ -36,7 +37,7 @@ public class Brightness extends Button {
 			WindowManager.LayoutParams lp = window.getAttributes();
 			mBrightnessIndex = (mBrightnessIndex + 1) % BRIGHTNESS.length;
 			lp.screenBrightness = BRIGHTNESS[mBrightnessIndex];
-			window.setAttributes(lp);
+			mActivity.runOnUiThread(new AdjustBrightness(mActivity, lp));
 		}
 	}
 

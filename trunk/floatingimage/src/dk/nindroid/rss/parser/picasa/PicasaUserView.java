@@ -3,6 +3,7 @@ package dk.nindroid.rss.parser.picasa;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.ListFragment;
 import android.view.Gravity;
 import android.view.View;
@@ -11,9 +12,11 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 import dk.nindroid.rss.R;
+import dk.nindroid.rss.settings.PicasaBrowser;
 import dk.nindroid.rss.settings.Settings;
+import dk.nindroid.rss.settings.SettingsFragment;
 
-public class PicasaUserView extends ListFragment {
+public class PicasaUserView extends ListFragment implements SettingsFragment {
 	private static final int	STREAM		 		= 0;
 	private static final int	ALBUMS				= 1;
 	
@@ -98,5 +101,14 @@ public class PicasaUserView extends ListFragment {
 		intent.putExtras(b);
 		this.getActivity().setResult(Activity.RESULT_OK, intent);		
 		this.getActivity().finish();
+	}
+
+	@Override
+	public boolean back() {
+		FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.replace(R.id.source, new PicasaBrowser(), "content");
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        ft.commit();
+        return true;
 	}
 }

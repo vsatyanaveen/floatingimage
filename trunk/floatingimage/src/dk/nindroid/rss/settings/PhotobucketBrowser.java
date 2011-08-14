@@ -90,4 +90,9 @@ public class PhotobucketBrowser extends SourceFragment {
 		    }
 		});
 	}
+
+	@Override
+	public boolean back() {
+		return false;
+	}
 }

@@ -29,6 +29,7 @@ import dk.nindroid.rss.renderers.floating.positionControllers.Mixup;
 import dk.nindroid.rss.renderers.floating.positionControllers.Stack;
 import dk.nindroid.rss.renderers.floating.positionControllers.StarSpeed;
 import dk.nindroid.rss.renderers.floating.positionControllers.TableTop;
+import dk.nindroid.rss.settings.Settings;
 
 public class FloatingRenderer extends Renderer {
 	public static final long 	mFocusDuration = 300;
@@ -56,7 +57,7 @@ public class FloatingRenderer extends Renderer {
 	private TextureBank 	mBank;
 	public 	TextureSelector mTextureSelector;
 	private long			mStartTime;
-	private int 			mTotalImgRows = 6;
+	private int 			mTotalImgRows = 0;
 	private int 			mImgCnt = 0;
 	private boolean			mDoUnselect = false;
 	private boolean			mResetImages = false;
@@ -71,6 +72,7 @@ public class FloatingRenderer extends Renderer {
 	private float			mStreamOffsetZ;
 	private Vec3f			mRequestedStreamOffset;
 	private long			mUpTime;
+	private Texture 		mLargeTexture;
 	
 	private static final Vec3f 		mCamPos = new Vec3f(0,0,0);
 	private Image					mSelected = null;
@@ -90,24 +92,45 @@ public class FloatingRenderer extends Renderer {
 		mBackgroundPainter = new BackgroundPainter();
 		this.mDisplay = display;
 		this.mBank = bank;
-		mImgs = new Image[mTotalImgRows * 3 / 2];
-		Texture largeTexture = new Texture();
-		InputStream smoothIS = activity.context().getResources().openRawResource(R.drawable.smooth_circle);
-		Bitmap smoothImage = BitmapFactory.decodeStream(smoothIS);
-		for(int i = 0; i < mImgs.length; ++i){
-			mImgs[mImgCnt++] = new Image(activity, mBank, display, mInfoBar, largeTexture, mTextureSelector, smoothImage);
-		}
-		setPositionController(mActivity.getSettings().floatingType);
-		mImgDepths = new Image[mImgs.length];
-		for(int i = 0; i < mImgs.length; ++i){
-			mImgDepths[i] = mImgs[i];
-		}
+		this.mLargeTexture = new Texture();
 		mDepthComparator = new ImageDepthComparator();
-		Arrays.sort(mImgDepths, mDepthComparator);
+		createImageArray();
+		
+		setPositionController(mActivity.getSettings().floatingType);
+		
 		mStartTime = System.currentTimeMillis();
 	}
 	
 	int mCurPositionController = -1;
+	
+	void createImageArray(){
+		// If amount of images have changed, rehash
+		int settingsRows = mActivity.getSettings().tsunami ? 18 : 6;
+		if(settingsRows != mTotalImgRows){
+			mTotalImgRows = settingsRows;
+			mCurPositionController = -1;
+			InputStream smoothIS = mActivity.context().getResources().openRawResource(R.drawable.smooth_circle);
+			Bitmap smoothImage = BitmapFactory.decodeStream(smoothIS);
+			mImgCnt = 0;
+			if(mImgs != null){
+				for(Image i : mImgs){
+					if(i.getShowing() != null){
+						i.getShowing().getBitmap().recycle();
+					}
+				}
+			}
+			mImgs = new Image[mTotalImgRows * 3 / 2];
+			for(int i = 0; i < mImgs.length; ++i){
+				mImgs[mImgCnt++] = new Image(mActivity, mBank, mDisplay, mInfoBar, mLargeTexture, mTextureSelector, smoothImage);
+			}
+			
+			mImgDepths = new Image[mImgs.length];
+			for(int i = 0; i < mImgs.length; ++i){
+				mImgDepths[i] = mImgs[i];
+			}
+			Arrays.sort(mImgDepths, mDepthComparator);
+		}
+	}
 	
 	public void setPositionController(int type){
 		if(mCurPositionController != type){
@@ -405,6 +428,7 @@ public class FloatingRenderer extends Renderer {
 	
 	@Override
 	public void onResume(){
+		createImageArray();
 		setPositionController(mActivity.getSettings().floatingType);
 		mTextureSelector.startThread();
 		mDoAdjustImagePositions = true;

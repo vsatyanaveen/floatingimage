@@ -64,15 +64,25 @@
                 android:entryValues="@array/floatingTypeValues"
                 android:dialogTitle="@string/floatingTypeTitle"
                 android:defaultValue="0" />
+            <CheckBoxPreference 
+            	android:key="tsunami"
+                android:title="@string/tsunami"
+                android:summary="@string/tsunamiSummary"
+                android:defaultValue="false" />
             <CheckBoxPreference
                 android:key="rotateImages"
                 android:title="@string/rotateImages"
                 android:summary="@string/rotateImagesSummary"
                 android:defaultValue="true" />
 			<CheckBoxPreference
-                android:key="imageDecorations"
-                android:title="@string/imageDecorations"
-                android:summary="@string/imageDecorationsSummary"
+                android:key="fullscreenBlack"
+                android:title="@string/fullscreenBlack"
+                android:summary="@string/fullscreenBlackSummary"
+                android:defaultValue="true" />
+            <CheckBoxPreference
+            	android:key="blackEdges"
+                android:title="@string/blackEdges"
+                android:summary="@string/blackEdgesSummary"
                 android:defaultValue="true" />
             <CheckBoxPreference
             	android:key="highResThumbs"

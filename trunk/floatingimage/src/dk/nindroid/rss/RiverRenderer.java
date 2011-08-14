@@ -2,6 +2,7 @@ package dk.nindroid.rss;
 
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.opengles.GL10;
 
 import android.content.Intent;
@@ -96,14 +97,9 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
         gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
         gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
         
-        
         gl.glHint(GL10.GL_PERSPECTIVE_CORRECTION_HINT,
                 GL10.GL_FASTEST);
-        //EGL10 egl = (EGL10)EGLContext.getEGL();
-        //egl.eglGetConfigs(egl.eglGetCurrentDisplay(), egl.eglg, config_size, num_config)
-        //gl.glEnable(GL10.GL_MULTISAMPLE);
         
-        //gl.glScalef(0.25f, 0.25f, 1.0f);
         long realTime = System.currentTimeMillis();
         
         long timeDiff = realTime - mLastFrameTime;

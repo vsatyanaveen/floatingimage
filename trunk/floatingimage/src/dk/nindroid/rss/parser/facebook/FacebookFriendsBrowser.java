@@ -16,8 +16,10 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import dk.nindroid.rss.R;
+import dk.nindroid.rss.settings.FacebookBrowser;
+import dk.nindroid.rss.settings.SettingsFragment;
 
-public class FacebookFriendsBrowser extends ListFragment implements GetFriendsTask.Callback {
+public class FacebookFriendsBrowser extends ListFragment implements GetFriendsTask.Callback, SettingsFragment {
 	private List<Friend> friends = null;
 	
 	boolean mDualPane;
@@ -132,8 +134,17 @@ public class FacebookFriendsBrowser extends ListFragment implements GetFriendsTa
 				Fragment f = FacebookFriendView.getInstance(this.getIntent().getStringExtra("ID"), this.getIntent().getStringExtra("Name"));
 				
 				f.setArguments(getIntent().getExtras());
-				getSupportFragmentManager().beginTransaction().add(android.R.id.content, f).commit();
+				getSupportFragmentManager().beginTransaction().add(android.R.id.content, f, "content").commit();
 			}
 		}
+	}
+
+	@Override
+	public boolean back() {
+		FragmentTransaction ft = getFragmentManager().beginTransaction();
+		ft.replace(R.id.source, new FacebookBrowser(), "content");
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
+        ft.commit();
+        return true;
 	}
 }

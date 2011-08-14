@@ -38,6 +38,7 @@ import dk.nindroid.rss.compatibility.Honeycomb;
 import dk.nindroid.rss.compatibility.SetWallpaper;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.LocalImage;
+import dk.nindroid.rss.helpers.MultisampleConfigChooser;
 import dk.nindroid.rss.launchers.ReadFeeds;
 import dk.nindroid.rss.menu.Settings;
 import dk.nindroid.rss.orientation.InitialOritentationReflector;
@@ -113,7 +114,8 @@ public class ShowStreams extends Activity implements MainActivity {
 		ClickHandler.init(this, renderer);
 		setContentView(R.layout.main); 
 		mGLSurfaceView = new GLSurfaceView(this);
-		mGLSurfaceView.setRenderer(renderer);
+        mGLSurfaceView.setRenderer(renderer);
+		
 		setContentView(mGLSurfaceView);
 	}
 	

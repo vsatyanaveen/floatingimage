@@ -203,6 +203,11 @@ public class FeedController {
 			int progress = 0;
 			mRenderer.setFeeds(0, mFeeds.size());
 			for(FeedReference feed : mFeeds){
+				if(feed.getType() == Settings.TYPE_UNKNOWN){
+					Log.e("Floating Image", "Unknown feed encountered: " + feed.getName() + ", ignoring.");
+					mRenderer.setFeeds(++progress, mFeeds.size());
+					continue;
+				}
 				List<ImageReference> references = null;
 				if(feed.getType() == Settings.TYPE_LOCAL){
 					references = readLocalFeed(feed);
