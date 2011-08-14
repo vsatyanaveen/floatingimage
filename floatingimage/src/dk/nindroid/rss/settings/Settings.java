@@ -8,6 +8,7 @@ import android.view.Surface;
 import android.view.WindowManager;
 
 public class Settings {
+	public static final int TYPE_UNKNOWN  = 0;
 	public static final int TYPE_LOCAL  = 1;
 	public static final int TYPE_FLICKR = 2;
 	public static final int TYPE_PICASA = 3;
@@ -35,6 +36,8 @@ public class Settings {
 	public int		floatingType = 0;
 	public long		floatingTraversal = 30000;
 	public int		forceRotation;
+	public boolean	tsunami;
+	public boolean	blackEdges;
 	
 	public int		backgroundColor;
 	public boolean	lowFps;
@@ -67,6 +70,8 @@ public class Settings {
 		floatingType = Integer.parseInt(sp.getString("floatingType", "0"));
 		floatingTraversal = Long.parseLong(sp.getString("floatingSpeed", "30000"));
 		forceRotation = Integer.parseInt(sp.getString("forceRotation", "0"));
+		blackEdges = sp.getBoolean("blackEdges", true);
+		tsunami = sp.getBoolean("tsunami", false);
 		switch(forceRotation){
 		case 90:
 			forceRotation = Surface.ROTATION_90;

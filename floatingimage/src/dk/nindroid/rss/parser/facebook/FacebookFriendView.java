@@ -16,8 +16,9 @@ import android.widget.FrameLayout;
 import android.widget.ListView;
 import dk.nindroid.rss.R;
 import dk.nindroid.rss.settings.Settings;
+import dk.nindroid.rss.settings.SettingsFragment;
 
-public class FacebookFriendView extends ListFragment {
+public class FacebookFriendView extends ListFragment implements SettingsFragment {
 	private static final int	PHOTOS_OF		 	= 0;
 	private static final int	ALBUMS				= 1;
 	
@@ -86,7 +87,7 @@ public class FacebookFriendView extends ListFragment {
 		//startActivityForResult(intent, ALBUMS);
 		if(mDualPane){
 			FragmentTransaction ft = getFragmentManager().beginTransaction();
-	        ft.replace(R.id.source, FacebookAlbumBrowser.getInstance(id, name));
+	        ft.replace(R.id.source, FacebookAlbumBrowser.getInstance(id, name), "content");
 	        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
 	        ft.commit();
 		}else{
@@ -139,8 +140,17 @@ public class FacebookFriendView extends ListFragment {
 				Fragment f = FacebookAlbumBrowser.getInstance(this.getIntent().getStringExtra("ID"), this.getIntent().getStringExtra("Name"));
 				
 				f.setArguments(getIntent().getExtras());
-				getSupportFragmentManager().beginTransaction().add(android.R.id.content, f).commit();
+				getSupportFragmentManager().beginTransaction().add(android.R.id.content, f, "content").commit();
 			}
 		}
+	}
+
+	@Override
+	public boolean back() {
+		FragmentTransaction ft = getFragmentManager().beginTransaction();
+		ft.replace(R.id.source, new FacebookFriendsBrowser(), "content");
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
+        ft.commit();
+        return true;
 	}
 }

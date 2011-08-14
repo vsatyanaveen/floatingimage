@@ -21,12 +21,13 @@ import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 import dk.nindroid.rss.R;
+import dk.nindroid.rss.flickr.FindUserTask;
 import dk.nindroid.rss.flickr.FlickrFeeder;
 import dk.nindroid.rss.parser.flickr.FlickrAlbumBrowser;
 import dk.nindroid.rss.parser.flickr.FlickrUser;
 import dk.nindroid.rss.uiActivities.Toaster;
 
-public class FlickrBrowser extends SourceSelector.SourceFragment {
+public class FlickrBrowser extends SourceSelector.SourceFragment implements FindUserTask.Callback, SettingsFragment{
 	// Positions
 	private static final int	SHOW_STREAM 				= 0;
 	private static final int	SEARCH 						= 1;
@@ -50,7 +51,6 @@ public class FlickrBrowser extends SourceSelector.SourceFragment {
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		FlickrFeeder.readCode(this.getActivity());
 		View sourceFrame = getActivity().findViewById(R.id.source);
         mDualPane = sourceFrame != null && sourceFrame.getVisibility() == View.VISIBLE;
 	}
@@ -58,6 +58,7 @@ public class FlickrBrowser extends SourceSelector.SourceFragment {
 	@Override
 	public void onResume() {
 		super.onResume();
+		FlickrFeeder.readCode(this.getActivity());
 		fillMenu();
 	}
 	
@@ -84,6 +85,8 @@ public class FlickrBrowser extends SourceSelector.SourceFragment {
 			setListAdapter(new ArrayAdapter<String>(this.getActivity(), android.R.layout.simple_list_item_1, options));
 		}
 	}
+	
+	
 	
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
@@ -141,7 +144,7 @@ public class FlickrBrowser extends SourceSelector.SourceFragment {
 	private void showMyAlbums(){
 		if(mDualPane){
 			FragmentTransaction ft = getFragmentManager().beginTransaction();
-	        ft.replace(R.id.source, FlickrAlbumBrowser.getInstance(null));
+	        ft.replace(R.id.source, FlickrAlbumBrowser.getInstance(null), "content");
 	        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
 	        ft.commit();
 		}else{
@@ -280,7 +283,12 @@ public class FlickrBrowser extends SourceSelector.SourceFragment {
 	}
 
 	private void returnStream(String username){
-		String uid = FlickrFeeder.findByUsername(username);
+		FindUserTask task = new FindUserTask(getActivity(), this);
+		task.execute(username);		
+	}
+	
+	@Override
+	public void findUserCallback(String username, String uid) {
 		if(username.length() == 0){ // This actually returns a user with no images!
 			Toast.makeText(this.getActivity(), R.string.flickrShowStreamNoUsername, Toast.LENGTH_LONG).show();
 			return;
@@ -337,5 +345,10 @@ public class FlickrBrowser extends SourceSelector.SourceFragment {
 				getSupportFragmentManager().beginTransaction().add(android.R.id.content, f).commit();
 			}
 		}
+	}
+
+	@Override
+	public boolean back() {
+		return false;
 	}
 }

@@ -26,7 +26,7 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import dk.nindroid.rss.R;
 import dk.nindroid.rss.settings.SourceSelector.SourceFragment;
 
-public class DirectoryBrowser extends SourceFragment implements OnTouchListener{
+public class DirectoryBrowser extends SourceFragment implements OnTouchListener, SettingsFragment{
 	public static final int SELECT_ID = Menu.FIRST;
 	public static final String ID = "local";
 	private boolean showHidden = false;
@@ -145,6 +145,7 @@ public class DirectoryBrowser extends SourceFragment implements OnTouchListener{
 	void returnResult(String path){
 		Intent intent = new Intent();
 		Bundle b = new Bundle();
+		b.putInt("TYPE", Settings.TYPE_LOCAL);
 		b.putString("PATH", path);
 		b.putString("NAME", path);
 		b.putString("EXTRAS", "");
@@ -170,6 +171,17 @@ public class DirectoryBrowser extends SourceFragment implements OnTouchListener{
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 		
+		return false;
+	}
+
+	@Override
+	public boolean back() {
+		if(history.size() > 1){
+			history.pop();
+			currentDirectory = history.peek();
+			browseTo(currentDirectory.getAbsolutePath());
+			return true;
+		}
 		return false;
 	}
 }

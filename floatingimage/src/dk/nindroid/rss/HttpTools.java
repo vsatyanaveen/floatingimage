@@ -18,7 +18,6 @@ public class HttpTools {
 
 		if (!(conn instanceof HttpURLConnection))
 			throw new IOException("Not an HTTP connection");
-
 		try {
 			HttpURLConnection httpConn = (HttpURLConnection) conn;
 			httpConn.setAllowUserInteraction(false);
@@ -34,7 +33,7 @@ public class HttpTools {
 				Log.w("Floating Image", "HttpTools: Response not OK: " + response);
 			}
 		} catch (Exception ex) {
-			Log.e("Floating Image", "HttpTools: Error getting http stream", ex);
+			Log.e("Floating Image", "HttpTools: Error getting http stream: " + urlString, ex);
 			throw new IOException("Error connecting");
 		}
 		return in;

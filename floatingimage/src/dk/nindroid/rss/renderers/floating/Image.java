@@ -37,7 +37,6 @@ public class Image implements ImagePlane {
 	private Texture			mLargeTexture;
 	private int				mState = STATE_FLOATING;
 	private boolean			mDelete;
-	private Bitmap			mLineSmoothBitmap;
 	
 	private Display			mDisplay;
 	private IntBuffer   	mVertexBuffer;
@@ -77,6 +76,7 @@ public class Image implements ImagePlane {
 	FloatBuffer mSmoothTexBuffer;
 	FloatBuffer mImageTexBuffer;
 	IntBuffer mSmoothingVertexBuffer;
+	private Bitmap			mLineSmoothBitmap;
 	
 	public void setPositionController(PositionController pc){
 		this.mPositionController = pc;
@@ -147,6 +147,16 @@ public class Image implements ImagePlane {
 				setTexture(gl, mShowingImage);
 			}
 		}
+		
+		// Set smoothing texture
+		gl.glBindTexture(GL11.GL_TEXTURE_2D, mSmoothTextureID);
+		gl.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
+		gl.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+		gl.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_CLAMP_TO_EDGE);
+		gl.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_CLAMP_TO_EDGE);
+		gl.glTexEnvf(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_BLEND);
+
+		GLUtils.texImage2D(GL11.GL_TEXTURE_2D, 0, mLineSmoothBitmap, 0);
 	}
 	public void reset(GL10 gl, long time){
 		if(mFocusBmp != null && !mFocusBmp.isRecycled()){
@@ -154,13 +164,7 @@ public class Image implements ImagePlane {
 		}
 		mFocusBmp = null;
 		mState = STATE_FLOATING;
-		/*
-		 * All images are recycled by the Cyclic list!
-		if(mShowingImage != null && !mShowingImage.getBitmap().isRecycled()){
-			mShowingImage.getBitmap().recycle();
-			Log.v("Floating Image", "Recycle bitmap due to image reset");
-		}
-		*/
+
 		mShowingImage = null;
 	}
 	
@@ -427,8 +431,8 @@ public class Image implements ImagePlane {
 		gl.glScalef(szX, szY, 1);
 		
 		// Draw image
-		gl.glActiveTexture(GL10.GL_TEXTURE0);
-		if(mLargeTex){
+		gl.glActiveTexture(GL10.GL_TEXTURE0); 
+		if(mLargeTex){ 
 			gl.glBindTexture(GL10.GL_TEXTURE_2D, mLargeTexture.getTextureID(gl));
 		}else{
 			gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
@@ -441,12 +445,15 @@ public class Image implements ImagePlane {
 		
 		
 		// Show smoothing
-		if(mShowingImage != null && mState != Image.STATE_FOCUSED){
-			drawSideSmoothing(gl, 0, 1, 0, true, szX, szY); // Left
-			drawSideSmoothing(gl, 1, 3, mShowingImage.getHeight(), false, szX, szY); // Bottom
-			drawSideSmoothing(gl, 0, 2, 0, false, szX, szY); // Top
-			drawSideSmoothing(gl, 2, 3, mShowingImage.getWidth(), true, szX, szY); // Right
-		}
+		//if((System.currentTimeMillis() % 10000) < 5000){
+			if(mShowingImage != null && mState != Image.STATE_FOCUSED){
+				drawSideSmoothing(gl, alpha, 0, 1, 0, true, szX, szY); // Left
+				drawSideSmoothing(gl, alpha, 1, 3, mShowingImage.getHeight(), false, szX, szY); // Bottom
+				drawSideSmoothing(gl, alpha, 0, 2, 0, false, szX, szY); // Top
+				drawSideSmoothing(gl, alpha, 2, 3, mShowingImage.getWidth(), true, szX, szY); // Right
+			}
+		//}
+		
 		//if(realTime % 10000 < 5000){
 			// Smooth images
 			//gl.glEnable(GL10.GL_BLEND);
@@ -466,9 +473,7 @@ public class Image implements ImagePlane {
         }
 	}
 	
-	boolean textureSet = false;
-	
-	void drawSideSmoothing(GL10 gl, int indexA, int indexB, float uvSide, boolean vertical, float scaleX, float scaleY){
+	void drawSideSmoothing(GL10 gl, float alpha, int indexA, int indexB, float uvSide, boolean vertical, float scaleX, float scaleY){
 		// Scale is added to counteract openGL scaling.
 
 		GL11 gl11 = (GL11)gl;
@@ -479,7 +484,7 @@ public class Image implements ImagePlane {
 		
 		
 		float lineWidth = 8; // Off by ^2 for some reason. :(
-		
+/*		
 		long time = (System.currentTimeMillis() / 1000) % 8;
 		if(time < 2){
 			return;
@@ -488,7 +493,7 @@ public class Image implements ImagePlane {
 		}else if(time < 6){
 			lineWidth = 30;
 		}		
-
+*/
 		int one = 0x10000;
 		int aX = (int)(a.getX() * one);
 		int aY = (int)(a.getY() * one);
@@ -517,17 +522,14 @@ public class Image implements ImagePlane {
 		float halfWidthB = pixelWidthB / 2.0f;
 		float halfHeightB = pixelHeightB / 2.0f;
 
-		float vertexDistance = -z * (vertical ? scaleY : scaleX);
-		float pixelPartA = pixelWidthA / vertexDistance * 0.5f;
-		float pixelPartB = pixelWidthB / vertexDistance * 0.5f;
-
+		float vertexDistance = -z; 
 		
-
 		if(vertical){
-			float imageHeight = mShowingImage.getHeight();
-			pixelPartA /= imageHeight;
-			pixelPartB /= imageHeight;
-			float offset = imageHeight / 128.0f;
+			float imageHeight = mShowingImage.getHeight() - 1.0f/128.0f;
+			float pixelPartA = halfHeightA / vertexDistance;
+			float pixelPartB = halfHeightB / vertexDistance;
+			
+			float offset = imageHeight / 256.0f;
 
 			mPixelVertices[0] = aX + (int)(halfWidthA * one);
 			mPixelVertices[1] = aY + (int)(halfHeightA * one);
@@ -609,11 +611,11 @@ public class Image implements ImagePlane {
 			mImageTex[14] = uvSide - offset;
 			mImageTex[15] = imageHeight;
 		}else{
-			float imageWidth = mShowingImage.getWidth();
-			pixelPartA /= imageWidth;
-			pixelPartB /= imageWidth;
-
-			float offset = imageWidth / 128;
+			float imageWidth = mShowingImage.getWidth() - 1.0f/128.0f;
+			float pixelPartA = halfWidthA / vertexDistance;
+			float pixelPartB = halfWidthB / vertexDistance; 
+			
+			float offset = imageWidth / 256;
 
 			mPixelVertices[0] = aX - (int)(halfWidthA * one);
 			mPixelVertices[1] = aY + (int)(halfHeightA * one);
@@ -701,39 +703,36 @@ public class Image implements ImagePlane {
 
 		mImageTexBuffer.put(mImageTex);
 		mImageTexBuffer.position(0);
-
-		if(!textureSet){
-			textureSet = true;
-			gl11.glBindTexture(GL11.GL_TEXTURE_2D, mSmoothTextureID);
-			gl11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
-			gl11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
-			gl11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_CLAMP_TO_EDGE);
-			gl11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_CLAMP_TO_EDGE);
-			gl11.glTexEnvf(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_BLEND);
-
-			GLUtils.texImage2D(GL11.GL_TEXTURE_2D, 0, mLineSmoothBitmap, 0);
-		}
-
 		
 		mSmoothingVertexBuffer.put(mPixelVertices);
 		mSmoothingVertexBuffer.position(0);
 
-		gl11.glActiveTexture( GL11.GL_TEXTURE0 );
-		
-		gl11.glTexEnvf( GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_REPLACE );
-		gl11.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
-		
-		gl11.glClientActiveTexture( GL11.GL_TEXTURE1 );
-		gl11.glActiveTexture( GL11.GL_TEXTURE1 );
-		
-		gl11.glEnableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
-		
-		gl11.glEnable(GL11.GL_TEXTURE_2D);
-		gl11.glBindTexture(GL10.GL_TEXTURE_2D, mSmoothTextureID);	
-		
-		if(time > 6){
-			gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_MODULATE);
+//		if(time >= 6){
+//			gl11.glDisable(GL11.GL_TEXTURE_2D);
+//			gl11.glEnable(GL11.GL_COLOR_ARRAY);
+//			gl.glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
+//			gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_MODULATE);
+//		}else{
+		if(mActivity.getSettings().blackEdges){
+			gl11.glActiveTexture( GL11.GL_TEXTURE0 );
+			gl11.glTexEnvi( GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE );
+			gl11.glBindTexture(GL10.GL_TEXTURE_2D, mSmoothTextureID);
+			gl11.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mSmoothTexBuffer);
 		}else{
+			gl11.glActiveTexture( GL11.GL_TEXTURE0 );
+			gl11.glTexEnvi( GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE );
+			gl11.glColor4f(1.0f, 1.0f, 1.0f, alpha);
+			gl11.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
+			
+			
+			gl11.glClientActiveTexture( GL11.GL_TEXTURE1 );
+			gl11.glActiveTexture( GL11.GL_TEXTURE1 );
+			
+			gl11.glEnableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
+			
+			gl11.glEnable(GL11.GL_TEXTURE_2D);
+			gl11.glBindTexture(GL10.GL_TEXTURE_2D, mSmoothTextureID);
+			
 			gl11.glTexEnvi( GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_COMBINE );
 			gl11.glTexEnvi( GL11.GL_TEXTURE_ENV, GL11.GL_COMBINE_RGB, GL11.GL_REPLACE );
 			gl11.glTexEnvi( GL11.GL_TEXTURE_ENV, GL11.GL_SRC0_RGB, GL11.GL_PREVIOUS ); //note: just use same rgb
@@ -754,20 +753,20 @@ public class Image implements ImagePlane {
 			/**/
 			
 			//gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, texBuffer);
+		
+			gl11.glClientActiveTexture( GL11.GL_TEXTURE0 );
+			gl11.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mImageTexBuffer);
+			
+			gl11.glClientActiveTexture( GL11.GL_TEXTURE1 );
+			gl11.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mSmoothTexBuffer);
+			
+			gl11.glActiveTexture( GL11.GL_TEXTURE1 );
 		}
-		gl11.glClientActiveTexture( GL11.GL_TEXTURE0 );
-		gl11.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mImageTexBuffer);
-		
-		gl11.glClientActiveTexture( GL11.GL_TEXTURE1 );
-		gl11.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mSmoothTexBuffer);
-		
-		gl11.glActiveTexture( GL11.GL_TEXTURE1 );
-
 		gl11.glVertexPointer(3, GL10.GL_FIXED, 0, mSmoothingVertexBuffer);
-
+		
 		gl11.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 8);
 		
-		gl11.glActiveTexture( GL11.GL_TEXTURE1 );
+		gl11.glActiveTexture( GL11.GL_TEXTURE1 ); 
 		gl11.glDisable(GL11.GL_TEXTURE_2D);
 		gl11.glActiveTexture( GL11.GL_TEXTURE0 );
 		gl11.glEnable(GL11.GL_TEXTURE_2D);
@@ -1217,9 +1216,9 @@ public class Image implements ImagePlane {
             
             float tex[] = {
             	0.0f,  0.0f,
-            	0.0f,  height - 0.005f,
-            	width - 0.005f,  0.0f,
-            	width - 0.005f,  height - 0.005f,
+            	0.0f,  height - 1.0f/512.0f,
+            	width - 1.0f/512.0f,  0.0f,
+            	width - 1.0f/512.0f,  height - 1.0f/512.0f,
             };
             mTexBuffer.put(tex);
             mTexBuffer.position(0);
@@ -1275,9 +1274,9 @@ public class Image implements ImagePlane {
 	        
 	        float tex[] = {
 	        	0.0f,  0.0f,
-	        	0.0f,  height - 0.005f,	
-	        	width - 0.005f,  0.0f,
-	        	width - 0.005f,  height - 0.005f,
+	        	0.0f,  height - 1.0f/128.0f,	
+	        	width - 1.0f/128.0f,  0.0f,
+	        	width - 1.0f/128.0f,  height - 1.0f/128.0f,
 	        };
 	        mTexBuffer.put(tex);
 	        mTexBuffer.position(0);

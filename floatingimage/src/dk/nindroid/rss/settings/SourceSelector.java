@@ -9,6 +9,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.ListFragment;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ListView;
 import dk.nindroid.rss.R;
@@ -50,7 +51,6 @@ public class SourceSelector extends ListFragment {
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putInt("selected", mSelected);
-		Thread t;
 	}
 	
 	protected void fillMenu(){
@@ -99,7 +99,7 @@ public class SourceSelector extends ListFragment {
 			        // Execute a transaction, replacing any existing fragment
 			        // with this one inside the frame.
 			        FragmentTransaction ft = getFragmentManager().beginTransaction();
-			        ft.replace(R.id.source, sf);
+			        ft.replace(R.id.source, sf, "content");
 			        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
 			        ft.commit();
 		        }
@@ -194,13 +194,28 @@ public class SourceSelector extends ListFragment {
 	            		finish();
 	            	}else{	                
 		                source.setArguments(getIntent().getExtras());
-		                getSupportFragmentManager().beginTransaction().add(android.R.id.content, source).commit();
+		                getSupportFragmentManager().beginTransaction().add(android.R.id.content, source, "content").commit();
 	            	}
 	            }
 	        }
+		 
+		 @Override
+		public boolean onKeyDown(int keyCode, KeyEvent event) {
+			 switch(keyCode){
+				case KeyEvent.KEYCODE_BACK:
+					Fragment f = getSupportFragmentManager().findFragmentByTag("content");
+					if(f instanceof SettingsFragment){
+						SettingsFragment sf = (SettingsFragment)f;
+						if(sf.back()){
+							return true;
+						}
+					}
+				}
+				return super.onKeyDown(keyCode, event);
+		}
 	}
 	
-	public static abstract class SourceFragment extends ListFragment{
+	public static abstract class SourceFragment extends ListFragment implements SettingsFragment{
 		public SourceFragment(int source) {
 			super();
             Bundle args = new Bundle();

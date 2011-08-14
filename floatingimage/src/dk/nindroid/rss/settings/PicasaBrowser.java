@@ -23,7 +23,7 @@ import dk.nindroid.rss.parser.picasa.PicasaFeeder;
 import dk.nindroid.rss.parser.picasa.PicasaUserView;
 import dk.nindroid.rss.settings.SourceSelector.SourceFragment;
 
-public class PicasaBrowser extends SourceFragment {
+public class PicasaBrowser extends SourceFragment implements SettingsFragment {
 	// Positions
 	private static final int	UNAUTHD_SIGN_IN		= 0;
 	private static final int	UNAUTHD_SHOW_USER 	= 1;
@@ -276,7 +276,7 @@ public class PicasaBrowser extends SourceFragment {
 
 				Fragment f = PicasaAlbumBrowser.getInstance(this.getIntent().getStringExtra(PicasaAlbumBrowser.OWNER));
 				f.setArguments(getIntent().getExtras());
-				getSupportFragmentManager().beginTransaction().add(android.R.id.content, f).commit();
+				getSupportFragmentManager().beginTransaction().add(android.R.id.content, f, "content").commit();
 			}
 		}
 	}
@@ -299,8 +299,13 @@ public class PicasaBrowser extends SourceFragment {
 	            	
 	            	Fragment f = PicasaUserView.getInstance(this.getIntent().getStringExtra("ID"));
 	            	f.setArguments(getIntent().getExtras());
-		            getSupportFragmentManager().beginTransaction().add(android.R.id.content, f).commit();
+		            getSupportFragmentManager().beginTransaction().add(android.R.id.content, f, "content").commit();
 	            }
 	        }
+	}
+
+	@Override
+	public boolean back() {
+		return false;
 	}
 }

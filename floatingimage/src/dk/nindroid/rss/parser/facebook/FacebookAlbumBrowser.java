@@ -2,18 +2,20 @@ package dk.nindroid.rss.parser.facebook;
 
 import java.util.List;
 
-import dk.nindroid.rss.R;
-import dk.nindroid.rss.settings.Settings;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.ListFragment;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import dk.nindroid.rss.R;
+import dk.nindroid.rss.settings.FacebookBrowser;
+import dk.nindroid.rss.settings.Settings;
+import dk.nindroid.rss.settings.SettingsFragment;
 
-public class FacebookAlbumBrowser extends ListFragment implements GetAlbumsTask.Callback{
+public class FacebookAlbumBrowser extends ListFragment implements GetAlbumsTask.Callback, SettingsFragment{
 	private List<Album> albums = null;
 	
 	public static FacebookAlbumBrowser getInstance(String id, String name){
@@ -92,5 +94,20 @@ public class FacebookAlbumBrowser extends ListFragment implements GetAlbumsTask.
 			options[i] = albums.get(i).name;
 		}
 		setListAdapter(new ArrayAdapter<String>(this.getActivity(), android.R.layout.simple_list_item_1, options));
+	}
+
+	@Override
+	public boolean back() {
+		FragmentTransaction ft = getFragmentManager().beginTransaction();
+		String id = this.getArguments().getString("ID");
+		if(id.equals("me")){
+			ft.replace(R.id.source, new FacebookBrowser(), "content");
+		}else{
+			String name = this.getArguments().getString("Name");
+			ft.replace(R.id.source, FacebookFriendView.getInstance(id, name), "content");
+		}
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
+        ft.commit();
+        return true;
 	}
 }

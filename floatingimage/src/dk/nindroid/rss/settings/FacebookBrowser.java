@@ -118,7 +118,7 @@ public class FacebookBrowser extends SourceFragment {
 	private void showMyAlbums(){
 		if(mDualPane){
 			FragmentTransaction ft = getFragmentManager().beginTransaction();
-	        ft.replace(R.id.source, FacebookAlbumBrowser.getInstance("me", null));
+	        ft.replace(R.id.source, FacebookAlbumBrowser.getInstance("me", null), "content");
 	        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
 	        ft.commit();
 		}else{
@@ -131,7 +131,7 @@ public class FacebookBrowser extends SourceFragment {
 	private void showFriends(){
 		if(mDualPane){
 			FragmentTransaction ft = getFragmentManager().beginTransaction();
-	        ft.replace(R.id.source, new FacebookFriendsBrowser());
+	        ft.replace(R.id.source, new FacebookFriendsBrowser(), "content");
 	        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
 	        ft.commit();
 		}else{
@@ -199,5 +199,10 @@ public class FacebookBrowser extends SourceFragment {
 				}
 			}
 		}
+	}
+
+	@Override
+	public boolean back() {
+		return false;
 	}
 }
