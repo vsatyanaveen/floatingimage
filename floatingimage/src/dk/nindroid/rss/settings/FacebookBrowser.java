@@ -146,12 +146,8 @@ public class FacebookBrowser extends SourceFragment {
 		super.onActivityResult(requestCode, resultCode, data);
 		if(resultCode == Activity.RESULT_OK){
 			data.putExtra("TYPE", Settings.TYPE_FACEBOOK);
-			switch(requestCode){
-			case FRIENDS:
-				this.getActivity().setResult(Activity.RESULT_OK, data);
-				this.getActivity().finish();
-				break;
-			}
+			this.getActivity().setResult(Activity.RESULT_OK, data);
+			this.getActivity().finish();
 		}
 	}
 	
@@ -188,13 +184,12 @@ public class FacebookBrowser extends SourceFragment {
 					f = new FacebookFriendsBrowser();
 					break;
 				case MY_ALBUMS:
-					f = FacebookAlbumBrowser.getInstance(null, null);
+					f = FacebookAlbumBrowser.getInstance("me", null);
 					break;
 				}
 				if (f == null){
 					finish();
 				}else{
-					f.setArguments(getIntent().getExtras());
 					getSupportFragmentManager().beginTransaction().add(android.R.id.content, f).commit();
 				}
 			}

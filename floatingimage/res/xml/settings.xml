@@ -131,7 +131,9 @@
             android:title="@string/misc">
 	     <PreferenceScreen android:title="@string/LiveWallpapers" android:summary="@string/LiveWallpapersSummary">
 				<intent 
-				android:action="android.service.wallpaper.LIVE_WALLPAPER_CHOOSER"  />
+				android:action="android.intent.action.MAIN"
+				android:targetClass="dk.nindroid.rss.menu.LiveWallpaperLauncher" 
+				android:targetPackage="dk.nindroid.rss" />
 	    	</PreferenceScreen>
 	    <PreferenceScreen android:title="@string/about" android:summary="@string/aboutSummary">
 				<intent 
