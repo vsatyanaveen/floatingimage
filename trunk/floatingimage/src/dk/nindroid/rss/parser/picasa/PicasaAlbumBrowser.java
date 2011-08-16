@@ -34,7 +34,10 @@ public class PicasaAlbumBrowser extends ListFragment implements GetAlbumsTask.Ca
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		owner = getArguments().getString(OWNER);
+		Bundle b = getArguments();
+		if(b != null){
+			owner = b.getString(OWNER);
+		}
 		fillMenu();
 	}
 	

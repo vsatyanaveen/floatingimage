@@ -17,6 +17,7 @@ import dk.nindroid.rss.settings.SettingsFragment;
 
 public class FacebookAlbumBrowser extends ListFragment implements GetAlbumsTask.Callback, SettingsFragment{
 	private List<Album> albums = null;
+	String id;
 	
 	public static FacebookAlbumBrowser getInstance(String id, String name){
 		FacebookAlbumBrowser fab = new FacebookAlbumBrowser();
@@ -31,7 +32,7 @@ public class FacebookAlbumBrowser extends ListFragment implements GetAlbumsTask.
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-			
+		this.id = getArguments().getString("ID");	
 		fillMenu();
 	}
 	
@@ -60,7 +61,7 @@ public class FacebookAlbumBrowser extends ListFragment implements GetAlbumsTask.
 	}
 	
 	public void getAlbums(){
-		new GetAlbumsTask(this.getActivity(), this).execute(this.getArguments().getString("ID"));
+		new GetAlbumsTask(this.getActivity(), this).execute(id);
 	}
 	
 	static class Album{
