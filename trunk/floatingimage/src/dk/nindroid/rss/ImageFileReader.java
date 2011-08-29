@@ -36,8 +36,14 @@ public class ImageFileReader{
 			Log.w("Floating Image", "Oops, image too large. Let's try that again, a bit smaller.", t);
 			setProgress(progress, 40);
 			opts.inSampleSize = opts.inSampleSize * 2;
-			bmp = BitmapFactory.decodeFile(path, opts);
+			try{
+				bmp = BitmapFactory.decodeFile(path, opts);
+			}catch(Throwable tr){
+				Log.e("Floating Image", "Still not working - bailing!.", tr);
+				setProgress(progress, 100);
+			}
 		}
+		Log.v("Floating Image", "bmp is: " + bmp.getWidth() + "x" + bmp.getHeight());
 		setProgress(progress, 60);
 		if(bmp == null) return null;
 		width = bmp.getWidth();

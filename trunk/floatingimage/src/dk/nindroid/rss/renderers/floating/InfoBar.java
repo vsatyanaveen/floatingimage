@@ -88,7 +88,9 @@ public class InfoBar {
 		mInfoPainter.setInfo(ir.getTitle(), ir.getAuthor(), 1024, 128);
 		mInfoPainter.paintCanvas(Math.min(display.getWidthPixels(), 1024), 80);
 		gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
-        setTexture(gl, mInfoPainter.getBitmap());
+		Bitmap infoBmp = mInfoPainter.getBitmap();
+        setTexture(gl, infoBmp);
+        infoBmp.recycle();
 	}
 	
 	protected void setTexture(GL10 gl, Bitmap bmp){		

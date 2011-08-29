@@ -17,20 +17,14 @@ public class PicasaWebAuth extends Activity {
 		setContentView(R.layout.webauth);
 		webView = (WebView) findViewById(R.id.webauth);
 		webView.getSettings().setJavaScriptEnabled(true);
-		webView.setWebViewClient(new MyWebViewClient(this));
+		webView.setWebViewClient(new MyWebViewClient());
 		String url = getIntent().getExtras().getString("URL");
 		Log.v("Floating Image", "Visiting url: " + url);
 		webView.loadUrl(url);
 	}
 	
-	private class MyWebViewClient extends WebViewClient {
-		Activity context; 
-		
-		MyWebViewClient(Activity context){
-			this.context = context;
-		}
-		
-	    @Override
+	private class MyWebViewClient extends WebViewClient {	
+		@Override
 	    public boolean shouldOverrideUrlLoading(WebView view, String url) {
 	    	Log.v("Floating Image", "Visiting url: " + url);
 	    	if(url.startsWith("http") || url.startsWith("https")){
@@ -43,9 +37,8 @@ public class PicasaWebAuth extends Activity {
 	    	if(verifier == null || token == null){
 	    		Log.w("Floating Image", "Invalid response from Google auth: " + url);
 	    	}else{
-	    		PicasaFeeder.setAuth(verifier, token, context);
+	    		new SetAuthTask(PicasaWebAuth.this, verifier, token).execute();
 	    	}
-			context.finish();
 	    	return true;
 	    }
 	}

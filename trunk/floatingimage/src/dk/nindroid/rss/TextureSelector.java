@@ -104,13 +104,14 @@ public class TextureSelector {
 			if(max == 0) return; // Not ready yet!
 			if(max <= 512){
 				mTextureResolution = 512;
-			}else if(max <= 1024){
+			}else// if(max <= 1024){
+			{
 				mTextureResolution = 1024;
-			}else if(max <= 2048){
-				mTextureResolution = 2048;
-			}else{
-				mTextureResolution = 4092;
-			}
+			}//else if(max <= 2048){
+				//mTextureResolution = 2048;
+			//}else{
+				//mTextureResolution = 4092;
+			//}
 		}
 		
 		@Override
@@ -248,37 +249,59 @@ public class TextureSelector {
 						bmp = Bitmap.createScaledBitmap(mCurrentBitmap, width / 2, height / 2, true);
 					}catch(Throwable tr){
 						Log.e("Floating Image", "Shit, that didn't work either. Bailing!", tr);
+						ImageFileReader.setProgress(progress, 100);
 					}
 				}
 				if(bmp != null){
-					applyBitmap(bmp, ImagePlane.SIZE_LARGE);
-					bmp.recycle();
+					applyBitmap(bmp, ImagePlane.SIZE_LARGE, true);
 				}
 			}
 		}
 		
 		private void applyOriginal(){
 			if(mCurSelected != null && mCurSelected.validForTextureUpdate()){
-				applyBitmap(mCurrentBitmap, ImagePlane.SIZE_ORIGINAL);
+				applyBitmap(mCurrentBitmap, ImagePlane.SIZE_ORIGINAL, false);
 			}
 		}
 		
-		private void applyBitmap(Bitmap bmp, int sizeType){
+		private void applyBitmap(Bitmap bmp, int sizeType, boolean doRecycle){
 			if(bmp == null) return;
 			int res = mTextureResolution;
 			Bitmap bitmap = null;
 			try{
 				bitmap = Bitmap.createBitmap(res, res, Config.ARGB_8888);
 			}catch(Throwable t){
-				Log.e("Floating Image", "Couldn't apply bitmap.", t);
+				Log.w("Floating Image", "Couldn't apply bitmap, trying again with a smaller version", t);
+				res /= 2;
+				try{
+					int w = bmp.getWidth() / 2;
+					int h = bmp.getHeight() / 2;
+					
+					if(doRecycle){
+						bmp.recycle();
+					}
+					bitmap = Bitmap.createBitmap(res, res, Config.ARGB_8888);
+					bmp = Bitmap.createScaledBitmap(mCurrentBitmap, w, h, true);
+				}catch(Throwable tr){
+					Log.e("Floating Image", "Still cannot apply image - bailing!", tr);
+					ImageFileReader.setProgress(progress, 100);
+				}
 			}
-			if(bitmap == null) return;
+			if(bitmap == null) {
+				if(doRecycle){
+					bmp.recycle();
+				}
+				return;
+			}
 			Canvas canvas = new Canvas(bitmap);
 			canvas.drawBitmap(bmp, 0, 0, mPaint);
 			if(mRef != null){
 				bitmap.recycle();
 			}else{
 				mCurSelected.setFocusTexture(bitmap, (float)bmp.getWidth() / res, (float)bmp.getHeight() / res, sizeType);
+			}
+			if(doRecycle){
+				bmp.recycle();
 			}
 		}
 		

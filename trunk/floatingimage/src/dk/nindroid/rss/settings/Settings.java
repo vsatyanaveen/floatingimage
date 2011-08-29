@@ -3,9 +3,7 @@ package dk.nindroid.rss.settings;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
-import android.view.Display;
 import android.view.Surface;
-import android.view.WindowManager;
 
 public class Settings {
 	public static final int TYPE_UNKNOWN  = 0;
@@ -53,8 +51,8 @@ public class Settings {
 	}
 	
 	public void readSettings(Context context) {
-		Display display = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-		int max = Math.max(display.getWidth(), display.getHeight());
+		//Display display = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+		//int max = Math.max(display.getWidth(), display.getHeight());
 		
 		this.sp = context.getSharedPreferences(settings, 0);
 		shuffleImages = sp.getBoolean("shuffleImages", true);
@@ -66,12 +64,13 @@ public class Settings {
 		slideSpeed = Long.parseLong(sp.getString("slideSpeed", "300"));
 		fullscreenBlack = sp.getBoolean("fullscreenBlack", true);
 		imageDecorations = sp.getBoolean("imageDecorations", true);
-		highResThumbs = sp.getBoolean("highResThumbs", max > 799);
+		highResThumbs = sp.getBoolean("highResThumbs", false);
 		floatingType = Integer.parseInt(sp.getString("floatingType", "0"));
 		floatingTraversal = Long.parseLong(sp.getString("floatingSpeed", "30000"));
 		forceRotation = Integer.parseInt(sp.getString("forceRotation", "0"));
 		blackEdges = sp.getBoolean("blackEdges", true);
-		tsunami = sp.getBoolean("tsunami", false);
+		tsunami = false; //sp.getBoolean("tsunami", false);
+		
 		switch(forceRotation){
 		case 90:
 			forceRotation = Surface.ROTATION_90;
@@ -83,10 +82,11 @@ public class Settings {
 			forceRotation = Surface.ROTATION_270;
 			break;
 		}
-		
+		/*
 		if(max < 500){
 			highResThumbs = false;
 		}
+		*/
 		backgroundColor = Integer.parseInt(sp.getString("backgroundColor", "0"));
 		lowFps = sp.getBoolean("liveWallpaperLowFramerate", false);
 	}
