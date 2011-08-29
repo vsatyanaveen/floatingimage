@@ -60,6 +60,7 @@
 	<string name="selectFolder">Select folder</string>
 	<string name="selectCurrentFolder">Select current folder</string>
 	<string name="showHiddenFiles">Toggle hidden files</string>
+	<string name="signingIn">Signing in</string>
 	<string name="flickr">Flickr</string>
 	<string name="flickrShowStream">Show stream</string>
 	<string name="flickrShowStreamUsername">Please enter the stream username</string>

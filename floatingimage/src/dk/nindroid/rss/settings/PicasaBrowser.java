@@ -21,6 +21,7 @@ import dk.nindroid.rss.R;
 import dk.nindroid.rss.parser.picasa.PicasaAlbumBrowser;
 import dk.nindroid.rss.parser.picasa.PicasaFeeder;
 import dk.nindroid.rss.parser.picasa.PicasaUserView;
+import dk.nindroid.rss.parser.picasa.SignInTask;
 import dk.nindroid.rss.settings.SourceSelector.SourceFragment;
 
 public class PicasaBrowser extends SourceFragment implements SettingsFragment {
@@ -91,8 +92,7 @@ public class PicasaBrowser extends SourceFragment implements SettingsFragment {
 				search();
 				break;
 			case UNAUTHD_SIGN_IN:
-				PicasaFeeder.signIn(this.getActivity());
-				fillMenu();
+				new SignInTask(this.getActivity()).execute();
 				break;
 			}
 		}else{

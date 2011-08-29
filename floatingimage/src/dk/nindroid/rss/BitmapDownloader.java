@@ -171,10 +171,15 @@ public class BitmapDownloader implements Runnable {
 					Log.w("Floating Image", "Disabling Exif Interface, the device lied!");
 				}
 			}
-			if(mSettings.highResThumbs){
-				image.set256Bitmap(bmp);
-			}else{
-				image.set128Bitmap(bmp);
+			try{
+				if(mSettings.highResThumbs){
+					image.set256Bitmap(bmp);
+				}else{
+					image.set128Bitmap(bmp);
+				}
+			}catch(Throwable t){
+				Log.w("Floating Image", "OOM", t);
+				return;
 			}
 			bank.addBitmap(image, true, next);
 		}

@@ -124,7 +124,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
         //*
         ++mFrames;
         if(realTime - mLastFPSTime > 1000){
-        	Log.v("Floating Image", "Framerate is " + mFrames + " frames per second");
+        	//Log.v("Floating Image", "Framerate is " + mFrames + " frames per second");
         	mFrames = 0;
         	mLastFPSTime = realTime;
         }

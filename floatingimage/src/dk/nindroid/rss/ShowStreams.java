@@ -38,7 +38,6 @@ import dk.nindroid.rss.compatibility.Honeycomb;
 import dk.nindroid.rss.compatibility.SetWallpaper;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.LocalImage;
-import dk.nindroid.rss.helpers.MultisampleConfigChooser;
 import dk.nindroid.rss.launchers.ReadFeeds;
 import dk.nindroid.rss.menu.Settings;
 import dk.nindroid.rss.orientation.InitialOritentationReflector;
@@ -70,7 +69,7 @@ public class ShowStreams extends Activity implements MainActivity {
 	public static final int				MENU_IMAGE_CONTEXT = 13;
 	public static final int				MISC_ROW_ID		= 201;
 	public static final String 			version 		= "2.5.1";
-	public static final int				CACHE_SIZE		= 15;
+	public static final int				CACHE_SIZE		= 8;
 	private GLSurfaceView 				mGLSurfaceView;
 	private RiverRenderer 				renderer;
 	private PowerManager.WakeLock 		wl;
