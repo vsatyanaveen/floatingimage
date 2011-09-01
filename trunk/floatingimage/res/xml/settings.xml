@@ -62,13 +62,11 @@
                 android:entryValues="@array/floatingTypeValues"
                 android:dialogTitle="@string/floatingTypeTitle"
                 android:defaultValue="0" />
-            <!-- 
             <CheckBoxPreference 
             	android:key="tsunami"
                 android:title="@string/tsunami"
                 android:summary="@string/tsunamiSummary"
                 android:defaultValue="false" />
-                -->
             <CheckBoxPreference
                 android:key="rotateImages"
                 android:title="@string/rotateImages"

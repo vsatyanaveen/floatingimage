@@ -69,7 +69,7 @@ public class Settings {
 		floatingTraversal = Long.parseLong(sp.getString("floatingSpeed", "30000"));
 		forceRotation = Integer.parseInt(sp.getString("forceRotation", "0"));
 		blackEdges = sp.getBoolean("blackEdges", true);
-		tsunami = false; //sp.getBoolean("tsunami", false);
+		tsunami = sp.getBoolean("tsunami", false);
 		
 		switch(forceRotation){
 		case 90:

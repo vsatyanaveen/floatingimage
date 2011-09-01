@@ -15,6 +15,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.PixelFormat;
 import android.hardware.SensorManager;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
@@ -113,7 +114,9 @@ public class ShowStreams extends Activity implements MainActivity {
 		ClickHandler.init(this, renderer);
 		setContentView(R.layout.main); 
 		mGLSurfaceView = new GLSurfaceView(this);
-        mGLSurfaceView.setRenderer(renderer);
+		mGLSurfaceView.setEGLConfigChooser(8, 8, 8, 0, 0, 0);
+		mGLSurfaceView.getHolder().setFormat(PixelFormat.RGB_888);
+		mGLSurfaceView.setRenderer(renderer);
 		
 		setContentView(mGLSurfaceView);
 	}

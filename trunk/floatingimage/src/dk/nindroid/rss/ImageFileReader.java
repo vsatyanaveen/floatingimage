@@ -4,6 +4,9 @@ import java.io.File;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
 import android.util.Log;
@@ -23,6 +26,7 @@ public class ImageFileReader{
 		int largerSide = Math.max(width, height);
 		setProgress(progress, 20);
 		opts.inJustDecodeBounds = false;
+		opts.inDither = true;
 		opts.inPreferredConfig = Config.ARGB_8888;
 		if(width + height > size * 1.5f){
 			int sampleSize = getSampleSize(size, largerSide);
@@ -46,20 +50,28 @@ public class ImageFileReader{
 		Log.v("Floating Image", "bmp is: " + bmp.getWidth() + "x" + bmp.getHeight());
 		setProgress(progress, 60);
 		if(bmp == null) return null;
-		width = bmp.getWidth();
-		height = bmp.getHeight();
-		largerSide = Math.max(width, height);
+		
 		setProgress(progress, 80);
 		if(largerSide > size){
-			float scale = (float)size / largerSide;
-			Bitmap tmp = Bitmap.createScaledBitmap(bmp, (int)(width * scale), (int)(height * scale), true);
-			bmp.recycle();
-			bmp = tmp;
+			bmp = scaleAndRecycle(bmp, size);
+			Log.v("Floating Image", "(" + width + "," + height + ") - (" + bmp.getWidth() + "," + bmp.getHeight() + ")");
 		}
 		setProgress(progress, 90);
 		return bmp;
 	}
 	
+	public static Bitmap scaleAndRecycle(Bitmap bmp, int maxSize){
+		int width = bmp.getWidth();
+		int height = bmp.getHeight();
+		int largerSide = Math.max(width, height);
+		float scale = (float)maxSize / largerSide;
+		Bitmap tmp = Bitmap.createBitmap((int)(width * scale), (int)(height * scale), Config.ARGB_8888);
+		Canvas canvas = new Canvas(tmp);
+		canvas.drawBitmap(bmp, null, new Rect(0, 0, tmp.getWidth(), tmp.getHeight()), new Paint(Paint.FILTER_BITMAP_FLAG));
+		bmp.recycle();
+		return tmp;
+	}
+		
 	public static void setProgress(Progress progress, int percent){
 		if(progress != null){
 			progress.setPercentDone(percent);

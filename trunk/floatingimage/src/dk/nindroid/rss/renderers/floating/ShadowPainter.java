@@ -11,6 +11,8 @@ import javax.microedition.khronos.opengles.GL10;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Bitmap.Config;
+import android.graphics.BitmapFactory.Options;
 import android.opengl.GLUtils;
 import dk.nindroid.rss.R;
 import dk.nindroid.rss.gfx.Vec3f;
@@ -29,10 +31,9 @@ public class ShadowPainter {
 	
 	public static void init(Context context){
 		InputStream shadowIS = context.getResources().openRawResource(R.drawable.image_shadow);
-		shadow = BitmapFactory.decodeStream(shadowIS);
-		
-		//canvas = Bitmap.createBitmap(128, 128, Config.RGB_565);
-		
+		Options opts = new Options();
+		opts.inPreferredConfig = Config.ARGB_8888;
+		shadow = BitmapFactory.decodeStream(shadowIS, null, opts);
 		
 		initPlane();
 	}

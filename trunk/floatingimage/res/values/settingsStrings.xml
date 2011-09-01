@@ -16,7 +16,7 @@
 	<string name="fullscreenBlack">Fade to black when fullscreen</string>
 	<string name="fullscreenBlackSummary">Fade background to all black when in fullscreen mode</string>
 	<string name="tsunami">Tsunami</string>
-	<string name="tsunamiSummary">Fill screen with images</string>
+	<string name="tsunamiSummary">Fill screen with images. USE WITH CAUTION: This may cause strange behaviour and instability!</string>
 	<string name="blackEdges">Black outline</string>
 	<string name="blackEdgesSummary">Put a black outline around images</string>
 	<string name="imageDecorations">Decorate images</string>
