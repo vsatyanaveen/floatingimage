@@ -195,10 +195,7 @@ public class TextureSelector {
 			int max = Math.max(width, height);
 			int res = mTextureResolution;
 			if(max > res){
-				float scale = (float)res / max;
-				Bitmap tmp = Bitmap.createScaledBitmap(bmp, (int)(width * scale), (int)(height * scale), true);
-				bmp.recycle();
-				bmp = tmp;
+				bmp = ImageFileReader.scaleAndRecycle(bmp, max);
 			}
 			if(mCurrentBitmap != null && !mCurrentBitmap.isRecycled()){
 				mCurrentBitmap.recycle();
@@ -241,12 +238,13 @@ public class TextureSelector {
 					}
 				}
 				Bitmap bmp = null;
+				int max = Math.max(width, height);
 				try{
-					bmp = Bitmap.createScaledBitmap(mCurrentBitmap, width, height, true);
+					bmp = ImageFileReader.scaleAndRecycle(mCurrentBitmap, max);
 				}catch(Throwable t){
 					Log.w("Floating Image", "Oops, let's try again with a smaller image", t);
 					try{
-						bmp = Bitmap.createScaledBitmap(mCurrentBitmap, width / 2, height / 2, true);
+						bmp = ImageFileReader.scaleAndRecycle(mCurrentBitmap, max / 2);
 					}catch(Throwable tr){
 						Log.e("Floating Image", "Shit, that didn't work either. Bailing!", tr);
 						ImageFileReader.setProgress(progress, 100);
@@ -281,7 +279,7 @@ public class TextureSelector {
 						bmp.recycle();
 					}
 					bitmap = Bitmap.createBitmap(res, res, Config.ARGB_8888);
-					bmp = Bitmap.createScaledBitmap(mCurrentBitmap, w, h, true);
+					bmp = ImageFileReader.scaleAndRecycle(mCurrentBitmap, Math.max(w, h));
 				}catch(Throwable tr){
 					Log.e("Floating Image", "Still cannot apply image - bailing!", tr);
 					ImageFileReader.setProgress(progress, 100);

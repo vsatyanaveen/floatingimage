@@ -18,6 +18,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
+import android.graphics.Bitmap.Config;
+import android.graphics.BitmapFactory.Options;
 import android.os.Environment;
 import android.util.Log;
 import dk.nindroid.rss.data.FileDateReverseComparator;
@@ -34,8 +36,11 @@ public class ImageCache {
 	File 					mExploreInfo;
 	byte[]					mBuf;
 	Context					mContext;
+	private final Options 	mOpts;					
 	
 	public ImageCache(Context context, TextureBank bank){
+		mOpts = new Options();
+		mOpts.inPreferredConfig = Config.ARGB_8888;
 		this.bank = bank;
 		this.mContext = context;
 		mBuf = new byte[1024];
@@ -65,26 +70,6 @@ public class ImageCache {
 		}
 	}
 	
-	/*
-	public void run(){
-		if(mExploreFiles == null) return;
-		while(true){
-			if(bank.stopThreads) return;
-			while(bank.cached.size() < 5 && !mExploreFiles.isEmpty()){
-				if(bank.stopThreads) return;
-				bank.addOldBitmap(getRandomExplore());
-			}
-			try {
-				synchronized (bank.cached) {
-					bank.cached.wait();
-				}
-			} catch (InterruptedException e) {
-				Log.v("Bitmap downloader", "*** Stopping asynchronous cache thread", e);
-				return;
-			}
-		}
-	}
-	*/
 	// Will not delete directory, just fail when trying to...
 	public void cleanCache(){
 		if(mCached == null){
@@ -147,7 +132,6 @@ public class ImageCache {
 			}else{
 				synchronized(mCached){
 					addFile(f_info);
-					//mCached.put(f_info.getName(), mFiles.size() - 1);
 				}
 			}
 		} catch (FileNotFoundException e) {
@@ -183,21 +167,8 @@ public class ImageCache {
 		//mFiles.add(file);
 		mCached.put(file.getName(), file);
 	}
-	/*
-	public ImageReference getRandomExplore(){
-		if(mExploreFiles.size() == 0 || (!mActive || !Settings.useCache)){
-			try {
-				Thread.sleep(10000); 	// Sleep for a bit, we're not doing anything anyway...
-										// TODO: Make this wait() instead!
-			} catch (InterruptedException e) {
-				Log.w("ImageCache", "We were interrupted!");
-			}
-			return null;
-		}
-		Log.v("Image cache", "Adding random cached image");
-		return getFile(mRand.nextInt(mExploreFiles.size()));
-	}
-	*/
+
+
 	public ImageReference getFile(File f_info, ImageReference ir){
 		//File f_info = null;
 		try {
@@ -221,7 +192,15 @@ public class ImageCache {
 				return null;
 			}
 			// Read bitmap
-			Bitmap bmp = BitmapFactory.decodeFile(bmpName);
+			Bitmap bmp = BitmapFactory.decodeFile(bmpName, mOpts);
+			
+			if(bmp == null){
+				f_info.delete();
+				synchronized(mCached){
+					mCached.remove(ir.getID() + ".info");
+				}
+				return null;
+			}
 			
 			// Fill image reference
 			ir.parseInfo(tokens, bmp);
@@ -233,7 +212,6 @@ public class ImageCache {
 				f_info.delete();
 				synchronized(mCached){
 					mCached.remove(ir.getID() + ".info");
-					//mFiles.set(index, null);
 				}
 			}
 			Log.w("Floating Image", "Image cache file not found: " + e);
@@ -244,7 +222,9 @@ public class ImageCache {
 	}
 	
 	public boolean exists(String name){
-		if(mCached == null) return false;
+		if(mCached == null){
+			setupImageCache();
+		}
 		synchronized(mCached){
 			if(mCached.containsKey(name + ".info")){
 				return true;

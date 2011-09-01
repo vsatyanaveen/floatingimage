@@ -11,6 +11,8 @@ import javax.microedition.khronos.opengles.GL10;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Bitmap.Config;
+import android.graphics.BitmapFactory.Options;
 import android.opengl.GLU;
 import android.opengl.GLUtils;
 import android.util.Log;
@@ -126,8 +128,9 @@ public class BackgroundPainter {
 		}
 		
 		if(shadowIS != null){
-		
-			bg = BitmapFactory.decodeStream(shadowIS);		
+			Options opts = new Options();
+			opts.inPreferredConfig = Config.ARGB_8888;
+			bg = BitmapFactory.decodeStream(shadowIS, null, opts);		
 			
 			int[] textures = new int[1];
 	        gl.glGenTextures(1, textures, 0);
