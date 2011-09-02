@@ -82,7 +82,7 @@ public class Wallpaper extends GLWallpaperService implements MainActivity{
 		}
 		
 		TextureBank setupFeeders(){
-			TextureBank bank = new TextureBank();
+			TextureBank bank = new TextureBank(mContext);
 			mFeedController = new FeedController(mContext);
 			BitmapDownloader bitmapDownloader = new BitmapDownloader(bank, mFeedController, mSettings);
 			ImageCache imageCache = new ImageCache(mContext, bank);

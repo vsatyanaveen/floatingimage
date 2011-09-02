@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Floating Image</string>
+    <string name="about">Om</string>
+    <string name="aboutSummary">Skamløs selvpromotering (engelsk)</string>
+        <!-- <string name="about_text">Hello, I am your friendly neighbourhood programmer!\n\nFloating Image is a spare time project created in part as an attempt to bring a bit of eye candy to Android, in part to get some experience programming for the platform. Images from various sources are streamed to the phone.\n\nImages with a blue glow have just been downloaded, where images with shadow are either taken from the phone locally, or from an image cache - not to worry, the cache is fairly small.\n\nSome Controls:\nNavigate stream: Swipe your finger sideways.\nPick image: Tap on it.\nGo to image homepage: Long click when selected.\n\nMore features are in the works, but I will of course gladly take advice on what would make this the killer application for you!\n\nThis application is free as in speech, which means that you may at any time request the code (I would however like improvements to float my way). It is also free as in beer, which means that if you like it, and happen to run into me, I encourage you to buy me a beer!</string>  -->
+	<!--string name="dataFolder">/floatingImage</string> -->
+	<!--string name="exploreFolder">/.exploreCache</string> -->
+	<string name="fullscreen">Fullskjerm</string>
+	<string name="show_details">Vis detaljer</string>
+	<string name="show">Vis</string>
+	<string name="show_folder">Vis mappe</string>
+	<string name="show_flickr">Vis Flickr</string>
+	<string name="show_flickr_user">Vis Flickr bruker</string>
+	<string name="search_flickr">Søk i Flickr</string>
+	<string name="cancel_show">Annullér visning</string>
+	<string name="go_to_source">Gå til kilde</string>
+	<string name="save_image">Gjem bilde</string>
+	<string name="set_as_background">Sett som bakgrunnsbilde</string>
+	<!-- <string name="user_agent">Floating image/Android</string> -->
+	<string name="empty_feed">Ingen bilder funnet i kilden</string>
+	<string name="authorize">Logg inn</string>
+	<string name="unauthorize">Logg ut</string>
+	<string name="please_wait">Vennligst vent ..</string>
+	<string name="share_subject">Se, et bilde!</string>
+	<string name="share_url">Del bildesti</string>
+	<string name="share_image">Del bilde</string>
+	<string name="delete_image">Slett bilde</string>
+	<string name="delete_image_are_you_sure">Er du sikker på at du ønsker å slette dette bilde?</string>
+	<string name="loading_feeds">Henter kilder</string>
+	<string name="pause">Pause</string>
+	<string name="resume">Fortsett</string>
+	<string name="stream">Kilde</string>
+</resources>
