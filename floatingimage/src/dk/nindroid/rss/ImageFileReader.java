@@ -61,13 +61,18 @@ public class ImageFileReader{
 	}
 	
 	public static Bitmap scaleAndRecycle(Bitmap bmp, int maxSize){
+		
 		int width = bmp.getWidth();
 		int height = bmp.getHeight();
 		int largerSide = Math.max(width, height);
 		float scale = (float)maxSize / largerSide;
+		//*
 		Bitmap tmp = Bitmap.createBitmap((int)(width * scale), (int)(height * scale), Config.ARGB_8888);
 		Canvas canvas = new Canvas(tmp);
 		canvas.drawBitmap(bmp, null, new Rect(0, 0, tmp.getWidth(), tmp.getHeight()), new Paint(Paint.FILTER_BITMAP_FLAG));
+		/*/
+		Bitmap tmp = Bitmap.createScaledBitmap(bmp, (int)(width * scale), (int)(height * scale), true);
+		//*/
 		bmp.recycle();
 		return tmp;
 	}

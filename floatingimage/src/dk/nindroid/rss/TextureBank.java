@@ -5,14 +5,16 @@ import dk.nindroid.rss.data.CircularList;
 import dk.nindroid.rss.data.ImageReference;
 
 public class TextureBank {
-	//Queue<ImageReference> 				unseen   = new LinkedList<ImageReference>();
-	CircularList<ImageReference>			images;
-	//Vector<String> 							streams  = new Vector<String>();		
+	CircularList<ImageReference>			images;		
 	ImageCache 								ic;
-	BitmapDownloader						bitmapDownloader; 
-	//private Map<String, ImageReference> 	mActiveBitmaps = new HashMap<String, ImageReference>();
+	BitmapDownloader						bitmapDownloader;
+	MainActivity							mActivity;
 	boolean 								stopThreads = false;
 	boolean 								running = false;
+	
+	public TextureBank(MainActivity activity){
+		this.mActivity = activity;
+	}
 	
 	public void initCache(int cacheSize, int activeImages){
 		if(this.images == null){
@@ -41,11 +43,11 @@ public class TextureBank {
 	}
 		
 	public boolean doDownload(String url){
-		return !ic.exists(url);
+		return !ic.exists(url, mActivity.getSettings().highResThumbs ? 256 : 128);
 	}
 	
 	public void addFromCache(ImageReference ir, boolean next){
-		ic.addImage(ir, next);
+		ic.addImage(ir, next, mActivity.getSettings().highResThumbs ? 256 : 128);
 	}
 		
 	public ImageReference getTexture(ImageReference previousImage, boolean next){

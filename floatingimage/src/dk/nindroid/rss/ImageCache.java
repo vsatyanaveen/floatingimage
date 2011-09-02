@@ -119,9 +119,9 @@ public class ImageCache {
 		}
 		if(ir == null) return;
 		String name = ir.getID();
-		if(exists(name)) return;
-		try {			
-			File f = new File(mExplore.getPath() + "/" + name + ".jpg");
+		if(exists(name, ir.getBitmap().getWidth())) return;
+		try {
+			File f = new File(mExplore.getPath() + "/" + name + "-" + ir.getBitmap().getWidth() + ".jpg");
 			FileOutputStream fos = new FileOutputStream(f);
 			ir.getBitmap().compress(CompressFormat.JPEG, 85, fos);
 			fos.flush();
@@ -146,8 +146,8 @@ public class ImageCache {
 	public File updateMeta(ImageReference ir){
 		try {
 			String name = ir.getID();
-			String thumbPath = mExplore.getPath() + "/" + name + ".jpg";
-			File f_info = new File(mExploreInfo.getPath() + "/" + name + ".info");
+			String thumbPath = mExplore.getPath() + "/" + name + "-" + ir.getBitmap().getWidth() + ".jpg";
+			File f_info = new File(mExploreInfo.getPath() + "/" + name + "-" + ir.getBitmap().getWidth() + ".info");
 			f_info.delete();
 			FileOutputStream fos_info = new FileOutputStream(f_info);
 			fos_info.write((thumbPath + "\n" + ir.getInfo()).getBytes());
@@ -187,8 +187,6 @@ public class ImageCache {
 			if(bmpName == null){
 				f_info.delete();
 				mCached.remove(ir.getID() + ".info");
-				//mFiles.set(index, null);
-				//return getRandomExplore();
 				return null;
 			}
 			// Read bitmap
@@ -221,19 +219,19 @@ public class ImageCache {
 		return null;
 	}
 	
-	public boolean exists(String name){
+	public boolean exists(String name, int size){
 		if(mCached == null){
 			setupImageCache();
 		}
 		synchronized(mCached){
-			if(mCached.containsKey(name + ".info")){
+			if(mCached.containsKey(name + "-" + size + ".info")){
 				return true;
 			}
 			return false;
 		}
 	}
 	
-	public void addImage(ImageReference ir, boolean next){
-		bank.addBitmap(getFile(mCached.get(ir.getID() + ".info"), ir), false, next);
+	public void addImage(ImageReference ir, boolean next, int size){
+		bank.addBitmap(getFile(mCached.get(ir.getID() + "-" + size + ".info"), ir), false, next);
 	}
 }
