@@ -57,9 +57,9 @@ public class ImageCache {
 		mExploreInfo.mkdirs(); // Make dir if not exists
 		mExplore.mkdirs(); // Make dir if not exists
 		File[] exploreInfoArray = mExploreInfo.listFiles();
+		mCached = new HashMap<String, File>(exploreInfoArray.length);
 		if(exploreInfoArray == null) return;
 		//mFiles = new ArrayList<File>(exploreInfoArray.length);
-		mCached = new HashMap<String, File>(exploreInfoArray.length);
 		Log.v("Floating Image", exploreInfoArray.length + " files in cache.");
 		for(int i = 0; i < exploreInfoArray.length; ++i){
 			File f = exploreInfoArray[i];
@@ -231,7 +231,11 @@ public class ImageCache {
 		}
 	}
 	
+	public ImageReference getImage(ImageReference ir, int size){
+		return getFile(mCached.get(ir.getID() + "-" + size + ".info"), ir);
+	}
+	
 	public void addImage(ImageReference ir, boolean next, int size){
-		bank.addBitmap(getFile(mCached.get(ir.getID() + "-" + size + ".info"), ir), false, next);
+		bank.addBitmap(getImage(ir, size), false, next);
 	}
 }

@@ -10,6 +10,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Bitmap.Config;
 import android.net.Uri;
+import android.util.Log;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.parser.flickr.data.ImageSizes;
 
@@ -40,6 +41,7 @@ public class FlickrImage extends ImageReference{
 	
 	@Override
 	public void recycleBitmap() {
+		Log.v("Floating Image", "Recycle " + getID());
 		if(bitmap != null){
 			bitmap.recycle();
 			bitmap = null;
@@ -236,9 +238,11 @@ public class FlickrImage extends ImageReference{
 		title = URLDecoder.decode(tokens[8]);
 		owner = URLDecoder.decode(tokens[9]);
 		userInfo = new FlickrUserInfo();
-		userInfo.setUsername(tokens[10]);
-		userInfo.setRealName(tokens[11]);
-		userInfo.setUrl(tokens[12]);
+		if(tokens.length > 10){
+			userInfo.setUsername(tokens[10]);
+			userInfo.setRealName(tokens[11]);
+			userInfo.setUrl(tokens[12]);
+		}
 		this.bitmap = bmp;
 	}
 	public boolean isNew(){

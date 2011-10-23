@@ -8,6 +8,8 @@
 	<string name="manageFeedsSummary">Choose which images to show</string> -->
 	<string name="manageFeeds">Manage feeds</string> 
 	<string name="manageFeedsSummary">Where should the images float from</string>
+	<string name="galleryMode">Gallery mode</string>
+	<string name="galleryModeSummary">Act as a standard gallery. This will override some settings below!</string>
 	<string name="display">Display</string>
 	<string name="searching_for_user">Searching for user</string>
 	<string name="floating">Floating images</string>
@@ -18,7 +20,7 @@
 	<string name="tsunami">Tsunami</string>
 	<string name="tsunamiSummary">Fill screen with images. USE WITH CAUTION: This may cause strange behaviour and instability!</string>
 	<string name="blackEdges">Black outline</string>
-	<string name="blackEdgesSummary">Put a black outline around images</string>
+	<string name="blackEdgesSummary">Put a black outline around images. Remove this for better performance.</string>
 	<string name="imageDecorations">Decorate images</string>
 	<string name="imageDecorationsSummary">Show shadows and glow behind images</string>
 	<string name="floatingType">Movement</string>

@@ -153,7 +153,7 @@ public class ShadowPainter {
 			gl.glRotatef(rotationA.getAngle(), rotationA.getX(), rotationA.getY(), rotationA.getZ());
 			gl.glRotatef(rotationB.getAngle(), rotationB.getX(), rotationB.getY(), rotationB.getZ());
 			gl.glRotatef(imageRotation, 0, 0, 1);
-			gl.glScalef(0.50f + scaleX, 0.5f + scaleY, 1);
+			gl.glScalef(1.15f * scaleX, 1.15f * scaleY, 1);
 			gl.glActiveTexture(GL10.GL_TEXTURE0);
 	        gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
 			gl.glVertexPointer(3, GL10.GL_FIXED, 0, mVertexBuffer);

@@ -263,7 +263,7 @@ public class TextureSelector {
 		}
 		
 		private void applyBitmap(Bitmap bmp, int sizeType, boolean doRecycle){
-			if(bmp == null) return;
+			if(bmp == null || bmp.isRecycled()) return;
 			int res = mTextureResolution;
 			Bitmap bitmap = null;
 			try{

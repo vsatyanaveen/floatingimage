@@ -15,9 +15,11 @@ import android.opengl.GLUtils;
 import android.util.Log;
 import dk.nindroid.rss.Display;
 import dk.nindroid.rss.MainActivity;
+import dk.nindroid.rss.OnDemandImageBank;
 import dk.nindroid.rss.TextureBank;
 import dk.nindroid.rss.TextureSelector;
 import dk.nindroid.rss.data.ImageReference;
+import dk.nindroid.rss.data.Progress;
 import dk.nindroid.rss.data.Ray;
 import dk.nindroid.rss.data.Texture;
 import dk.nindroid.rss.gfx.ImageUtil;
@@ -28,7 +30,7 @@ import dk.nindroid.rss.renderers.floating.positionControllers.PositionController
 import dk.nindroid.rss.renderers.floating.positionControllers.Rotation;
 import dk.nindroid.rss.uiActivities.Toaster;
 
-public class Image implements ImagePlane {
+public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 	private static final int STATE_FLOATING =   0;
 	private static final int STATE_FOCUSING =   1;
 	private static final int STATE_FOCUSED	=   2;
@@ -38,6 +40,7 @@ public class Image implements ImagePlane {
 	private int				mState = STATE_FLOATING;
 	private boolean			mDelete;
 	
+	private final OnDemandImageBank mOnDemandBank;
 	private Display			mDisplay;
 	private IntBuffer   	mVertexBuffer;
 	private ByteBuffer  	mIndexBuffer;
@@ -47,6 +50,7 @@ public class Image implements ImagePlane {
 	private Rotation		mRotationA;
 	private Rotation		mRotationB;
 	private Vec3f			mPos;
+	private float			mPositionControlerScale;
 	private Rotation		mRotationASaved;
 	private Rotation		mRotationBSaved;
 	private PositionController	mPositionController;
@@ -59,6 +63,8 @@ public class Image implements ImagePlane {
 	private MainActivity	mActivity;
 	private InfoBar			mInfoBar;
 	private TextureSelector mTextureSelector;
+	private boolean			mSetThumbnailTexture = false;
+	private boolean			mFrameOnly = false;
 	
 	// Selected vars
 	private Vec3f			mSelectedPos = new Vec3f();
@@ -114,6 +120,12 @@ public class Image implements ImagePlane {
 		mDelete = true;
 	}
 	
+	public void getImageIfEmpty(){
+		if(mShowingImage == null){
+			mOnDemandBank.get(this, true);
+		}
+	}
+	
 	public void setBackground(){
 		if(mLargeTex){
 			try {
@@ -144,7 +156,9 @@ public class Image implements ImagePlane {
 		}else{
 			mLargeTex = false;
 			if(mShowingImage != null){
-				setTexture(gl, mShowingImage);
+				if(mShowingImage != null){
+					mOnDemandBank.get(mShowingImage, this);
+				}
 			}
 		}
 		
@@ -239,8 +253,10 @@ public class Image implements ImagePlane {
 				 InfoBar infoBar, 
 				 Texture largeTexture, 
 				 TextureSelector textureSelector,
-				 Bitmap lineSmoothBitmap){
+				 Bitmap lineSmoothBitmap,
+				 OnDemandImageBank onDemandBank){
 		this.mDisplay = display;
+		this.mOnDemandBank = onDemandBank;
 		mbank = bank;
 		this.mLineSmoothBitmap = lineSmoothBitmap;
 		this.mActivity = activity;
@@ -256,6 +272,7 @@ public class Image implements ImagePlane {
         ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
         tbb.order(ByteOrder.nativeOrder());
         mTexBuffer = tbb.asFloatBuffer();
+        mLargeTexBuffer = tbb.asFloatBuffer();
 
 		initSmoothing();
         
@@ -267,6 +284,9 @@ public class Image implements ImagePlane {
         };
         mTexBuffer.put(tex);
         mTexBuffer.position(0);	
+        
+        mLargeTexBuffer.put(tex);
+        mLargeTexBuffer.position(0);
 		
 		int one = 0x10000;
 		int vertices[] = {
@@ -367,7 +387,7 @@ public class Image implements ImagePlane {
 				return;
 			}
 		}
-		
+				
 		float x, y, z, szX, szY;
 		x = mPos.getX();
 		y = mPos.getY();
@@ -393,6 +413,9 @@ public class Image implements ImagePlane {
 			}
 		}
 		
+		szX *= mPositionControlerScale;
+		szY *= mPositionControlerScale;
+		
 		gl.glFrontFace(GL10.GL_CCW);
 		gl.glEnable(GL10.GL_TEXTURE_2D);
 		
@@ -416,42 +439,45 @@ public class Image implements ImagePlane {
 		gl.glEnable(GL10.GL_BLEND);
 		//Vec3f rot = mPositionController.getRotation(interval);
 		float alpha = (mState == STATE_FLOATING ? mPositionController.getOpacity(interval) : 1) * mAlpha;
-		
 		gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
 		gl.glEnable(GL10.GL_BLEND);
 		gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_MODULATE);
 		gl.glColor4f(1.0f, 1.0f, 1.0f, alpha);
-		if(mActivity.getSettings().imageDecorations){
-			ShadowPainter.draw(gl, x, y, z, mRotationA, mRotationB, userRotation, szX, szY);
+		if(!mFrameOnly){
+			if(mActivity.getSettings().imageDecorations){
+				ShadowPainter.draw(gl, x, y, z, mRotationA, mRotationB, userRotation, szX, szY);
+			}
 		}
 		gl.glTranslatef(x, y, z);
 		gl.glRotatef(mRotationA.getAngle(), mRotationA.getX(), mRotationA.getY(), mRotationA.getZ());
 		gl.glRotatef(mRotationB.getAngle(), mRotationB.getX(), mRotationB.getY(), mRotationB.getZ());
 		gl.glRotatef(userRotation, 0, 0, 1);
 		gl.glScalef(szX, szY, 1);
-		
+	
 		// Draw image
 		gl.glActiveTexture(GL10.GL_TEXTURE0); 
 		if(mLargeTex){ 
 			gl.glBindTexture(GL10.GL_TEXTURE_2D, mLargeTexture.getTextureID(gl));
+			gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mLargeTexBuffer);
 		}else{
 			gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
+			gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mTexBuffer);
 		}
         gl.glVertexPointer(3, GL10.GL_FIXED, 0, mVertexBuffer);
-        
-		gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mTexBuffer);
-		
-		gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
-		
-		
+			
+	    if(!mFrameOnly){	
+			gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
+		}
 		// Show smoothing
 		//if((System.currentTimeMillis() % 10000) < 5000){
+	    if(mActivity.getSettings().blackEdges){
 			if(mShowingImage != null && mState != Image.STATE_FOCUSED){
 				drawSideSmoothing(gl, alpha, 0, 1, 0, true, szX, szY); // Left
 				drawSideSmoothing(gl, alpha, 1, 3, mShowingImage.getHeight(), false, szX, szY); // Bottom
 				drawSideSmoothing(gl, alpha, 0, 2, 0, false, szX, szY); // Top
 				drawSideSmoothing(gl, alpha, 2, 3, mShowingImage.getWidth(), true, szX, szY); // Right
 			}
+	    }
 		//}
 		
 		//if(realTime % 10000 < 5000){
@@ -967,6 +993,8 @@ public class Image implements ImagePlane {
 		mPos.set(pos);
 		mPositionController.getRotation(interval, mRotationA, mRotationB);
 		
+		mPositionControlerScale = mPositionController.getScale();
+		
 		boolean isInRewind = totalTime < mActivity.getSettings().floatingTraversal * (mRotations - 1);
 		// Get new texture...
 		if(totalTime > mActivity.getSettings().floatingTraversal * mRotations && !isInRewind){
@@ -1007,6 +1035,7 @@ public class Image implements ImagePlane {
 			return;
 		}
 		mRotationA.setAngle((1.0f - fraction) * mRotationASaved.getAngle());
+		mPositionControlerScale = fraction + (1.0f - fraction) * mPositionController.getScale();
 		fraction = smoothstep(fraction);
 		float selectedX = mSelectedPos.getX();		
 		float selectedY = mSelectedPos.getY();
@@ -1033,11 +1062,16 @@ public class Image implements ImagePlane {
 			}
 			
 			mPositionController.getRotation(interval, mRotationA, mRotationB);
+			mPositionControlerScale = mPositionController.getScale();
 			long offset = mActivity.getSettings().floatingTraversal * 1024;
 			mRotations = (int)((totalTime + offset) / mActivity.getSettings().floatingTraversal) + 1 - 1024;
 			mState = STATE_FLOATING;
 			if(mShowingImage != null){
-				setTexture(gl, mShowingImage);
+				if(mActivity.getSettings().galleryMode){
+					//mOnDemandBank.get(mShowingImage, this);
+				}else{
+					//setTexture(gl, mShowingImage);
+				}
 				if(mFocusBmp != null){
 					mFocusBmp.recycle();
 					mFocusBmp = null;
@@ -1058,6 +1092,8 @@ public class Image implements ImagePlane {
 		mRotationA.setAngle(fraction * mRotationA.getAngle());
 		mRotationB.setAngle(fraction * mRotationB.getAngle());
 		Vec3f pos = mPositionController.getPosition(interval);
+		
+		mPositionControlerScale = 1.0f - fraction + (fraction) * mPositionController.getScale();
 				
 		float distX = pos.getX() - selectedX;
 		float distY = pos.getY() - selectedY;
@@ -1074,6 +1110,15 @@ public class Image implements ImagePlane {
 	
 	public boolean update(GL10 gl, long time, long realTime){
 		boolean depthChanged = false;
+		if(mSetThumbnailTexture && mShowingImage != null){
+			if(mShowingImage.getBitmap() != null){
+				setTexture(gl, mShowingImage);
+				mShowingImage.recycleBitmap();
+			}else{
+				mOnDemandBank.get(mShowingImage, this);
+			}
+		}
+		mSetThumbnailTexture = false;
 		// Make sure time is positive, then divide by traversal time to get how far image is
 		if(mState == STATE_FLOATING){
 			depthChanged = updateFloating(gl, time);		
@@ -1084,6 +1129,7 @@ public class Image implements ImagePlane {
 			// We might change the value here...
 			if(mState == STATE_FOCUSED){
 				updateTransformation(realTime);
+				mPositionControlerScale = 1.0f;
 				setFocusedPosition();
 				synchronized(this){
 					if(mUpdateLargeTex && mFocusBmp != null){
@@ -1116,16 +1162,22 @@ public class Image implements ImagePlane {
 	private void resetTexture(GL10 gl, boolean next){
 		mFocusBmp = null;
 		mDelete = false;
-		ImageReference ir = mbank.getTexture(mShowingImage, next);
-		if(ir != null){
-			mShowingImage = ir;
-		}	
-    	if(mShowingImage != null){
-    		setTexture(gl, mShowingImage);
-    	}else{
-    		this.mFocusBmp = null;
-    		this.mLargeTex = false;
-    	}
+		if(mActivity.getSettings().galleryMode){
+			mFrameOnly = true;
+			maspect = 1.3f;
+			mOnDemandBank.get(this, next);
+		}else{
+			ImageReference ir = mbank.getTexture(mShowingImage, next);
+			if(ir != null){
+				mShowingImage = ir;
+			}	
+	    	if(mShowingImage != null && mShowingImage.getBitmap() != null){
+	    		setTexture(gl, mShowingImage);
+	    	}else{
+	    		this.mFocusBmp = null;
+	    		this.mLargeTex = false;
+	    	}
+		}
 	}
 	
 	public boolean validForTextureUpdate(){
@@ -1212,7 +1264,7 @@ public class Image implements ImagePlane {
         	
         	ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
             tbb.order(ByteOrder.nativeOrder());
-            mTexBuffer = tbb.asFloatBuffer();
+            mLargeTexBuffer = tbb.asFloatBuffer();
             
             float tex[] = {
             	0.0f,  0.0f,
@@ -1220,8 +1272,8 @@ public class Image implements ImagePlane {
             	width - 1.0f/512.0f,  0.0f,
             	width - 1.0f/512.0f,  height - 1.0f/512.0f,
             };
-            mTexBuffer.put(tex);
-            mTexBuffer.position(0);
+            mLargeTexBuffer.put(tex);
+            mLargeTexBuffer.position(0);
             
             //timeC = System.currentTimeMillis();
             //Log.v("Floating Image", "Set texture timings. A: " + (timeA - startTime) + "ms, B:" + (timeB - timeA) + "ms, C: " + (timeC - timeB) + "ms.");
@@ -1280,6 +1332,7 @@ public class Image implements ImagePlane {
 	        };
 	        mTexBuffer.put(tex);
 	        mTexBuffer.position(0);
+	        mFrameOnly = false;
         }catch(IllegalArgumentException e){
         	Log.e("Floating Image", "Image: Error setting texture", e);
         }
@@ -1288,6 +1341,7 @@ public class Image implements ImagePlane {
 	private int mTextureID;
 	private int mSmoothTextureID;
 	private FloatBuffer mTexBuffer;
+	private FloatBuffer mLargeTexBuffer;
 	
 	private int VERTS = 4;
 	
@@ -1386,5 +1440,29 @@ public class Image implements ImagePlane {
 			return t;
 		}
 		return -1;
+	}
+
+	@Override
+	public boolean bitmapLoaded(String id) {
+		if(mShowingImage != null && mShowingImage.getID().equals(id)){
+			mSetThumbnailTexture = true;
+			return true;
+		}	
+    	return false;
+	}
+
+	@Override
+	public Progress getProgressIndicator() {
+		return null;
+	}
+
+	@Override
+	public boolean isVisible(String id) {
+		return mShowingImage != null && mShowingImage.getID().equals(id);
+	}
+
+	@Override
+	public void setEmptyImage(ImageReference ir) {
+		this.mShowingImage = ir;
 	}
 }

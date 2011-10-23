@@ -196,9 +196,14 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 	}
 	
 	public void onResume(){
-		mBank.start();
+		if(!mActivity.getSettings().galleryMode){
+			mBank.start();
+		}
 		mFadeOffset = 0.0f;
 		mReinit = true;
+		if(mActivity.getSettings().galleryMode){
+			mPause = true;
+		}
 		mRenderer.onResume();
 	}
 	public void onPause(){

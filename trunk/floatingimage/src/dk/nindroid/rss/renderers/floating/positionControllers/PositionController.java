@@ -8,6 +8,10 @@ public abstract class PositionController {
 		return time - (long)(traversalTime * (1.0f - adjustInterval(1.0f)));
 	}
 	
+	public float getScale(){
+		return 1.0f;
+	}
+	
 	public abstract void jitter();
 	public abstract Vec3f getPosition(float interval);
 	public abstract void getRotation(float interval, Rotation a, Rotation b);

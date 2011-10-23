@@ -77,6 +77,7 @@ public class ShowStreams extends Activity implements MainActivity {
 	private FeedController				mFeedController;
 	private ImageCache 					mImageCache;
 	private TextureBank					mTextureBank;
+	private OnDemandImageBank			mOnDemandBank;
 	private dk.nindroid.rss.settings.Settings		mSettings;
 	
 	/** Called when the activity is first created. */
@@ -132,6 +133,7 @@ public class ShowStreams extends Activity implements MainActivity {
 		BitmapDownloader bitmapDownloader = new BitmapDownloader(bank, mFeedController, mSettings);
 		mImageCache = new ImageCache(this, bank);
 		bank.setFeeders(bitmapDownloader, mImageCache);
+		mOnDemandBank = new OnDemandImageBank(mFeedController, this, mImageCache);
 		return bank;
 	}
 	
@@ -281,7 +283,7 @@ public class ShowStreams extends Activity implements MainActivity {
 		if(mSettings.mode == dk.nindroid.rss.settings.Settings.MODE_FLOATING_IMAGE){
 			if(!(defaultRenderer instanceof FloatingRenderer)){
 				Log.v("Floating Image", "Switching to floating renderer");
-				defaultRenderer = new FloatingRenderer(this, mTextureBank, renderer.mDisplay);
+				defaultRenderer = new FloatingRenderer(this, mTextureBank, mOnDemandBank, mFeedController, renderer.mDisplay);
 			}
 		}else{
 			if(!(defaultRenderer instanceof SlideshowRenderer)){
@@ -292,7 +294,7 @@ public class ShowStreams extends Activity implements MainActivity {
 		Log.v("Floating Image", "Resume texture bank done...");
 		
 		renderer.setRenderer(defaultRenderer);
-		mTextureBank.initCache(CACHE_SIZE, defaultRenderer.totalImages());
+		mTextureBank.initCache(mSettings.galleryMode ? 0 : CACHE_SIZE, defaultRenderer.totalImages());
 		renderer.onResume();
 		
 		wl.acquire();

@@ -22,12 +22,13 @@ public class Settings {
 	public static final int MODE_RANDOM = 6;
 	public static final int MODE_FLOATING_IMAGE = 7;
 	
+	public boolean	galleryMode;
 	public boolean 	shuffleImages;
 	public boolean 	rotateImages;
 	public boolean 	fullscreenBlack;
 	public String  	downloadDir;
 	public int 		mode;
-	public long 		slideshowInterval;
+	public long 	slideshowInterval;
 	public long	 	slideSpeed;
 	public boolean	imageDecorations;
 	public boolean	highResThumbs;
@@ -36,6 +37,7 @@ public class Settings {
 	public int		forceRotation;
 	public boolean	tsunami;
 	public boolean	blackEdges;
+	public boolean	hideEdges;
 	
 	public int		backgroundColor;
 	public boolean	lowFps;
@@ -70,6 +72,7 @@ public class Settings {
 		forceRotation = Integer.parseInt(sp.getString("forceRotation", "0"));
 		blackEdges = sp.getBoolean("blackEdges", true);
 		tsunami = sp.getBoolean("tsunami", false);
+		galleryMode = sp.getBoolean("galleryMode", false);
 		
 		switch(forceRotation){
 		case 90:

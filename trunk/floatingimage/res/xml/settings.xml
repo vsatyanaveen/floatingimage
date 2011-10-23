@@ -54,6 +54,11 @@
     </PreferenceCategory>
     <PreferenceCategory
             android:title="@string/floating">
+            <CheckBoxPreference 
+			    android:key="galleryMode"
+			    android:title="@string/galleryMode"
+			    android:summary="@string/galleryModeSummary"
+			    android:defaultValue="false" />
              <ListPreference
                 android:key="floatingType"
                 android:title="@string/floatingType"

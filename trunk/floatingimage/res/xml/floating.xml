@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
 	android:title="@string/floating">
+			 <CheckBoxPreference 
+			    android:key="galleryMode"
+			    android:title="@string/galleryMode"
+			    android:summary="@string/galleryModeSummary"
+			    android:defaultValue="false" />
              <ListPreference
                 android:key="floatingType"
                 android:title="@string/floatingType"
