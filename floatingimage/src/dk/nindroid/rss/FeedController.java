@@ -40,11 +40,28 @@ public class FeedController {
 	private MainActivity					mActivity;
 	private int								mCachedActive;
 	
+	public interface EventSubscriber{
+		public void feedsUpdated();
+	}
+	
+	private List<EventSubscriber> eventSubscribers;
+	
 	public FeedController(MainActivity activity){
 		mFeeds = new ArrayList<FeedReference>();
 		mPositions = new ArrayList<PositionInterval>();
 		mReferences = new ArrayList<List<ImageReference>>();
 		mActivity = activity;
+		eventSubscribers = new ArrayList<EventSubscriber>();
+	}
+	
+	public void addSubscriber(EventSubscriber subscriber){
+		eventSubscribers.add(subscriber);
+	}
+	
+	private void onFeedsUpdated(){
+		for(EventSubscriber es : eventSubscribers){
+			es.feedsUpdated();
+		}
 	}
 	
 	public void setRenderer(RiverRenderer renderer){
@@ -61,8 +78,8 @@ public class FeedController {
 	
 	public ImageReference getImageReference(boolean forward){
 		ImageReference ir = null;
+		if(mReferences.size() == 0) return null;
 		synchronized (mReferences) {
-			if(mReferences.size() == 0) return null;
 			if(System.currentTimeMillis() - mLastFeedRead > REFRESH_INTERVAL){
 				Log.v("Floating Image", "Refreshing feeds.");
 				readFeeds(mCachedActive);
@@ -167,7 +184,9 @@ public class FeedController {
 				mFeeds = newFeeds;
 				parseFeeds(active);
 			}
+			
 		}
+		onFeedsUpdated();
 	}
 	
 	private void feedsChanged(){

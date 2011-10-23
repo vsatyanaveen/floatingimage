@@ -33,6 +33,7 @@ public class Wallpaper extends GLWallpaperService implements MainActivity{
 		Wallpaper mContext;
 		Settings mSettings;
 		TextureBank mBank;
+		OnDemandImageBank mOnDemandBank;
 		
 		public MyEngine(Wallpaper context, Settings settings) {
 			super();
@@ -65,7 +66,7 @@ public class Wallpaper extends GLWallpaperService implements MainActivity{
 				if(mSettings.mode == dk.nindroid.rss.settings.Settings.MODE_FLOATING_IMAGE){
 					if(!(defaultRenderer instanceof FloatingRenderer)){
 						Log.v("Floating Image", "Switching to floating renderer");
-						defaultRenderer = new FloatingRenderer(mContext, mBank, renderer.mDisplay);
+						defaultRenderer = new FloatingRenderer(mContext, mBank, mOnDemandBank, mFeedController, renderer.mDisplay);
 					}
 				}else{
 					if(!(defaultRenderer instanceof SlideshowRenderer)){
@@ -87,6 +88,7 @@ public class Wallpaper extends GLWallpaperService implements MainActivity{
 			BitmapDownloader bitmapDownloader = new BitmapDownloader(bank, mFeedController, mSettings);
 			ImageCache imageCache = new ImageCache(mContext, bank);
 			bank.setFeeders(bitmapDownloader, imageCache);
+			mOnDemandBank = new OnDemandImageBank(mFeedController, mContext, imageCache);
 			return bank;
 		}
 	

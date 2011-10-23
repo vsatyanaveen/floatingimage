@@ -10,10 +10,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 import dk.nindroid.rss.Display;
+import dk.nindroid.rss.FeedController;
 import dk.nindroid.rss.MainActivity;
+import dk.nindroid.rss.OnDemandImageBank;
 import dk.nindroid.rss.R;
 import dk.nindroid.rss.TextureBank;
 import dk.nindroid.rss.TextureSelector;
+import dk.nindroid.rss.FeedController.EventSubscriber;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.Ray;
 import dk.nindroid.rss.data.Texture;
@@ -25,13 +28,13 @@ import dk.nindroid.rss.renderers.floating.positionControllers.FloatDown;
 import dk.nindroid.rss.renderers.floating.positionControllers.FloatLeft;
 import dk.nindroid.rss.renderers.floating.positionControllers.FloatRight;
 import dk.nindroid.rss.renderers.floating.positionControllers.FloatUp;
+import dk.nindroid.rss.renderers.floating.positionControllers.Gallery;
 import dk.nindroid.rss.renderers.floating.positionControllers.Mixup;
 import dk.nindroid.rss.renderers.floating.positionControllers.Stack;
 import dk.nindroid.rss.renderers.floating.positionControllers.StarSpeed;
 import dk.nindroid.rss.renderers.floating.positionControllers.TableTop;
-import dk.nindroid.rss.settings.Settings;
 
-public class FloatingRenderer extends Renderer {
+public class FloatingRenderer extends Renderer implements EventSubscriber{
 	public static final long 	mFocusDuration = 300;
 	public static long			mSelectedTime;
 	public static final float  	mFocusX = 0.0f;
@@ -48,13 +51,15 @@ public class FloatingRenderer extends Renderer {
 	public static final int		FLOATING_TYPE_UP = 3;
 	public static final int		FLOATING_TYPE_STARSPEED = 4;
 	public static final int		FLOATING_TYPE_TABLETOP = 5;
-	public static final int		FLOATING_TYPE_STACK = 6;
+	public static final int		FLOATING_TYPE_STACK = 6;	
+	public static final int		FLOATING_TYPE_GALLERY = 15;
 	public static final int		FLOATING_TYPE_MIXUP = 20;
 	
 	private boolean 		mNewStart = true;
 	private Image[] 		mImgs;
 	private Image[] 		mImgDepths;
 	private TextureBank 	mBank;
+	private OnDemandImageBank mOnDemandBank;
 	public 	TextureSelector mTextureSelector;
 	private long			mStartTime;
 	private int 			mTotalImgRows = 0;
@@ -84,7 +89,7 @@ public class FloatingRenderer extends Renderer {
 	private ImageDepthComparator 	mDepthComparator;
 	private boolean			mDoAdjustImagePositions = false;
 	
-	public FloatingRenderer(MainActivity activity, TextureBank bank, Display display){
+	public FloatingRenderer(MainActivity activity, TextureBank bank, OnDemandImageBank onDemandBank, FeedController feedController, Display display){
 		this.mActivity = activity;
 		mTextureSelector = new TextureSelector(display);
 		mRequestedStreamOffset = new Vec3f();
@@ -92,6 +97,7 @@ public class FloatingRenderer extends Renderer {
 		mBackgroundPainter = new BackgroundPainter();
 		this.mDisplay = display;
 		this.mBank = bank;
+		this.mOnDemandBank = onDemandBank;
 		this.mLargeTexture = new Texture();
 		mDepthComparator = new ImageDepthComparator();
 		createImageArray();
@@ -99,6 +105,11 @@ public class FloatingRenderer extends Renderer {
 		setPositionController(mActivity.getSettings().floatingType);
 		
 		mStartTime = System.currentTimeMillis();
+		if(feedController.getShowing() == 0){
+			feedController.addSubscriber(this);
+		}else{
+			this.feedsUpdated();
+		}
 	}
 	
 	int mCurPositionController = -1;
@@ -106,22 +117,19 @@ public class FloatingRenderer extends Renderer {
 	void createImageArray(){
 		// If amount of images have changed, rehash
 		int settingsRows = mActivity.getSettings().tsunami ? 18 : 6;
+		if(mActivity.getSettings().galleryMode){
+			settingsRows = 12;
+		}
 		if(settingsRows != mTotalImgRows){
 			mTotalImgRows = settingsRows;
 			mCurPositionController = -1;
 			InputStream smoothIS = mActivity.context().getResources().openRawResource(R.drawable.smooth_circle);
 			Bitmap smoothImage = BitmapFactory.decodeStream(smoothIS);
 			mImgCnt = 0;
-			if(mImgs != null){
-				for(Image i : mImgs){
-					if(i.getShowing() != null){
-						i.getShowing().getBitmap().recycle();
-					}
-				}
-			}
+
 			mImgs = new Image[mTotalImgRows * 3 / 2];
 			for(int i = 0; i < mImgs.length; ++i){
-				mImgs[mImgCnt++] = new Image(mActivity, mBank, mDisplay, mInfoBar, mLargeTexture, mTextureSelector, smoothImage);
+				mImgs[mImgCnt++] = new Image(mActivity, mBank, mDisplay, mInfoBar, mLargeTexture, mTextureSelector, smoothImage, mOnDemandBank);
 			}
 			
 			mImgDepths = new Image[mImgs.length];
@@ -133,6 +141,9 @@ public class FloatingRenderer extends Renderer {
 	}
 	
 	public void setPositionController(int type){
+		if(mActivity.getSettings().galleryMode){
+			type = FLOATING_TYPE_GALLERY;
+		}
 		if(mCurPositionController != type){
 			mCurPositionController = type;
 			
@@ -175,6 +186,11 @@ public class FloatingRenderer extends Renderer {
 			case FLOATING_TYPE_MIXUP:
 				for(int i = 0; i < mImgs.length; ++i){
 					mImgs[i].setPositionController(new Mixup(mActivity, mDisplay, this, i, mImgs.length));
+				}
+				break;
+			case FLOATING_TYPE_GALLERY:
+				for(int i = 0; i < mImgs.length; ++i){
+					mImgs[i].setPositionController(new Gallery(mActivity, mDisplay, i, mImgs.length));
 				}
 				break;
 			}
@@ -602,6 +618,13 @@ public class FloatingRenderer extends Renderer {
 		if(this.mSelected != null){
 			this.mSelected.delete();
 			this.mDoUnselect = true;
+		}
+	}
+
+	@Override
+	public void feedsUpdated() {
+		for(Image i : mImgs){
+			i.getImageIfEmpty();
 		}
 	}
 }
