@@ -2,7 +2,10 @@ package dk.nindroid.rss.parser.picasa;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.ListFragment;
 import android.view.Gravity;
@@ -15,12 +18,14 @@ import dk.nindroid.rss.R;
 import dk.nindroid.rss.settings.PicasaBrowser;
 import dk.nindroid.rss.settings.Settings;
 import dk.nindroid.rss.settings.SettingsFragment;
+import dk.nindroid.rss.settings.PicasaBrowser.AlbumActivity;
 
 public class PicasaUserView extends ListFragment implements SettingsFragment {
 	private static final int	STREAM		 		= 0;
 	private static final int	ALBUMS				= 1;
 	
 	String id;
+	boolean mDualPane;
 	
 	public static PicasaUserView getInstance(String id){
 		PicasaUserView puv = new PicasaUserView();
@@ -36,7 +41,10 @@ public class PicasaUserView extends ListFragment implements SettingsFragment {
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 		id = getArguments().getString("ID");
+		View sourceFrame = getActivity().findViewById(R.id.source);
+		mDualPane = sourceFrame != null && sourceFrame.getVisibility() == View.VISIBLE;
 		fillMenu();
+		
 	}
 	
 	private void fillMenu(){
@@ -73,9 +81,16 @@ public class PicasaUserView extends ListFragment implements SettingsFragment {
 	}
 	
 	private void showAlbums() {
-		Intent intent = new Intent(this.getActivity(), PicasaAlbumBrowser.class);
-		intent.putExtra(PicasaAlbumBrowser.OWNER, id);
-		startActivityForResult(intent, ALBUMS);
+		if(mDualPane){
+			FragmentTransaction ft = getFragmentManager().beginTransaction();
+	        ft.replace(R.id.source, PicasaAlbumBrowser.getInstance(id));
+	        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+	        ft.commit();
+		}else{
+			Intent intent = new Intent(this.getActivity(), AlbumActivity.class);
+			intent.putExtra(PicasaAlbumBrowser.OWNER, id);
+			startActivityForResult(intent, ALBUMS);
+		}
 	}
 	
 	@Override
@@ -110,5 +125,28 @@ public class PicasaUserView extends ListFragment implements SettingsFragment {
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         ft.commit();
         return true;
+	}
+	
+	public static class AlbumActivity extends FragmentActivity{
+		@Override
+		protected void onCreate(Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
+
+			if (getResources().getConfiguration().orientation
+					== Configuration.ORIENTATION_LANDSCAPE) {
+				// If the screen is now in landscape mode, we can show the
+				// dialog in-line with the list so we don't need this activity.
+				finish();
+				return;
+			}
+
+			if (savedInstanceState == null) {
+				// During initial setup, plug in the details fragment.
+
+				Fragment f = PicasaAlbumBrowser.getInstance(this.getIntent().getStringExtra(PicasaAlbumBrowser.OWNER));
+				f.setArguments(getIntent().getExtras());
+				getSupportFragmentManager().beginTransaction().add(android.R.id.content, f, "content").commit();
+			}
+		}
 	}
 }

@@ -187,22 +187,22 @@ public class PicasaBrowser extends SourceFragment implements SettingsFragment {
 				dialog.dismiss();
 			}
 		}).create();
-	showKeyboard(streamDialog, input);
-	streamDialog.show();
+		showKeyboard(streamDialog, input);
+		streamDialog.show();
 	}
 	
 	private void showUser(String user){
-		if(user.length() == 0){ // This actually returns a user with no images!
-			Toast.makeText(this.getActivity(), R.string.picasaShowStreamNoUsername, Toast.LENGTH_LONG).show();
-			return;
-		}
 		if(user == null) {// Bad username.
 			Toast.makeText(this.getActivity(), R.string.picasaShowStreamBadUsername, Toast.LENGTH_LONG).show();
 			return; 
 		}
+		if(user.length() == 0){ // This actually returns a user with no images!
+			Toast.makeText(this.getActivity(), R.string.picasaShowStreamNoUsername, Toast.LENGTH_LONG).show();
+			return;
+		}
 		if(mDualPane){
 			FragmentTransaction ft = getFragmentManager().beginTransaction();
-	        ft.replace(R.id.source, PicasaAlbumBrowser.getInstance(null));
+	        ft.replace(R.id.source, PicasaUserView.getInstance(user));
 	        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
 	        ft.commit();
 		}else{

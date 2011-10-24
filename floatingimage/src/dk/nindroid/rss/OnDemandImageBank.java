@@ -3,6 +3,7 @@ package dk.nindroid.rss;
 import java.io.IOException;
 
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -11,6 +12,7 @@ import dk.nindroid.rss.compatibility.Exif;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.LocalImage;
 import dk.nindroid.rss.data.Progress;
+import dk.nindroid.rss.settings.Settings;
 
 public class OnDemandImageBank {
 	static boolean 	exifAvailable = false;
@@ -29,14 +31,35 @@ public class OnDemandImageBank {
 	}
 	
 	final FeedController mFeedController;
-	final Loader mLoader;
+	final PreLoader mPreLoader;
+	final Loader[] mLoaders;
 	final ImageCache mImageCache;
+	final Config mConfig;
 	
 	public OnDemandImageBank(FeedController feedController, MainActivity activity, ImageCache imageCache) {
 		this.mFeedController = feedController;
-		this.mLoader = new Loader(activity.getSettings().highResThumbs);
-		new Thread(mLoader).start();
+		mLoaders = new Loader[5];
+		for(int i = 0; i < mLoaders.length; ++i){
+			mLoaders[i] = new Loader(activity.getSettings());
+		}
+		mPreLoader = new PreLoader(mLoaders, activity.getSettings());
+		
 		this.mImageCache = imageCache;
+		mConfig = activity.getSettings().bitmapConfig;
+	}
+	
+	public void start(){
+		for(int i = 0; i < mLoaders.length; ++i){
+			new Thread(mLoaders[i]).start();
+		}
+		new Thread(mPreLoader).start();
+	}
+	
+	public void stop(){
+		for(int i = 0; i < mLoaders.length; ++i){
+			mLoaders[i].mHandler.getLooper().quit();
+		}
+		mPreLoader.mHandler.getLooper().quit();
 	}
 	
 	public void get(LoaderClient callback, boolean isNext){
@@ -48,14 +71,14 @@ public class OnDemandImageBank {
 	}
 	
 	public void get(ImageReference ir, LoaderClient callback){
-		Log.v("Floating Image", "Reget image");
+		Log.v("Floating Image", "Reget!");
 		loadBitmap(callback, ir);
 	}
 	
 	private void loadBitmap(LoaderClient callback, ImageReference ir){
-		Message msg = new Message();
+		Message msg = Message.obtain();
 		msg.obj = new LoaderBundle(ir, callback);
-		mLoader.sendMessage(msg);
+		mPreLoader.sendMessage(msg);
 	}
 	
 	class LoaderBundle{
@@ -74,12 +97,15 @@ public class OnDemandImageBank {
 		public void setEmptyImage(ImageReference ir);		
 	}
 	
-	private class Loader implements Runnable{
-		LoaderHandler mHandler; 
-		final boolean hires;
+	private class PreLoader implements Runnable{
+		final Loader[] mLoaders;
+		final Settings mSettings;
+		PreLoaderHandler mHandler;
 		
-		public Loader(boolean hires){
-			this.hires = hires;
+		
+		public PreLoader(Loader[] loaders, Settings settings) {
+			this.mLoaders = loaders;
+			this.mSettings = settings;
 		}
 		
 		public void sendMessage(Message msg){
@@ -89,18 +115,80 @@ public class OnDemandImageBank {
 		@Override
 		public void run() {
 			Looper.prepare();
-			mHandler = new LoaderHandler(hires);
+			mHandler = new PreLoaderHandler(mLoaders, mSettings);
+			Looper.loop();
+		}
+		
+		private class PreLoaderHandler extends Handler{
+			final Loader[] mLoaders;
+			final Settings mSettings;
+			int curLoader = -1;
+			
+			public PreLoaderHandler(Loader[] loaders, Settings settings) {
+				this.mLoaders = loaders;
+				this.mSettings = settings;
+			}
+			
+			@Override
+			public void handleMessage(Message msg) {
+				super.handleMessage(msg);
+				LoaderBundle bundle = (LoaderBundle)msg.obj;
+				ImageReference ir = bundle.ir;
+				LoaderClient callback = bundle.lc;
+				
+				if(ir == null){
+					return;
+				}
+				if(!callback.isVisible(ir.getID())){
+					return;
+				}
+				if(ir.getBitmap() != null){
+					Log.v("Floating Image", "Image is already set...");
+					return;
+				}
+				
+				if(mImageCache.exists(ir.getID(), this.mSettings.highResThumbs ? 256 : 128)){
+					mImageCache.getImage(ir, this.mSettings.highResThumbs ? 256 : 128);
+				}
+				if(ir.getBitmap() != null){
+					if(!callback.bitmapLoaded(ir.getID())){
+						ir.recycleBitmap();
+					}
+					return;
+				}
+				curLoader = (curLoader + 1) % mLoaders.length;
+				mLoaders[curLoader].sendMessage(Message.obtain(msg));
+			}
+		}
+	}
+	
+	private class Loader implements Runnable{
+		LoaderHandler mHandler; 
+		Settings mSettings;
+		
+		public Loader(Settings settings){
+			this.mSettings = settings;
+		}
+		
+		public void sendMessage(Message msg){
+			mHandler.sendMessage(msg);
+		}
+		
+		@Override
+		public void run() {
+			Looper.prepare();
+			mHandler = new LoaderHandler(mSettings);
 			Looper.loop();
 		}
 		
 		class LoaderHandler extends Handler{
-			boolean hires;
-			public LoaderHandler(boolean hires){
-				this.hires = hires;
+			Settings mSettings;
+			public LoaderHandler(Settings settings){
+				this.mSettings = settings;
 			}
 			
 			Bitmap loadLocal(LocalImage li, Progress progress){
-				Bitmap bmp = ImageFileReader.readImage(li.getFile(), hires ? 256 : 128, progress);
+				Bitmap bmp = ImageFileReader.readImage(li.getFile(), mSettings.highResThumbs ? 256 : 128, progress, mConfig);
 				if(bmp == null){
 					return null;
 				}
@@ -133,11 +221,11 @@ public class OnDemandImageBank {
 			}
 			
 			public Bitmap loadFromWeb(ImageReference ir, Progress progress){
-				Bitmap bmp = BitmapDownloader.downloadImage(hires ? ir.get256ImageUrl() : ir.get128ImageUrl(), progress);
+				Bitmap bmp = BitmapDownloader.downloadImage(mSettings.highResThumbs ? ir.get256ImageUrl() : ir.get128ImageUrl(), progress, mConfig);
 				if(bmp == null){
 					return null;
 				}
-				if(hires){
+				if(mSettings.highResThumbs){
 					int max = Math.max(bmp.getHeight(), bmp.getWidth());
 					if(max > 256){
 						float scale = (float)256 / max;
@@ -164,39 +252,32 @@ public class OnDemandImageBank {
 				LoaderBundle bundle = (LoaderBundle)msg.obj;
 				ImageReference ir = bundle.ir;
 				LoaderClient callback = bundle.lc;
-				if(ir == null) return;
-				if(!callback.isVisible(ir.getID())){
-					return;
-				}
-				if(mImageCache.exists(ir.getID(), hires ? 256 : 128)){
-					mImageCache.getImage(ir, hires ? 256 : 128);
-				}
-				if(ir.getBitmap() != null){
-					if(!callback.bitmapLoaded(ir.getID())){
-						ir.recycleBitmap();
-					}
-					return;
-				}
-				
+				if(!callback.isVisible(ir.getID())) return;
 				Bitmap bmp;
-				if(ir instanceof LocalImage){
-					bmp = loadLocal((LocalImage)ir, callback.getProgressIndicator());
-				}else{
-					bmp = loadFromWeb(ir, callback.getProgressIndicator());
-				}
-				if(bmp == null) return;
-				if(callback.isVisible(ir.getID())){
-					if(hires){
-						ir.set256Bitmap(bmp);
+				synchronized (ir) {
+					if(ir.getBitmap() != null) return; // Image already loaded.
+					if(ir instanceof LocalImage){
+						bmp = loadLocal((LocalImage)ir, callback.getProgressIndicator());
 					}else{
-						ir.set128Bitmap(bmp);
+						bmp = loadFromWeb(ir, callback.getProgressIndicator());
 					}
-					if(ir.getBitmap() != null){
-						mImageCache.saveImage(ir);
-						if(!callback.bitmapLoaded(ir.getID())){
-							ir.recycleBitmap();
+					if(bmp == null){
+						// Force image to retry
+						callback.bitmapLoaded(ir.getID());
+						return;
+					}
+					if(callback.isVisible(ir.getID())){
+						if(mSettings.highResThumbs){
+							ir.set256Bitmap(bmp);
+						}else{
+							ir.set128Bitmap(bmp);
 						}
-						
+						if(ir.getBitmap() != null){
+							mImageCache.saveImage(ir);
+							if(!callback.bitmapLoaded(ir.getID())){
+								ir.recycleBitmap();
+							}
+						}
 					}
 				}
 			}

@@ -58,7 +58,7 @@ public class GetAlbumsTask extends BlockingTask<String, List<FacebookAlbumBrowse
 				Log.w("Floating Image", "Error reading facebook stream", e);
 				super.setError(R.string.error_fetching_albums);
 			} catch (IOException e) {
-				Log.w("Floaing Image", "Error getting albums", e);
+				Log.w("Floating Image", "Error getting albums", e);
 				super.setError(R.string.error_fetching_albums);
 			}
 		}

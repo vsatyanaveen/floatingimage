@@ -6,17 +6,12 @@ import java.net.URLEncoder;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Bitmap.Config;
 import android.net.Uri;
-import android.util.Log;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.parser.flickr.data.ImageSizes;
 
 public class FlickrImage extends ImageReference{
 	private final static String imageType = "flickrInternal";
-	private final static Paint paint = new Paint();
 	String farmID;
 	String serverID;
 	String imgID;
@@ -24,48 +19,14 @@ public class FlickrImage extends ImageReference{
 	String title;
 	String owner;
 	FlickrUserInfo userInfo;
-	Bitmap bitmap;
 	boolean unseen;
 	boolean personal;
-	float width;
-	float height;
 	ImageSizes sizes;
 	
 	public String getID(){
 		return imgID;
 	}
 	
-	public Bitmap getBitmap(){
-		return bitmap;
-	}
-	
-	@Override
-	public void recycleBitmap() {
-		Log.v("Floating Image", "Recycle " + getID());
-		if(bitmap != null){
-			bitmap.recycle();
-			bitmap = null;
-		}
-	}
-	
-	@Override
-	public void set128Bitmap(Bitmap bitmap){
-		this.bitmap = Bitmap.createBitmap(128, 128, Config.ARGB_8888);
-		Canvas cvs = new Canvas(this.bitmap);
-		cvs.drawBitmap(bitmap, 0, 0, paint);
-		this.width = bitmap.getWidth() / 128.0f;
-		this.height = bitmap.getHeight() / 128.0f;
-		bitmap.recycle();
-	}
-	@Override
-	public void set256Bitmap(Bitmap bitmap){
-		this.bitmap = Bitmap.createBitmap(256, 256, Config.ARGB_8888);
-		Canvas cvs = new Canvas(this.bitmap);
-		cvs.drawBitmap(bitmap, 0, 0, paint);
-		this.width = bitmap.getWidth() / 256.0f;
-		this.height = bitmap.getHeight() / 256.0f;
-		bitmap.recycle();		
-	}
 	public void getExtended(){
 		userInfo = PersonInfo.getInfo(owner);
 	}
@@ -194,9 +155,9 @@ public class FlickrImage extends ImageReference{
 		String nl = "\n";
 		sb.append(imageType);
 		sb.append(nl);
-		sb.append(width);
+		sb.append(mWidth);
 		sb.append(nl);
-		sb.append(height);
+		sb.append(mHeight);
 		sb.append(nl);
 		sb.append(farmID);
 		sb.append(nl);
@@ -229,10 +190,10 @@ public class FlickrImage extends ImageReference{
 	}
 	@Override
 	public void parseInfo(String[] tokens, Bitmap bmp) throws IOException {
-		width = Float.parseFloat(tokens[2]);
-		height = Float.parseFloat(tokens[3]);
+		mWidth = Float.parseFloat(tokens[2]);
+		mHeight = Float.parseFloat(tokens[3]);
 		farmID = tokens[4];
-		serverID = tokens[5];
+		serverID = tokens[5]; 
 		imgID = tokens[6];
 		secret = tokens[7];
 		title = URLDecoder.decode(tokens[8]);
@@ -243,7 +204,7 @@ public class FlickrImage extends ImageReference{
 			userInfo.setRealName(tokens[11]);
 			userInfo.setUrl(tokens[12]);
 		}
-		this.bitmap = bmp;
+		this.mBitmap = bmp;
 	}
 	public boolean isNew(){
 		return unseen;
@@ -253,13 +214,5 @@ public class FlickrImage extends ImageReference{
 	}
 	public boolean isPersonal(){
 		return personal;
-	}
-	@Override
-	public float getHeight() {
-		return height;
-	}
-	@Override
-	public float getWidth() {
-		return width;
 	}
 }

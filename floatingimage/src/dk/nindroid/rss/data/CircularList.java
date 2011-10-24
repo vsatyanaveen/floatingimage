@@ -98,7 +98,7 @@ public class CircularList<ImageRefeference> {
 				//Log.v("Floating List", "addNext()");
 				//visualize(nextData);
 			}else{
-				//Log.v("Floating List", "Wasted work...");
+				Log.v("Floating List", "Wasted work...");
 				t.recycleBitmap();
 			}
 		}
@@ -116,7 +116,7 @@ public class CircularList<ImageRefeference> {
 				if(t.getBitmap() != null){
 					t.recycleBitmap();
 				}
-				//Log.v("Floating List", "Wasted work...");
+				Log.v("Floating List", "Wasted work...");
 			}
 		}
 	}

@@ -6,28 +6,16 @@ import java.io.IOException;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Bitmap.Config;
 import android.net.Uri;
 
 public class LocalImage extends ImageReference{
 	public final static String imageType = "local";
-	private final static Paint paint = new Paint();
 	private 	  File 		mFile;
-	private 	  Bitmap 	mBitmap;
-	private 	  float		mWidth;
-	private 	  float		mHeight;
 	
-	public LocalImage(){
-		mWidth = 0;
-		mHeight = 0;
-	}
+	public LocalImage(){}
 	
 	public LocalImage(File file){
 		this.mFile = file;
-		mWidth = 0;
-		mHeight = 0;
 	}
 	
 	@Override
@@ -50,26 +38,8 @@ public class LocalImage extends ImageReference{
 	}
 
 	@Override
-	public Bitmap getBitmap() {
-		return mBitmap;
-	}
-	
-	@Override
-	public void recycleBitmap() {
-		if(mBitmap != null){
-			mBitmap.recycle();
-			mBitmap = null;
-		}
-	}
-
-	@Override
 	public void getExtended() {
 		// No extended available
-	}
-
-	@Override
-	public float getHeight() {
-		return mHeight;
 	}
 
 	@Override
@@ -121,11 +91,6 @@ public class LocalImage extends ImageReference{
 	}
 
 	@Override
-	public float getWidth() {
-		return mWidth;
-	}
-
-	@Override
 	public boolean isNew() {
 		return false;
 	}
@@ -153,25 +118,6 @@ public class LocalImage extends ImageReference{
 			}
 		}
 		this.mBitmap = bmp;
-	}
-
-	@Override
-	public void set128Bitmap(Bitmap bmp) {
-		this.mBitmap = Bitmap.createBitmap(128, 128, Config.ARGB_8888);
-		Canvas cvs = new Canvas(this.mBitmap);
-		cvs.drawBitmap(bmp, 0, 0, paint);
-		this.mWidth = bmp.getWidth() / 128.0f;
-		this.mHeight = bmp.getHeight() / 128.0f;
-		bmp.recycle();
-	}
-	
-	public void set256Bitmap(Bitmap bmp){
-		this.mBitmap = Bitmap.createBitmap(256, 256, Config.ARGB_8888);
-		Canvas cvs = new Canvas(this.mBitmap);
-		cvs.drawBitmap(bmp, 0, 0, paint);
-		this.mWidth = bmp.getWidth() / 256.0f;
-		this.mHeight = bmp.getHeight() / 256.0f;
-		bmp.recycle();
 	}
 
 	@Override

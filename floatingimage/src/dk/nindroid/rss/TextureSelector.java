@@ -5,6 +5,7 @@ import java.io.File;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.Bitmap.Config;
 import android.os.Process;
 import android.util.Log;
@@ -16,14 +17,22 @@ import dk.nindroid.rss.renderers.ImagePlane;
 public class TextureSelector {
 	private Worker 		mWorker;
 	private Display		mDisplay;
+	private Config		mConfig;
+	private Bitmap		mCurrentBitmap;
+	private ImagePlane	mCurSelected;
 		
-	public TextureSelector(Display display){
+	public TextureSelector(Display display, Config config){
 		this.mDisplay = display;
+		this.mConfig = config;
+	}
+	
+	public Bitmap getCurrentBitmap(){
+		return mCurrentBitmap;
 	}
 	
 	public void startThread(){
 		if(mWorker != null) stopThread();
-		mWorker = new Worker(mDisplay);
+		mWorker = new Worker(mDisplay, mConfig);
 		mWorker.mRun = true;
 		mDisplay.RegisterImageSizeChangedListener(mWorker);
 		Thread t = new Thread(mWorker);
@@ -36,6 +45,7 @@ public class TextureSelector {
 				mDisplay.deRegisterImageSizeChangedListener(mWorker);
 				mWorker.mRun = false;
 				mWorker.notifyAll();
+				mWorker = null;
 			}
 		}
 	}
@@ -43,7 +53,7 @@ public class TextureSelector {
 	public void selectImage(ImagePlane img, ImageReference ref){
 		if(mWorker != null){
 			synchronized (mWorker) {
-				mWorker.mCurSelected = img;
+				mCurSelected = img;
 				mWorker.mRef = ref;
 				mWorker.notify();
 			}		
@@ -77,26 +87,26 @@ public class TextureSelector {
 	
 	public int getProgress(){
 		if(mWorker != null){
-			return mWorker.progress.isKey(mWorker.mCurSelected) ? mWorker.progress.getPercentDone() : 2;
+			return mWorker.progress.isKey(mCurSelected) ? mWorker.progress.getPercentDone() : 2;
 		}
 		return 0;
 	}
 	
 	private class Worker implements Runnable, Display.ImageSizeChanged{
-		private final Paint			mPaint  = new Paint(); 
-		private ImagePlane			mCurSelected;
+		private final Paint			mPaint  = new Paint(Paint.FILTER_BITMAP_FLAG); 
 		private ImageReference 		mRef;
 		private boolean 			mRun	= true;
 		private final Progress 		progress = new Progress();
-		private Bitmap				mCurrentBitmap;
 		private boolean				mDoApplyLarge = false;
 		private boolean				mDoApplyOriginal = false;
 		private int					mTextureResolution;
 		private boolean				mSwapSides = false;
 		private Display				mDisplay;
+		private Config 				mConfig;
 		
-		public Worker(Display display){
+		public Worker(Display display, Config config){
 			this.mDisplay = display;
+			this.mConfig = config;
 		}
 		
 		private void setTextureResolution(){
@@ -104,14 +114,11 @@ public class TextureSelector {
 			if(max == 0) return; // Not ready yet!
 			if(max <= 512){
 				mTextureResolution = 512;
-			}else// if(max <= 1024){
+			}
+			else
 			{
-				mTextureResolution = 1024;
-			}//else if(max <= 2048){
-				//mTextureResolution = 2048;
-			//}else{
-				//mTextureResolution = 4092;
-			//}
+				mTextureResolution = 2048;
+			}
 		}
 		
 		@Override
@@ -151,7 +158,7 @@ public class TextureSelector {
 					if(ref instanceof LocalImage){ // Special case, read from disk
 						Bitmap bmp = null;
 						try{
-							bmp = ImageFileReader.readImage(new File(url), res, progress);
+							bmp = ImageFileReader.readImage(new File(url), res, progress, mConfig);
 						}catch(Throwable t){
 							Log.e("Floating Image", "Unexpected nastyness caught!", t);
 						}
@@ -161,7 +168,7 @@ public class TextureSelector {
 					}else{ // Download from web
 						// Retry max 5 times in case we time out.
 						for(int i = 0; i < 5; ++i){
-							Bitmap bmp = BitmapDownloader.downloadImage(url, progress);
+							Bitmap bmp = BitmapDownloader.downloadImage(url, progress, mConfig);
 							if(bmp != null && bmp.getWidth() > 0 && bmp.getHeight() > 0){
 								Log.v("Floating Image", "Image size: (" + bmp.getWidth() + "," + bmp.getHeight() + ")");
 								applyLarge(bmp);
@@ -195,7 +202,7 @@ public class TextureSelector {
 			int max = Math.max(width, height);
 			int res = mTextureResolution;
 			if(max > res){
-				bmp = ImageFileReader.scaleAndRecycle(bmp, max);
+				bmp = ImageFileReader.scaleAndRecycle(bmp, res, mConfig);
 			}
 			if(mCurrentBitmap != null && !mCurrentBitmap.isRecycled()){
 				mCurrentBitmap.recycle();
@@ -228,7 +235,7 @@ public class TextureSelector {
 					if(mSwapSides){
 						width ^= height; height ^= width; width ^= height; // mmmMMMMmmm... Donuts!
 					}
-				}else{ // Hello Alexis. :)
+				}else{
 					if(aspect > 1){
 						width  = mTextureResolution;
 						height = (int)(width / aspect);
@@ -237,69 +244,46 @@ public class TextureSelector {
 						width  = (int)(aspect * height);
 					}
 				}
-				Bitmap bmp = null;
-				int max = Math.max(width, height);
-				try{
-					bmp = ImageFileReader.scaleAndRecycle(mCurrentBitmap, max);
-				}catch(Throwable t){
-					Log.w("Floating Image", "Oops, let's try again with a smaller image", t);
-					try{
-						bmp = ImageFileReader.scaleAndRecycle(mCurrentBitmap, max / 2);
-					}catch(Throwable tr){
-						Log.e("Floating Image", "Shit, that didn't work either. Bailing!", tr);
-						ImageFileReader.setProgress(progress, 100);
-					}
-				}
-				if(bmp != null){
-					applyBitmap(bmp, ImagePlane.SIZE_LARGE, true);
-				}
+				applyBitmap(mCurrentBitmap, ImagePlane.SIZE_LARGE, Math.max(width, height) / (float)mTextureResolution);
 			}
 		}
 		
 		private void applyOriginal(){
 			if(mCurSelected != null && mCurSelected.validForTextureUpdate()){
-				applyBitmap(mCurrentBitmap, ImagePlane.SIZE_ORIGINAL, false);
+				applyBitmap(mCurrentBitmap, ImagePlane.SIZE_ORIGINAL, 1.0f);
 			}
 		}
 		
-		private void applyBitmap(Bitmap bmp, int sizeType, boolean doRecycle){
+		private void applyBitmap(Bitmap bmp, int sizeType, float scale){
 			if(bmp == null || bmp.isRecycled()) return;
 			int res = mTextureResolution;
 			Bitmap bitmap = null;
 			try{
-				bitmap = Bitmap.createBitmap(res, res, Config.ARGB_8888);
+				bitmap = Bitmap.createBitmap(res, res, mConfig);
 			}catch(Throwable t){
 				Log.w("Floating Image", "Couldn't apply bitmap, trying again with a smaller version", t);
 				res /= 2;
+				scale /= 2;
 				try{
-					int w = bmp.getWidth() / 2;
-					int h = bmp.getHeight() / 2;
-					
-					if(doRecycle){
-						bmp.recycle();
-					}
-					bitmap = Bitmap.createBitmap(res, res, Config.ARGB_8888);
-					bmp = ImageFileReader.scaleAndRecycle(mCurrentBitmap, Math.max(w, h));
+					bitmap = Bitmap.createBitmap(res, res, mConfig);
 				}catch(Throwable tr){
 					Log.e("Floating Image", "Still cannot apply image - bailing!", tr);
 					ImageFileReader.setProgress(progress, 100);
 				}
 			}
 			if(bitmap == null) {
-				if(doRecycle){
-					bmp.recycle();
-				}
 				return;
 			}
+			int max = Math.max(bmp.getWidth(), bmp.getHeight());
+			float sizeFraction = max / (float)res;
 			Canvas canvas = new Canvas(bitmap);
-			canvas.drawBitmap(bmp, 0, 0, mPaint);
+			int drawWidth = (int)(bmp.getWidth() * scale / sizeFraction);
+			int drawHeight = (int)(bmp.getHeight() * scale / sizeFraction);
+			canvas.drawBitmap(bmp, null, new Rect(0, 0, drawWidth, drawHeight), mPaint);
 			if(mRef != null){
 				bitmap.recycle();
 			}else{
-				mCurSelected.setFocusTexture(bitmap, (float)bmp.getWidth() / res, (float)bmp.getHeight() / res, sizeType);
-			}
-			if(doRecycle){
-				bmp.recycle();
+				mCurSelected.setFocusTexture(bitmap, (float)drawWidth/res, (float)drawHeight/res, sizeType);
 			}
 		}
 		

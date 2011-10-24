@@ -13,8 +13,9 @@ import android.util.Log;
 import dk.nindroid.rss.data.Progress;
 
 public class ImageFileReader{
+	static Paint mPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
 
-	public static Bitmap readImage(File f, int size, Progress progress){
+	public static synchronized Bitmap readImage(File f, int size, Progress progress, Config config){
 		String path = f.getAbsolutePath();
 		Options opts = new Options();
 		setProgress(progress, 10);
@@ -27,11 +28,10 @@ public class ImageFileReader{
 		setProgress(progress, 20);
 		opts.inJustDecodeBounds = false;
 		opts.inDither = true;
-		opts.inPreferredConfig = Config.ARGB_8888;
+		opts.inPreferredConfig = config;
 		if(width + height > size * 1.5f){
 			int sampleSize = getSampleSize(size, largerSide);
 			opts.inSampleSize = sampleSize;
-			//Log.v("Floating Image", "Reading image (" + width + ", " + height + ") at " + (width / sampleSize) + ", " + (height / sampleSize));
 		}
 		Bitmap bmp = null;
 		try{
@@ -47,33 +47,36 @@ public class ImageFileReader{
 				setProgress(progress, 100);
 			}
 		}
-		Log.v("Floating Image", "bmp is: " + bmp.getWidth() + "x" + bmp.getHeight());
 		setProgress(progress, 60);
 		if(bmp == null) return null;
-		
+		largerSide = Math.max(bmp.getWidth(), bmp.getHeight());
 		setProgress(progress, 80);
 		if(largerSide > size){
-			bmp = scaleAndRecycle(bmp, size);
-			Log.v("Floating Image", "(" + width + "," + height + ") - (" + bmp.getWidth() + "," + bmp.getHeight() + ")");
+			bmp = scaleAndRecycle(bmp, size, config);
 		}
 		setProgress(progress, 90);
 		return bmp;
 	}
 	
-	public static Bitmap scaleAndRecycle(Bitmap bmp, int maxSize){
-		
+	public static Bitmap scaleAndRecycle(Bitmap bmp, int maxSize, Config config){
+		Bitmap tmp = scale(bmp, maxSize, config);
+		bmp.recycle();
+		return tmp;
+	}
+	
+	public static Bitmap scale(Bitmap bmp, int maxSize, Config config){
 		int width = bmp.getWidth();
 		int height = bmp.getHeight();
 		int largerSide = Math.max(width, height);
 		float scale = (float)maxSize / largerSide;
-		//*
-		Bitmap tmp = Bitmap.createBitmap((int)(width * scale), (int)(height * scale), Config.ARGB_8888);
-		Canvas canvas = new Canvas(tmp);
-		canvas.drawBitmap(bmp, null, new Rect(0, 0, tmp.getWidth(), tmp.getHeight()), new Paint(Paint.FILTER_BITMAP_FLAG));
-		/*/
-		Bitmap tmp = Bitmap.createScaledBitmap(bmp, (int)(width * scale), (int)(height * scale), true);
-		//*/
-		bmp.recycle();
+		Bitmap tmp;
+		if(config == Config.RGB_565){
+			tmp = Bitmap.createScaledBitmap(bmp, (int)(width * scale), (int)(height * scale), true);
+		}else{
+			tmp = Bitmap.createBitmap((int)(width * scale), (int)(height * scale), config);
+			Canvas canvas = new Canvas(tmp);
+			canvas.drawBitmap(bmp, null, new Rect(0, 0, tmp.getWidth(), tmp.getHeight()), mPaint);
+		}
 		return tmp;
 	}
 		

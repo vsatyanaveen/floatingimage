@@ -349,6 +349,7 @@ public class FeedController {
 			if(isSpread()){
 				a = (a + 1) % space;
 			}
+			//Log.v("Floating Image", "Get next: " + b);
 			return b;
 		}
 		
@@ -357,6 +358,7 @@ public class FeedController {
 			if(isSpread()){
 				b = ((b - 1) + space) % space;
 			}
+			//Log.v("Floating Image", "Get prev: " + a);
 			return a;
 		}
 		

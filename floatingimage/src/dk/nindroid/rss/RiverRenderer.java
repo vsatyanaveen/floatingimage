@@ -29,7 +29,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 	private boolean			mDoubleClicked = false;
 	private boolean 		mShowOSD = false;
 	private boolean 		mHideOSD = false;
-	private long 			mOffset = 0;
+	private long 			mOffset = -7000;
 	private float			mFadeOffset = 0;
 	private static final float mSensitivityX = 70.0f;
 	private final boolean 	mLimitFramerate;
@@ -455,8 +455,6 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 			toScreenSpace(pos);
 			mClickedPos = pos;
 		}
-		
-		Log.v("RiverRenderer", "Clicked position: " + mClickedPos.toString());
 	}
 	
 	public void onDoubleClick(float x, float y){

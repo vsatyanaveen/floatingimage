@@ -55,7 +55,7 @@ public class FloatingRenderer extends Renderer implements EventSubscriber{
 	public static final int		FLOATING_TYPE_GALLERY = 15;
 	public static final int		FLOATING_TYPE_MIXUP = 20;
 	
-	private boolean 		mNewStart = true;
+	private boolean 		mNewStart = false; // Disable splash
 	private Image[] 		mImgs;
 	private Image[] 		mImgDepths;
 	private TextureBank 	mBank;
@@ -78,6 +78,8 @@ public class FloatingRenderer extends Renderer implements EventSubscriber{
 	private Vec3f			mRequestedStreamOffset;
 	private long			mUpTime;
 	private Texture 		mLargeTexture;
+	private long			mLastFrameTime;
+	private FeedController	mFeedController;
 	
 	private static final Vec3f 		mCamPos = new Vec3f(0,0,0);
 	private Image					mSelected = null;
@@ -91,7 +93,7 @@ public class FloatingRenderer extends Renderer implements EventSubscriber{
 	
 	public FloatingRenderer(MainActivity activity, TextureBank bank, OnDemandImageBank onDemandBank, FeedController feedController, Display display){
 		this.mActivity = activity;
-		mTextureSelector = new TextureSelector(display);
+		mTextureSelector = new TextureSelector(display, mActivity.getSettings().bitmapConfig);
 		mRequestedStreamOffset = new Vec3f();
 		mInfoBar = new InfoBar();
 		mBackgroundPainter = new BackgroundPainter();
@@ -99,17 +101,13 @@ public class FloatingRenderer extends Renderer implements EventSubscriber{
 		this.mBank = bank;
 		this.mOnDemandBank = onDemandBank;
 		this.mLargeTexture = new Texture();
+		this.mFeedController = feedController;
 		mDepthComparator = new ImageDepthComparator();
 		createImageArray();
 		
 		setPositionController(mActivity.getSettings().floatingType);
 		
 		mStartTime = System.currentTimeMillis();
-		if(feedController.getShowing() == 0){
-			feedController.addSubscriber(this);
-		}else{
-			this.feedsUpdated();
-		}
 	}
 	
 	int mCurPositionController = -1;
@@ -118,7 +116,7 @@ public class FloatingRenderer extends Renderer implements EventSubscriber{
 		// If amount of images have changed, rehash
 		int settingsRows = mActivity.getSettings().tsunami ? 18 : 6;
 		if(mActivity.getSettings().galleryMode){
-			settingsRows = 12;
+			settingsRows = 8;
 		}
 		if(settingsRows != mTotalImgRows){
 			mTotalImgRows = settingsRows;
@@ -203,11 +201,16 @@ public class FloatingRenderer extends Renderer implements EventSubscriber{
     	Ray r = new Ray(mCamPos, rayDir);
     	
 		if(mSelected != null){
-			if(mSelected.intersect(r) <= 0){
+			if(mActivity.getSettings().singleClickDeselect){
 				deselect(gl, frameTime, realTime);
 				return true;
+			}else{
+				if(mSelected.intersect(r) <= 0){
+					deselect(gl, frameTime, realTime);
+					return true;
+				}
+				return false; // Single click for menu when has selection
 			}
-			return false; // Single click for menu when has selection
 		}else{
 			// Ignore click if we're at the splash
 	    	if(mSplashImg == null){
@@ -245,11 +248,15 @@ public class FloatingRenderer extends Renderer implements EventSubscriber{
 	@Override
 	public boolean doubleClick(GL10 gl, float x, float y, long frameTime,
 			long realTime) {
-		if(mSelected != null){
-			deselect(gl, frameTime, realTime);
-			return true;
+		if(mActivity.getSettings().singleClickDeselect){
+			return false;
+		}else{
+			if(mSelected != null){
+				deselect(gl, frameTime, realTime);
+				return true;
+			}
+			return false;
 		}
-		return false;
 	}
 	
 	private void deselect(GL10 gl, long frameTime, long realTime){
@@ -325,15 +332,26 @@ public class FloatingRenderer extends Renderer implements EventSubscriber{
         	}
         }
         
-        for(int i = 0; i < mImgCnt; ++i){
-        	if(mImgDepths[i].update(gl, frameTime, realTime)){
-        		sortArray = true;
-        	}
+        if(mLastFrameTime < frameTime){
+        	for(int i = 0; i < mImgCnt; ++i){
+            	if(mImgDepths[i].update(gl, frameTime, realTime)){
+            		sortArray = true;
+            	}
+            }
+        }else{ // Rewind, update images reverse
+        	for(int i = mImgCnt - 1; i >= 0; --i){
+            	if(mImgDepths[i].update(gl, frameTime, realTime)){
+            		sortArray = true;
+            	}
+            }
         }
+        
+        
         if(sortArray)
         {
         	updateDepths();	
         }
+        mLastFrameTime = frameTime;
         //updateRotation(realTime);
         updateTranslation(realTime);
 	}
@@ -427,13 +445,17 @@ public class FloatingRenderer extends Renderer implements EventSubscriber{
 	}
 	
 	public void init(GL10 gl, long time, OSD osd){
-		mBackgroundPainter.initTexture(gl, mActivity.context(), mActivity.getSettings().backgroundColor);
+		mBackgroundPainter.initTexture(gl, mActivity, mActivity.getSettings().backgroundColor);
 		osd.setEnabled(false, true, true);
 		for(int i = 0; i < mImgCnt; ++i){
 			mImgs[i].init(gl, time);
 		}
 		if(mSelected != null){
 			mInfoBar.select(gl, mDisplay, mSelected.getShowing());
+		}
+		
+		if(mFeedController.getShowing() == 0){
+			mFeedController.addSubscriber(this);
 		}
 	}
 	
@@ -444,9 +466,9 @@ public class FloatingRenderer extends Renderer implements EventSubscriber{
 	
 	@Override
 	public void onResume(){
+		mTextureSelector.startThread();
 		createImageArray();
 		setPositionController(mActivity.getSettings().floatingType);
-		mTextureSelector.startThread();
 		mDoAdjustImagePositions = true;
 	}
 	
@@ -533,7 +555,8 @@ public class FloatingRenderer extends Renderer implements EventSubscriber{
 		mBank.reset();
 		for(Image i : mImgs){
 			i.reset(gl, time);
-		}	
+		}
+		feedsUpdated();
 	}
 
 	@Override

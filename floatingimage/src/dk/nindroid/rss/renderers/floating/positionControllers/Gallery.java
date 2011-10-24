@@ -3,7 +3,6 @@ package dk.nindroid.rss.renderers.floating.positionControllers;
 import dk.nindroid.rss.Display;
 import dk.nindroid.rss.MainActivity;
 import dk.nindroid.rss.gfx.Vec3f;
-import dk.nindroid.rss.renderers.floating.FloatingRenderer;
 
 public class Gallery extends PositionController {
 	public static final float  	mFloatZ = -3.5f;
@@ -30,8 +29,8 @@ public class Gallery extends PositionController {
 		mJitter = new Vec3f();
 		mPos = new Vec3f();
 		switch(image % 3){
-			case 0: mYLayerPos = 0.0f; break;	
-			case 1: mYLayerPos = 1.5f; break;
+			case 0: mYLayerPos = 1.5f; break;	
+			case 1: mYLayerPos = 0.0f; break;
 			case 2: mYLayerPos = -1.5f; break;
 		}
 		jitter();
@@ -63,7 +62,7 @@ public class Gallery extends PositionController {
 	}
 
 	public float getFarRight(){
-		return mDisplay.getWidth() * 0.7f * (-mFloatZ + FloatingRenderer.mJitterZ) * 1.2f + 1.3f;
+		return mDisplay.getWidth() * (-mFloatZ);
 	}
 
 	@Override
