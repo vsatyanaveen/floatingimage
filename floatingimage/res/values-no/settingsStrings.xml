@@ -9,11 +9,16 @@
 	<string name="manageFeeds">Redigér kilder</string> 
 	<string name="manageFeedsSummary">Hvor skal bildene komme fra</string>
 	<string name="display">Utseende</string>
+	<string name="searching_for_user">Leter etter bruker</string>
 	<string name="floating">Flytende bilder</string>
 	<string name="rotateImages">Roter bildene</string>
 	<string name="rotateImagesSummary">Velt bildene for en litt mer rotete effekt</string>
 	<string name="fullscreenBlack">Helt sort ved fullskjerm</string>
 	<string name="fullscreenBlackSummary">Gjør bakgrunnen helt sort når bildene vises i fullskjerm</string>
+	<string name="tsunami">Tsunami</string>
+	<string name="tsunamiSummary">Fyll skjermen med bilder</string>
+	<string name="blackEdges">Svart omriss</string>
+	<string name="blackEdgesSummary">Viser et svart omriss rundt bildene</string>
 	<string name="imageDecorations">Dekorér bildene</string>
 	<string name="imageDecorationsSummary">Vis skygger bak bildene</string>
 	<string name="floatingType">Bevegelse</string>
@@ -22,6 +27,7 @@
 	<string name="floatingSpeed">Hastighet</string>
 	<string name="floatingSpeedSummary">Hvor hurtig skal bildene bevege seg over skjermen</string>
 	<string name="floatingSpeedTitle">Flytende bildehastighet</string>
+	<string name="internals">Internt</string>
 	<string name="shuffle">Bland bildene</string>
 	<string name="shuffleSummary">Vis bildene i tilfeldig rekkefølge</string>
 	<string name="modeTitle">Velg visningsform</string>
@@ -42,14 +48,19 @@
 	<string name="forceRotation">Tving skjermrotasjon</string>
 	<string name="forceRotationSummary">Justér skjermrotasjonen manuelt</string>
 	<string name="forceRotationTitle">Skjermrotasjion</string>
+	<string name="useCache">Bildecache</string>
+	<string name="useCacheSummary">Dette gir en jevnere bildestrøm ved streaming</string>
 	<string name="useHighResThumbs">Bruk høyoppløselige thumbnails</string>
 	<string name="useHighResThumbsSummary">EKSPERIMENTELL: Dette kan få duppeditten din til å kræsje! Virker kun på enheter som støtter høy oppløsning.</string>
+	<string name="clearCache">Tøm cache</string>
+	<string name="clearCacheSummary">Fjerner alt innhold fra bildecache</string>
 	<string name="feedMenuAdd">Tilføy ny kilde</string>
 	<string name="feedMenuAddSummary">Tilføy en ny strøm av bilder</string>
 	<string name="feedMenuRemove">Fjern kilde</string>
 	<string name="selectFolder">Velg mappe</string>
 	<string name="selectCurrentFolder">Velg denne mappen</string>
 	<string name="showHiddenFiles">Vis/skjul skjulte filer</string>
+	<string name="signingIn">Logger på</string>
 	<string name="flickr">Flickr</string>
 	<string name="flickrShowStream">Vis strøm</string>
 	<string name="flickrShowStreamUsername">Vennligst tast inn brukernavnet for strømmen</string>
@@ -86,6 +97,11 @@
 	<string name="facebookPhotosOfFriend">Vis bilder av</string>
 	<string name="facebookFriendsAlbums">Album av</string>
 	<string name="facebookShowAlbum">Vis</string>
+	<string name="photobucket">Photobucket</string>
+	<string name="photobucketShowUser">Vis bruker</string>
+	<string name="photobucketShowUserBadUsername">Beklager, Photobucket brukeren dessverre ikke funnet.</string>
+	<string name="photobucketShowRecent">Vis nye</string>
+	<string name="photobucketShowFollowing">Vis fulgte bilder</string>	
 	<string name="loadingAlbums">Henter album...</string>
 	<string name="loadingFriends">Henter venner...</string>
 	<string name="albumBy">Album av</string>
@@ -93,4 +109,7 @@
 	<string name="cameraPictures">Kamerabilder</string>
 	<string name="moreCameraPictures">Flere kamerabilder</string>
 	<string name="Downloads">Downloads</string>
+	<string name="misc">Annet</string>
+	<string name="LiveWallpapers">Live wallpapers</string>
+	<string name="LiveWallpapersSummary">La Floating Image organisere Live Wallpaper oppsettet</string>
 </resources>

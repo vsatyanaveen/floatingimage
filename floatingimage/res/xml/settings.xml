@@ -83,6 +83,11 @@
                 android:summary="@string/fullscreenBlackSummary"
                 android:defaultValue="true" />
             <CheckBoxPreference
+            	android:key="singleClickDeselect"
+                android:title="@string/singleClickDeselect"
+                android:summary="@string/singleClickDeselectSummary"
+                android:defaultValue="true" />
+            <CheckBoxPreference
             	android:key="blackEdges"
                 android:title="@string/blackEdges"
                 android:summary="@string/blackEdgesSummary"
