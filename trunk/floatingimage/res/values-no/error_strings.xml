@@ -6,4 +6,6 @@
     <string name="error_fetching_friends">Feil ved henting av venner, vennligst prøv igjen.</string>
     <string name="error_getting_flickr_user">Feil ved henting av brukeren din, vennligst prøv å logge inn igjen.</string>
     <string name="authorization_failed">Det skjedde noe rart med påloggingsforsøket... Vennligst prøv igjen!</string>
+    <string name="cannot_read_feed">Kan ikke lese kilden, den er antagelig for stor.</string>
+    <string name="device_does_not_support_live_wallpapers">Beklager, duppeditten din støtter visst ikke Live Wallpapers? :(</string>
 </resources>

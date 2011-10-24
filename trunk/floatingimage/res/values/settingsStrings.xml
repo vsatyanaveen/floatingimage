@@ -21,8 +21,11 @@
 	<string name="tsunamiSummary">Fill screen with images. USE WITH CAUTION: This may cause strange behaviour and instability!</string>
 	<string name="blackEdges">Black outline</string>
 	<string name="blackEdgesSummary">Put a black outline around images. Remove this for better performance.</string>
+	<string name="singleClickDeselect">Click once to deselect image</string>
+	<string name="singleClickDeselectSummary">If on a single click deselects an image. Double click brings up the menu.</string>
 	<string name="imageDecorations">Decorate images</string>
 	<string name="imageDecorationsSummary">Show shadows and glow behind images</string>
+	
 	<string name="floatingType">Movement</string>
 	<string name="floatingTypeSummary">How should the images move</string>
 	<string name="floatingTypeTitle">Floating images movement</string>
