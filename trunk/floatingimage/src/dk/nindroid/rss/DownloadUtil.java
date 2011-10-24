@@ -42,7 +42,6 @@ public class DownloadUtil {
 		int totalRead = 0;
 
 		DataInputStream in = new DataInputStream(connection.getInputStream());
-		if(in == null) return null;
 		while ((bytesRead = in.read(buffer)) != -1) { // loop until the
 														// DataInputStream is
 														// completed

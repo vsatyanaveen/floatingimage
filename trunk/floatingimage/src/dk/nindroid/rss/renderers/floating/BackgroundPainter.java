@@ -17,6 +17,7 @@ import android.opengl.GLU;
 import android.opengl.GLUtils;
 import android.util.Log;
 import dk.nindroid.rss.Display;
+import dk.nindroid.rss.MainActivity;
 import dk.nindroid.rss.R;
 import dk.nindroid.rss.gfx.Vec3f;
 
@@ -33,7 +34,6 @@ public class BackgroundPainter {
 	
 	private static final float zDepth = 15.0f;
 	
-	private Bitmap bg;
 	private int mTextureID;
 	private FloatBuffer mTexBuffer;
 	private Vec3f[]		mVertices;
@@ -91,9 +91,9 @@ public class BackgroundPainter {
 		mIndexBuffer.position(0);
 	}
 	
-	public void initTexture(GL10 gl, Context context, int backgroundColor){	
+	public void initTexture(GL10 gl, MainActivity activity, int backgroundColor){	
 		InputStream shadowIS;
-		
+		Context context = activity.context();
 		switch(backgroundColor){
 		case GREY:
 			shadowIS = context.getResources().openRawResource(R.drawable.background);
@@ -130,7 +130,7 @@ public class BackgroundPainter {
 		if(shadowIS != null){
 			Options opts = new Options();
 			opts.inPreferredConfig = Config.ARGB_8888;
-			bg = BitmapFactory.decodeStream(shadowIS, null, opts);		
+			Bitmap bg = BitmapFactory.decodeStream(shadowIS, null, opts);		
 			
 			int[] textures = new int[1];
 	        gl.glGenTextures(1, textures, 0);
@@ -154,6 +154,8 @@ public class BackgroundPainter {
 	        GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, bg, 0);
 	        //GLUtils.texSubImage2D(GL10.GL_TEXTURE_2D, 0, 0, 0, bg);
 			
+	        bg.recycle();
+	        
 	        ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
 	        tbb.order(ByteOrder.nativeOrder());
 	        mTexBuffer = tbb.asFloatBuffer();

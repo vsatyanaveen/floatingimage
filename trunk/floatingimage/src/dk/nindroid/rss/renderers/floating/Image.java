@@ -129,10 +129,11 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 	public void setBackground(){
 		if(mLargeTex){
 			try {
-				if(mFocusBmp.isRecycled()){
+				Bitmap bmp = mTextureSelector.getCurrentBitmap();
+				if(bmp.isRecycled()){
 					Log.e("Floating Image", "Trying to set recycled bitmap as background!");
 				}else{
-					mActivity.setWallpaper(mFocusBmp);
+					mActivity.setWallpaper(bmp);
 				}
 			} catch (IOException e) {
 				Log.e("Floating Image", "Failed to get image", e);
@@ -150,15 +151,12 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 		mLastTextureSize = 0;
 		
 		// Revive textures
-		if(mState == STATE_FOCUSED && mFocusBmp != null){
-			// Set large texture next time round.
-			mUpdateLargeTex = true;
+		if(mState == STATE_FOCUSED){
+			mTextureSelector.applyLarge();
 		}else{
 			mLargeTex = false;
 			if(mShowingImage != null){
-				if(mShowingImage != null){
-					mOnDemandBank.get(mShowingImage, this);
-				}
+				mOnDemandBank.get(mShowingImage, this);
 			}
 		}
 		
@@ -178,7 +176,7 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 		}
 		mFocusBmp = null;
 		mState = STATE_FLOATING;
-
+		
 		mShowingImage = null;
 	}
 	
@@ -1072,10 +1070,6 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 				}else{
 					//setTexture(gl, mShowingImage);
 				}
-				if(mFocusBmp != null){
-					mFocusBmp.recycle();
-					mFocusBmp = null;
-				}
 				mLargeTex = false;
 			}
 			return;
@@ -1134,6 +1128,8 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 				synchronized(this){
 					if(mUpdateLargeTex && mFocusBmp != null){
 						setFocusTexture(gl);
+						mFocusBmp.recycle();
+						mFocusBmp = null;
 						mLargeTex = true;
 						mUpdateLargeTex = false;
 					}
@@ -1279,8 +1275,6 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
             //Log.v("Floating Image", "Set texture timings. A: " + (timeA - startTime) + "ms, B:" + (timeB - timeA) + "ms, C: " + (timeC - timeB) + "ms.");
         }catch(IllegalArgumentException e){
         	Log.w("Floating Image", "Large texture could not be shown", e);
-        	mFocusBmp.recycle();
-			mFocusBmp = null;
 			mLargeTex = false;
         	setTexture(gl, mShowingImage);
         }

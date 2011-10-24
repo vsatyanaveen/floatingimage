@@ -32,12 +32,16 @@ public class PicasaWebAuth extends Activity {
 		        return true;
 	    	}
 	    	Uri uri = Uri.parse(url);
-	    	String verifier = uri.getQueryParameter("oauth_verifier");
-	    	String token = uri.getQueryParameter("oauth_token");
-	    	if(verifier == null || token == null){
-	    		Log.w("Floating Image", "Invalid response from Google auth: " + url);
-	    	}else{
-	    		new SetAuthTask(PicasaWebAuth.this, verifier, token).execute();
+	    	try{
+		    	String verifier = uri.getQueryParameter("oauth_verifier");
+		    	String token = uri.getQueryParameter("oauth_token");
+		    	if(verifier == null || token == null){
+		    		Log.w("Floating Image", "Invalid response from Google auth: " + url);
+		    	}else{
+		    		new SetAuthTask(PicasaWebAuth.this, verifier, token).execute();
+		    	}
+	    	}catch(UnsupportedOperationException e){
+	    		Log.e("Floating Image", "Exception caught", e);
 	    	}
 	    	return true;
 	    }

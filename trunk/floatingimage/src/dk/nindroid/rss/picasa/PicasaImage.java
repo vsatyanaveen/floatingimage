@@ -4,15 +4,11 @@ import java.io.IOException;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Bitmap.Config;
 import android.net.Uri;
 import dk.nindroid.rss.data.ImageReference;
 
 public class PicasaImage extends ImageReference{
 	private final static String imageType = "picasaInternal";
-	private final static Paint paint = new Paint();
 	String imgID;
 	String title;
 	String owner;
@@ -22,11 +18,8 @@ public class PicasaImage extends ImageReference{
 	String thumbnail128URL;
 	String thumbnail256URL;
 	String imageURL;
-	Bitmap bitmap;
 	boolean unseen;
 	boolean personal;
-	float width;
-	float height;
 	
 	public void setImageID(String id){
 		imgID = id;
@@ -77,28 +70,10 @@ public class PicasaImage extends ImageReference{
 	public String getBigImageUrl() {
 		return sourceURL;
 	}
-
-	@Override
-	public Bitmap getBitmap() {
-		return bitmap;
-	}
 	
-	@Override
-	public void recycleBitmap() {
-		if(bitmap != null){
-			bitmap.recycle();
-			bitmap = null;
-		}
-	}
-
 	@Override
 	public void getExtended() {
 		// No need, we get everything from the initial lookup!		
-	}
-
-	@Override
-	public float getHeight() {
-		return height;
 	}
 
 	@Override
@@ -122,9 +97,9 @@ public class PicasaImage extends ImageReference{
 		String nl = "\n";
 		sb.append(imageType);
 		sb.append(nl);
-		sb.append(width);
+		sb.append(mWidth);
 		sb.append(nl);
-		sb.append(height);
+		sb.append(mHeight);
 		sb.append(nl);
 		sb.append(imgID);
 		sb.append(nl);
@@ -144,8 +119,8 @@ public class PicasaImage extends ImageReference{
 	
 	@Override
 	public void parseInfo(String[] tokens, Bitmap bmp) throws IOException {
-		width = Float.parseFloat(tokens[2]);
-		height = Float.parseFloat(tokens[3]);
+		mWidth = Float.parseFloat(tokens[2]);
+		mHeight = Float.parseFloat(tokens[3]);
 		imgID = tokens[4];
 		title = tokens[5];
 		owner = tokens[6];
@@ -153,7 +128,7 @@ public class PicasaImage extends ImageReference{
 		thumbnail256URL = tokens[8];
 		imageURL = tokens[9];
 		sourceURL = tokens[10];
-		this.bitmap = bmp;
+		this.mBitmap = bmp;
 	}
 
 	@Override
@@ -177,11 +152,6 @@ public class PicasaImage extends ImageReference{
 	}
 
 	@Override
-	public float getWidth() {
-		return width;
-	}
-
-	@Override
 	public boolean isNew() {
 		return unseen;
 	}
@@ -189,26 +159,6 @@ public class PicasaImage extends ImageReference{
 	@Override
 	public boolean isPersonal() {
 		return personal;
-	}
-
-	@Override
-	public void set128Bitmap(Bitmap bitmap) {
-		this.bitmap = Bitmap.createBitmap(128, 128, Config.ARGB_8888);
-		Canvas cvs = new Canvas(this.bitmap);
-		cvs.drawBitmap(bitmap, 0, 0, paint);
-		this.width = bitmap.getWidth() / 128.0f;
-		this.height = bitmap.getHeight() / 128.0f;
-		bitmap.recycle();
-	}
-
-	@Override
-	public void set256Bitmap(Bitmap bitmap) {
-		this.bitmap = Bitmap.createBitmap(256, 256, Config.ARGB_8888);
-		Canvas cvs = new Canvas(this.bitmap);
-		cvs.drawBitmap(bitmap, 0, 0, paint);
-		this.width = bitmap.getWidth() / 256.0f;
-		this.height = bitmap.getHeight() / 256.0f;
-		bitmap.recycle();
 	}
 
 	@Override

@@ -18,7 +18,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
-import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
 import android.os.Environment;
 import android.util.Log;
@@ -38,15 +37,15 @@ public class ImageCache {
 	Context					mContext;
 	private final Options 	mOpts;					
 	
-	public ImageCache(Context context, TextureBank bank){
+	public ImageCache(MainActivity activity, TextureBank bank){
 		mOpts = new Options();
-		mOpts.inPreferredConfig = Config.ARGB_8888;
+		mOpts.inPreferredConfig = activity.getSettings().bitmapConfig;
 		this.bank = bank;
-		this.mContext = context;
+		this.mContext = activity.context();
 		mBuf = new byte[1024];
 		String datafolder = mContext.getString(R.string.dataFolder);
 		datafolder = Environment.getExternalStorageDirectory().getAbsolutePath() + datafolder;
-		mExploreInfoFolder = datafolder + context.getString(R.string.exploreFolder);
+		mExploreInfoFolder = datafolder + activity.context().getString(R.string.exploreFolder);
 		mExploreFolder = mExploreInfoFolder + "/bmp";
 	}
 	
@@ -57,8 +56,8 @@ public class ImageCache {
 		mExploreInfo.mkdirs(); // Make dir if not exists
 		mExplore.mkdirs(); // Make dir if not exists
 		File[] exploreInfoArray = mExploreInfo.listFiles();
-		mCached = new HashMap<String, File>(exploreInfoArray.length);
 		if(exploreInfoArray == null) return;
+		mCached = new HashMap<String, File>(exploreInfoArray.length);
 		//mFiles = new ArrayList<File>(exploreInfoArray.length);
 		Log.v("Floating Image", exploreInfoArray.length + " files in cache.");
 		for(int i = 0; i < exploreInfoArray.length; ++i){
@@ -74,7 +73,11 @@ public class ImageCache {
 	public void cleanCache(){
 		if(mCached == null){
 			setupImageCache();
+			if(mCached == null){
+				return;
+			}
 		}
+		
 		try{
 			int limit = 500;
 			File[] files = mExploreInfo.listFiles();
@@ -116,16 +119,25 @@ public class ImageCache {
 	public void saveImage(ImageReference ir){
 		if(mCached == null){
 			setupImageCache();
+			if(mCached == null){
+				return;
+			}
 		}
 		if(ir == null) return;
+		Bitmap bmp = ir.getBitmap();
+		if(bmp == null) return;
 		String name = ir.getID();
-		if(exists(name, ir.getBitmap().getWidth())) return;
+		if(exists(name, bmp.getWidth())) return;
 		try {
-			File f = new File(mExplore.getPath() + "/" + name + "-" + ir.getBitmap().getWidth() + ".jpg");
+			File f = new File(mExplore.getPath() + "/" + name + "-" + bmp.getWidth() + ".jpg");
 			FileOutputStream fos = new FileOutputStream(f);
-			ir.getBitmap().compress(CompressFormat.JPEG, 85, fos);
-			fos.flush();
-			fos.close();
+			synchronized (bmp) {
+				if(bmp.isRecycled()) return;
+				bmp.compress(CompressFormat.JPEG, 85, fos);
+				fos.flush();
+				fos.close();
+			}
+			
 			File f_info = updateMeta(ir);
 			if(f_info == null){
 				f.delete();
@@ -146,8 +158,10 @@ public class ImageCache {
 	public File updateMeta(ImageReference ir){
 		try {
 			String name = ir.getID();
-			String thumbPath = mExplore.getPath() + "/" + name + "-" + ir.getBitmap().getWidth() + ".jpg";
-			File f_info = new File(mExploreInfo.getPath() + "/" + name + "-" + ir.getBitmap().getWidth() + ".info");
+			Bitmap bmp = ir.getBitmap();
+			if(bmp == null) return null;
+			String thumbPath = mExplore.getPath() + "/" + name + "-" + bmp.getWidth() + ".jpg";
+			File f_info = new File(mExploreInfo.getPath() + "/" + name + "-" + bmp.getWidth() + ".info");
 			f_info.delete();
 			FileOutputStream fos_info = new FileOutputStream(f_info);
 			fos_info.write((thumbPath + "\n" + ir.getInfo()).getBytes());
@@ -186,16 +200,31 @@ public class ImageCache {
 			String bmpName = tokens[0];
 			if(bmpName == null){
 				f_info.delete();
-				mCached.remove(ir.getID() + ".info");
+				synchronized(mCached){
+					mCached.remove(f_info.getName());
+				}
 				return null;
 			}
 			// Read bitmap
-			Bitmap bmp = BitmapFactory.decodeFile(bmpName, mOpts);
+			Bitmap bmp;
+			try{
+				bmp = BitmapFactory.decodeFile(bmpName, mOpts);
+			}catch(NullPointerException e){
+				f_info.delete();
+				synchronized(mCached){
+					mCached.remove(f_info.getName());
+				}
+				Log.e("Floating Image", "NullPointerException reading Image cache!", e);
+				Log.e("Floating Image", "Is mOpts null? " + (mOpts == null));
+				Log.e("Floating Image", "Is bmpName null? " + (bmpName == null));
+				Log.e("Floating Image", "Does the file exist? " + new File(bmpName).exists());
+				return null;
+			}
 			
 			if(bmp == null){
 				f_info.delete();
 				synchronized(mCached){
-					mCached.remove(ir.getID() + ".info");
+					mCached.remove(f_info.getName());
 				}
 				return null;
 			}
@@ -209,10 +238,10 @@ public class ImageCache {
 			if(f_info != null){
 				f_info.delete();
 				synchronized(mCached){
-					mCached.remove(ir.getID() + ".info");
+					mCached.remove(f_info.getName());
 				}
 			}
-			Log.w("Floating Image", "Image cache file not found: " + e);
+			Log.w("Floating Image", "Image cache file not found", e);
 		} catch (IOException e) {
 			Log.w("Floating Image", "IOException reading Image cache!", e);
 		}
@@ -222,6 +251,9 @@ public class ImageCache {
 	public boolean exists(String name, int size){
 		if(mCached == null){
 			setupImageCache();
+			if(mCached == null){
+				return false;
+			}
 		}
 		synchronized(mCached){
 			if(mCached.containsKey(name + "-" + size + ".info")){

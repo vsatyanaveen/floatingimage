@@ -113,27 +113,13 @@ public class BitmapDownloader implements Runnable {
 	
 	public void addExternalImage(ImageReference ir, boolean next){ 
 		String url = mSettings.highResThumbs ? ir.get256ImageUrl() : ir.get128ImageUrl();
-		Bitmap bmp = downloadImage(url, null);
+		Bitmap bmp = downloadImage(url, null, mSettings.bitmapConfig);
 		if(bmp == null){
 			return;
 		}
 		if(mSettings.highResThumbs){
-			int max = Math.max(bmp.getHeight(), bmp.getWidth());
-			if(max > 256){
-				float scale = (float)256 / max;
-				Bitmap tmp = Bitmap.createScaledBitmap(bmp, (int)(bmp.getWidth() * scale), (int)(bmp.getHeight() * scale), true);
-				bmp.recycle();
-				bmp = tmp;
-			}
 			ir.set256Bitmap(bmp);
 		}else{
-			int max = Math.max(bmp.getHeight(), bmp.getWidth());
-			if(max > 128){
-				float scale = (float)128 / max;
-				Bitmap tmp = Bitmap.createScaledBitmap(bmp, (int)(bmp.getWidth() * scale), (int)(bmp.getHeight() * scale), true);
-				bmp.recycle();
-				bmp = tmp;
-			}
 			ir.set128Bitmap(bmp);
 		}
 		ir.getExtended();
@@ -144,7 +130,7 @@ public class BitmapDownloader implements Runnable {
 		
 		File file = image.getFile();
 		int size = mSettings.highResThumbs ? 256 : 128;
-		Bitmap bmp = ImageFileReader.readImage(file, size, null);
+		Bitmap bmp = ImageFileReader.readImage(file, size, null, mSettings.bitmapConfig);
 		if(bmp != null){
 			if(exifAvailable){
 				try {
@@ -194,14 +180,14 @@ public class BitmapDownloader implements Runnable {
 		return rssParser.getData();
 	}
 	
-	public static Bitmap downloadImage(String URL, Progress progress){
+	public static Bitmap downloadImage(String URL, Progress progress, Config config){
 		URL url;
 		byte[] bitmapByteArray;
 		try {
 			url = new URL(URL);		
 			bitmapByteArray = DownloadUtil.fetchUrlBytes(url, "Floating image/Android", progress);
 			Options opts = new Options();
-			opts.inPreferredConfig = Config.ARGB_8888;
+			opts.inPreferredConfig = config;
 			Bitmap bm = BitmapFactory.decodeByteArray(bitmapByteArray, 0, bitmapByteArray.length, opts);
 			return bm;
 		} catch (Exception e) {

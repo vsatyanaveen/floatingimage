@@ -252,6 +252,7 @@ public class ShowStreams extends Activity implements MainActivity {
 	@Override 
 	protected void onPause() {
 		Log.v("Floating image", "Pausing...");
+		mOnDemandBank.stop();
 		//Debug.stopMethodTracing();
 		mGLSurfaceView.onPause();
 		renderer.onPause();
@@ -265,6 +266,7 @@ public class ShowStreams extends Activity implements MainActivity {
 	protected void onResume() {
 		Log.v("Floating Image", "Resuming main activity");
 		super.onResume();
+		mOnDemandBank.start();
 		//String loading = this.getString(dk.nindroid.rss.R.string.please_wait);
 		//ProgressDialog dialog = ProgressDialog.show(this, "", loading, true);
 		mSettings.readSettings(this);
@@ -276,7 +278,7 @@ public class ShowStreams extends Activity implements MainActivity {
 				Log.v("Floating Image", "Not Honeycomb!");
 			}
 		}catch (Throwable t){
-			Log.v("Floating Image", "Compatibility check", t);
+			Log.v("Floating Image", "Compatibility check failed. Cannot set button brightness");
 		}
 		Log.v("Floating Image", "Begin resume...");
 		Renderer defaultRenderer = renderer.getRenderer();
@@ -301,7 +303,7 @@ public class ShowStreams extends Activity implements MainActivity {
 		orientationManager.onResume();
 
 		mGLSurfaceView.onResume();
-		ReadFeeds.runAsync(mFeedController, defaultRenderer.totalImages() + CACHE_SIZE);
+		ReadFeeds.runAsync(mFeedController, defaultRenderer.totalImages() + (mSettings.galleryMode ? 0 : CACHE_SIZE));
 		//dialog.dismiss();
 		//Debug.startMethodTracing("floatingimage");
 		Log.v("Floating Image", "End resume...");

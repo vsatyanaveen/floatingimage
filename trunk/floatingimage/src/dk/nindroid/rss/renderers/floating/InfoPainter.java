@@ -65,7 +65,7 @@ public class InfoPainter {
 			}while(title1Width > textWidth);
 			
 			int lastSpace;
-			if(nextSpace != -1){
+			if(nextSpace != -1 && nextSpace < mTitle.length()){
 				title2 = mTitle.substring(nextSpace);
 				title2Width = (int)Math.ceil(mPainter.measureText(title2));
 				if(title2Width > textWidth){

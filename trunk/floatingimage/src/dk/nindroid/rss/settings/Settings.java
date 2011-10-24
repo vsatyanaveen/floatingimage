@@ -1,8 +1,13 @@
 package dk.nindroid.rss.settings;
 
+import android.app.ActivityManager;
+import android.app.ActivityManager.MemoryInfo;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.os.Environment;
+import android.util.Log;
 import android.view.Surface;
 
 public class Settings {
@@ -38,11 +43,13 @@ public class Settings {
 	public boolean	tsunami;
 	public boolean	blackEdges;
 	public boolean	hideEdges;
+	public boolean	singleClickDeselect;
 	
 	public int		backgroundColor;
 	public boolean	lowFps;
 	
 	public boolean fullscreen;
+	public Bitmap.Config bitmapConfig = Config.RGB_565;
 
 	private SharedPreferences sp;
 	
@@ -73,7 +80,8 @@ public class Settings {
 		blackEdges = sp.getBoolean("blackEdges", true);
 		tsunami = sp.getBoolean("tsunami", false);
 		galleryMode = sp.getBoolean("galleryMode", false);
-		
+		singleClickDeselect = sp.getBoolean("singleClickDeselect", true);
+			
 		switch(forceRotation){
 		case 90:
 			forceRotation = Surface.ROTATION_90;
@@ -85,6 +93,7 @@ public class Settings {
 			forceRotation = Surface.ROTATION_270;
 			break;
 		}
+		
 		/*
 		if(max < 500){
 			highResThumbs = false;
@@ -92,6 +101,17 @@ public class Settings {
 		*/
 		backgroundColor = Integer.parseInt(sp.getString("backgroundColor", "0"));
 		lowFps = sp.getBoolean("liveWallpaperLowFramerate", false);
+		
+		memoryBalancing(context);
+	}
+	
+	void memoryBalancing(Context context){
+		ActivityManager am = (ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE);
+		MemoryInfo mi = new MemoryInfo();
+		am.getMemoryInfo(mi);
+		bitmapConfig = mi.availMem < 100000000l ? Config.RGB_565 : Config.ARGB_8888;
+		Log.v("Floating Image", "Available memory: " + mi.availMem);
+		Log.v("Floating Image", "Low memory? " + (bitmapConfig == Config.RGB_565));
 	}
 	
 	public void PreferenceChanged(SharedPreferences sp, String key){
