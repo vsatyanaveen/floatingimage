@@ -38,7 +38,7 @@ public class OnDemandImageBank {
 	
 	public OnDemandImageBank(FeedController feedController, MainActivity activity, ImageCache imageCache) {
 		this.mFeedController = feedController;
-		mLoaders = new Loader[5];
+		mLoaders = new Loader[10];
 		for(int i = 0; i < mLoaders.length; ++i){
 			mLoaders[i] = new Loader(activity.getSettings());
 		}
@@ -222,24 +222,26 @@ public class OnDemandImageBank {
 			
 			public Bitmap loadFromWeb(ImageReference ir, Progress progress){
 				Bitmap bmp = BitmapDownloader.downloadImage(mSettings.highResThumbs ? ir.get256ImageUrl() : ir.get128ImageUrl(), progress, mConfig);
-				if(bmp == null){
-					return null;
-				}
-				if(mSettings.highResThumbs){
-					int max = Math.max(bmp.getHeight(), bmp.getWidth());
-					if(max > 256){
-						float scale = (float)256 / max;
-						Bitmap tmp = Bitmap.createScaledBitmap(bmp, (int)(bmp.getWidth() * scale), (int)(bmp.getHeight() * scale), true);
-						bmp.recycle();
-						bmp = tmp;
+				synchronized (LoaderHandler.class) {
+					if(bmp == null){
+						return null;
 					}
-				}else{
-					int max = Math.max(bmp.getHeight(), bmp.getWidth());
-					if(max > 128){
-						float scale = (float)128 / max;
-						Bitmap tmp = Bitmap.createScaledBitmap(bmp, (int)(bmp.getWidth() * scale), (int)(bmp.getHeight() * scale), true);
-						bmp.recycle();
-						bmp = tmp;
+					if(mSettings.highResThumbs){
+						int max = Math.max(bmp.getHeight(), bmp.getWidth());
+						if(max > 256){
+							float scale = (float)256 / max;
+							Bitmap tmp = Bitmap.createScaledBitmap(bmp, (int)(bmp.getWidth() * scale), (int)(bmp.getHeight() * scale), true);
+							bmp.recycle();
+							bmp = tmp;
+						}
+					}else{
+						int max = Math.max(bmp.getHeight(), bmp.getWidth());
+						if(max > 128){
+							float scale = (float)128 / max;
+							Bitmap tmp = Bitmap.createScaledBitmap(bmp, (int)(bmp.getWidth() * scale), (int)(bmp.getHeight() * scale), true);
+							bmp.recycle();
+							bmp = tmp;
+						}
 					}
 				}
 				ir.getExtended();
@@ -266,16 +268,18 @@ public class OnDemandImageBank {
 						callback.bitmapLoaded(ir.getID());
 						return;
 					}
-					if(callback.isVisible(ir.getID())){
-						if(mSettings.highResThumbs){
-							ir.set256Bitmap(bmp);
-						}else{
-							ir.set128Bitmap(bmp);
-						}
-						if(ir.getBitmap() != null){
-							mImageCache.saveImage(ir);
-							if(!callback.bitmapLoaded(ir.getID())){
-								ir.recycleBitmap();
+					synchronized (LoaderHandler.class) {
+						if(callback.isVisible(ir.getID())){
+							if(mSettings.highResThumbs){
+								ir.set256Bitmap(bmp);
+							}else{
+								ir.set128Bitmap(bmp);
+							}
+							if(ir.getBitmap() != null){
+								mImageCache.saveImage(ir);
+								if(!callback.bitmapLoaded(ir.getID())){
+									ir.recycleBitmap();
+								}
 							}
 						}
 					}

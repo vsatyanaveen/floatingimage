@@ -132,10 +132,12 @@ public class ImageCache {
 			File f = new File(mExplore.getPath() + "/" + name + "-" + bmp.getWidth() + ".jpg");
 			FileOutputStream fos = new FileOutputStream(f);
 			synchronized (bmp) {
-				if(bmp.isRecycled()) return;
-				bmp.compress(CompressFormat.JPEG, 85, fos);
-				fos.flush();
-				fos.close();
+				synchronized (this) {
+					if(bmp.isRecycled()) return;
+					bmp.compress(CompressFormat.JPEG, 85, fos);
+					fos.flush();
+					fos.close();
+				}
 			}
 			
 			File f_info = updateMeta(ir);
