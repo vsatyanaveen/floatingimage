@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">浮动图像</string>
+    <string name="about">关于</string>
+    <string name="authorizing">授权</string>
+    <string name="aboutSummary">自我推广</string>
+        <!-- <string name="about_text">Hello, I am your friendly neighbourhood programmer!\n\nFloating Image is a spare time project created in part as an attempt to bring a bit of eye candy to Android, in part to get some experience programming for the platform. Images from various sources are streamed to the phone.\n\nImages with a blue glow have just been downloaded, where images with shadow are either taken from the phone locally, or from an image cache - not to worry, the cache is fairly small.\n\nSome Controls:\nNavigate stream: Swipe your finger sideways.\nPick image: Tap on it.\nGo to image homepage: Long click when selected.\n\nMore features are in the works, but I will of course gladly take advice on what would make this the killer application for you!\n\nThis application is free as in speech, which means that you may at any time request the code (I would however like improvements to float my way). It is also free as in beer, which means that if you like it, and happen to run into me, I encourage you to buy me a beer!</string>  -->
+	<string name="dataFolder">/浮动图像</string>
+	<string name="exploreFolder">/.explore缓存</string>
+	<string name="fullscreen">全屏</string>
+	<string name="show_details">查看详情</string>
+	<string name="show">显示</string>
+	<string name="show_folder">显示文件夹</string>
+	<string name="show_flickr">显示网络相册</string>
+	<string name="show_flickr_user">显示网络相册用户</string>
+	<string name="search_flickr">搜索网络相册</string>
+	<string name="cancel_show">取消显示</string>
+	<string name="go_to_source">去找资源</string>
+	<string name="save_image">保存图像</string>
+	<string name="set_as_background">设置为背景</string>
+	<string name="user_agent">浮动图片/Android</string>
+	<string name="empty_feed">反馈中没有发现图片</string>
+	<string name="authorize">登录</string>
+	<string name="unauthorize">退出</string>
+	<string name="please_wait">The gears are grinding... 请稍等</string>
+	<string name="share_subject">看, 一张图片!</string>
+	<string name="share_url">分享图片链接</string>
+	<string name="share_image">分享图像</string>
+	<string name="delete_image">删除图像</string>
+	<string name="delete_image_are_you_sure">你确定要删除这图片吗</string>
+	<string name="loading_feeds">载入反馈</string>
+	<string name="pause">暂停</string>
+	<string name="resume">恢复</string>
+	<string name="stream">流</string>
+</resources>

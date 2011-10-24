@@ -1,0 +1,166 @@
+<resources>
+	<string-array name="displayModeDescriptions">
+		<item>无</item>
+		<item>左右滑动</item>
+		<item>上下滑动</item>
+		<item>淡入淡出</item>
+		<item>淡出为黑色</item>
+
+		<item>淡出为白色</item>
+		<item>从上面随机</item>
+		<item>浮动图像</item>
+	</string-array>
+	
+	<string-array name="displayModeValues">
+		<item>无</item>
+		<item>左右滑动</item>
+
+		<item>上下滑动</item>
+		<item>淡入淡出</item>
+		<item>淡出为黑色</item>
+		<item>淡出为白色</item>
+		<item>随机</item>
+		<item>浮动图像</item>
+
+	</string-array>
+	
+	<string-array name="slideIntervalDescriptions">
+		<item>2 秒</item>
+		<item>5 秒</item>
+		<item>10 秒</item>
+		<item>30 秒</item>
+		<item>1 分钟</item>
+
+		<item>2 分钟</item>
+		<item>5 分钟</item>
+		<item>10 分钟</item>
+		<item>30 分钟</item>
+		<item>1 小时</item>
+		<item>2 小时</item>
+
+		<item>6 小时</item>
+		<item>12 小时</item>
+		<item>1 天</item>
+		<item>1 星期</item>
+	</string-array>
+	
+	<string-array name="slideIntervalValues">
+		<item>2000</item>
+
+		<item>5000</item>
+		<item>10000</item>
+		<item>30000</item>
+		<item>60000</item>
+		<item>120000</item>
+		<item>300000</item>
+
+		<item>600000</item>
+		<item>1800000</item>
+		<item>3600000</item>
+		<item>7200000</item>
+		<item>21600000</item>
+		<item>43200000</item>
+
+		<item>86400000</item>
+		<item>604800000</item>
+	</string-array>
+	
+	<string-array name="backgroundColorDescriptions">
+		<item>灰色</item>
+		<item>黑色</item>
+		<item>纯黑色</item>
+
+		<item>白色</item>
+		<item>蓝色</item>
+		<item>绿色</item>
+		<item>红色</item>
+		<item>黄色</item>
+		<item>全部</item>
+
+	</string-array>
+	
+	<string-array name="backgroundColorValues">
+		<item>0</item>
+		<item>1</item>
+		<item>8</item>
+		<item>2</item>
+		<item>3</item>
+
+		<item>4</item>
+		<item>5</item>
+		<item>6</item>
+		<item>7</item>
+	</string-array>
+	
+	<string-array name="slideSpeedDescriptions">
+		<item>快</item>
+
+		<item>慢</item>
+		<item>超慢</item>
+	</string-array>
+	
+	<string-array name="slideSpeedValues">
+		<item>300</item>
+		<item>1000</item>
+		<item>3000</item>
+
+	</string-array>
+	
+	<string-array name="floatingTypeDescriptions">
+		<item>右边</item>
+		<item>左边</item>
+		<item>下面</item>
+		<item>上面</item>
+		<item>超高速</item>
+
+		<item>台面</item>
+		<item>堆累</item>
+		<item>混合起来</item>
+	</string-array>
+	
+	<string-array name="floatingTypeValues">
+		<item>0</item>
+		<item>1</item>
+
+		<item>2</item>
+		<item>3</item>
+		<item>4</item>
+		<item>5</item>
+		<item>6</item>
+		<item>20</item>
+
+	</string-array>
+	
+	<string-array name="floatingSpeedDescriptions">
+		<item>非常快</item>
+		<item>快</item>
+		<item>正常</item>
+		<item>慢</item>
+		<item>非常慢</item>
+
+	</string-array>
+	
+	<string-array name="floatingSpeedValues">
+		<item>7000</item>
+		<item>15000</item>
+		<item>30000</item>
+		<item>60000</item>
+		<item>250000</item>
+
+	</string-array>
+	
+	<string-array name="forceRotationDescriptions">
+		<item>无旋转</item>
+		<item>90 度</item>
+		<item>180 度</item>
+		<item>270 度</item>
+	</string-array>
+
+	
+	<string-array name="forceRotationValues">
+		<item>0</item>
+		<item>90</item>
+		<item>180</item>
+		<item>270</item>
+	</string-array>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_showing_fetching_album_list">专辑列表获取错误.请点击再次尝试.</string>
+    <string name="internal_error">陷入内部错误,请联系开发者</string>
+    <string name="error_fetching_albums">获取专辑错误, 请再次尝试</string>
+    <string name="error_fetching_friends">获取好友错误，请再次尝试</string>
+    <string name="error_getting_flickr_user">获取您的信息错误，请尝试再次登录.</string>
+    <string name="authorization_failed">授权时一些奇怪的事情发生... 请再次尝试!</string>
+    <string name="cannot_read_feed">无法读取反馈,可能文件太大了.</string>
+    <string name="device_does_not_support_live_wallpapers">抱歉,看来你的设备不支持动态壁纸. :(</string>
+</resources>
