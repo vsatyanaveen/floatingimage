@@ -63,6 +63,7 @@ public class Wallpaper extends GLWallpaperService implements MainActivity{
 		void init(){
 			if(renderer != null){
 				dk.nindroid.rss.renderers.Renderer defaultRenderer = renderer.getRenderer();
+				mOnDemandBank.start();
 				if(mSettings.mode == dk.nindroid.rss.settings.Settings.MODE_FLOATING_IMAGE){
 					if(!(defaultRenderer instanceof FloatingRenderer)){
 						Log.v("Floating Image", "Switching to floating renderer");

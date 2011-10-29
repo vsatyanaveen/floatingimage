@@ -113,7 +113,13 @@ public class OnDemandImageBank {
 		}
 		
 		public void sendMessage(Message msg){
-			mHandler.sendMessage(msg);
+			if(mHandler != null){
+				mHandler.sendMessage(msg);
+			}else{
+				LoaderBundle bundle = (LoaderBundle)msg.obj;
+				ImageReference ir = bundle.ir;
+				bundle.lc.bitmapLoaded(ir.getID());
+			}
 		}
 		
 		@Override
