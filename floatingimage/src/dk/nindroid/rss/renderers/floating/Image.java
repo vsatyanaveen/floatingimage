@@ -16,7 +16,6 @@ import android.util.Log;
 import dk.nindroid.rss.Display;
 import dk.nindroid.rss.MainActivity;
 import dk.nindroid.rss.OnDemandImageBank;
-import dk.nindroid.rss.TextureBank;
 import dk.nindroid.rss.TextureSelector;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.Progress;
@@ -55,7 +54,6 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 	private Rotation		mRotationBSaved;
 	private PositionController	mPositionController;
 	private float			mAlpha = 1;
-	private TextureBank 	mbank;
 	//private long			mStartTime;
 	private ImageReference 	mShowingImage;
 	private Vec3f[]			mVertices;
@@ -64,7 +62,7 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 	private InfoBar			mInfoBar;
 	private TextureSelector mTextureSelector;
 	private boolean			mSetThumbnailTexture = false;
-	private boolean			mFrameOnly = false;
+	private boolean			mImageNotSet = true;
 	
 	// Selected vars
 	private Vec3f			mSelectedPos = new Vec3f();
@@ -74,6 +72,7 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 	private float			mFocusHeight;
 	private boolean			mLargeTex = false;
 	private boolean			mSetBackgroundWhenReady = false;
+	private long			mImageAppliedTime = 0;
 	
 	// Smoothing vars
 	int[] mPixelVertices;
@@ -149,15 +148,16 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 		// Make sure the textures are redrawn after subactivity
 		mLargeTexture.nullTexture();
 		mLastTextureSize = 0;
-		
+		mImageNotSet = true;
 		// Revive textures
+		if(mShowingImage != null){
+			mOnDemandBank.get(mShowingImage, this);
+		}
+		
 		if(mState == STATE_FOCUSED){
 			mTextureSelector.applyLarge();
 		}else{
 			mLargeTex = false;
-			if(mShowingImage != null){
-				mOnDemandBank.get(mShowingImage, this);
-			}
 		}
 		
 		// Set smoothing texture
@@ -246,7 +246,6 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 	}
 		
 	public Image(MainActivity activity, 
-				 TextureBank bank, 
 				 Display display, 
 				 InfoBar infoBar, 
 				 Texture largeTexture, 
@@ -255,7 +254,6 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 				 OnDemandImageBank onDemandBank){
 		this.mDisplay = display;
 		this.mOnDemandBank = onDemandBank;
-		mbank = bank;
 		this.mLineSmoothBitmap = lineSmoothBitmap;
 		this.mActivity = activity;
 		this.mInfoBar = infoBar;
@@ -385,6 +383,7 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 				return;
 			}
 		}
+		if(mImageNotSet) return;
 				
 		float x, y, z, szX, szY;
 		x = mPos.getX();
@@ -437,11 +436,15 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 		gl.glEnable(GL10.GL_BLEND);
 		//Vec3f rot = mPositionController.getRotation(interval);
 		float alpha = (mState == STATE_FLOATING ? mPositionController.getOpacity(interval) : 1) * mAlpha;
+		float imageAppliedFadeInterval = getImageAppliedFadeInterval(realTime);
+		alpha *= imageAppliedFadeInterval;
+		z += imageAppliedFadeInterval * 0.5f - 0.5f;
+		
 		gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
 		gl.glEnable(GL10.GL_BLEND);
 		gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_MODULATE);
 		gl.glColor4f(1.0f, 1.0f, 1.0f, alpha);
-		if(!mFrameOnly){
+		if(!mImageNotSet){
 			if(mActivity.getSettings().imageDecorations){
 				ShadowPainter.draw(gl, x, y, z, mRotationA, mRotationB, userRotation, szX, szY);
 			}
@@ -463,7 +466,7 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 		}
         gl.glVertexPointer(3, GL10.GL_FIXED, 0, mVertexBuffer);
 			
-	    if(!mFrameOnly){	
+	    if(!mImageNotSet){	
 			gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
 		}
 		// Show smoothing
@@ -495,6 +498,13 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
         if(mState == STATE_FOCUSED && !mLargeTex){
         	ProgressBar.draw(gl, mTextureSelector.getProgress(), mDisplay);
         }
+	}
+	
+	private float getImageAppliedFadeInterval(long realTime){
+		long timePassed = realTime - mImageAppliedTime;
+		double dInterval = timePassed / 500.0;
+		float interval = smoothstep((float)Math.min(dInterval, 1.0));
+		return interval;
 	}
 	
 	void drawSideSmoothing(GL10 gl, float alpha, int indexA, int indexB, float uvSide, boolean vertical, float scaleX, float scaleY){
@@ -1108,6 +1118,7 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 			if(mShowingImage.getBitmap() != null){
 				setTexture(gl, mShowingImage);
 				mShowingImage.recycleBitmap();
+				mImageAppliedTime = realTime;
 			}else{
 				mOnDemandBank.get(mShowingImage, this);
 			}
@@ -1158,22 +1169,9 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 	private void resetTexture(GL10 gl, boolean next){
 		mFocusBmp = null;
 		mDelete = false;
-		if(mActivity.getSettings().galleryMode){
-			mFrameOnly = true;
-			maspect = 1.3f;
-			mOnDemandBank.get(this, next);
-		}else{
-			ImageReference ir = mbank.getTexture(mShowingImage, next);
-			if(ir != null){
-				mShowingImage = ir;
-			}	
-	    	if(mShowingImage != null && mShowingImage.getBitmap() != null){
-	    		setTexture(gl, mShowingImage);
-	    	}else{
-	    		this.mFocusBmp = null;
-	    		this.mLargeTex = false;
-	    	}
-		}
+		mImageNotSet = true;
+		maspect = 1.3f;
+		mOnDemandBank.get(this, next);
 	}
 	
 	public boolean validForTextureUpdate(){
@@ -1326,7 +1324,7 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 	        };
 	        mTexBuffer.put(tex);
 	        mTexBuffer.position(0);
-	        mFrameOnly = false;
+	        mImageNotSet = false;
         }catch(IllegalArgumentException e){
         	Log.e("Floating Image", "Image: Error setting texture", e);
         }
@@ -1343,6 +1341,7 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 	
 	public float intersect(Ray r){
 		if(mShowingImage == null) return -1;
+		if(mImageNotSet) return -1;
 		float posX = mPos.getX();
 		float posY = mPos.getY();
 		float posZ = mPos.getZ();
@@ -1364,6 +1363,8 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 			scaleX = mDisplay.getWidth() * mDisplay.getFill();
 			scaleY = scaleX / maspect;
 		}
+		scaleX *= mPositionControlerScale;
+		scaleY *= mPositionControlerScale;
 		
 		// o is for origo :)
 		float ox1;
@@ -1438,7 +1439,7 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 
 	@Override
 	public boolean bitmapLoaded(String id) {
-		if(mShowingImage != null && mShowingImage.getID().equals(id)){
+		if(this.doLoad(id)){
 			mSetThumbnailTexture = true;
 			return true;
 		}	
@@ -1451,8 +1452,8 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 	}
 
 	@Override
-	public boolean isVisible(String id) {
-		return mShowingImage != null && mShowingImage.getID().equals(id);
+	public boolean doLoad(String id) {
+		return mShowingImage != null && mShowingImage.getID().equals(id) && mImageNotSet;
 	}
 
 	@Override

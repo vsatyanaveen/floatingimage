@@ -107,7 +107,7 @@ public class ShowStreams extends Activity implements MainActivity {
 		//ShowStreams.current = this;
 		mTextureBank = setupFeeders();
 		cleanIfOld();
-		renderer = new RiverRenderer(this, true, mTextureBank, false);
+		renderer = new RiverRenderer(this, true, false);
 		mFeedController.setRenderer(renderer);
 		OSD.init(this, renderer);
 		orientationManager.addSubscriber(renderer.mDisplay);
@@ -256,6 +256,7 @@ public class ShowStreams extends Activity implements MainActivity {
 		//Debug.stopMethodTracing();
 		mGLSurfaceView.onPause();
 		renderer.onPause();
+		mTextureBank.stop();
 		wl.release();
 		orientationManager.onPause();
 		Log.v("Floating image", "Paused!");
@@ -285,28 +286,29 @@ public class ShowStreams extends Activity implements MainActivity {
 		if(mSettings.mode == dk.nindroid.rss.settings.Settings.MODE_FLOATING_IMAGE){
 			if(!(defaultRenderer instanceof FloatingRenderer)){
 				Log.v("Floating Image", "Switching to floating renderer");
-				defaultRenderer = new FloatingRenderer(this, mTextureBank, mOnDemandBank, mFeedController, renderer.mDisplay);
+				defaultRenderer = new FloatingRenderer(this, mOnDemandBank, mFeedController, renderer.mDisplay);
 			}
+			ReadFeeds.runAsync(mFeedController, defaultRenderer.totalImages());
 		}else{
 			if(!(defaultRenderer instanceof SlideshowRenderer)){
 				Log.v("Floating Image", "Switching to slideshow renderer");
 				defaultRenderer = new SlideshowRenderer(this, mTextureBank, renderer.mDisplay);
 			}
+			mTextureBank.initCache(CACHE_SIZE, defaultRenderer.totalImages());
+			ReadFeeds.runAsync(mFeedController, defaultRenderer.totalImages() + CACHE_SIZE);
+			mTextureBank.start();
 		}
-		Log.v("Floating Image", "Resume texture bank done...");
 		
 		renderer.setRenderer(defaultRenderer);
-		mTextureBank.initCache(mSettings.galleryMode ? 0 : CACHE_SIZE, defaultRenderer.totalImages());
+		
 		renderer.onResume();
 		
 		wl.acquire();
 		orientationManager.onResume();
 
 		mGLSurfaceView.onResume();
-		ReadFeeds.runAsync(mFeedController, defaultRenderer.totalImages() + (mSettings.galleryMode ? 0 : CACHE_SIZE));
 		//dialog.dismiss();
 		//Debug.startMethodTracing("floatingimage");
-		Log.v("Floating Image", "End resume...");
 	}
 	
 	@Override

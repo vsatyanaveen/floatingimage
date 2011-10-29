@@ -22,14 +22,13 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 	
 	private boolean 		mTranslucentBackground = false;
 	private boolean			mMoveEventHandled = false;
-	private TextureBank 	mBank;
 	private long			mUpTime;
 	private Vec2f 			mClickedPos = new Vec2f();
 	private boolean 		mClicked = false;
 	private boolean			mDoubleClicked = false;
 	private boolean 		mShowOSD = false;
 	private boolean 		mHideOSD = false;
-	private long 			mOffset = -7000;
+	private long 			mOffset;
 	private float			mFadeOffset = 0;
 	private static final float mSensitivityX = 70.0f;
 	private final boolean 	mLimitFramerate;
@@ -49,16 +48,16 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 	
 	private long			mStartTime;
 		
-	public RiverRenderer(MainActivity activity, boolean useTranslucentBackground, TextureBank textureBank, boolean limitFramerate){
+	public RiverRenderer(MainActivity activity, boolean useTranslucentBackground, boolean limitFramerate){
 		this.mActivity = activity;
 		this.mLimitFramerate = limitFramerate;
 		mDisplay = new Display(activity.getSettings());
 		mTranslucentBackground = useTranslucentBackground;
-		mBank = textureBank;
 		mOSD = new OSD(activity);
 		mFeedProgress = new FeedProgress(activity.context());
 		mStartTime = System.currentTimeMillis();
 		mLastFrameTime = mStartTime;
+		mOffset = -activity.getSettings().floatingTraversal / 18;
 	}
 	
 	public void setRenderer(Renderer renderer){
@@ -196,9 +195,6 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 	}
 	
 	public void onResume(){
-		if(!mActivity.getSettings().galleryMode){
-			mBank.start();
-		}
 		mFadeOffset = 0.0f;
 		mReinit = true;
 		if(mActivity.getSettings().galleryMode){
@@ -208,7 +204,6 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 	}
 	public void onPause(){
 		mRenderer.onPause();
-		mBank.stop();
 	}
 	
 	public void setBackground(){

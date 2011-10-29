@@ -1,13 +1,10 @@
 package dk.nindroid.rss.settings;
 
-import android.app.ActivityManager;
-import android.app.ActivityManager.MemoryInfo;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.os.Environment;
-import android.util.Log;
 import android.view.Surface;
 
 public class Settings {
@@ -106,12 +103,12 @@ public class Settings {
 	}
 	
 	void memoryBalancing(Context context){
+		/*
 		ActivityManager am = (ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE);
 		MemoryInfo mi = new MemoryInfo();
 		am.getMemoryInfo(mi);
-		bitmapConfig = mi.availMem < 100000000l ? Config.RGB_565 : Config.ARGB_8888;
-		Log.v("Floating Image", "Available memory: " + mi.availMem);
-		Log.v("Floating Image", "Low memory? " + (bitmapConfig == Config.RGB_565));
+		*/
+		bitmapConfig = Config.ARGB_8888;
 	}
 	
 	public void PreferenceChanged(SharedPreferences sp, String key){

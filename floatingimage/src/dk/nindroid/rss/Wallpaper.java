@@ -47,7 +47,7 @@ public class Wallpaper extends GLWallpaperService implements MainActivity{
 			
 			mBank = setupFeeders();			
 			
-			renderer = new RiverRenderer(context, false, mBank, true);
+			renderer = new RiverRenderer(context, false, true);
 			mFeedController.setRenderer(renderer);
 			OSD.init(context, renderer);
 			
@@ -66,16 +66,17 @@ public class Wallpaper extends GLWallpaperService implements MainActivity{
 				if(mSettings.mode == dk.nindroid.rss.settings.Settings.MODE_FLOATING_IMAGE){
 					if(!(defaultRenderer instanceof FloatingRenderer)){
 						Log.v("Floating Image", "Switching to floating renderer");
-						defaultRenderer = new FloatingRenderer(mContext, mBank, mOnDemandBank, mFeedController, renderer.mDisplay);
+						defaultRenderer = new FloatingRenderer(mContext, mOnDemandBank, mFeedController, renderer.mDisplay);
 					}
 				}else{
 					if(!(defaultRenderer instanceof SlideshowRenderer)){
 						Log.v("Floating Image", "Switching to slideshow renderer");
 						defaultRenderer = new SlideshowRenderer(mContext, mBank, renderer.mDisplay);
+						mBank.initCache(ShowStreams.CACHE_SIZE, defaultRenderer.totalImages());
+						mBank.start();
 					}
 				}
 				renderer.setRenderer(defaultRenderer);
-				mBank.initCache(ShowStreams.CACHE_SIZE, defaultRenderer.totalImages());
 				renderer.onResume();
 				
 				ReadFeeds.runAsync(mFeedController, defaultRenderer.totalImages() + ShowStreams.CACHE_SIZE);
@@ -94,6 +95,7 @@ public class Wallpaper extends GLWallpaperService implements MainActivity{
 	
 		public void onDestroy() {
 			super.onDestroy();
+			mBank.stop();
 			if (renderer != null) {
 				renderer.onPause();
 			}

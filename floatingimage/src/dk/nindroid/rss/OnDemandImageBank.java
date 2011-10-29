@@ -38,7 +38,7 @@ public class OnDemandImageBank {
 	
 	public OnDemandImageBank(FeedController feedController, MainActivity activity, ImageCache imageCache) {
 		this.mFeedController = feedController;
-		mLoaders = new Loader[10];
+		mLoaders = new Loader[4];
 		for(int i = 0; i < mLoaders.length; ++i){
 			mLoaders[i] = new Loader(activity.getSettings());
 		}
@@ -50,9 +50,13 @@ public class OnDemandImageBank {
 	
 	public void start(){
 		for(int i = 0; i < mLoaders.length; ++i){
-			new Thread(mLoaders[i]).start();
+			Thread t = new Thread(mLoaders[i]);
+			t.setPriority(Thread.MIN_PRIORITY);
+			t.start();
 		}
-		new Thread(mPreLoader).start();
+		Thread t = new Thread(mPreLoader);
+		t.setPriority(Thread.MIN_PRIORITY);
+		t.start();
 	}
 	
 	public void stop(){
@@ -91,7 +95,7 @@ public class OnDemandImageBank {
 	}
 	
 	public interface LoaderClient{
-		public boolean isVisible(String id);
+		public boolean doLoad(String id);
 		public boolean bitmapLoaded(String id);
 		public Progress getProgressIndicator();
 		public void setEmptyImage(ImageReference ir);		
@@ -139,11 +143,10 @@ public class OnDemandImageBank {
 				if(ir == null){
 					return;
 				}
-				if(!callback.isVisible(ir.getID())){
+				if(!callback.doLoad(ir.getID())){
 					return;
 				}
 				if(ir.getBitmap() != null){
-					Log.v("Floating Image", "Image is already set...");
 					return;
 				}
 				
@@ -254,7 +257,7 @@ public class OnDemandImageBank {
 				LoaderBundle bundle = (LoaderBundle)msg.obj;
 				ImageReference ir = bundle.ir;
 				LoaderClient callback = bundle.lc;
-				if(!callback.isVisible(ir.getID())) return;
+				if(!callback.doLoad(ir.getID())) return;
 				Bitmap bmp;
 				synchronized (ir) {
 					if(ir.getBitmap() != null) return; // Image already loaded.
@@ -269,7 +272,7 @@ public class OnDemandImageBank {
 						return;
 					}
 					synchronized (LoaderHandler.class) {
-						if(callback.isVisible(ir.getID())){
+						if(callback.doLoad(ir.getID())){
 							if(mSettings.highResThumbs){
 								ir.set256Bitmap(bmp);
 							}else{
