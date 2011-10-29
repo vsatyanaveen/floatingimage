@@ -86,12 +86,14 @@ public class TextureBank {
 	}
 	
 	public void stop(){
-		running = false;
-		stopThreads = true;
-		synchronized(images){
-			images.notifyAll();
+		if(running){
+			running = false;
+			stopThreads = true;
+			synchronized(images){
+				images.notifyAll();
+			}
+			ic.cleanCache();
 		}
-		ic.cleanCache();
 	}
 	public void startExternal(){
 		new Thread(bitmapDownloader).start();

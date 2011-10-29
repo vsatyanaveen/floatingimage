@@ -101,6 +101,7 @@ public class FlickrBrowser extends SourceSelector.SourceFragment implements Find
 				break;
 			case EXPLORE:
 				returnExplore();
+				break;
 			case AUTHORIZE:
 				try {
 					FlickrFeeder.authorize(this.getActivity());

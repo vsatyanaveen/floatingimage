@@ -31,10 +31,9 @@ public class FeedController {
 	private static long						RETRY_INTERVAL = 30000; // Every half minute;
 	private long							mLastFeedRead = 0;
 	
-	private List<List<ImageReference>> 		mReferences;
-	//private List<Integer>					mFeedIndex;
+	private List<ImageReference> 			mReferences;
 	private List<FeedReference>				mFeeds;
-	private List<PositionInterval>			mPositions;
+	private PositionInterval				mPosition;
 	private Random 							mRand = new Random(System.currentTimeMillis());
 	private RiverRenderer					mRenderer;
 	private MainActivity					mActivity;
@@ -44,12 +43,13 @@ public class FeedController {
 		public void feedsUpdated();
 	}
 	
+	
+	
 	private List<EventSubscriber> eventSubscribers;
 	
 	public FeedController(MainActivity activity){
 		mFeeds = new ArrayList<FeedReference>();
-		mPositions = new ArrayList<PositionInterval>();
-		mReferences = new ArrayList<List<ImageReference>>();
+		mReferences = new ArrayList<ImageReference>();
 		mActivity = activity;
 		eventSubscribers = new ArrayList<EventSubscriber>();
 	}
@@ -84,45 +84,24 @@ public class FeedController {
 				Log.v("Floating Image", "Refreshing feeds.");
 				readFeeds(mCachedActive);
 			}
-			int thisFeed = getFeed();
-			List<ImageReference> feed = mReferences.get(thisFeed);
 			
-			if(mFeeds.get(thisFeed).getType() == Settings.TYPE_LOCAL && feed.size() == 0 && System.currentTimeMillis() - mLastFeedRead > RETRY_INTERVAL ){
- 				Log.v("Floating Image", "A local feed is of zero length, trying to read again.");
-				mLastFeedRead = System.currentTimeMillis();
-				feed = readLocalFeed(mFeeds.get(thisFeed));
-				mReferences.set(thisFeed, feed);
-				mPositions.set(thisFeed, new PositionInterval(mCachedActive, feed.size()));
+			if(System.currentTimeMillis() - mLastFeedRead > RETRY_INTERVAL && mFeeds.size() == 0){
+ 				Log.v("Floating Image", "No pictures are showing, trying to read again.");
+ 				readFeeds(mCachedActive);
 			}
-			if(feed.size() != 0){
-				int index = forward ? mPositions.get(thisFeed).getNext() : mPositions.get(thisFeed).getPrev();
-				ir = feed.get(index);
+			
+			if(mReferences.size() != 0){
+				int index = forward ? mPosition.getNext() : mPosition.getPrev();
+				ir = mReferences.get(index);
 			}
 		}
 		return ir;
 	}
 	
-	public int getFeed(){
-		float rand = mRand.nextFloat();
-		int feeds = mReferences.size();
-		float[] fraction = new float[feeds];
-		int total = 0;
-		for(int i = 0; i < feeds; ++i){
-			total += mReferences.get(i).size();
-			fraction[i] = total;
-		}
-		for(int i = 0; i < feeds; ++i){
-			fraction[i] /= total;
-			if(fraction[i] > rand){
-				return i;
-			}
-		}
-		return mReferences.size() - 1;
-	}
-	
 	public void readFeeds(int active){
 		mCachedActive = active;
 		mLastFeedRead = System.currentTimeMillis();
+		
 		List<FeedReference> newFeeds = new ArrayList<FeedReference>();
 		FeedsDbAdapter mDbHelper = new FeedsDbAdapter(mActivity.context());
 		SharedPreferences sp = mActivity.context().getSharedPreferences(mActivity.getSettingsKey(), 0);
@@ -203,11 +182,7 @@ public class FeedController {
 	}
 	
 	public int getShowing(){
-		int count = 0;
-		for(List<ImageReference> list : mReferences){
-			count += list.size();
-		}
-		return count;
+		return mReferences.size();
 	}
 	
 	public FeedReference getFeedReference(String path, int type, String name){
@@ -218,7 +193,7 @@ public class FeedController {
 	private synchronized boolean parseFeeds(int active){
 		synchronized(mFeeds){
 			mReferences.clear();
-			mPositions.clear();
+			List<List<ImageReference>> refs = new ArrayList<List<ImageReference>>();
 			int progress = 0;
 			mRenderer.setFeeds(0, mFeeds.size());
 			for(FeedReference feed : mFeeds){
@@ -247,18 +222,55 @@ public class FeedController {
 							Collections.shuffle(references);
 						}
 					}
-					synchronized(mReferences){
-						Log.v("Floating Image", "Adding feed: " + references.size() + " images");
-						mReferences.add(references); 										// These two 
-						mPositions.add(new PositionInterval(active, references.size()));	// are in sync!
-					}
+					Log.v("Floating Image", "Adding feed: " + references.size() + " images");
+					refs.add(references);
 				}else{
 					Log.w("FeedController", "Reading feed failed too many times, giving up!");
 				}
 				mRenderer.setFeeds(++progress, mFeeds.size());
 			}
+			joinFeeds(refs, active);
 			return mReferences.size() > 0;
 		}
+	}
+	
+	private void joinFeeds(List<List<ImageReference>> refs, int active){
+		List<Integer> feedPos = new ArrayList<Integer>(refs.size());
+		for(int i = 0; i < refs.size(); ++i){
+			feedPos.add(0);
+		}
+		synchronized (mReferences) {
+			while(refs.size() > 0){
+				int feedIndex = getFeed(refs);
+				int irIndex = feedPos.get(feedIndex) + 1;
+				if(irIndex == refs.get(feedIndex).size()){
+					refs.remove(feedIndex);
+					feedPos.remove(feedIndex);
+				}else{
+					mReferences.add(refs.get(feedIndex).get(feedPos.get(feedIndex)));
+					feedPos.set(feedIndex, irIndex);
+				}
+			}
+			mPosition = new PositionInterval(active, mReferences.size());
+		}
+	}
+	
+	public int getFeed(List<List<ImageReference>> refs){
+		float rand = mRand.nextFloat();
+		int feeds = refs.size();
+		float[] fraction = new float[feeds];
+		int total = 0;
+		for(int i = 0; i < feeds; ++i){
+			total += refs.get(i).size();
+			fraction[i] = total;
+		}
+		for(int i = 0; i < feeds; ++i){
+			fraction[i] /= total;
+			if(fraction[i] > rand){
+				return i;
+			}
+		}
+		return refs.size() - 1;
 	}
 	
 	private List<ImageReference> parseFeed(FeedReference feed){

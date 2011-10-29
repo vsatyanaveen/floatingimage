@@ -11,12 +11,11 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 import dk.nindroid.rss.Display;
 import dk.nindroid.rss.FeedController;
+import dk.nindroid.rss.FeedController.EventSubscriber;
 import dk.nindroid.rss.MainActivity;
 import dk.nindroid.rss.OnDemandImageBank;
 import dk.nindroid.rss.R;
-import dk.nindroid.rss.TextureBank;
 import dk.nindroid.rss.TextureSelector;
-import dk.nindroid.rss.FeedController.EventSubscriber;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.Ray;
 import dk.nindroid.rss.data.Texture;
@@ -43,7 +42,6 @@ public class FloatingRenderer extends Renderer implements EventSubscriber{
 	public static final float  	mJitterX = 0.8f;
 	public static final float  	mJitterY = 0.5f;
 	public static final float  	mJitterZ = 1.5f;
-	private static final long	SPLASHTIME = 2000l;
 	
 	public static final int		FLOATING_TYPE_LEFT = 0;
 	public static final int		FLOATING_TYPE_RIGHT = 1;
@@ -55,10 +53,8 @@ public class FloatingRenderer extends Renderer implements EventSubscriber{
 	public static final int		FLOATING_TYPE_GALLERY = 15;
 	public static final int		FLOATING_TYPE_MIXUP = 20;
 	
-	private boolean 		mNewStart = false; // Disable splash
 	private Image[] 		mImgs;
 	private Image[] 		mImgDepths;
-	private TextureBank 	mBank;
 	private OnDemandImageBank mOnDemandBank;
 	public 	TextureSelector mTextureSelector;
 	private long			mStartTime;
@@ -85,20 +81,18 @@ public class FloatingRenderer extends Renderer implements EventSubscriber{
 	private Image					mSelected = null;
 	private int						mSelectedIndex;
 	private Image					mSplashImg;
-	private long					mDefocusSplashTime;
 	private boolean					mSelectingNext;
 	private boolean					mSelectingPrev;
 	private ImageDepthComparator 	mDepthComparator;
 	private boolean			mDoAdjustImagePositions = false;
 	
-	public FloatingRenderer(MainActivity activity, TextureBank bank, OnDemandImageBank onDemandBank, FeedController feedController, Display display){
+	public FloatingRenderer(MainActivity activity, OnDemandImageBank onDemandBank, FeedController feedController, Display display){
 		this.mActivity = activity;
 		mTextureSelector = new TextureSelector(display, mActivity.getSettings().bitmapConfig);
 		mRequestedStreamOffset = new Vec3f();
 		mInfoBar = new InfoBar();
 		mBackgroundPainter = new BackgroundPainter();
 		this.mDisplay = display;
-		this.mBank = bank;
 		this.mOnDemandBank = onDemandBank;
 		this.mLargeTexture = new Texture();
 		this.mFeedController = feedController;
@@ -127,7 +121,7 @@ public class FloatingRenderer extends Renderer implements EventSubscriber{
 
 			mImgs = new Image[mTotalImgRows * 3 / 2];
 			for(int i = 0; i < mImgs.length; ++i){
-				mImgs[mImgCnt++] = new Image(mActivity, mBank, mDisplay, mInfoBar, mLargeTexture, mTextureSelector, smoothImage, mOnDemandBank);
+				mImgs[mImgCnt++] = new Image(mActivity, mDisplay, mInfoBar, mLargeTexture, mTextureSelector, smoothImage, mOnDemandBank);
 			}
 			
 			mImgDepths = new Image[mImgs.length];
@@ -286,28 +280,12 @@ public class FloatingRenderer extends Renderer implements EventSubscriber{
 			adjustImagePositions(frameTime); // If image speed has changed, image positions need to be reset!
 			mDoAdjustImagePositions = false;
 		}
-		// If new start, show splash!
-		if(mNewStart){
-			mSplashImg = mImgDepths[4]; 
-			Bitmap splash = BitmapFactory.decodeStream(mActivity.context().getResources().openRawResource(R.drawable.splash));
-			mSplashImg.setSelected(gl, splash, 343.0f/512.0f, 1.0f, frameTime);
-			mNewStart = false;
-			mDefocusSplashTime = realTime + SPLASHTIME;
-		}
+		
 		if(mDoUnselect){
 			mDoUnselect = false;
 			deselect(gl, frameTime, realTime);
 		}
-		// Defocus splash image after defined period.
-        if(mSplashImg != null){
-        	if(realTime > mDefocusSplashTime && mSplashImg.stateInFocus()){
-	        	mSelectedTime = realTime;
-	        	mSplashImg.select(gl, frameTime, realTime);
-        	}
-        	if(mSplashImg.stateFloating()){
-        		mSplashImg = null;
-        	}
-        }
+		
         // Deselect selected when it is floating.
         if(mSelected != null){
         	if(mSelected.stateInFocus()){
@@ -552,7 +530,6 @@ public class FloatingRenderer extends Renderer implements EventSubscriber{
 	
 	public void resetImages(GL10 gl, long time) {
 		mResetImages = false;
-		mBank.reset();
 		for(Image i : mImgs){
 			i.reset(gl, time);
 		}

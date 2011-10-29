@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -52,7 +53,12 @@ public abstract class ImageReference {
 	}
 	
 	public final void set128Bitmap(Bitmap bmp){
-		this.mBitmap = Bitmap.createBitmap(128, 128, bmp.getConfig());
+		Config config = bmp.getConfig();
+		if(config == null){
+			this.mBitmap = Bitmap.createBitmap(128, 128, Config.RGB_565);
+		}else{
+			this.mBitmap = Bitmap.createBitmap(128, 128, bmp.getConfig());
+		}
 		Canvas cvs = new Canvas(this.mBitmap);
 		Rect drawRect = getRect(bmp, 128);
 		cvs.drawBitmap(bmp, null, drawRect, paint);

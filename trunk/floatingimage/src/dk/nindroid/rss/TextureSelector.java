@@ -117,7 +117,7 @@ public class TextureSelector {
 			}
 			else
 			{
-				mTextureResolution = 2048;
+				mTextureResolution = 1024;
 			}
 		}
 		
