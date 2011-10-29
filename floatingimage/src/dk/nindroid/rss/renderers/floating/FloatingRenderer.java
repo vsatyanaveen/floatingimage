@@ -624,7 +624,9 @@ public class FloatingRenderer extends Renderer implements EventSubscriber{
 	@Override
 	public void feedsUpdated() {
 		for(Image i : mImgs){
-			i.getImageIfEmpty();
+			if(i != null){
+				i.getImageIfEmpty();
+			}
 		}
 	}
 }

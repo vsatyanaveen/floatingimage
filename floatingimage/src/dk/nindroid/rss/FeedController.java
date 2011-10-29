@@ -192,7 +192,6 @@ public class FeedController {
 	// False if no images.
 	private synchronized boolean parseFeeds(int active){
 		synchronized(mFeeds){
-			mReferences.clear();
 			List<List<ImageReference>> refs = new ArrayList<List<ImageReference>>();
 			int progress = 0;
 			mRenderer.setFeeds(0, mFeeds.size());
@@ -237,18 +236,21 @@ public class FeedController {
 	private void joinFeeds(List<List<ImageReference>> refs, int active){
 		List<Integer> feedPos = new ArrayList<Integer>(refs.size());
 		for(int i = 0; i < refs.size(); ++i){
-			feedPos.add(0);
+			feedPos.add(-1);
 		}
 		synchronized (mReferences) {
+			mReferences.clear();
 			while(refs.size() > 0){
 				int feedIndex = getFeed(refs);
-				int irIndex = feedPos.get(feedIndex) + 1;
-				if(irIndex == refs.get(feedIndex).size()){
-					refs.remove(feedIndex);
-					feedPos.remove(feedIndex);
-				}else{
-					mReferences.add(refs.get(feedIndex).get(feedPos.get(feedIndex)));
-					feedPos.set(feedIndex, irIndex);
+				if(feedIndex < refs.size()){
+					int irIndex = feedPos.get(feedIndex) + 1;
+					if(irIndex == refs.get(feedIndex).size()){
+						refs.remove(feedIndex);
+						feedPos.remove(feedIndex);
+					}else{
+						mReferences.add(refs.get(feedIndex).get(irIndex));
+						feedPos.set(feedIndex, irIndex);
+					}
 				}
 			}
 			mPosition = new PositionInterval(active, mReferences.size());
