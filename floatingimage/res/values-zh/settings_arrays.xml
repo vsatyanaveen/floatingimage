@@ -12,16 +12,14 @@
 	</string-array>
 	
 	<string-array name="displayModeValues">
-		<item>无</item>
-		<item>左右滑动</item>
-
-		<item>上下滑动</item>
-		<item>淡入淡出</item>
-		<item>淡出为黑色</item>
-		<item>淡出为白色</item>
-		<item>随机</item>
-		<item>浮动图像</item>
-
+		<item>none</item>
+		<item>slideRightToLeft</item>
+		<item>SlideTopToBottom</item>
+		<item>crossFade</item>
+		<item>fadeToBlack</item>
+		<item>fadeToWhite</item>
+		<item>random</item>
+		<item>floatingImages</item>
 	</string-array>
 	
 	<string-array name="slideIntervalDescriptions">

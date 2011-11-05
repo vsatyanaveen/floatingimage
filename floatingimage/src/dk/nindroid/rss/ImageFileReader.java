@@ -15,7 +15,7 @@ import dk.nindroid.rss.data.Progress;
 public class ImageFileReader{
 	static Paint mPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
 
-	public static synchronized Bitmap readImage(File f, int size, Progress progress, Config config){
+	public static Bitmap readImage(File f, int size, Progress progress, Config config){
 		String path = f.getAbsolutePath();
 		Options opts = new Options();
 		setProgress(progress, 10);

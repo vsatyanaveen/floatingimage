@@ -353,6 +353,7 @@ public class FloatingRenderer extends Renderer implements EventSubscriber{
 	
 	public void render(GL10 gl, long time, long realTime){
 		initRender(gl);
+		
 		// Background first, this is backmost
 		mBackgroundPainter.draw(gl, mDisplay, mActivity.getSettings().backgroundColor);
         //Image.setState(gl);

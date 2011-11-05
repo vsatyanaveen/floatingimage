@@ -12,7 +12,6 @@ import dk.nindroid.rss.launchers.ReadFeeds;
 import dk.nindroid.rss.menu.WallpaperSettings;
 import dk.nindroid.rss.renderers.OSD;
 import dk.nindroid.rss.renderers.floating.FloatingRenderer;
-import dk.nindroid.rss.renderers.floating.GlowImage;
 import dk.nindroid.rss.renderers.floating.ShadowPainter;
 import dk.nindroid.rss.renderers.slideshow.SlideshowRenderer;
 import dk.nindroid.rss.settings.Settings;
@@ -33,6 +32,7 @@ public class Wallpaper extends GLWallpaperService implements MainActivity{
 		Wallpaper mContext;
 		Settings mSettings;
 		TextureBank mBank;
+		ImageCache mImageCache;
 		OnDemandImageBank mOnDemandBank;
 		
 		public MyEngine(Wallpaper context, Settings settings) {
@@ -40,7 +40,6 @@ public class Wallpaper extends GLWallpaperService implements MainActivity{
 			mContext = context;
 			this.mSettings = settings;
 			
-			GlowImage.init(context);
 			ShadowPainter.init(context);
 			
 			ShowStreams.registerParsers();
@@ -88,9 +87,9 @@ public class Wallpaper extends GLWallpaperService implements MainActivity{
 			TextureBank bank = new TextureBank(mContext);
 			mFeedController = new FeedController(mContext);
 			BitmapDownloader bitmapDownloader = new BitmapDownloader(bank, mFeedController, mSettings);
-			ImageCache imageCache = new ImageCache(mContext, bank);
-			bank.setFeeders(bitmapDownloader, imageCache);
-			mOnDemandBank = new OnDemandImageBank(mFeedController, mContext, imageCache);
+			mImageCache = new ImageCache(mContext, bank);
+			bank.setFeeders(bitmapDownloader, mImageCache);
+			mOnDemandBank = new OnDemandImageBank(mFeedController, mContext, mImageCache);
 			return bank;
 		}
 	
@@ -101,6 +100,7 @@ public class Wallpaper extends GLWallpaperService implements MainActivity{
 				renderer.onPause();
 			}
 			renderer = null;
+			mImageCache.cleanCache();
 		}
 
 		@Override

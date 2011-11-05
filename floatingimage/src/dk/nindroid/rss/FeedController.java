@@ -28,6 +28,7 @@ import dk.nindroid.rss.uiActivities.Toaster;
 
 public class FeedController {
 	private static long						REFRESH_INTERVAL = 7200000; // Every other hour;
+	//private static long						REFRESH_INTERVAL = 120000; // Every other hour;
 	private static long						RETRY_INTERVAL = 30000; // Every half minute;
 	private long							mLastFeedRead = 0;
 	
@@ -78,16 +79,17 @@ public class FeedController {
 	
 	public ImageReference getImageReference(boolean forward){
 		ImageReference ir = null;
+		
+		if(System.currentTimeMillis() - mLastFeedRead > RETRY_INTERVAL && mReferences.size() == 0){
+			Log.v("Floating Image", "No pictures are showing, trying to read again.");
+			readFeeds(mCachedActive);
+		}
+		
 		if(mReferences.size() == 0) return null;
 		synchronized (mReferences) {
 			if(System.currentTimeMillis() - mLastFeedRead > REFRESH_INTERVAL){
 				Log.v("Floating Image", "Refreshing feeds.");
 				readFeeds(mCachedActive);
-			}
-			
-			if(System.currentTimeMillis() - mLastFeedRead > RETRY_INTERVAL && mFeeds.size() == 0){
- 				Log.v("Floating Image", "No pictures are showing, trying to read again.");
- 				readFeeds(mCachedActive);
 			}
 			
 			if(mReferences.size() != 0){
@@ -147,7 +149,7 @@ public class FeedController {
 		
 		synchronized(mFeeds){
 			boolean reparseFeeds = false;
-			if(mFeeds.size() != newFeeds.size()){
+			if(mFeeds.size() != newFeeds.size() || mReferences.size() == 0){
 				feedsChanged();
 				reparseFeeds = true;
 			}else{
@@ -162,10 +164,10 @@ public class FeedController {
 			if(reparseFeeds){
 				mFeeds = newFeeds;
 				parseFeeds(active);
+				onFeedsUpdated();
 			}
 			
 		}
-		onFeedsUpdated();
 	}
 	
 	private void feedsChanged(){

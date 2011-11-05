@@ -61,7 +61,13 @@ public class OnDemandImageBank {
 	
 	public void stop(){
 		for(int i = 0; i < mLoaders.length; ++i){
-			mLoaders[i].mHandler.getLooper().quit();
+			Handler h = mLoaders[i].mHandler;
+			if(h != null){
+				Looper l = h.getLooper();
+				if(l != null){
+					l.quit();
+				}
+			}
 		}
 		mPreLoader.mHandler.getLooper().quit();
 	}

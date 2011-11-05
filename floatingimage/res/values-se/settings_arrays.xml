@@ -1,0 +1,147 @@
+﻿<resources>
+        <string-array name="displayModeDescriptions">
+                <item>Ingen</item>
+                <item>Glid horisontellt</item>
+                <item>Glid vertikalt</item>
+                <item>Övergång</item>
+                <item>Tona över till svar</item>
+                <item>Tona över till vitt</item>
+                <item>Slumpmässigt från ovan</item>
+                <item>Flytande bilder</item>
+        </string-array>
+        
+        <string-array name="displayModeValues">
+                <item>none</item>
+                <item>slideRightToLeft</item>
+                <item>SlideTopToBottom</item>
+                <item>crossFade</item>
+                <item>fadeToBlack</item>
+                <item>fadeToWhite</item>
+                <item>random</item>
+                <item>floatingImages</item>
+        </string-array>
+        
+        <string-array name="slideIntervalDescriptions">
+                <item>2 sekund</item>
+                <item>5 sekund</item>
+                <item>10 sekund</item>
+                <item>30 sekund</item>
+                <item>1 minut</item>
+                <item>2 minuter</item>
+                <item>5 minuter</item>
+                <item>10 minuter</item>
+                <item>30 minuter</item>
+                <item>1 timme</item>
+                <item>2 timmar</item>
+                <item>6 timmar</item>
+                <item>12 timmar</item>
+                <item>1 dag</item>
+                <item>1 vecka</item>
+        </string-array>
+        
+        <string-array name="slideIntervalValues">
+                <item>2000</item>
+                <item>5000</item>
+                <item>10000</item>
+                <item>30000</item>
+                <item>60000</item>
+                <item>120000</item>
+                <item>300000</item>
+                <item>600000</item>
+                <item>1800000</item>
+                <item>3600000</item>
+                <item>7200000</item>
+                <item>21600000</item>
+                <item>43200000</item>
+                <item>86400000</item>
+                <item>604800000</item>
+        </string-array>
+        
+        <string-array name="backgroundColorDescriptions">
+                <item>Grå</item>
+                <item>Svart</item>
+                <item>Ren svärta</item>
+                <item>Vitt</item>
+                <item>Blått</item>
+                <item>Grön</item>
+                <item>Röd</item>
+                <item>Gul</item>
+                <item>Alla</item>
+        </string-array>
+        
+        <string-array name="backgroundColorValues">
+                <item>0</item>
+                <item>1</item>
+                <item>8</item>
+                <item>2</item>
+                <item>3</item>
+                <item>4</item>
+                <item>5</item>
+                <item>6</item>
+                <item>7</item>
+        </string-array>
+        
+        <string-array name="slideSpeedDescriptions">
+                <item>snabb</item>
+                <item>långsam</item>
+                <item>väldigt långsam</item>
+        </string-array>
+        
+        <string-array name="slideSpeedValues">
+                <item>300</item>
+                <item>1000</item>
+                <item>3000</item>
+        </string-array>
+        
+        <string-array name="floatingTypeDescriptions">
+                <item>Höger</item>
+                <item>Vänster</item>
+                <item>Ner</item>
+                <item>Upp</item>
+                <item>Hyperfart</item>
+                <item>Lägg på ett bord</item>
+                <item>Lägg i en hög</item>
+                <item>Mixa ihop</item>
+        </string-array>
+        
+        <string-array name="floatingTypeValues">
+                <item>0</item>
+                <item>1</item>
+                <item>2</item>
+                <item>3</item>
+                <item>4</item>
+                <item>5</item>
+                <item>6</item>
+                <item>20</item>
+        </string-array>
+        
+        <string-array name="floatingSpeedDescriptions">
+                <item>väldigt snabb</item>
+                <item>snabb</item>
+                <item>normal</item>
+                <item>långsam</item>
+                <item>väldigt långsam</item>
+        </string-array>
+        
+        <string-array name="floatingSpeedValues">
+                <item>7000</item>
+                <item>15000</item>
+                <item>30000</item>
+                <item>60000</item>
+                <item>250000</item>
+        </string-array>
+        
+        <string-array name="forceRotationDescriptions">
+                <item>Ingen rotation</item>
+                <item>90 grader</item>
+                <item>180 grader</item>
+                <item>270 grader</item>
+        </string-array>
+        
+        <string-array name="forceRotationValues">
+                <item>0</item>
+                <item>90</item>
+                <item>180</item>
+                <item>270</item>
+        </string-array>
+</resources>
