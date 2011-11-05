@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Floating Image</string>
+    <string name="about">Om appen</string>
+    <string name="authorizing">Autentiserar</string>
+    <string name="aboutSummary">Våghalsig presentation av mig</string>
+        <!-- <string name="about_text">Hallå, jag är en vardaglig och vänlig programmerare!\n\nFloating Image är ett fritidsprojekt skapad dels som ett försök att få lite ögongodis till Android och dels för att få lite erfarenhet av att programmera för plattformen. Appen strömmar bilder från olika källor till telefonen. \n\nBilder med ett blått sken är nyhämtade och bilder med en skugga är antingen tagna lokalt från telefonen eller från en bild-cache. Oroa dig inte, cachen är ganska liten. \n\nHur du kontrollerar bilderna: \nStyra strömmen: Dra med fingret åt sidan \nVälj bild: Peta (klicka) med fingret på den \nGå till bildens hemsida: Tryck och håll fingret över bilden när den är vald \n\nFler funktioner är på gång, och jag kommer naturligtvis ta råd om vad som skulle göra detta till den grymmaste appen för dig! \ n \ nDet här programmet är öppen källkod, vilket innebär att du kan när som helst begära koden (jag skulle dock vilja förbättra float image på mitt sätt). Appen är också gratis och kostar inget, så om du gillar den och råkar se mig på stan, så uppmanar jag dig att köpa mig en öl! (och översättaren tackar sällan nej till en kopp kaffe!). </string>  -->
+        <string name="dataFolder">/floatingImage</string>
+        <string name="exploreFolder">/.exploreCache</string>
+        <string name="fullscreen">Helskärm</string>
+        <string name="show_details">Visa detaljer</string>
+        <string name="show">Visa</string>
+        <string name="show_folder">Visa mapp</string>
+        <string name="show_flickr">Visa Flickr</string>
+        <string name="show_flickr_user">Visa Flickr användare</string>
+        <string name="search_flickr">Sök på Flickr</string>
+        <string name="cancel_show">Avbryt visning</string>
+        <string name="go_to_source">Gå till källan</string>
+        <string name="save_image">Spara bild</string>
+        <string name="set_as_background">Andvänd som bakgrund</string>
+        <string name="user_agent">Floating image/Android</string>
+        <string name="empty_feed">Inga bilder funna från källan</string>
+        <string name="authorize">Logga in</string>
+        <string name="unauthorize">Logga ut</string>
+        <string name="please_wait">Hamsterhjulen snurrar... Vänligen vänta</string>
+        <string name="share_subject">Titta, en bild!</string>
+        <string name="share_url">Dela bildens URL</string>
+        <string name="share_image">Dela bild</string>
+        <string name="delete_image">Ta bort bild</string>
+        <string name="delete_image_are_you_sure">Är du säker på att du vill ta bort bilden?</string>
+        <string name="loading_feeds">Laddar bilder från källor</string>
+        <string name="pause">Paus</string>
+        <string name="resume">Fortsätt</string>
+        <string name="stream">Ström</string>
+</resources>

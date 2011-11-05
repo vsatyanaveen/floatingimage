@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_showing_fetching_album_list">Fel vid hämtning av albumlistan. Klicka för att försöka igen.</string>
+    <string name="internal_error">Intern fel, vänligen kontakta utvecklaren</string>
+    <string name="error_fetching_albums">Fel vid hämtning av album, vänligen försök igen</string>
+    <string name="error_fetching_friends">Fel vid hämtning av vänner, vänligen försök igen</string>
+    <string name="error_getting_flickr_user">Fel vid hämtning av din användarprofil, vänligen logga in igen.</string>
+    <string name="authorization_failed">Nåt konstigt hände vid autentiseringen... Vänligen försök igen!</string>
+    <string name="cannot_read_feed">Kan ej läsa källa, den är förmodligen för stor.</string>
+    <string name="device_does_not_support_live_wallpapers">Ledsen, men din enhet verkar inte stödja levande bakgrunder. :-(</string>
+</resources>

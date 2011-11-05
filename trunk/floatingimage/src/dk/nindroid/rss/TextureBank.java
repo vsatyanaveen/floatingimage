@@ -92,7 +92,6 @@ public class TextureBank {
 			synchronized(images){
 				images.notifyAll();
 			}
-			ic.cleanCache();
 		}
 	}
 	public void startExternal(){

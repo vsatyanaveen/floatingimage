@@ -14,7 +14,6 @@ import dk.nindroid.rss.gfx.Vec2f;
 import dk.nindroid.rss.renderers.FeedProgress;
 import dk.nindroid.rss.renderers.OSD;
 import dk.nindroid.rss.renderers.Renderer;
-import dk.nindroid.rss.renderers.floating.GlowImage;
 import dk.nindroid.rss.renderers.floating.ShadowPainter;
 
 public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.helpers.GLWallpaperService.Renderer {
@@ -73,13 +72,14 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 		if(mReinit){
 			Log.v("Floating Image", "initting");
 			mReinit = false;
-			GlowImage.initTexture(gl);
-	      	ShadowPainter.initTexture(gl);
+			ShadowPainter.initTexture(gl);
 	      	mOSD.init(gl, mDisplay);
 	      	mRenderer.init(gl, System.currentTimeMillis() + mOffset, mOSD);
 			FeedProgress.init();
 			Log.v("Floating Image", "initting done!");
 		}
+		
+		
 		
 		gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE,
                 GL10.GL_MODULATE);
@@ -97,7 +97,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
         
         gl.glHint(GL10.GL_PERSPECTIVE_CORRECTION_HINT,
                 GL10.GL_FASTEST);
-        
+       
         long realTime = System.currentTimeMillis();
         
         long timeDiff = realTime - mLastFrameTime;
@@ -224,7 +224,9 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 	
 	public void resetImages(){
 		Log.v("Floating Image", "Resetting images");
-		mRenderer.resetImages();
+		if(mRenderer != null){
+			mRenderer.resetImages();
+		}
 	}
 
 	@Override

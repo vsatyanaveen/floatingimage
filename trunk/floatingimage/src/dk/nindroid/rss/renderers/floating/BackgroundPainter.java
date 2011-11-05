@@ -187,9 +187,6 @@ public class BackgroundPainter {
 	 * @param szZ
 	 */
 	public void draw(GL10 gl, Display display, int backgroundColor){
-		if(backgroundColor == PURE_BLACK){
-			return;
-		}
 		gl.glDisable(GL10.GL_BLEND);
 		
 		int error = gl.glGetError();
@@ -206,8 +203,10 @@ public class BackgroundPainter {
 	        gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
 			gl.glVertexPointer(3, GL10.GL_FIXED, 0, mVertexBuffer);
 			gl.glEnable(GL10.GL_TEXTURE_2D);
-			gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mTexBuffer);
-			gl.glDrawElements(GL10.GL_TRIANGLE_STRIP, 4, GL10.GL_UNSIGNED_BYTE, mIndexBuffer);
+			if(backgroundColor != PURE_BLACK){
+				gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mTexBuffer);
+				gl.glDrawElements(GL10.GL_TRIANGLE_STRIP, 4, GL10.GL_UNSIGNED_BYTE, mIndexBuffer);
+			}
 			error = gl.glGetError();
 			if(error != 0){
 				Log.e("Floating Image", "GL Error painting background: " + GLU.gluErrorString(error));
