@@ -71,6 +71,7 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 	private float			mFocusWidth;
 	private float			mFocusHeight;
 	private boolean			mLargeTex = false;
+	private long			mLargeTexTime = 0;
 	private boolean			mSetBackgroundWhenReady = false;
 	private long			mImageAppliedTime = 0;
 	
@@ -457,18 +458,24 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 	
 		// Draw image
 		gl.glActiveTexture(GL10.GL_TEXTURE0); 
-		if(mLargeTex){ 
-			gl.glBindTexture(GL10.GL_TEXTURE_2D, mLargeTexture.getTextureID(gl));
-			gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mLargeTexBuffer);
-		}else{
-			gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
-			gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mTexBuffer);
-		}
-        gl.glVertexPointer(3, GL10.GL_FIXED, 0, mVertexBuffer);
-			
-	    if(!mImageNotSet){	
+		gl.glVertexPointer(3, GL10.GL_FIXED, 0, mVertexBuffer);
+		
+		gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
+		gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mTexBuffer);
+		
+		if(!mImageNotSet){	
 			gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
+		
+			if(mLargeTex){
+				float largeAlpha = Math.min(1.0f, (realTime - mLargeTexTime) / 500.0f);
+				gl.glColor4f(1.0f, 1.0f, 1.0f, largeAlpha);
+				gl.glBindTexture(GL10.GL_TEXTURE_2D, mLargeTexture.getTextureID(gl));
+				gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mLargeTexBuffer);
+				gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
+			}
 		}
+			
+	    
 		// Show smoothing
 		//if((System.currentTimeMillis() % 10000) < 5000){
 	    if(mActivity.getSettings().blackEdges){
@@ -1141,6 +1148,10 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 						setFocusTexture(gl);
 						mFocusBmp.recycle();
 						mFocusBmp = null;
+						if(!mLargeTex){
+							// Only fade if coming from small texture!
+							mLargeTexTime = realTime;
+						}
 						mLargeTex = true;
 						mUpdateLargeTex = false;
 					}
