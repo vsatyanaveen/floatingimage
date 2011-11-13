@@ -247,6 +247,12 @@ public class ShowStreams extends Activity implements MainActivity {
 		super.onStop();
 	}
 	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		System.exit(0);
+	}
+	
 	@Override 
 	protected void onPause() {
 		Log.v("Floating image", "Pausing...");
@@ -310,9 +316,14 @@ public class ShowStreams extends Activity implements MainActivity {
 		//Debug.startMethodTracing("floatingimage");
 	}
 	
+	long optionsPressedTime = 0;
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		renderer.toggleMenu();
+		if(System.currentTimeMillis() - optionsPressedTime > 500){
+			optionsPressedTime = System.currentTimeMillis();
+			renderer.toggleMenu();
+		}
 		return false;
 	}
 	
@@ -361,8 +372,44 @@ public class ShowStreams extends Activity implements MainActivity {
 		switch(keyCode){
 		case KeyEvent.KEYCODE_BACK:
 			if(renderer.unselect()) return true;
-		default: return super.onKeyDown(keyCode, event);
+			break;
+		case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
+			renderer.beginFastForward();
+			return true;
+		case KeyEvent.KEYCODE_MEDIA_REWIND:
+			renderer.beginRewind();
+			return true;
+		case KeyEvent.KEYCODE_MEDIA_PLAY:
+			if(renderer.isPaused()){
+				renderer.pause();
+			}
+			return true;
+		case KeyEvent.KEYCODE_MEDIA_PAUSE:
+			if(!renderer.isPaused()){
+				renderer.pause();
+			}
+			return true;
+		case KeyEvent.KEYCODE_ZOOM_IN:
+			renderer.zoomIn();
+			return true;
+		case KeyEvent.KEYCODE_ZOOM_OUT:
+			renderer.zoomOut();
+			return true;
 		}
+		return super.onKeyDown(keyCode, event);
+	}
+	
+	@Override
+	public boolean onKeyUp(int keyCode, KeyEvent event) {
+		switch(keyCode){
+		case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
+			renderer.endFastForward();
+			return true;
+		case KeyEvent.KEYCODE_MEDIA_REWIND:
+			renderer.endRewind();
+			return true;
+		}
+		return super.onKeyUp(keyCode, event);
 	}
 	
 	public void showAbout(){

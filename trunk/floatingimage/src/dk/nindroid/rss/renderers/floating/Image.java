@@ -75,6 +75,8 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 	private boolean			mSetBackgroundWhenReady = false;
 	private long			mImageAppliedTime = 0;
 	
+	private boolean			mLockTexture;
+	
 	// Smoothing vars
 	int[] mPixelVertices;
 	float[] mImageTex;
@@ -90,6 +92,10 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 	
 	public PositionController getPositionController(){
 		return this.mPositionController;
+	}
+	
+	public void lockTexture(boolean lock){
+		mLockTexture = lock;
 	}
 	
 	public void init(GL10 gl, long time){
@@ -863,7 +869,7 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 		if(this.mState == STATE_FOCUSED){
 			float invScale = 1.0f / mInitialScale;
 			if(scale < invScale * 1.01f){
-				scale = invScale;
+				this.mScale = invScale;
 				return;
 			}else{
 				this.mScale = Math.min(scale, 5.0f / mInitialScale); // Avoid focusing on a single pixel, that's just silly!
@@ -1178,11 +1184,13 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 	/************ Texture functions ************/
 	
 	private void resetTexture(GL10 gl, boolean next){
-		mFocusBmp = null;
-		mDelete = false;
-		mImageNotSet = true;
-		maspect = 1.3f;
-		mOnDemandBank.get(this, next);
+		if(!mLockTexture){
+			mFocusBmp = null;
+			mDelete = false;
+			mImageNotSet = true;
+			maspect = 1.3f;
+			mOnDemandBank.get(this, next);
+		}
 	}
 	
 	public boolean validForTextureUpdate(){

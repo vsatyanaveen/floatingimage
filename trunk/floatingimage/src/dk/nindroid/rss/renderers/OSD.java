@@ -7,6 +7,7 @@ import java.nio.IntBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import android.util.Log;
 import android.view.Surface;
 import dk.nindroid.rss.Display;
 import dk.nindroid.rss.MainActivity;

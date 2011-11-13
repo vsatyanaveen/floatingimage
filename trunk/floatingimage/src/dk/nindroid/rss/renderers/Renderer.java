@@ -33,4 +33,6 @@ public abstract class Renderer {
 	public abstract float adjustOffset(float speedX, float speedY); 
 	public abstract void wallpaperMove(float fraction);
 	public abstract int totalImages();
+	public void zoomIn(){}
+	public void zoomOut(){}
 }

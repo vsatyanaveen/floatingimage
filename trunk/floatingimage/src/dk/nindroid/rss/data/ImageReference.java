@@ -57,7 +57,7 @@ public abstract class ImageReference {
 		if(config == null){
 			this.mBitmap = Bitmap.createBitmap(128, 128, Config.RGB_565);
 		}else{
-			this.mBitmap = Bitmap.createBitmap(128, 128, bmp.getConfig());
+			this.mBitmap = Bitmap.createBitmap(128, 128, config);
 		}
 		Canvas cvs = new Canvas(this.mBitmap);
 		Rect drawRect = getRect(bmp, 128);
@@ -69,7 +69,12 @@ public abstract class ImageReference {
 	
 	
 	public final void set256Bitmap(Bitmap bmp){
-		this.mBitmap = Bitmap.createBitmap(256, 256, bmp.getConfig());
+		Config config = bmp.getConfig();
+		if(config == null){
+			this.mBitmap = Bitmap.createBitmap(256, 256, Config.RGB_565);
+		}else{
+			this.mBitmap = Bitmap.createBitmap(256, 256, config);
+		}
 		Canvas cvs = new Canvas(this.mBitmap);
 		Rect drawRect = getRect(bmp, 256);
 		cvs.drawBitmap(bmp, null, drawRect, paint);
