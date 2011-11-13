@@ -244,9 +244,11 @@ public class Image implements ImagePlane {
 			szY = szX / mAspect;
 		}
 		*/
-		gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_REPLACE);
+		gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_MODULATE);
 		gl.glFrontFace(GL10.GL_CCW);
 		gl.glEnable(GL10.GL_TEXTURE_2D);
+		
+		Log.v("Floating Image", "Alpha: " + mAlpha);
 		
 		gl.glColor4f(1.0f, 1.0f, 1.0f, mAlpha);
 		gl.glActiveTexture(GL10.GL_TEXTURE0);

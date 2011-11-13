@@ -12,11 +12,13 @@ import android.util.Log;
 import dk.nindroid.rss.Display;
 import dk.nindroid.rss.FeedController;
 import dk.nindroid.rss.FeedController.EventSubscriber;
+import dk.nindroid.rss.TextureSelector.PrepareCallback;
 import dk.nindroid.rss.MainActivity;
 import dk.nindroid.rss.OnDemandImageBank;
 import dk.nindroid.rss.R;
 import dk.nindroid.rss.TextureSelector;
 import dk.nindroid.rss.data.ImageReference;
+import dk.nindroid.rss.data.LocalImage;
 import dk.nindroid.rss.data.Ray;
 import dk.nindroid.rss.data.Texture;
 import dk.nindroid.rss.gfx.Vec3f;
@@ -33,7 +35,7 @@ import dk.nindroid.rss.renderers.floating.positionControllers.Stack;
 import dk.nindroid.rss.renderers.floating.positionControllers.StarSpeed;
 import dk.nindroid.rss.renderers.floating.positionControllers.TableTop;
 
-public class FloatingRenderer extends Renderer implements EventSubscriber{
+public class FloatingRenderer extends Renderer implements EventSubscriber, PrepareCallback{
 	public static final long 	mFocusDuration = 300;
 	public static long			mSelectedTime;
 	public static final float  	mFocusX = 0.0f;
@@ -61,6 +63,7 @@ public class FloatingRenderer extends Renderer implements EventSubscriber{
 	private int 			mTotalImgRows = 0;
 	private int 			mImgCnt = 0;
 	private boolean			mDoUnselect = false;
+	private int				mDoSelect = -1;
 	private boolean			mResetImages = false;
 	private Display 		mDisplay;
 	private MainActivity	mActivity;
@@ -84,7 +87,16 @@ public class FloatingRenderer extends Renderer implements EventSubscriber{
 	private boolean					mSelectingNext;
 	private boolean					mSelectingPrev;
 	private ImageDepthComparator 	mDepthComparator;
-	private boolean			mDoAdjustImagePositions = false;
+	private boolean					mDoAdjustImagePositions = false;
+	
+	private boolean					mSlideshow = false;
+	private long					mSlideshowImageShowTime = 10000;
+	private long					mSlideshowSlideWaitTime	= 10000;
+	private long					mSlideshowImageShownAt;
+	private long					mSlideshowSlideImageDismissedAt;
+	private int 					mSlideshowLastImage = 0;
+	
+	
 	
 	public FloatingRenderer(MainActivity activity, OnDemandImageBank onDemandBank, FeedController feedController, Display display){
 		this.mActivity = activity;
@@ -102,6 +114,7 @@ public class FloatingRenderer extends Renderer implements EventSubscriber{
 		setPositionController(mActivity.getSettings().floatingType);
 		
 		mStartTime = System.currentTimeMillis();
+		mSlideshowSlideImageDismissedAt = mStartTime;
 	}
 	
 	int mCurPositionController = -1;
@@ -222,13 +235,7 @@ public class FloatingRenderer extends Renderer implements EventSubscriber{
 	            	}
 	            }
 	        	if(selected != null && selected.canSelect()){
-	        		mSelectedTime = realTime;
-	        		mSelected = selected;
-	        		selected.select(gl, frameTime, realTime);
-	        		for(i = mImgs.length; i > 0; --i){
-	        			if(mImgs[i - 1] == selected)
-	        				mSelectedIndex = i - 1;
-	        		}
+	        		selectImage(gl, frameTime, realTime, selected);
 	        		return true;
 	        	}else{
 	        		return false;
@@ -236,6 +243,16 @@ public class FloatingRenderer extends Renderer implements EventSubscriber{
 	        }else{
 	        	return false;
 	        }
+		}
+	}
+	
+	private void selectImage(GL10 gl, long frameTime, long realTime, Image selected){
+		mSelectedTime = realTime;
+		mSelected = selected;
+		selected.select(gl, frameTime, realTime);
+		for(int i = mImgs.length; i > 0; --i){
+			if(mImgs[i - 1] == selected)
+				mSelectedIndex = i - 1;
 		}
 	}
 	
@@ -286,6 +303,11 @@ public class FloatingRenderer extends Renderer implements EventSubscriber{
 			deselect(gl, frameTime, realTime);
 		}
 		
+		if(mDoSelect != -1){
+			selectImage(gl, frameTime, realTime, mImgs[mDoSelect]);
+			mDoSelect = -1;
+		}
+		
         // Deselect selected when it is floating.
         if(mSelected != null){
         	if(mSelected.stateInFocus()){
@@ -324,6 +346,7 @@ public class FloatingRenderer extends Renderer implements EventSubscriber{
             }
         }
         
+        updateSlideshow(gl, frameTime, realTime);
         
         if(sortArray)
         {
@@ -332,6 +355,43 @@ public class FloatingRenderer extends Renderer implements EventSubscriber{
         mLastFrameTime = frameTime;
         //updateRotation(realTime);
         updateTranslation(realTime);
+	}
+	
+	public void updateSlideshow(GL10 gl, long frameTime, long realTime){
+		if(mSlideshow){
+			if(mSelected != null){
+				if(realTime - mSlideshowImageShownAt > mSlideshowImageShowTime){
+					deselect(gl, frameTime, realTime);
+					mSlideshowImageShownAt = -1;
+					mSlideshowSlideImageDismissedAt = realTime;
+				}
+			}else{
+				if(realTime - mSlideshowSlideImageDismissedAt > mSlideshowSlideWaitTime){
+					if(mSlideshowSlideImageDismissedAt != -1){
+						mSlideshowSlideImageDismissedAt = -1;
+						prepareNext();
+					}
+				}
+			}
+		}
+	}
+	
+	public void prepareNext(){
+		
+		int next = (mSlideshowLastImage + 1) % mImgs.length;
+		Image img = mImgs[next];
+		img.lockTexture(true);
+		mTextureSelector.PrepareImage(img, this, img.getShowing());
+		mSlideshowLastImage = next;
+	}
+	
+	@Override
+	public void TexturePrepared(String id) {
+		mImgs[mSlideshowLastImage].lockTexture(false);
+		if(mSelected == null){
+			mDoSelect = mSlideshowLastImage;
+			mSlideshowImageShownAt = System.currentTimeMillis();
+		}
 	}
 	
 	public void updateDepths(){
@@ -452,24 +512,8 @@ public class FloatingRenderer extends Renderer implements EventSubscriber{
 	}
 	
 	void adjustImagePositions(long time){
-		/*
-		long interval = mActivity.getSettings().floatingTraversal / mTotalImgRows;
-		long prevNewStartTime = mImgs[0].getStartTime();
-		long prevOrgStartTime = mImgs[0].getStartTime();
-		*/
 		for(Image img : mImgs){
 			img.traversalChanged(time);
-			/*
-			long prevOrg = prevOrgStartTime;
-			prevOrgStartTime = img.getStartTime();
-			if(img.getStartTime() != prevOrg){
-				img.setStartTime(prevNewStartTime - interval, time);
-			}
-			else{
-				img.setStartTime(prevNewStartTime, time);
-			}
-			prevNewStartTime = img.getStartTime();
-			*/
 		}
 	}
 
@@ -480,6 +524,22 @@ public class FloatingRenderer extends Renderer implements EventSubscriber{
 			return true;
 		}
 		return false;
+	}
+	
+	public void zoomIn(){
+		if(mSelected != null){
+			mSelected.initTransform();
+			mSelected.transform(0, 0, 0, 0, 0, 1.1f);
+			mSelected.transformEnd();
+		}
+	}
+	
+	public void zoomOut(){
+		if(mSelected != null){
+			mSelected.initTransform();
+			mSelected.transform(0, 0, 0, 0, 0, 0.9f);
+			mSelected.transformEnd();
+		}
 	}
 
 	@Override

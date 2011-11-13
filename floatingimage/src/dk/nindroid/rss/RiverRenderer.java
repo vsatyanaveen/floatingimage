@@ -46,6 +46,13 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 	private boolean			mReinit = true;
 	
 	private long			mStartTime;
+	
+	private long			mForwardPressed = -1;
+	private long			mRewindPressed = -1;
+	private long			mForwardReleased = -1;
+	private long			mRewindReleased = -1;
+	private long			mForwardPressedTime = -1;
+	private long			mRewindPressedTime = -1;
 		
 	public RiverRenderer(MainActivity activity, boolean useTranslucentBackground, boolean limitFramerate){
 		this.mActivity = activity;
@@ -101,7 +108,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
         long realTime = System.currentTimeMillis();
         
         long timeDiff = realTime - mLastFrameTime;
-        mLastFrameTime = realTime;
+        
         if(mPause){
         	this.mOffset -= timeDiff;
         } else if(timeDiff > 200){ // We left the app, and have returned, or experienced lag.
@@ -128,6 +135,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
         }
         //*/
         fadeOffset(realTime);
+        applyFowardRewind(realTime);
         //mOffset = mRenderer.editOffset(mOffset, realTime);
         long time = realTime + mOffset;
         
@@ -161,6 +169,8 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
         	mFeedProgress.draw(gl, mFeedsLoaded, mFeedsTotal, mDisplay);
         	mOSD.draw(gl, realTime);
         }
+        
+        mLastFrameTime = realTime;
 	}
 	
 	private void fadeOffset(long time) {
@@ -170,6 +180,30 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 			mOffset += fadeOffset;
 		}else{
 			mFadeOffset = 0.0f;
+		}
+	}
+	
+	private void applyFowardRewind(long time){
+		long frameMultiplier = time - mLastFrameTime;
+		if(mForwardPressed != -1){
+			mForwardPressedTime = time - mForwardPressed;
+			long offset = Math.min(mForwardPressedTime, 2000) / 100;
+			mOffset += offset * frameMultiplier;
+		}else if(mForwardReleased != -1){
+			long stopTime = Math.min(mForwardPressedTime, 2000);
+			long startSpeed = stopTime / 100;
+			long offset = startSpeed - Math.min(time - mForwardReleased, stopTime) / 100;
+			mOffset += offset * frameMultiplier;
+		}
+		if(mRewindPressed != -1){
+			mRewindPressedTime = time - mRewindPressed;
+			long offset = Math.min(mRewindPressedTime, 2000) / 100;
+			mOffset -= offset * frameMultiplier;
+		}else if(mRewindReleased != -1){
+			long stopTime = Math.min(mRewindPressedTime, 2000);
+			long startSpeed = stopTime / 100;
+			long offset = startSpeed - Math.min(time - mRewindReleased, stopTime) / 100;
+			mOffset -= offset * frameMultiplier;
 		}
 	}
 	
@@ -281,6 +315,40 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 	public boolean pause(){
 		this.mPause ^= true;
 		return this.mPause;
+	}
+	
+	public boolean isPaused(){
+		return mPause;
+	}
+	
+	public void beginFastForward(){
+		if(mForwardPressed == -1){
+			mForwardPressed = System.currentTimeMillis();
+		}
+	}
+	
+	public void endFastForward(){
+		mForwardPressed = -1;
+		mForwardReleased = System.currentTimeMillis();
+	}
+	
+	public void beginRewind(){
+		if(mRewindPressed == -1){
+			mRewindPressed = System.currentTimeMillis();
+		}
+	}
+	
+	public void endRewind(){
+		mRewindPressed = -1;
+		mRewindReleased = System.currentTimeMillis();
+	}
+	
+	public void zoomIn(){
+		mRenderer.zoomIn();
+	}
+	
+	public void zoomOut(){
+		mRenderer.zoomOut();
 	}
 	
 	float lastX;

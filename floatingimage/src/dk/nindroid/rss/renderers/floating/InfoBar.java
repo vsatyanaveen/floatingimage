@@ -15,6 +15,7 @@ import dk.nindroid.rss.gfx.Vec3f;
 
 public class InfoBar {
 	private static final int 	one = 0x10000;
+	private static final int 	MAX_WIDTH = 2048;
 	private Vec3f[]		mVertices;
 	private IntBuffer	mVertexBuffer;
 	private ByteBuffer	mIndexBuffer;
@@ -63,7 +64,7 @@ public class InfoBar {
 		ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
         tbb.order(ByteOrder.nativeOrder());
         mTexBuffer = tbb.asFloatBuffer();
-        float ratioX = display.getWidthPixels() / 1024.0f;
+        float ratioX = display.getWidthPixels() / (float)MAX_WIDTH;
         float ratioY = 80.0f / 128.0f;
         
         float tex[] = {
@@ -74,7 +75,7 @@ public class InfoBar {
         };
         mTexBuffer.put(tex);
         mTexBuffer.position(0);
-        mInfoPainter.paintCanvas(Math.min(display.getWidthPixels(), 1024), 80);
+        mInfoPainter.paintCanvas(Math.min(display.getWidthPixels(), MAX_WIDTH), 80);
 		gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
         setTexture(gl, mInfoPainter.getBitmap());
 	}
@@ -85,8 +86,8 @@ public class InfoBar {
 			gl.glGenTextures(1, textures, 0);
 			mTextureID = textures[0];
 		}		
-		mInfoPainter.setInfo(ir.getTitle(), ir.getAuthor(), 1024, 128);
-		mInfoPainter.paintCanvas(Math.min(display.getWidthPixels(), 1024), 80);
+		mInfoPainter.setInfo(ir.getTitle(), ir.getAuthor(), MAX_WIDTH, 128);
+		mInfoPainter.paintCanvas(Math.min(display.getWidthPixels(), MAX_WIDTH), 80);
 		gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
 		Bitmap infoBmp = mInfoPainter.getBitmap();
         setTexture(gl, infoBmp);

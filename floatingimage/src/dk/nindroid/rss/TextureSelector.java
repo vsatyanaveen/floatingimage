@@ -50,11 +50,23 @@ public class TextureSelector {
 		}
 	}
 	
+	public void PrepareImage(ImagePlane img, PrepareCallback callback, ImageReference ref){
+		if(mWorker != null){
+			synchronized (mWorker) {
+				mCurSelected = img;
+				mWorker.mRef = ref;
+				mWorker.mCallback = callback;
+				mWorker.notify();
+			}		
+		}
+	}
+	
 	public void selectImage(ImagePlane img, ImageReference ref){
 		if(mWorker != null){
 			synchronized (mWorker) {
 				mCurSelected = img;
 				mWorker.mRef = ref;
+				mWorker.mDoApplyLarge = true;
 				mWorker.notify();
 			}		
 		}
@@ -103,6 +115,8 @@ public class TextureSelector {
 		private boolean				mSwapSides = false;
 		private Display				mDisplay;
 		private Config 				mConfig;
+		private String				mId;
+		private PrepareCallback 	mCallback;
 		
 		public Worker(Display display, Config config){
 			this.mDisplay = display;
@@ -131,6 +145,28 @@ public class TextureSelector {
 					Log.i("dk.nindroid.rss.TextureSelector", "Stop received");
 					return;
 				}
+				synchronized (this) {
+					ref = mRef;
+					mRef = null;
+				}
+				
+				if(ref != null){
+					String id = ref.getID();
+					if(!id.equals(this.mId)){
+						this.mId = id;
+						Bitmap bmp = prepare(ref);
+						if(bmp != null){
+							applyLarge(bmp);
+							if(mCallback != null){
+								mCallback = null;
+								mCallback.TexturePrepared(ref.getID());
+							}
+						}else{
+							mCurSelected.setFocusTexture(null, 0, 0, ImagePlane.SIZE_LARGE);
+						}
+					}
+				}
+				
 				if(mDoApplyLarge){
 					applyLarge();
 					mDoApplyLarge = false;
@@ -139,46 +175,7 @@ public class TextureSelector {
 					applyOriginal();
 					mDoApplyOriginal = false;
 				}
-				synchronized (this) {
-					ref = mRef;
-					mRef = null;
-				}
-				if(ref != null){
-					int rot = (int)ref.getTargetOrientation();
-					mSwapSides = rot % 180 == 90;
-					mCurrentBitmap = null;
-					String url = ref.getBigImageUrl();
-					progress.setKey(mCurSelected);
-					progress.setPercentDone(5);
-					int res = mTextureResolution;
-					if(res == 0){
-						setTextureResolution();
-						res = mTextureResolution;
-					}
-					if(ref instanceof LocalImage){ // Special case, read from disk
-						Bitmap bmp = null;
-						try{
-							bmp = ImageFileReader.readImage(new File(url), res, progress, mConfig);
-						}catch(Throwable t){
-							Log.e("Floating Image", "Unexpected nastyness caught!", t);
-						}
-						if(bmp != null){
-							applyLarge(bmp);
-						}
-					}else{ // Download from web
-						// Retry max 5 times in case we time out.
-						for(int i = 0; i < 5; ++i){
-							Bitmap bmp = BitmapDownloader.downloadImage(url, progress, mConfig);
-							if(bmp != null && bmp.getWidth() > 0 && bmp.getHeight() > 0){
-								Log.v("Floating Image", "Image size: (" + bmp.getWidth() + "," + bmp.getHeight() + ")");
-								applyLarge(bmp);
-								break;
-							}else{
-								mCurSelected.setFocusTexture(null, 0, 0, ImagePlane.SIZE_LARGE);
-							}
-						}
-					}
-				}
+				
 				synchronized (this) {
 					if(!mRun){
 						Log.i("dk.nindroid.rss.TextureSelector", "Stop received");
@@ -192,6 +189,40 @@ public class TextureSelector {
 					}
 				}
 			}
+		}
+		
+		public Bitmap prepare(ImageReference ref){
+			
+			int rot = (int)ref.getTargetOrientation();
+			mSwapSides = rot % 180 == 90;
+			mCurrentBitmap = null;
+			String url = ref.getBigImageUrl();
+			progress.setKey(mCurSelected);
+			progress.setPercentDone(5);
+			int res = mTextureResolution;
+			if(res == 0){
+				setTextureResolution();
+				res = mTextureResolution;
+			}
+			if(ref instanceof LocalImage){ // Special case, read from disk
+				Bitmap bmp = null;
+				try{
+					bmp = ImageFileReader.readImage(new File(url), res, progress, mConfig);
+				}catch(Throwable t){
+					Log.e("Floating Image", "Unexpected nastyness caught!", t);
+				}
+				return bmp;
+			}else{ // Download from web
+				// Retry max 5 times in case we time out.
+				for(int i = 0; i < 5; ++i){
+					Bitmap bmp = BitmapDownloader.downloadImage(url, progress, mConfig);
+					if(bmp != null && bmp.getWidth() > 0 && bmp.getHeight() > 0){
+						Log.v("Floating Image", "Image size: (" + bmp.getWidth() + "," + bmp.getHeight() + ")");
+						return bmp;
+					}
+				}
+			}
+			return null;
 		}
 		
 		private void applyLarge(Bitmap bmp){
@@ -208,7 +239,6 @@ public class TextureSelector {
 				mCurrentBitmap.recycle();
 			}
 			mCurrentBitmap = bmp;
-			applyLarge();
 		}
 		
 		// Scale bmp to current screen size, and apply
@@ -301,5 +331,9 @@ public class TextureSelector {
 				}
 			}
 		}
+	}
+	
+	public interface PrepareCallback{
+		public void TexturePrepared(String id);
 	}
 }
