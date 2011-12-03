@@ -7,7 +7,6 @@ import java.nio.IntBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
 
-import android.util.Log;
 import android.view.Surface;
 import dk.nindroid.rss.Display;
 import dk.nindroid.rss.MainActivity;
@@ -499,5 +498,13 @@ public class OSD {
 	
 	public void registerPlayListener(Play.EventHandler listener){
 		mPlay.registerEventListener(listener);
+	}
+	
+	public void play(){
+		mPlay.play();
+	}
+	
+	public void pause(){
+		mPlay.pause();
 	}
 }

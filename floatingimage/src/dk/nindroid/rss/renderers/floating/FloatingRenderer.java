@@ -33,8 +33,9 @@ import dk.nindroid.rss.renderers.floating.positionControllers.Mixup;
 import dk.nindroid.rss.renderers.floating.positionControllers.Stack;
 import dk.nindroid.rss.renderers.floating.positionControllers.StarSpeed;
 import dk.nindroid.rss.renderers.floating.positionControllers.TableTop;
+import dk.nindroid.rss.renderers.osd.Play.EventHandler;
 
-public class FloatingRenderer extends Renderer implements EventSubscriber, PrepareCallback{
+public class FloatingRenderer extends Renderer implements EventSubscriber, PrepareCallback, EventHandler{
 	public static final long 	mFocusDuration = 300;
 	public static long			mSelectedTime;
 	public static final float  	mFocusX = 0.0f;
@@ -78,6 +79,7 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 	private Texture 		mLargeTexture;
 	private long			mLastFrameTime;
 	private FeedController	mFeedController;
+	private OSD				mOsd;
 	
 	private static final Vec3f 		mCamPos = new Vec3f(0,0,0);
 	private Image					mSelected = null;
@@ -211,6 +213,7 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 	}
 		
 	public boolean click(GL10 gl, float x, float y, long frameTime, long realTime){
+		mOsd.pause();
 		Vec3f rayDir = new Vec3f(x, y, -1);
     	rayDir.normalize();
     	Ray r = new Ray(mCamPos, rayDir);
@@ -290,10 +293,13 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 	}
 	
 	@Override 
-	public long editOffset(long offset, long realTime){
-		long illegalDistance = Math.max(0, mStartTime - (realTime + offset));
-		long id = illegalDistance / 300;
-		return offset + id * id;
+	public long editOffset(long offset, long realTime, boolean isPaused){
+		if(isPaused && mSelected != null){
+			float interval = mSelected.getInterval(realTime + offset) - 0.5f;
+			long adjustment = (long)(200.0f * interval);
+			offset -= adjustment;
+		}
+		return offset;
 	}
 	
 	public void update(GL10 gl, long frameTime, long realTime){
@@ -493,7 +499,7 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 	
 	public void init(GL10 gl, long time, OSD osd){
 		mBackgroundPainter.initTexture(gl, mActivity, mActivity.getSettings().backgroundColor);
-		osd.setEnabled(false, true, true, settingsEnabled, imagesEnabled);
+		osd.setEnabled(true, true, true, settingsEnabled, imagesEnabled);
 		for(int i = 0; i < mImgCnt; ++i){
 			mImgs[i].init(gl, time);
 		}
@@ -504,8 +510,22 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 		if(mFeedController.getShowing() == 0){
 			mFeedController.addSubscriber(this);
 		}
+		mOsd = osd;
+		osd.registerPlayListener(this);
+		osd.pause();
 	}
 	
+	@Override
+	public void Play() {
+		mSlideshowSlideImageDismissedAt = 0;
+		this.mSlideshow = true;
+	}
+
+	@Override
+	public void Pause() {
+		this.mSlideshow = false;
+	}
+		
 	@Override
 	public void onPause(){
 		mTextureSelector.stopThread();
@@ -566,8 +586,9 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 	@Override
 	public boolean slideLeft(long realTime) {
 		if(mSelected != null){
-			mSelectingNext = false;
-			mSelectingPrev = true;
+			boolean reverse = mSelected.getPositionController().isReversed();
+			mSelectingNext = reverse; // Normal is false
+			mSelectingPrev = !reverse; // Normal is true
 			Log.v("Floating Image", "SlideLeft");
 			return true;
 		}
@@ -577,8 +598,9 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 	@Override
 	public boolean slideRight(long realTime) {
 		if(mSelected != null){
-			mSelectingNext = true;
-			mSelectingPrev = false;
+			boolean reverse = mSelected.getPositionController().isReversed();
+			mSelectingNext = !reverse; // Normal is true
+			mSelectingPrev = reverse; // Normal is false
 			Log.v("Floating Image", "SlideRight");
 			return true;
 		}

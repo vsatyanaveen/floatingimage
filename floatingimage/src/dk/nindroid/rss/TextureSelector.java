@@ -158,8 +158,8 @@ public class TextureSelector {
 						if(bmp != null){
 							applyLarge(bmp);
 							if(mCallback != null){
-								mCallback = null;
 								mCallback.TexturePrepared(ref.getID());
+								mCallback = null;
 							}
 						}else{
 							mCurSelected.setFocusTexture(null, 0, 0, ImagePlane.SIZE_LARGE);

@@ -1,8 +1,6 @@
 package dk.nindroid.rss.renderers.osd;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -21,7 +19,7 @@ public class Play extends Button {
 	
 	int		mCurrentTex;
 	
-	List<EventHandler> listeners;
+	EventHandler listener;
 	
 	public Play(Context context) {
 		InputStream is = context.getResources().openRawResource(R.drawable.osd_play);
@@ -30,6 +28,18 @@ public class Play extends Button {
 		mPause = BitmapFactory.decodeStream(is);
 	}
 
+	public void play(){
+		if(!playing){
+			click(0);
+		}
+	}
+	
+	public void pause(){
+		if(playing){
+			click(0);
+		}
+	}
+	
 	@Override
 	public void click(long time) {
 		if(playing){
@@ -44,15 +54,11 @@ public class Play extends Button {
 	}
 	
 	public void onEvent(){
-		if(listeners  != null){
+		if(listener  != null){
 			if(playing){
-				for(EventHandler listener : listeners){
-					listener.Play();
-				}
+				listener.Play();
 			}else{
-				for(EventHandler listener : listeners){
-					listener.Pause();
-				}
+				listener.Pause();
 			}
 		}
 	}
@@ -73,10 +79,7 @@ public class Play extends Button {
 	}
 	
 	public void registerEventListener(EventHandler listener){
-		if(listeners == null){
-			listeners = new ArrayList<EventHandler>();
-		}
-		listeners.add(listener);
+		this.listener = listener;
 	}
 	
 	public interface EventHandler{

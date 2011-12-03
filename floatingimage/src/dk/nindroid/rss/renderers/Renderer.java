@@ -8,7 +8,7 @@ import dk.nindroid.rss.data.ImageReference;
 public abstract class Renderer {
 	public abstract void update(GL10 gl, long time, long realTime);
 	public abstract void render(GL10 gl, long frameTime, long realtime);
-	public long editOffset(long offset, long realTime){
+	public long editOffset(long offset, long realTime, boolean isPaused){
 		return offset;
 	}
 	public abstract void init(GL10 gl, long time, OSD osd);

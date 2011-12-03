@@ -79,7 +79,7 @@ public class Gallery extends PositionController {
 	
 	@Override
 	public float getScale() {
-		return 0.75f;
+		return 0.70f;
 	}
 
 	@Override

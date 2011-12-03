@@ -25,7 +25,6 @@ public class FloatRight extends GridController {
 	float mRotation;
 	private final static Vec3f ROTATION = new Vec3f(0, 0, 1);
 	
-	
 	public FloatRight(MainActivity activity, Display display, int image, int noImages){
 		super(image, noImages);
 		mRand = new Random(System.currentTimeMillis() + image);

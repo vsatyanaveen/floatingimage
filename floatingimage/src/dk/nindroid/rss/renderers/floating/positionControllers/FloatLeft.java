@@ -25,6 +25,10 @@ public class FloatLeft extends GridController {
 	float mRotation;
 	private final static Vec3f ROTATION = new Vec3f(0, 0, 1);
 	
+	@Override
+	public boolean isReversed() {
+		return true;
+	}	
 	
 	public FloatLeft(MainActivity activity, Display display, int image, int noImages){
 		super(image, noImages);
