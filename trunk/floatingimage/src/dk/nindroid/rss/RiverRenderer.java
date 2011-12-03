@@ -136,7 +136,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
         //*/
         fadeOffset(realTime);
         applyFowardRewind(realTime);
-        //mOffset = mRenderer.editOffset(mOffset, realTime);
+        mOffset = mRenderer.editOffset(mOffset, realTime - mStartTime, mPause);
         long time = realTime + mOffset;
         
         mDisplay.setFrameTime(realTime);

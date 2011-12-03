@@ -12,6 +12,9 @@ public abstract class PositionController {
 		return 1.0f;
 	}
 	
+	public boolean isReversed(){
+		return false;
+	}
 	public abstract void jitter();
 	public abstract Vec3f getPosition(float interval);
 	public abstract void getRotation(float interval, Rotation a, Rotation b);
