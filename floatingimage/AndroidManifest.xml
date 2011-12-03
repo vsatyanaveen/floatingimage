@@ -58,6 +58,15 @@
 <activity android:name=".parser.facebook.FacebookFriendView$SubActivity"></activity>
 <activity android:name=".menu.LiveWallpaperLauncher"></activity>
 <activity android:name=".parser.picasa.PicasaUserView$AlbumActivity"></activity>
+<activity android:name=".settings.FeedSettings"></activity>
+<activity android:name="GalleryActivity" android:label="Floating Gallery" android:taskAffinity=".GalleryActivity">
+    <intent-filter>
+		<action android:name="android.intent.action.MAIN"></action>
+		<category android:name="android.intent.category.LAUNCHER"></category>
+	</intent-filter>
+</activity>
+<activity android:name=".menu.GallerySettings"></activity>
+<activity android:name=".menu.GalleryFeedManagerLauncher"></activity>
 </application>
 
     <uses-sdk android:minSdkVersion="4" android:targetSdkVersion="11"/>

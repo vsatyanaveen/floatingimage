@@ -13,11 +13,6 @@
 				android:targetClass="dk.nindroid.rss.menu.WallpaperFeedManagerLauncher" 
 				android:targetPackage="dk.nindroid.rss" />
         </PreferenceScreen>        
-        <CheckBoxPreference
-                android:key="shuffleImages"
-                android:title="@string/shuffle"
-                android:summary="@string/shuffleSummary" 
-                android:defaultValue="true" />
     </PreferenceCategory>
     <PreferenceCategory
             android:title="@string/display">

@@ -117,4 +117,9 @@
 	<string name="misc">Misc</string>
 	<string name="LiveWallpapers">Live wallpapers</string>
 	<string name="LiveWallpapersSummary">Manage live wallpapers to set Floating Image as wallpaper</string>
+	
+	<string name="feedSortOrder">Sort images by</string>
+	<string name="feedActive">Active</string>
+	<string name="feedName">Name</string>
+	<string name="feedSubtitle">Subtitle</string>
 </resources>

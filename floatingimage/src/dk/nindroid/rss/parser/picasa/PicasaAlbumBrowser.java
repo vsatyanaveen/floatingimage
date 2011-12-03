@@ -58,6 +58,9 @@ public class PicasaAlbumBrowser extends ListFragment implements GetAlbumsTask.Ca
 			b.putString("PATH", url);
 			b.putInt("TYPE", Settings.TYPE_PICASA);
 			b.putString("NAME", albums.get(position).getTitle());
+			if(owner == null){
+				owner = getString(R.string.me);
+			}
 			b.putString("EXTRAS", getString(R.string.albumBy) + " " + owner);
 			intent.putExtras(b);
 			this.getActivity().setResult(Activity.RESULT_OK, intent);

@@ -40,11 +40,15 @@ public class FeedController {
 	private MainActivity					mActivity;
 	private int								mCachedActive;
 	
+	private int								mForceFeedId = -1;
+	
 	public interface EventSubscriber{
 		public void feedsUpdated();
 	}
 	
-	
+	public void showFeed(int id){
+		this.mForceFeedId = id;
+	}
 	
 	private List<EventSubscriber> eventSubscribers;
 	
@@ -115,15 +119,22 @@ public class FeedController {
 			int feedi = c.getColumnIndex(FeedsDbAdapter.KEY_URI);
 			int namei = c.getColumnIndex(FeedsDbAdapter.KEY_TITLE);
 			int idi   = c.getColumnIndex(FeedsDbAdapter.KEY_ROWID);
+			int sortingi = c.getColumnIndex(FeedsDbAdapter.KEY_SORTING);
 			while(c.moveToNext()){
 				int type = c.getInt(typei); 
 				String feed = c.getString(feedi);
 				String name = c.getString(namei);
 				int id = c.getInt(idi);
-				boolean enabled = sp.getBoolean("feed_" + Integer.toString(id), true);
+				int sorting = c.getInt(sortingi);
+				boolean enabled;
+				if(mForceFeedId == -1){
+					enabled = sp.getBoolean("feed_" + Integer.toString(id), true);
+				}else{
+					enabled = mForceFeedId == id;
+				}
 				// Only add a single feed once!
 				if(enabled && !newFeeds.contains(feed)){
-					newFeeds.add(getFeedReference(feed, type, name));
+					newFeeds.add(getFeedReference(feed, type, name, sorting));
 				}
 			}
 		}catch(Exception e){
@@ -187,8 +198,8 @@ public class FeedController {
 		return mReferences.size();
 	}
 	
-	public FeedReference getFeedReference(String path, int type, String name){
-		return new FeedReference(getParser(type), path, name, type);
+	public FeedReference getFeedReference(String path, int type, String name, int sorting){
+		return new FeedReference(getParser(type), path, name, type, sorting);
 	}
 	
 	// False if no images.
@@ -213,25 +224,105 @@ public class FeedController {
 							references = parseFeed(feed);
 							break;
 						}catch (Exception e){
-							Log.w("FeedController", "Failed getting feed, retrying...", e);
+							Log.w("Floating Image", "Failed getting feed, retrying...", e);
 						}
 					}
 				}
 				if(references != null){
 					if(references.size() != 0){
-						if(mActivity.getSettings().shuffleImages){
-							Collections.shuffle(references);
-						}
+						sortFeed(feed, references);
 					}
 					Log.v("Floating Image", "Adding feed: " + references.size() + " images");
 					refs.add(references);
 				}else{
-					Log.w("FeedController", "Reading feed failed too many times, giving up!");
+					Log.w("Floating Image", "Reading feed failed too many times, giving up!");
 				}
 				mRenderer.setFeeds(++progress, mFeeds.size());
 			}
 			joinFeeds(refs, active);
 			return mReferences.size() > 0;
+		}
+	}
+	
+	void sortFeed(FeedReference feed, List<ImageReference> refs){
+		if(feed.getType() == Settings.TYPE_LOCAL){
+			switch(feed.getSorting()){
+			case 0: // Name
+				Collections.sort(refs, new NameComparator(false));
+				break;
+			case 1: // Name reversed
+				Collections.sort(refs, new NameComparator(true));
+				break;
+			case 2: // Date
+				Collections.sort(refs, new FileDateComparator(false));
+				break;
+			case 3: // Date reversed
+				Collections.sort(refs, new FileDateComparator(true));
+				break;
+			case 4: // Random
+				Collections.shuffle(refs);
+				break;
+			}
+		}else{
+			switch(feed.getSorting()){
+			case 0: // Name
+				Collections.sort(refs, new NameComparator(false));
+				break;
+			case 1: // Name reversed
+				Collections.sort(refs, new NameComparator(true));
+				break;
+			case 2: // Date
+				// Do nothing
+				break;
+			case 3: // Date reversed
+				Collections.reverse(refs);
+				break;
+			case 4: // Random
+				Collections.shuffle(refs);
+				break;
+			}
+		}
+	}
+	
+	class FileDateComparator implements Comparator<ImageReference>{
+		boolean reverse;
+		public FileDateComparator(boolean reverse) {
+			this.reverse = reverse;
+		}
+		
+		@Override
+		public int compare(ImageReference lhs, ImageReference rhs) {
+			File a = ((LocalImage)lhs).getFile();
+			File b = ((LocalImage)rhs).getFile();
+			
+			int res;
+			
+			if(a.lastModified() == b.lastModified()){
+				res = 0;
+			}else{
+				res = a.lastModified() < b.lastModified() ? -1 : 1;
+			}
+			
+			if(reverse){
+				res *= -1;
+			}
+			return res;
+		}
+	}
+	
+	class NameComparator implements Comparator<ImageReference>{
+		boolean reverse;
+		public NameComparator(boolean reverse) {
+			this.reverse = reverse;
+		}
+		
+		@Override
+		public int compare(ImageReference lhs, ImageReference rhs) {
+			int res = lhs.getTitle().compareTo(rhs.getTitle());
+			if(reverse){
+				res *= -1;
+			}
+			return res;
 		}
 	}
 	

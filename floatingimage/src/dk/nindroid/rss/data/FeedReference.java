@@ -7,6 +7,7 @@ public class FeedReference {
 	private String 		mFeedLocation;
 	private String		mName;
 	private int			mType;
+	private int			mSorting;
 	
 	public int getType(){
 		return mType;
@@ -23,11 +24,16 @@ public class FeedReference {
 		return mName;
 	}
 	
-	public FeedReference(FeedParser parser, String feedLocation, String name, int type){
+	public int getSorting(){
+		return mSorting;
+	}
+	
+	public FeedReference(FeedParser parser, String feedLocation, String name, int type, int sorting){
 		this.mParser = parser;
 		this.mFeedLocation = feedLocation;
 		this.mName = name;
 		this.mType = type;
+		this.mSorting = sorting;
 	}
 	
 	@Override

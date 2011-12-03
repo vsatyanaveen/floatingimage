@@ -144,4 +144,18 @@
 		<item>180</item>
 		<item>270</item>
 	</string-array>
+	
+	<string-array name="sortOrderFiles">
+		<item>Name</item>
+		<item>Name reverse</item>
+		<item>Date</item>
+		<item>Date reverse</item>
+		<item>Random</item>
+	</string-array>
+	
+	<string-array name="sortOrderOnline">
+		<item>Name</item>
+		<item>Name reverse</item>
+		<item>Random</item>
+	</string-array>
 </resources>
