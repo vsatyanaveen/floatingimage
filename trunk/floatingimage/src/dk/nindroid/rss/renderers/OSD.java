@@ -115,7 +115,6 @@ public class OSD {
 	public void init(GL10 gl, Display display){
 		this.mDisplay = display;
 		mBrightness.init(gl);
-		//mAbout.init(gl);
 		mImages.init(gl);
 		mSettings.init(gl);
 		mFullscreen.init(gl, mDisplay);
@@ -128,32 +127,46 @@ public class OSD {
 		return mFraction != 0.0f;
 	}
 	
-	public void setEnabled(boolean play, boolean fullscreen, boolean rotation){
+	public void setEnabled(boolean play, boolean fullscreen, boolean rotation, boolean settings, boolean images){
 		mShowRotation = rotation;
-		int amount = 3;
+		int amount = 1;
 		if(play) ++amount;
 		if(fullscreen) ++amount;
+		if(settings) ++amount;
+		if(images) ++amount;
 		int index = 0;
 		mButtons = new Button[amount];
 		mButtons[index++] = mBrightness;
 		
-		// Ensure settings is always bottom right corner!
+		// Ensure settings is always bottom right corner! (if shown)
 		if(amount == 4){
-			mButtons[index++] = mImages;
+			if(images){
+				mButtons[index++] = mImages;
+			}
 			if(play){
 				mButtons[index++] = mPlay;
 			}
 			if(fullscreen){
 				mButtons[index++] = mFullscreen;
 			}
-			mButtons[index++] = mSettings;
+			if(settings){
+				mButtons[index++] = mSettings;
+			}
 		}else{
 			if(amount % 2 == 0){
-				mButtons[index++] = mSettings;
-				mButtons[index++] = mImages;
+				if(settings){
+					mButtons[index++] = mSettings;
+				}
+				if(images){
+					mButtons[index++] = mImages;
+				}
 			}else{
-				mButtons[index++] = mImages;
-				mButtons[index++] = mSettings;
+				if(images){
+					mButtons[index++] = mImages;
+				}
+				if(settings){
+					mButtons[index++] = mSettings;
+				}
 			}
 			if(play){
 				mButtons[index++] = mPlay;
@@ -248,7 +261,18 @@ public class OSD {
         int index = -1;
         int buttons = mButtons.length;
         
-		if(mButtons.length % 2 == 0){
+        if(mButtons.length == 2){
+        	gl.glPushMatrix();
+			gl.glTranslatef(getPos(outsideLeft, -1.0f * dx), yPos, -1.0f);	
+			gl.glScalef(width, height, 1.0f);	
+			drawIcon(gl, mButtons[++index].getTextureID(), mTexBuffer);
+		gl.glPopMatrix();
+		gl.glPushMatrix();
+			gl.glTranslatef(getPos(outsideRight, 1.0f * dx), yPos, -1.0f);
+			gl.glScalef(width, height, 1.0f);
+			drawIcon(gl, mButtons[++index].getTextureID(), mTexBuffer);
+		gl.glPopMatrix();
+        }else if(mButtons.length % 2 == 0){
 			gl.glPushMatrix();
 				gl.glTranslatef(getPos(outsideLeft, -1.5f * dx), yPos, -1.0f);	
 				gl.glScalef(width, height, 1.0f);	
@@ -438,7 +462,8 @@ public class OSD {
 				int buttons = mButtons.length;
 				if(y > mDisplay.getHeightPixels() - 80){
 					// Bottom
-					int xPos = (int)(x / mDisplay.getWidthPixels() * (4 - buttons % 2));
+					buttons = buttons > 4 ? 4 - buttons % 2 : buttons;
+					int xPos = (int)(x / mDisplay.getWidthPixels() * buttons);
 					if(xPos < mButtons.length && xPos >= 0){
 						mButtons[xPos].click(time);
 					}

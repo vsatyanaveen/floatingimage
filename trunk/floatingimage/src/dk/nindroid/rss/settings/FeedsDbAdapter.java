@@ -25,6 +25,10 @@ public class FeedsDbAdapter {
     public static final String KEY_TYPE = "type";
     public static final String KEY_ROWID = "_id";
     public static final String KEY_EXTRA = "extra";
+    
+    public static final String KEY_USER_TITLE = "user_title";
+    public static final String KEY_USER_EXTRA = "user_extra";
+    public static final String KEY_SORTING = "sorting";
 
     private static final String TAG = "FeedsDbAdapter";
     private DatabaseHelper mDbHelper;
@@ -38,12 +42,15 @@ public class FeedsDbAdapter {
             				  + KEY_ROWID +" integer primary key autoincrement, "
             				  + KEY_TYPE + " integer not null, " 
             				  + KEY_URI + " text not null, " 
-            				  + KEY_TITLE + " text not null,"
-            				  + KEY_EXTRA + " text not null);";
+            				  + KEY_TITLE + " text not null, "
+            				  + KEY_EXTRA + " text not null, "
+            				  + KEY_SORTING + " integer not null, "
+            				  + KEY_USER_TITLE + " text, "
+            				  + KEY_USER_EXTRA + " text);";
 
     private static final String DATABASE_NAME = "floatingImage";
     private static final String DATABASE_TABLE = "feeds";
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 5;
 
     private final Context mCtx;
 
@@ -118,6 +125,7 @@ public class FeedsDbAdapter {
         initialValues.put(KEY_URI, uri);
         initialValues.put(KEY_TYPE, type);
         initialValues.put(KEY_EXTRA, extras);
+        initialValues.put(KEY_SORTING, 0);
         //initialValues.put(KEY_ENABLED, enabled ? 1 : 0);
 
         return mDb.insert(DATABASE_TABLE, null, initialValues);
@@ -142,7 +150,7 @@ public class FeedsDbAdapter {
     public Cursor fetchAllFeeds() {
 
         return mDb.query(DATABASE_TABLE, new String[] {KEY_ROWID, KEY_TITLE,
-                KEY_URI, KEY_TYPE, KEY_EXTRA}, null, null, null, null, null);
+                KEY_URI, KEY_TYPE, KEY_EXTRA, KEY_SORTING, KEY_USER_TITLE, KEY_USER_EXTRA}, null, null, null, null, null);
     }
 
     /**
@@ -157,7 +165,7 @@ public class FeedsDbAdapter {
         Cursor mCursor =
 
                 mDb.query(true, DATABASE_TABLE, new String[] {KEY_ROWID,
-                        KEY_TITLE, KEY_URI, KEY_TYPE, KEY_EXTRA}, KEY_ROWID + "=" + rowId, null,
+                        KEY_TITLE, KEY_URI, KEY_TYPE, KEY_EXTRA, KEY_SORTING, KEY_USER_TITLE, KEY_USER_EXTRA}, KEY_ROWID + "=" + rowId, null,
                         null, null, null, null);
         if (mCursor != null) {
             mCursor.moveToFirst();
@@ -176,12 +184,24 @@ public class FeedsDbAdapter {
      * @param body value to set note body to
      * @return true if the note was successfully updated, false otherwise
      */
-    public boolean updateFeed(long rowId, String title, String body, int type, String extras) {
+    public boolean updateFeed(long rowId, String title, String body, int type, String extras, int sorting, String userTitle, String userExtra) {
         ContentValues args = new ContentValues();
         args.put(KEY_TITLE, title);
         args.put(KEY_URI, body);
         args.put(KEY_TYPE, type);
         args.put(KEY_EXTRA, extras);
+        args.put(KEY_SORTING, sorting);
+        args.put(KEY_USER_TITLE, userTitle);
+        args.put(KEY_USER_EXTRA, userExtra);
+
+        return mDb.update(DATABASE_TABLE, args, KEY_ROWID + "=" + rowId, null) > 0;
+    }
+    
+    public boolean updateFeed(long rowId, int sorting, String userTitle, String userExtra) {
+    	ContentValues args = new ContentValues();
+    	args.put(KEY_SORTING, sorting);
+        args.put(KEY_USER_TITLE, userTitle);
+        args.put(KEY_USER_EXTRA, userExtra);
 
         return mDb.update(DATABASE_TABLE, args, KEY_ROWID + "=" + rowId, null) > 0;
     }

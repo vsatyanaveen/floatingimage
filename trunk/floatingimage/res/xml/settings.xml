@@ -11,11 +11,6 @@
 			android:targetClass="dk.nindroid.rss.menu.ApplicationFeedManagerLauncher"
 			android:targetPackage="dk.nindroid.rss" />
         </PreferenceScreen>
-        <CheckBoxPreference
-                android:key="shuffleImages"
-                android:title="@string/shuffle"
-                android:summary="@string/shuffleSummary" 
-                android:defaultValue="true" />
     </PreferenceCategory>
     <PreferenceCategory
             android:title="@string/display">
@@ -54,11 +49,6 @@
     </PreferenceCategory>
     <PreferenceCategory
             android:title="@string/floating">
-            <CheckBoxPreference 
-			    android:key="galleryMode"
-			    android:title="@string/galleryMode"
-			    android:summary="@string/galleryModeSummary"
-			    android:defaultValue="false" />
              <ListPreference
                 android:key="floatingType"
                 android:title="@string/floatingType"

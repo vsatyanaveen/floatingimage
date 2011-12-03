@@ -19,7 +19,6 @@
 					android:layout_height="wrap_content"
 					android:layout_alignParentRight="true" 
 					android:layout_marginRight="6sp"
-					android:clickable="false"
 					android:longClickable="false"
 					android:focusable="false" /> 
 		<LinearLayout 

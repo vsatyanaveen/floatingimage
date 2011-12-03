@@ -14,6 +14,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.hardware.SensorManager;
 import android.net.Uri;
@@ -69,6 +70,10 @@ public class ShowStreams extends Activity implements MainActivity {
 	public static final int				MISC_ROW_ID		= 201;
 	public static final String 			version 		= "2.5.1";
 	public static final int				CACHE_SIZE		= 8;
+	
+	public static final String			SHOW_FEED_ID	= "show_feed_id";
+	public static final String			SETTINGS_NAME	= "settings_name";
+	
 	private GLSurfaceView 				mGLSurfaceView;
 	private RiverRenderer 				renderer;
 	private PowerManager.WakeLock 		wl;
@@ -79,16 +84,29 @@ public class ShowStreams extends Activity implements MainActivity {
 	private OnDemandImageBank			mOnDemandBank;
 	private dk.nindroid.rss.settings.Settings		mSettings;
 	
+	private int showFeedId;
+	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		this.showFeedId = getIntent().getIntExtra(SHOW_FEED_ID, -1);
+		String settingsName = getIntent().getStringExtra(SETTINGS_NAME);
+		if(settingsName == null){
+			settingsName = "dk.nindroid.rss_preferences";
+			
+			// Ensure that gallery mode is disabled when not running gallery
+			Editor e = this.getSharedPreferences(settingsName, 0).edit();
+			e.putBoolean("galleryMode", false);
+			e.commit();
+		}
+		
 		registerParsers();
 		String dataFolder = getString(R.string.dataFolder);
 		File sdDir = Environment.getExternalStorageDirectory();
 		dataFolder = sdDir.getAbsolutePath() + dataFolder;
 		File dataFile = new File(dataFolder);
-		this.mSettings = new dk.nindroid.rss.settings.Settings("dk.nindroid.rss_preferences");
+		this.mSettings = new dk.nindroid.rss.settings.Settings(settingsName);
 		if(!dataFile.exists() && !dataFile.mkdirs()){
 			Toast error = Toast.makeText(this, "Error creating data folder (Do you have an SD card?)\nCache will not work, operations might be flaky!", Toast.LENGTH_LONG);
 			error.show();
@@ -128,6 +146,9 @@ public class ShowStreams extends Activity implements MainActivity {
 	TextureBank setupFeeders(){
 		TextureBank bank = new TextureBank(this);
 		mFeedController = new FeedController(this);
+		if(showFeedId != -1){
+			mFeedController.showFeed(showFeedId);
+		}
 		BitmapDownloader bitmapDownloader = new BitmapDownloader(bank, mFeedController, mSettings);
 		mImageCache = new ImageCache(this, bank);
 		bank.setFeeders(bitmapDownloader, mImageCache);
@@ -250,7 +271,9 @@ public class ShowStreams extends Activity implements MainActivity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		System.exit(0);
+		if(this.showFeedId == -1){
+			System.exit(0);
+		}
 	}
 	
 	@Override 
@@ -291,7 +314,12 @@ public class ShowStreams extends Activity implements MainActivity {
 		if(mSettings.mode == dk.nindroid.rss.settings.Settings.MODE_FLOATING_IMAGE){
 			if(!(defaultRenderer instanceof FloatingRenderer)){
 				Log.v("Floating Image", "Switching to floating renderer");
-				defaultRenderer = new FloatingRenderer(this, mOnDemandBank, mFeedController, renderer.mDisplay);
+				FloatingRenderer floatingRenderer = new FloatingRenderer(this, mOnDemandBank, mFeedController, renderer.mDisplay);
+				defaultRenderer = floatingRenderer;
+				if(showFeedId != -1){
+					floatingRenderer.disableSettings();
+					floatingRenderer.disableImages();
+				}
 			}
 			ReadFeeds.runAsync(mFeedController, defaultRenderer.totalImages());
 		}else{

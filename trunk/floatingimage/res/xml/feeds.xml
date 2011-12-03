@@ -8,9 +8,4 @@
 			android:targetClass="dk.nindroid.rss.menu.ApplicationFeedManagerLauncher"
 			android:targetPackage="dk.nindroid.rss" />
         </PreferenceScreen>
-        <CheckBoxPreference
-                android:key="shuffleImages"
-                android:title="@string/shuffle"
-                android:summary="@string/shuffleSummary" 
-                android:defaultValue="true" />
 </PreferenceScreen>

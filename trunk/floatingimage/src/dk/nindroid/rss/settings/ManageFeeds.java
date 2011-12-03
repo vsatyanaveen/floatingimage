@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -16,23 +18,27 @@ import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.util.Log;
 import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import dk.nindroid.rss.R;
 import dk.nindroid.rss.gfx.ImageUtil;
 
 public class ManageFeeds extends PreferenceActivity {
 	public static final String SHARED_PREFS_NAME = "SHARED_PREFS_NAME";
+	public static final String HIDE_CHECKBOXES = "HIDE_CHECKBOXES";
 	
 	public static final int ADD_ID = Menu.FIRST;
 	public static final int CLEAR_ALL_ID = Menu.FIRST + 1;
     private static final int DELETE_ID = Menu.FIRST + 1;
     private static final int SELECT_FOLDER = 12;
+    private static final int EDIT_FEED = 13;
 	private FeedsDbAdapter 	mDbHelper;
 	private List<Feed> 	mRowList = new ArrayList<Feed>();
+	List<Preference> mCheckBoxes;
+	private boolean mHideCheckBoxes;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +46,8 @@ public class ManageFeeds extends PreferenceActivity {
 		// This works, just need to pass which preference to use
 		PreferenceManager pm = this.getPreferenceManager();
 		pm.setSharedPreferencesName(this.getIntent().getExtras().getString(SHARED_PREFS_NAME));
+		this.mHideCheckBoxes = this.getIntent().getExtras().getBoolean(HIDE_CHECKBOXES);
+		
 		setContentView(R.layout.manage_feeds);
 		mDbHelper = new FeedsDbAdapter(this);
 		registerForContextMenu(getListView());
@@ -51,6 +59,8 @@ public class ManageFeeds extends PreferenceActivity {
 	}
 	
 	private PreferenceScreen createPreferenceHierarchy() {
+		mCheckBoxes = new ArrayList<Preference>();
+		
 		PreferenceScreen root = getPreferenceManager().createPreferenceScreen(this);
 		
 		mRowList.clear();
@@ -139,12 +149,16 @@ public class ManageFeeds extends PreferenceActivity {
 		return ImageUtil.readBitmap(this, res);
 	}
 	
+	
+	
 	private Preference createCheckbox(Feed f, Bitmap bmp){
-		Preference pref = new ManageFeedPreference(this, bmp);
+		ManageFeedPreference pref = new ManageFeedPreference(this, bmp, mHideCheckBoxes);
 		pref.setKey("feed_" + Integer.toString(f.id));
 		pref.setDefaultValue(true);
 		pref.setTitle(f.title);
 		pref.setSummary(f.extras);
+		pref.setOnPreferenceClickListener(new FeedClickListener(f.id));
+		mCheckBoxes.add(pref);
 		return pref;
 	}
 	
@@ -162,11 +176,19 @@ public class ManageFeeds extends PreferenceActivity {
 		int typei = c.getColumnIndex(FeedsDbAdapter.KEY_TYPE);
 		int namei = c.getColumnIndex(FeedsDbAdapter.KEY_TITLE);
 		int extrasi = c.getColumnIndex(FeedsDbAdapter.KEY_EXTRA);
+		int userNamei = c.getColumnIndex(FeedsDbAdapter.KEY_USER_TITLE);
+		int userExtrai = c.getColumnIndex(FeedsDbAdapter.KEY_USER_EXTRA);
 		while(c.moveToNext()){
 			int type = c.getInt(typei);
-			String title = c.getString(namei);
+			String title = c.getString(userNamei);
+			if(title == null || title.length() == 0){
+				title = c.getString(namei);
+			}
 			int id = c.getInt(idi);
-			String extras = c.getString(extrasi);
+			String extras = c.getString(userExtrai);
+			if(extras == null || extras.length() == 0){
+				extras = c.getString(extrasi);
+			}
 			Feed feed = new Feed(title, id, extras);
 			List<Feed> feeds = data.get(type);
 			if(feeds != null){
@@ -219,6 +241,24 @@ public class ManageFeeds extends PreferenceActivity {
 			mDbHelper.addFeed(name, path, type, extras);
 			mDbHelper.close();
 			setPreferenceScreen(createPreferenceHierarchy());
+		}else if(requestCode == EDIT_FEED){
+			createPreferenceHierarchy();
+		}
+	}
+	
+	private class FeedClickListener implements Preference.OnPreferenceClickListener{
+		int id;
+		public FeedClickListener(int id){
+			this.id = id;
+		}
+		
+		@Override
+		public boolean onPreferenceClick(Preference preference) {
+			Intent intent = new Intent(ManageFeeds.this, FeedSettings.class);
+			intent.putExtra(FeedSettings.FEED_ID, id);
+			intent.putExtra(ManageFeeds.SHARED_PREFS_NAME, getPreferenceManager().getSharedPreferencesName());
+			startActivityForResult(intent, EDIT_FEED);
+			return true;
 		}
 	}
 	
@@ -233,6 +273,13 @@ public class ManageFeeds extends PreferenceActivity {
 	
 	@Override
 	protected void onPause() {
+		SharedPreferences sp = getSharedPreferences(this.getPreferenceManager().getSharedPreferencesName(), 0);
+		Editor e = sp.edit();
+		for(Preference p : mCheckBoxes){
+			e.putBoolean(p.getKey(), ((ManageFeedPreference)p).isActive());
+		}
+		e.commit();
+		
 		super.onPause();
 	}
 	

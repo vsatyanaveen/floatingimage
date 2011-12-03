@@ -125,7 +125,7 @@ public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.rende
 
 	@Override
 	public void init(GL10 gl, long time, OSD osd) {
-		osd.setEnabled(true, false, true);
+		osd.setEnabled(true, false, true, true, true);
 		osd.registerPlayListener(this);
 		mPrevious.init(gl, time);
 		mCurrent.init(gl, time);

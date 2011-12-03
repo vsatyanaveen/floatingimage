@@ -12,13 +12,12 @@ import android.util.Log;
 import dk.nindroid.rss.Display;
 import dk.nindroid.rss.FeedController;
 import dk.nindroid.rss.FeedController.EventSubscriber;
-import dk.nindroid.rss.TextureSelector.PrepareCallback;
 import dk.nindroid.rss.MainActivity;
 import dk.nindroid.rss.OnDemandImageBank;
 import dk.nindroid.rss.R;
 import dk.nindroid.rss.TextureSelector;
+import dk.nindroid.rss.TextureSelector.PrepareCallback;
 import dk.nindroid.rss.data.ImageReference;
-import dk.nindroid.rss.data.LocalImage;
 import dk.nindroid.rss.data.Ray;
 import dk.nindroid.rss.data.Texture;
 import dk.nindroid.rss.gfx.Vec3f;
@@ -96,7 +95,16 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 	private long					mSlideshowSlideImageDismissedAt;
 	private int 					mSlideshowLastImage = 0;
 	
+	private boolean settingsEnabled = true;
+	private boolean imagesEnabled = true;
 	
+	public void disableSettings(){
+		this.settingsEnabled = false;
+	}
+	
+	public void disableImages(){
+		this.imagesEnabled = false;
+	}
 	
 	public FloatingRenderer(MainActivity activity, OnDemandImageBank onDemandBank, FeedController feedController, Display display){
 		this.mActivity = activity;
@@ -485,7 +493,7 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 	
 	public void init(GL10 gl, long time, OSD osd){
 		mBackgroundPainter.initTexture(gl, mActivity, mActivity.getSettings().backgroundColor);
-		osd.setEnabled(false, true, true);
+		osd.setEnabled(false, true, true, settingsEnabled, imagesEnabled);
 		for(int i = 0; i < mImgCnt; ++i){
 			mImgs[i].init(gl, time);
 		}
@@ -558,8 +566,8 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 	@Override
 	public boolean slideLeft(long realTime) {
 		if(mSelected != null){
-			mSelectingNext = true;
-			mSelectingPrev = false;
+			mSelectingNext = false;
+			mSelectingPrev = true;
 			Log.v("Floating Image", "SlideLeft");
 			return true;
 		}
@@ -569,8 +577,8 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 	@Override
 	public boolean slideRight(long realTime) {
 		if(mSelected != null){
-			mSelectingNext = false;
-			mSelectingPrev = true;
+			mSelectingNext = true;
+			mSelectingPrev = false;
 			Log.v("Floating Image", "SlideRight");
 			return true;
 		}

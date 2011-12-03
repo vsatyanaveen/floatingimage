@@ -1,24 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-	android:title="@string/floating">
-             <ListPreference
-                android:key="floatingType"
-                android:title="@string/floatingType"
-                android:summary="@string/floatingTypeSummary"
-                android:entries="@array/floatingTypeDescriptions"
-                android:entryValues="@array/floatingTypeValues"
-                android:dialogTitle="@string/floatingTypeTitle"
-                android:defaultValue="0" />
-            <CheckBoxPreference 
-            	android:key="tsunami"
-                android:title="@string/tsunami"
-                android:summary="@string/tsunamiSummary"
-                android:defaultValue="false" />
-            <CheckBoxPreference
-                android:key="rotateImages"
-                android:title="@string/rotateImages"
-                android:summary="@string/rotateImagesSummary"
-                android:defaultValue="true" />
+<PreferenceScreen
+        xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+            android:title="@string/feeds">
+            
+         <PreferenceScreen android:title="@string/manageFeeds" android:summary="@string/manageFeedsSummary">
+			<intent 
+			android:action="android.intent.action.MAIN" 
+			android:targetClass="dk.nindroid.rss.menu.GalleryFeedManagerLauncher"
+			android:targetPackage="dk.nindroid.rss" />
+        </PreferenceScreen>
+    </PreferenceCategory>
+    <PreferenceCategory
+            android:title="@string/floating">
 			<CheckBoxPreference
                 android:key="fullscreenBlack"
                 android:title="@string/fullscreenBlack"
@@ -60,4 +55,20 @@
                 android:entryValues="@array/backgroundColorValues"
                 android:dialogTitle="@string/backgroundColorTitle"
                 android:defaultValue="0" />
+	</PreferenceCategory>
+     <PreferenceCategory
+            android:title="@string/misc">
+	     <PreferenceScreen android:title="@string/LiveWallpapers" android:summary="@string/LiveWallpapersSummary">
+			<intent 
+				android:action="android.intent.action.MAIN"
+				android:targetClass="dk.nindroid.rss.menu.LiveWallpaperLauncher" 
+				android:targetPackage="dk.nindroid.rss" />
+	    </PreferenceScreen>
+	    <PreferenceScreen android:title="@string/about" android:summary="@string/aboutSummary">
+				<intent 
+				android:action="android.intent.action.MAIN" 
+				android:targetClass="dk.nindroid.rss.settings.About" 
+				android:targetPackage="dk.nindroid.rss" />
+	    </PreferenceScreen>
+    </PreferenceCategory>
 </PreferenceScreen>
