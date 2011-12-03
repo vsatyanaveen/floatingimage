@@ -68,7 +68,7 @@ public class ShowStreams extends Activity implements MainActivity {
 	public static final int				CONTEXT_DELETE 	= Menu.FIRST + 4;
 	public static final int				MENU_IMAGE_CONTEXT = 13;
 	public static final int				MISC_ROW_ID		= 201;
-	public static final String 			version 		= "2.5.1";
+	public static final String 			version 		= "3.3.0";
 	public static final int				CACHE_SIZE		= 8;
 	
 	public static final String			SHOW_FEED_ID	= "show_feed_id";
@@ -472,7 +472,6 @@ public class ShowStreams extends Activity implements MainActivity {
 		SharedPreferences sp = getSharedPreferences("version", 0);
 		String oldVersion = sp.getString("version", "0.0.0");
 		if(isDeprecated(oldVersion)){ // upgrade
-			mImageCache.cleanCache();
 			addDefaultLocalPaths();
 		}
 		SharedPreferences.Editor editor = sp.edit(); 

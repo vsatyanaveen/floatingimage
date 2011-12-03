@@ -178,6 +178,7 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 		GLUtils.texImage2D(GL11.GL_TEXTURE_2D, 0, mLineSmoothBitmap, 0);
 	}
 	public void reset(GL10 gl, long time){
+		Log.v("Floating Image", "RESET");
 		if(mFocusBmp != null && !mFocusBmp.isRecycled()){
 			mFocusBmp.recycle();			
 		}
@@ -508,7 +509,7 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 		gl.glPopMatrix();
 		
         
-        if(mState == STATE_FOCUSED && !mLargeTex){
+        if(mState == STATE_FOCUSED && !mLargeTex && mTextureSelector.getProgress() < 100){
         	ProgressBar.draw(gl, mTextureSelector.getProgress(), mDisplay);
         }
 	}
@@ -1185,6 +1186,7 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 	
 	private void resetTexture(GL10 gl, boolean next){
 		if(!mLockTexture){
+			Log.v("Floating Image", "RESET TEXTURE");
 			mFocusBmp = null;
 			mDelete = false;
 			mImageNotSet = true;

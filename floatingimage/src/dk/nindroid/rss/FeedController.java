@@ -161,12 +161,10 @@ public class FeedController {
 		synchronized(mFeeds){
 			boolean reparseFeeds = false;
 			if(mFeeds.size() != newFeeds.size() || mReferences.size() == 0){
-				feedsChanged();
 				reparseFeeds = true;
 			}else{
 				for(int i = 0; i < mFeeds.size(); ++i){
 					if(!(mFeeds.get(i).equals(newFeeds.get(i)))){
-						feedsChanged();
 						reparseFeeds = true;
 						break;
 					}
@@ -174,7 +172,9 @@ public class FeedController {
 			}
 			if(reparseFeeds){
 				mFeeds = newFeeds;
+				mReferences.clear();
 				parseFeeds(active);
+				feedsChanged();
 				onFeedsUpdated();
 			}
 			
