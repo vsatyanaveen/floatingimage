@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="dk.nindroid.rss"
-      android:installLocation="auto" android:versionName="3.2.4" android:versionCode="92">
+      android:installLocation="auto" android:versionName="3.3.0" android:versionCode="92">
      
-    <application android:icon="@drawable/icon" android:label="@string/app_name" android:hardwareAccelerated="true" android:debuggable="true">
+    <application android:icon="@drawable/icon" android:label="@string/app_name" android:hardwareAccelerated="true" android:debuggable="false">
         <activity android:name=".ShowStreams" android:screenOrientation="nosensor">
         	<intent-filter>
         		<action android:name="android.intent.action.MAIN"></action>
@@ -77,6 +77,7 @@
 	<uses-permission android:name="android.permission.WRITE_SETTINGS"></uses-permission>
 	<uses-permission android:name="android.permission.BIND_WALLPAPER"></uses-permission>
 	<uses-permission android:name="android.permission.INTERNET" />
+	<uses-feature android:name="android.hardware.touchscreen" android:required="false"/>
 	
 	<supports-screens 
 		android:largeScreens="true" 
