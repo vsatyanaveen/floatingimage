@@ -10,6 +10,7 @@
     	android:layout_weight="1">
     	<TableRow>
     	    <TextView 
+    	        android:id="@+id/activeLabel"
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
 	            android:text="@string/feedActive"
@@ -17,7 +18,9 @@
         	<CheckBox
 	            android:id="@+id/active"
 	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content" />
+	            android:layout_height="wrap_content"
+	            android:focusable="true"
+	            android:focusableInTouchMode="true" />
     	</TableRow>
     	
     	<TableRow>

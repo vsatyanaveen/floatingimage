@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="dk.nindroid.rss"
-      android:installLocation="auto" android:versionName="3.3.0" android:versionCode="92">
+      android:installLocation="auto" android:versionName="3.3.1" android:versionCode="94">
      
-    <application android:icon="@drawable/icon" android:label="@string/app_name" android:hardwareAccelerated="true" android:debuggable="false">
+    <application android:icon="@drawable/icon" android:label="@string/app_name" android:hardwareAccelerated="true" android:debuggable="true">
         <activity android:name=".ShowStreams" android:screenOrientation="nosensor">
         	<intent-filter>
         		<action android:name="android.intent.action.MAIN"></action>
@@ -59,12 +59,14 @@
 <activity android:name=".menu.LiveWallpaperLauncher"></activity>
 <activity android:name=".parser.picasa.PicasaUserView$AlbumActivity"></activity>
 <activity android:name=".settings.FeedSettings"></activity>
-<activity android:name="GalleryActivity" android:label="Floating Gallery" android:taskAffinity=".GalleryActivity">
+
+<activity android:name="GalleryActivity" android:label="Floating Gallery" android:taskAffinity=".GalleryActivity" android:icon="@drawable/icon_gallery">
     <intent-filter>
 		<action android:name="android.intent.action.MAIN"></action>
 		<category android:name="android.intent.category.LAUNCHER"></category>
 	</intent-filter>
 </activity>
+
 <activity android:name=".menu.GallerySettings"></activity>
 <activity android:name=".menu.GalleryFeedManagerLauncher"></activity>
 </application>

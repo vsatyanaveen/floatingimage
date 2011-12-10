@@ -61,7 +61,7 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 	private MainActivity	mActivity;
 	private InfoBar			mInfoBar;
 	private TextureSelector mTextureSelector;
-	private boolean			mSetThumbnailTexture = false;
+	private String			mSetThumbnailTexture;
 	private boolean			mImageNotSet = true;
 	
 	// Selected vars
@@ -126,9 +126,9 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 		mDelete = true;
 	}
 	
-	public void getImageIfEmpty(){
+	public void getImageIfEmpty(boolean next){
 		if(mShowingImage == null){
-			mOnDemandBank.get(this, true);
+			mOnDemandBank.get(this, next);
 		}
 	}
 	
@@ -1128,7 +1128,7 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 	
 	public boolean update(GL10 gl, long time, long realTime){
 		boolean depthChanged = false;
-		if(mSetThumbnailTexture && mShowingImage != null){
+		if(this.doLoad(mSetThumbnailTexture) && mShowingImage != null){
 			if(mShowingImage.getBitmap() != null){
 				setTexture(gl, mShowingImage);
 				mShowingImage.recycleBitmap();
@@ -1137,7 +1137,7 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 				mOnDemandBank.get(mShowingImage, this);
 			}
 		}
-		mSetThumbnailTexture = false;
+		mSetThumbnailTexture = null;
 		// Make sure time is positive, then divide by traversal time to get how far image is
 		if(mState == STATE_FLOATING){
 			depthChanged = updateFloating(gl, time);		
@@ -1461,7 +1461,7 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 	@Override
 	public boolean bitmapLoaded(String id) {
 		if(this.doLoad(id)){
-			mSetThumbnailTexture = true;
+			mSetThumbnailTexture = id;
 			return true;
 		}	
     	return false;
@@ -1474,11 +1474,14 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 
 	@Override
 	public boolean doLoad(String id) {
-		return mShowingImage != null && mShowingImage.getID().equals(id) && mImageNotSet;
+		return id != null && mShowingImage != null && mShowingImage.getID().equals(id) && mImageNotSet;
 	}
 
 	@Override
 	public void setEmptyImage(ImageReference ir) {
 		this.mShowingImage = ir;
+		if(ir != null){
+			Log.v("Floating Image", "Setting image #" + ir.getFeedPosition());
+		}
 	}
 }

@@ -1,10 +1,12 @@
 package dk.nindroid.rss.settings;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
@@ -16,6 +18,8 @@ import dk.nindroid.rss.R;
 
 public class FeedSettings extends Activity{
 	public static final String FEED_ID = "feed_id";
+	public static final String NEW_FEED = "new_feed";
+	public static final String HIDE_ACTIVE = "hide_active";
 	
 	CheckBox mActive;
 	EditText mTitle;
@@ -29,10 +33,14 @@ public class FeedSettings extends Activity{
 	
 	String mSharedPreferences;
 	
+	boolean mNewFeed;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mSharedPreferences = this.getIntent().getExtras().getString(ManageFeeds.SHARED_PREFS_NAME);
+		boolean hideActive = this.getIntent().getExtras().getBoolean(HIDE_ACTIVE);
+		mNewFeed = this.getIntent().getExtras().getBoolean(NEW_FEED, false);
 		
 		setContentView(R.layout.feed_settings);
 		mActive = (CheckBox)findViewById(R.id.active);
@@ -40,11 +48,12 @@ public class FeedSettings extends Activity{
 		mExtra = (EditText)findViewById(R.id.extra);
 		mSorting = (Spinner)findViewById(R.id.sortOrder);
 		
-		mId = getIntent().getIntExtra(FEED_ID, -1);
+		if(hideActive){
+			mActive.setVisibility(View.GONE);
+			findViewById(R.id.activeLabel).setVisibility(View.GONE);
+		}
 		
-		mDb = new FeedsDbAdapter(this).open();
-		setData();
-		mDb.close();
+		mId = getIntent().getIntExtra(FEED_ID, -1);
 		
 		boolean local = true;
 		int sortId = local ? R.array.sortOrderFiles : R.array.sortOrderOnline;
@@ -53,6 +62,10 @@ public class FeedSettings extends Activity{
 	            this, sortId, android.R.layout.simple_spinner_item);
 	    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 	    mSorting.setAdapter(adapter);
+	    
+	    mDb = new FeedsDbAdapter(this).open();
+		setData();
+		mDb.close();
 	    
 	    ((Button)findViewById(R.id.ok)).setOnClickListener(new OkClicked());
 	    ((Button)findViewById(R.id.cancel)).setOnClickListener(new CancelClicked());
@@ -74,7 +87,7 @@ public class FeedSettings extends Activity{
 			String uExtra = c.getString(iUserExtra);
 			SharedPreferences sp = getSharedPreferences(mSharedPreferences, 0);
 			boolean enabled = sp.getBoolean("feed_" + Integer.toString(mId), true);
-			this.mActive.setChecked(enabled);
+			this.mActive.setChecked(enabled || mNewFeed);
 			
 			this.mTitle.setHint(mTitleString);
 			this.mExtra.setHint(mExtraString);
@@ -90,7 +103,8 @@ public class FeedSettings extends Activity{
 				this.mExtra.setText(uExtra);
 			}
 			
-			mSorting.setSelection(sorting);
+			mSorting.setSelection(sorting, true);
+			mSorting.invalidate();
 		}
 	}
 	
@@ -108,16 +122,40 @@ public class FeedSettings extends Activity{
 	private class OkClicked implements OnClickListener{
 		@Override
 		public void onClick(View v) {
-			mDb.open();
-			saveFeed();
-			mDb.close();
-			FeedSettings.this.finish();
+			returnOk();
 		}
 	}
+	
+	void returnOk(){
+		mDb.open();
+		saveFeed();
+		mDb.close();
+		Bundle b = new Bundle();
+		b.putInt(FeedSettings.FEED_ID, mId);
+		Intent intent = new Intent();
+		intent.putExtras(b);
+		setResult(RESULT_OK, intent);
+		FeedSettings.this.finish();
+	}
+	
 	private class CancelClicked implements OnClickListener{
 		@Override
 		public void onClick(View v) {
+			Bundle b = new Bundle();
+			b.putInt(FeedSettings.FEED_ID, mId);
+			Intent intent = new Intent();
+			intent.putExtras(b);
+			setResult(RESULT_CANCELED, intent);
 			FeedSettings.this.finish();
 		}
+	}
+	
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if(keyCode == KeyEvent.KEYCODE_BACK){
+			returnOk();
+			return true;
+		}
+		return super.onKeyDown(keyCode, event);
 	}
 }

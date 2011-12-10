@@ -58,7 +58,7 @@ public class ManageFeedPreference extends Preference {
 	
 	@Override
 	protected Object onGetDefaultValue(TypedArray a, int index) {
-		return a.getBoolean(index, true);
+		return a.getBoolean(index, false);
 	}
 	
 	
@@ -66,7 +66,7 @@ public class ManageFeedPreference extends Preference {
 	protected void onSetInitialValue(boolean restorePersistedValue, Object defaultValue) {
 		if (restorePersistedValue) {
             // Restore state
-            mEnabled = getPersistedBoolean(true);
+            mEnabled = getPersistedBoolean(false);
         } else {
             // Set state
             Boolean value = (Boolean) defaultValue;

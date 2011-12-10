@@ -50,6 +50,10 @@ public class FeedController {
 		this.mForceFeedId = id;
 	}
 	
+	public int getFeedSize(){
+		return mReferences.size();
+	}
+	
 	private List<EventSubscriber> eventSubscribers;
 	
 	public FeedController(MainActivity activity){
@@ -81,6 +85,10 @@ public class FeedController {
 		return getImageReference(false);
 	}
 	
+	public void resetCounter(){
+		mPosition = new PositionInterval(mCachedActive, mReferences.size());
+	}
+	
 	public ImageReference getImageReference(boolean forward){
 		ImageReference ir = null;
 		
@@ -98,6 +106,12 @@ public class FeedController {
 			
 			if(mReferences.size() != 0){
 				int index = forward ? mPosition.getNext() : mPosition.getPrev();
+				if(mForceFeedId != -1){
+					int pass = forward ? mPosition.getNextPass() : mPosition.getPrevPass();
+					if(pass != 0){
+						return null;
+					}
+				}
 				ir = mReferences.get(index);
 			}
 		}
@@ -128,7 +142,7 @@ public class FeedController {
 				int sorting = c.getInt(sortingi);
 				boolean enabled;
 				if(mForceFeedId == -1){
-					enabled = sp.getBoolean("feed_" + Integer.toString(id), true);
+					enabled = sp.getBoolean("feed_" + Integer.toString(id), false);
 				}else{
 					enabled = mForceFeedId == id;
 				}
@@ -183,7 +197,7 @@ public class FeedController {
 	
 	private void feedsChanged(){
 		if(mRenderer != null){
-			mRenderer.resetImages();
+			//mRenderer.resetImages();
 		}
 	}
 	
@@ -341,7 +355,9 @@ public class FeedController {
 						refs.remove(feedIndex);
 						feedPos.remove(feedIndex);
 					}else{
-						mReferences.add(refs.get(feedIndex).get(irIndex));
+						ImageReference ref = refs.get(feedIndex).get(irIndex);
+						ref.setFeedPosition(mReferences.size());
+						mReferences.add(ref);
 						feedPos.set(feedIndex, irIndex);
 					}
 				}
@@ -441,7 +457,9 @@ public class FeedController {
 	
 	private class PositionInterval{
 		int a;
+		int aPass;
 		int b;
+		int bPass;
 		int space;
 		int interval;
 				
@@ -452,28 +470,54 @@ public class FeedController {
 		}
 		
 		public int getNext(){
+			int oldB = b;
 			b = (b + 1) % space;
-			if(isSpread()){
-				a = (a + 1) % space;
+			if(b < oldB){
+				++bPass;
 			}
-			//Log.v("Floating Image", "Get next: " + b);
+			
+			if(isSpread()){
+				int oldA = a;
+				a = (a + 1) % space;
+				if(a < oldA){
+					++aPass;
+				}
+			}
 			return b;
 		}
 		
 		public int getPrev(){
+			int oldA = a;
 			a = ((a - 1) + space) % space;
-			if(isSpread()){
-				b = ((b - 1) + space) % space;
+			if(a > oldA){
+				--aPass;
 			}
-			//Log.v("Floating Image", "Get prev: " + a);
+			
+			if(isSpread()){
+				int oldB = b;
+				b = ((b - 1) + space) % space;
+				if(b > oldB){
+					--bPass;
+				}
+			}
 			return a;
+		}
+		
+		public int getNextPass(){
+			return bPass;
+		}
+		
+		public int getPrevPass(){
+			return aPass;
 		}
 		
 		public PositionInterval(int intervalLength, int space){
 			this.space = space;
 			this.interval = intervalLength;
 			b = space - 1;
-			a = b;
+			a = 0;
+			aPass = 0;
+			bPass = -1;
 		}
 	}
 }
