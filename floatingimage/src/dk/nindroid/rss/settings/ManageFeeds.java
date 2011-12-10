@@ -35,6 +35,7 @@ public class ManageFeeds extends PreferenceActivity {
     private static final int DELETE_ID = Menu.FIRST + 1;
     private static final int SELECT_FOLDER = 12;
     private static final int EDIT_FEED = 13;
+    private static final int EDIT_NEW_FEED = 14;
 	private FeedsDbAdapter 	mDbHelper;
 	private List<Feed> 	mRowList = new ArrayList<Feed>();
 	List<Preference> mCheckBoxes;
@@ -154,7 +155,7 @@ public class ManageFeeds extends PreferenceActivity {
 	private Preference createCheckbox(Feed f, Bitmap bmp){
 		ManageFeedPreference pref = new ManageFeedPreference(this, bmp, mHideCheckBoxes);
 		pref.setKey("feed_" + Integer.toString(f.id));
-		pref.setDefaultValue(true);
+		pref.setDefaultValue(false);
 		pref.setTitle(f.title);
 		pref.setSummary(f.extras);
 		pref.setOnPreferenceClickListener(new FeedClickListener(f.id));
@@ -238,11 +239,28 @@ public class ManageFeeds extends PreferenceActivity {
 				extras = (String)b.get("EXTRAS");
 			}
 			mDbHelper.open();
-			mDbHelper.addFeed(name, path, type, extras);
+			long id = mDbHelper.addFeed(name, path, type, extras);
 			mDbHelper.close();
-			setPreferenceScreen(createPreferenceHierarchy());
+			
+			Intent intent = new Intent(this, FeedSettings.class);
+			intent.putExtra(FeedSettings.FEED_ID, (int)id);
+			intent.putExtra(ManageFeeds.SHARED_PREFS_NAME, getPreferenceManager().getSharedPreferencesName());
+			intent.putExtra(FeedSettings.NEW_FEED, true);
+			intent.putExtra(FeedSettings.HIDE_ACTIVE, this.mHideCheckBoxes);
+			startActivityForResult(intent, EDIT_NEW_FEED);
 		}else if(requestCode == EDIT_FEED){
 			createPreferenceHierarchy();
+		}else if(requestCode == EDIT_NEW_FEED){
+			if(resultCode == RESULT_CANCELED){
+				int feedId = data.getIntExtra(FeedSettings.FEED_ID, -1);
+				if(feedId != -1){
+					mDbHelper.open();
+					mDbHelper.deleteFeed(feedId);
+					mDbHelper.close();
+				}
+			}else{
+				createPreferenceHierarchy();
+			}
 		}
 	}
 	
@@ -257,6 +275,8 @@ public class ManageFeeds extends PreferenceActivity {
 			Intent intent = new Intent(ManageFeeds.this, FeedSettings.class);
 			intent.putExtra(FeedSettings.FEED_ID, id);
 			intent.putExtra(ManageFeeds.SHARED_PREFS_NAME, getPreferenceManager().getSharedPreferencesName());
+			intent.putExtra(FeedSettings.NEW_FEED, false);
+			intent.putExtra(FeedSettings.HIDE_ACTIVE, ManageFeeds.this.mHideCheckBoxes);
 			startActivityForResult(intent, EDIT_FEED);
 			return true;
 		}

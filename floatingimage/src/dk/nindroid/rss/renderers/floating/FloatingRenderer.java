@@ -89,6 +89,7 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 	private boolean					mSelectingPrev;
 	private ImageDepthComparator 	mDepthComparator;
 	private boolean					mDoAdjustImagePositions = false;
+	private boolean					mFeedsUpdated = false;
 	
 	private boolean					mSlideshow = false;
 	private long					mSlideshowImageShowTime = 10000;
@@ -299,11 +300,36 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 			long adjustment = (long)(200.0f * interval);
 			offset -= adjustment;
 		}
+		
+		if(this.mCurPositionController == FLOATING_TYPE_GALLERY){
+			int count = mFeedController.getFeedSize();
+			long elapsed = realTime + offset;
+			long traversal = mActivity.getSettings().floatingTraversal;
+			if(elapsed < -traversal * 0.4f){
+				float interval = (elapsed + traversal * 0.4f) / (traversal / 16.0f);
+				interval *= interval;
+				offset += interval * 40;
+			}
+			else{
+				long overshoot = elapsed - traversal * count / mImgs.length;
+				if(overshoot > -traversal / 3 * 2){
+					float interval = (overshoot + traversal / 3 * 2) / (traversal / 16.0f);
+					interval *= interval;
+					offset -= interval * 40;
+				}
+			}
+		}
+		
+		
 		return offset;
 	}
 	
 	public void update(GL10 gl, long frameTime, long realTime){
 		boolean sortArray = false;
+		if(mFeedsUpdated){
+			mFeedsUpdated = false;
+			feedsUpdated(frameTime);
+		}
 		if(mResetImages){
 			resetImages(gl, frameTime);
 		}
@@ -535,8 +561,10 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 	public void onResume(){
 		mTextureSelector.startThread();
 		createImageArray();
+		if(mCurPositionController != -1){
+			mDoAdjustImagePositions = true;
+		}
 		setPositionController(mActivity.getSettings().floatingType);
-		mDoAdjustImagePositions = true;
 	}
 	
 	void adjustImagePositions(long time){
@@ -621,6 +649,7 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 	
 	public void resetImages(GL10 gl, long time) {
 		mResetImages = false;
+		mFeedController.resetCounter();
 		for(Image i : mImgs){
 			i.reset(gl, time);
 		}
@@ -714,9 +743,21 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 
 	@Override
 	public void feedsUpdated() {
+		mFeedsUpdated = true;
+	}
+	
+	private void feedsUpdated(long frameTime){
+		float lastImagePosition = Float.MAX_VALUE;
+		// Get reverse, if a later image is shown before an earlier one.
 		for(Image i : mImgs){
 			if(i != null){
-				i.getImageIfEmpty();
+				float interval = i.getInterval(frameTime);
+				if(interval > lastImagePosition){
+					i.getImageIfEmpty(false);
+				}else{
+					i.getImageIfEmpty(true);
+					lastImagePosition = interval;
+				}
 			}
 		}
 	}

@@ -167,11 +167,11 @@ public class TextureSelector {
 					}
 				}
 				
-				if(mDoApplyLarge){
+				if(mRef == null && mDoApplyLarge){
 					applyLarge();
 					mDoApplyLarge = false;
 				}
-				if(mDoApplyOriginal){
+				if(mRef == null && mDoApplyOriginal){
 					applyOriginal();
 					mDoApplyOriginal = false;
 				}

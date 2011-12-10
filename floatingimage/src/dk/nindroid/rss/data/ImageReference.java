@@ -17,9 +17,16 @@ public abstract class ImageReference {
 	protected boolean mInvalidated = false;
 	protected 	  float		mWidth;
 	protected 	  float		mHeight;
+	private 		int		mFeedPosition = -1;
 	private final static Paint paint = new Paint(Paint.FILTER_BITMAP_FLAG);
 	public ImageReference(){
 		this.mRotator = new Rotator();
+	}
+	public int getFeedPosition(){
+		return this.mFeedPosition;
+	}
+	public void setFeedPosition(int pos){
+		this.mFeedPosition = pos;
 	}
 	
 	public abstract String get128ImageUrl();

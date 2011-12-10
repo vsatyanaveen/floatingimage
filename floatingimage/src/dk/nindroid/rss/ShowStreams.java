@@ -208,7 +208,7 @@ public class ShowStreams extends Activity implements MainActivity {
 				Toast.makeText(this, "Setting background, please be patient...", Toast.LENGTH_LONG).show();
 				ImageDownloader.setWallpaper(ir.getOriginalImageUrl(), ir.getTitle(), ir instanceof LocalImage, this);
 				return true;
-			case CONTEXT_SAVE:
+			case CONTEXT_SAVE: 
 				ir = renderer.getSelected();
 				ImageDownloader.downloadImage(ir.getOriginalImageUrl(), ir.getTitle(), this);
 				return true;
@@ -271,9 +271,6 @@ public class ShowStreams extends Activity implements MainActivity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		if(this.showFeedId == -1){
-			System.exit(0);
-		}
 	}
 	
 	@Override 
