@@ -35,7 +35,7 @@ import dk.nindroid.rss.renderers.floating.positionControllers.StarSpeed;
 import dk.nindroid.rss.renderers.floating.positionControllers.TableTop;
 import dk.nindroid.rss.renderers.osd.Play.EventHandler;
 
-public class FloatingRenderer extends Renderer implements EventSubscriber, PrepareCallback, EventHandler{
+public class FloatingRenderer extends Renderer implements EventSubscriber, PrepareCallback, EventHandler, Image.ImageDataProvider{
 	public static final long 	mFocusDuration = 300;
 	public static long			mSelectedTime;
 	public static final float  	mFocusX = 0.0f;
@@ -145,7 +145,7 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 
 			mImgs = new Image[mTotalImgRows * 3 / 2];
 			for(int i = 0; i < mImgs.length; ++i){
-				mImgs[mImgCnt++] = new Image(mActivity, mDisplay, mInfoBar, mLargeTexture, mTextureSelector, smoothImage, mOnDemandBank);
+				mImgs[mImgCnt++] = new Image(mActivity, mDisplay, mInfoBar, mLargeTexture, mTextureSelector, smoothImage, mOnDemandBank, this, i);
 			}
 			
 			mImgDepths = new Image[mImgs.length];
@@ -361,10 +361,15 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
         			mSelectedIndex += (mSelectingNext ? imageCount - 1 : 1);
         			mSelectedIndex %= imageCount;
         			mSelected = mImgs[mSelectedIndex];
-        			mSelectedTime = realTime;
-        			mSelectingNext = false;
-        			mSelectingPrev = false;
-        			mSelected.select(gl, frameTime, realTime);
+        			if(mSelected.canSelect()){
+	        			mSelectedTime = realTime;
+	        			mSelectingNext = false;
+	        			mSelectingPrev = false;
+	        			mSelected.select(gl, frameTime, realTime);
+        			}else{
+        				mSelected = null;
+        				mSlideshow = false;
+        			}
         		}else{
         			mSelected = null;
         		}
@@ -760,5 +765,11 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 				}
 			}
 		}
+	}
+
+	@Override
+	public ImageReference getImageReference(int id, int rotations) {
+		long imageNumber = mImgs.length * (long)rotations + id;
+		return mFeedController.getImageReference(imageNumber);
 	}
 }

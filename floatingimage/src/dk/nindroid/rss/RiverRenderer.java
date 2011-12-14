@@ -63,6 +63,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 		mFeedProgress = new FeedProgress(activity.context());
 		mStartTime = System.currentTimeMillis();
 		mLastFrameTime = mStartTime;
+		mOffset = -(long)(mActivity.getSettings().floatingTraversal * 0.1f);
 	}
 	
 	public void setRenderer(Renderer renderer){

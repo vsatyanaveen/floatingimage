@@ -39,6 +39,7 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 	private int				mState = STATE_FLOATING;
 	private boolean			mDelete;
 	
+	int						mId;
 	private final OnDemandImageBank mOnDemandBank;
 	private Display			mDisplay;
 	private IntBuffer   	mVertexBuffer;
@@ -63,6 +64,7 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 	private TextureSelector mTextureSelector;
 	private String			mSetThumbnailTexture;
 	private boolean			mImageNotSet = true;
+	private ImageDataProvider mDataProvider;
 	
 	// Selected vars
 	private Vec3f			mSelectedPos = new Vec3f();
@@ -128,7 +130,8 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 	
 	public void getImageIfEmpty(boolean next){
 		if(mShowingImage == null){
-			mOnDemandBank.get(this, next);
+			//mOnDemandBank.get(this, next);
+			this.resetTexture(next);
 		}
 	}
 	
@@ -259,7 +262,9 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 				 Texture largeTexture, 
 				 TextureSelector textureSelector,
 				 Bitmap lineSmoothBitmap,
-				 OnDemandImageBank onDemandBank){
+				 OnDemandImageBank onDemandBank,
+				 ImageDataProvider dataProvider,
+				 int id){
 		this.mDisplay = display;
 		this.mOnDemandBank = onDemandBank;
 		this.mLineSmoothBitmap = lineSmoothBitmap;
@@ -267,6 +272,8 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 		this.mInfoBar = infoBar;
 		this.mTextureSelector = textureSelector;
 		this.mLargeTexture = largeTexture;
+		this.mDataProvider = dataProvider;
+		this.mId = id;
         mPos = new Vec3f(0, 0, 0);
         mRotationA = new Rotation(0, 0, 0, 1);
         mRotationB = new Rotation(0, 0, 0, 1);
@@ -1023,20 +1030,20 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
         	reJitter();
         	depthChanged = true;
         	//Log.v("Floating Image", "Getting new texture - forward!");
-        	resetTexture(gl, true);
         	++mRotations;
+        	resetTexture(true);
         }
 		// Read last texture (Rewind)
 		if(isInRewind){
 			reJitter();
 			depthChanged = true;
 			//Log.v("Floating Image", "Getting new texture - rewind!");
-			resetTexture(gl, false);
 			--mRotations;
+			resetTexture(false);
         }
 		if(mShowingImage == null && getInterval(time) < 0.01f){
 			//Log.v("Floating Image", "Getting new texture - I need one!");
-			resetTexture(gl, true);
+			resetTexture(true);
 		}
 		return depthChanged;
 	}
@@ -1184,14 +1191,18 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 	
 	/************ Texture functions ************/
 	
-	private void resetTexture(GL10 gl, boolean next){
+	private void resetTexture(boolean next){
 		if(!mLockTexture){
-			Log.v("Floating Image", "RESET TEXTURE");
+			//Log.v("Floating Image", "RESET TEXTURE");
 			mFocusBmp = null;
 			mDelete = false;
 			mImageNotSet = true;
 			maspect = 1.3f;
-			mOnDemandBank.get(this, next);
+			//mOnDemandBank.get(this, next);
+			setEmptyImage(mDataProvider.getImageReference(mId, mRotations));
+			if(mShowingImage != null){
+				mOnDemandBank.get(mShowingImage, this);
+			}
 		}
 	}
 	
@@ -1480,8 +1491,9 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 	@Override
 	public void setEmptyImage(ImageReference ir) {
 		this.mShowingImage = ir;
-		if(ir != null){
-			Log.v("Floating Image", "Setting image #" + ir.getFeedPosition());
-		}
+	}
+	
+	interface ImageDataProvider{
+		ImageReference getImageReference(int id, int rotations);
 	}
 }
