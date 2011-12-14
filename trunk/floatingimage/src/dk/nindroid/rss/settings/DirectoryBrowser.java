@@ -23,6 +23,7 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnTouchListener;
 import android.widget.ListView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import dk.nindroid.rss.FeedController;
 import dk.nindroid.rss.R;
 import dk.nindroid.rss.settings.SourceSelector.SourceFragment;
 
@@ -74,7 +75,7 @@ public class DirectoryBrowser extends SourceFragment implements OnTouchListener,
 		File current = new File(curDir);
 		String[] files = current.list();
 		directories.clear();
-		directories.add("..");
+		int images = countPictures(files);
 		if(files != null){
 			for(String file : files){
 				File f = new File(curDir + "/" + file);
@@ -84,7 +85,17 @@ public class DirectoryBrowser extends SourceFragment implements OnTouchListener,
 			}
 			Collections.sort(directories, new stringUncaseComparator());
 		}
-		setListAdapter(new DirectoryAdapter(this, directories));
+		setListAdapter(new DirectoryAdapter(this, current.getName(), directories, images));
+	}
+	
+	private int countPictures(String[] files){
+		int count = 0;
+		for(String file : files){
+			if(FeedController.isImage(file)){
+				++count;
+			}
+		}
+		return count;
 	}
 	
 	private void oneDirUp(){
@@ -102,8 +113,10 @@ public class DirectoryBrowser extends SourceFragment implements OnTouchListener,
 		super.onListItemClick(l, v, position, id);
 		if(position == 0){
 			oneDirUp();
+		}else if(position == 1){
+			returnResult(currentDirectory.getAbsolutePath());
 		}else{
-			currentDirectory = new File(currentDirectory, directories.get(position));
+			currentDirectory = new File(currentDirectory, directories.get(position - 2));
 			history.add(currentDirectory);
 			browseTo(currentDirectory.getAbsolutePath());
 		}

@@ -81,7 +81,6 @@ public class OnDemandImageBank {
 	}
 	
 	public void get(ImageReference ir, LoaderClient callback){
-		Log.v("Floating Image", "Reget!");
 		loadBitmap(callback, ir);
 	}
 	

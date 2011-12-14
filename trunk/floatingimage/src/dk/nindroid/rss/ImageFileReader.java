@@ -70,10 +70,16 @@ public class ImageFileReader{
 		int largerSide = Math.max(width, height);
 		float scale = (float)maxSize / largerSide;
 		Bitmap tmp;
+		int targetX = (int)(width * scale);
+		int targetY = (int)(height * scale);
+		
+		if(targetX == 0 || targetY == 0){
+			return null;
+		}
 		if(config == Config.RGB_565){
-			tmp = Bitmap.createScaledBitmap(bmp, (int)(width * scale), (int)(height * scale), true);
+			tmp = Bitmap.createScaledBitmap(bmp, targetX, targetY, true);
 		}else{
-			tmp = Bitmap.createBitmap((int)(width * scale), (int)(height * scale), config);
+			tmp = Bitmap.createBitmap(targetX, targetY, config);
 			Canvas canvas = new Canvas(tmp);
 			canvas.drawBitmap(bmp, null, new Rect(0, 0, tmp.getWidth(), tmp.getHeight()), mPaint);
 		}

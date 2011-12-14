@@ -453,6 +453,7 @@ public class OSD {
 	
 	public boolean click(float x, float y, long time){
 		boolean inButtonArea = false;
+		if(mButtons == null) return false; // Not ready!
 		int height = mButtons.length > 4 ? 160 : 80;
 		inButtonArea = y > mDisplay.getHeightPixels() - height;
 		if(mFraction != 0.0f){

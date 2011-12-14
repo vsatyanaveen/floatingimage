@@ -122,4 +122,10 @@
 	<string name="feedActive">Active</string>
 	<string name="feedName">Name</string>
 	<string name="feedSubtitle">Subtitle</string>
+	<string name="add_this_directory">Selecte %s</string>
+	
+	<plurals name="n_images">
+		<item quantity="one">One image</item>
+		<item quantity="other">%d images</item>
+	</plurals>
 </resources>

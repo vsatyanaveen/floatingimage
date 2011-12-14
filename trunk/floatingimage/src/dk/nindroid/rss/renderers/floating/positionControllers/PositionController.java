@@ -5,7 +5,7 @@ import dk.nindroid.rss.gfx.Vec3f;
 public abstract class PositionController {
 	
 	public long adjustTime(long time, long traversalTime){
-		return time - (long)(traversalTime * (1.0f - adjustInterval(1.0f)));
+		return time - (long)(traversalTime * (1.0f - adjustInterval(0.99f)));
 	}
 	
 	public float getScale(){

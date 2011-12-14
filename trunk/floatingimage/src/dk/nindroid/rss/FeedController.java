@@ -77,6 +77,33 @@ public class FeedController {
 		this.mRenderer = renderer;
 	}
 	
+	public ImageReference getImageReference(long position){
+		if(System.currentTimeMillis() - mLastFeedRead > RETRY_INTERVAL && mReferences.size() == 0){
+			Log.v("Floating Image", "No pictures are showing, trying to read again.");
+			readFeeds(mCachedActive);
+		}
+		int refs = mReferences.size();
+		if(refs == 0) return null;
+		
+		synchronized (mReferences) {
+			if(System.currentTimeMillis() - mLastFeedRead > REFRESH_INTERVAL){
+				Log.v("Floating Image", "Refreshing feeds.");
+				readFeeds(mCachedActive);
+			}
+			
+			if(refs != 0){
+				if(mForceFeedId != -1){
+					if(position < 0 || position >= mReferences.size()){
+						return null;
+					}
+				}
+				position = (position + mReferences.size() * 100) % refs;
+				return mReferences.get((int)position);
+			}
+		}
+		return null;
+	}
+	
 	public ImageReference getNextImageReference(){
 		return getImageReference(true);
 	}
@@ -117,7 +144,7 @@ public class FeedController {
 		}
 		return ir;
 	}
-	
+		
 	public void readFeeds(int active){
 		mCachedActive = active;
 		mLastFeedRead = System.currentTimeMillis();
@@ -446,11 +473,18 @@ public class FeedController {
 		
 	}
 	
-	private static boolean isImage(File f){
+	public static boolean isImage(File f){
 		String filename = f.getName();
-		String extension = filename.substring(filename.lastIndexOf('.') + 1);
-		if("jpg".equalsIgnoreCase(extension) || "jpeg".equalsIgnoreCase(extension) || "png".equalsIgnoreCase(extension)){
-			return true;
+		return isImage(filename);
+	}
+	
+	public static boolean isImage(String filename){
+		int extensionIndex = filename.lastIndexOf('.');
+		if(extensionIndex != -1){
+			String extension = filename.substring(extensionIndex + 1);
+			if("jpg".equalsIgnoreCase(extension) || "jpeg".equalsIgnoreCase(extension) || "png".equalsIgnoreCase(extension) || "gif".equalsIgnoreCase(extension)){
+				return true;
+			}
 		}
 		return false;
 	}
