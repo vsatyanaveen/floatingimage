@@ -5,5 +5,7 @@
     <string name="error_fetching_albums">Fejl ved hentning af album, prøv venligst igen</string>
     <string name="error_fetching_friends">Fejl ved hentning af venner, prøv venligst igen</string>
     <string name="error_getting_flickr_user">Fejl ved hentning af din bruger, prøv venligst at logge ind igen.</string>
-    <string name="authorization_failed">Der skete noget underligt ved login... Prøv venligst igen!</string>
+    <string name="authorization_failed">Der skete noget underligt ved login… Prøv venligst igen!</string>
+    <string name="cannot_read_feed">Kan ikke læse kilden, den er måske for stor.</string>
+    <string name="device_does_not_support_live_wallpapers">Det lader desværre til at din enhed ikke understøtter levende baggrunde. :()</string>
 </resources>

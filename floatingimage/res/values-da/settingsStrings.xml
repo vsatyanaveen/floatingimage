@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<string name="cancel">Annullér</string>
 	<string name="settings">Indstillinger</string>
@@ -8,14 +7,23 @@
 	<string name="manageFeedsSummary">Choose which images to show</string> -->
 	<string name="manageFeeds">Redigér kilder</string> 
 	<string name="manageFeedsSummary">Hvor skal billederne komme fra</string>
+	
 	<string name="display">Udseende</string>
+	<string name="searching_for_user">Leder efter bruger</string>
 	<string name="floating">Flydende billeder</string>
 	<string name="rotateImages">Roter billeder</string>
 	<string name="rotateImagesSummary">Vælt billeder for en lidt mere rodet effekt</string>
 	<string name="fullscreenBlack">Helt sort ved fuldskærm</string>
 	<string name="fullscreenBlackSummary">Gør baggrunden helt sort når billede vises i fuldskærm</string>
+	<string name="tsunami">Tsunami</string>
+	<string name="tsunamiSummary">Fyld skærmen med billeder. Pas på, dette kan lede til ustabilitet!</string>
+	<string name="blackEdges">Sort kant</string>
+	<string name="blackEdgesSummary">Læg en sort kant rundt om billederne. Slå dette fra for bedre performance.</string>
+	<string name="singleClickDeselect">Enkelt-klik fravælger</string>
+	<string name="singleClickDeselectSummary">Hvis på fravælger et enkelt klik billedet. Dobbeltklik vil vise menuen.</string>
 	<string name="imageDecorations">Dekorér billeder</string>
 	<string name="imageDecorationsSummary">Vis skygger bag billeder</string>
+	
 	<string name="floatingType">Bevægelse</string>
 	<string name="floatingTypeSummary">Hvordan skal billederne bevæge sig</string>
 	<string name="floatingTypeTitle">Flydende billedbevægelse</string>
@@ -50,6 +58,7 @@
 	<string name="selectFolder">Vælg mappe</string>
 	<string name="selectCurrentFolder">Vælg denne mappe</string>
 	<string name="showHiddenFiles">Vis/skjul skjulte filer</string>
+	<string name="signingIn">Logger ind</string>
 	<string name="flickr">Flickr</string>
 	<string name="flickrShowStream">Vis strøm</string>
 	<string name="flickrShowStreamUsername">Indtast venligst brugernavnet for strømmen</string>
@@ -62,8 +71,8 @@
 	<string name="flickrMyAlbums">Mine albums</string>
 	<string name="flickrMyFavorites">Mine favoritter</string>
 	<string name="flickrMyContactsPhotos">Fotos fra mine kontakter</string>
-	<string name="flickrExplore">Top 500 (Explore)</string>
-	<string name="flickrPhotosFromHere">Fotos herfra</string>
+	<string name="flickrExplore">Explore</string>
+	<string name="flickrExploreSummary">Dagens 500 mest interessante</string>
 	<string name="flickrAllContactsStreams">Alle kontakters strømme</string>
 	<string name="flickr_search">Søg: </string>
 	<string name="picasa">Picasa</string>
@@ -86,11 +95,34 @@
 	<string name="facebookPhotosOfFriend">Vis billeder af</string>
 	<string name="facebookFriendsAlbums">Albums af</string>
 	<string name="facebookShowAlbum">Vis</string>
-	<string name="loadingAlbums">Henter albums...</string>
-	<string name="loadingFriends">Henter venner...</string>
+	<string name="photobucket">Photobucket</string>
+	<string name="photobucketShowUser">Vis bruger</string>
+	<string name="photobucketShowUserBadUsername">Desværre, Photobucket-bruger ikke fundet.</string>
+	<string name="photobucketShowRecent">Vis nylige billeder</string>
+	<string name="photobucketShowFollowing">Vis fulgte fotos</string>
+	<string name="loadingAlbums">Henter albums…</string>
+	<string name="loadingFriends">Henter venner…</string>
 	<string name="albumBy">Album af</string>
 	<string name="me">mig</string>
 	<string name="cameraPictures">Kamerabilleder</string>
 	<string name="moreCameraPictures">Flere kamerabilleder</string>
 	<string name="Downloads">Downloads</string>
+	<string name="misc">Diverse</string>
+	<string name="LiveWallpapers">Bevægelige baggrunde</string>
+	<string name="LiveWallpapersSummary">Sæt bevægelige baggrunde op for at sætte Floating Image som en baggrund</string>
+	
+	<string name="feedSortOrder">Sortér billeder efter</string>
+	<string name="feedActive">Aktiv</string>
+	<string name="feedName">Navn</string>
+	<string name="feedSubtitle">Undertitel</string>
+	<string name="add_this_directory">Vælg %s</string>
+	
+	<plurals name="n_images">
+		<item quantity="one">Ét billede</item>
+		<item quantity="other">%d billeder</item>
+	</plurals>
+	<string name="delete">Slet</string>
+	<string name="include_subdirs">Tag billeder fra underbiblioteker med</string>
+	<string name="show_new_feed">Vis ny kilde</string>
+	<string name="select_what_to_show">Vælg hvad der skal vises</string>
 </resources>
