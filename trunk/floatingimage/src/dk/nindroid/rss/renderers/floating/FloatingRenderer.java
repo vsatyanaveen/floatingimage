@@ -373,7 +373,7 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
         			mSelectedIndex += (mSelectingNext ? imageCount - 1 : 1);
         			mSelectedIndex %= imageCount;
         			mSelected = mImgs[mSelectedIndex];
-        			if(mSelected.canSelect()){
+        			if(mSelected.canSelect() && mSelected.isShowing()){
 	        			mSelectedTime = realTime;
 	        			mSelectingNext = false;
 	        			mSelectingPrev = false;
@@ -381,6 +381,8 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
         			}else{
         				mSelected = null;
         				mSlideshow = false;
+        				mSelectingNext = false;
+	        			mSelectingPrev = false;
         			}
         		}else{
         			mSelected = null;

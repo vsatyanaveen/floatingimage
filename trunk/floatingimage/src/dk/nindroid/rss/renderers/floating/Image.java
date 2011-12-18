@@ -202,6 +202,10 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 		return true;
 	}
 	
+	public boolean isShowing(){
+		return !this.mImageNotSet;
+	}
+	
 	public ImageReference getShowing(){
 		return mShowingImage;
 	}

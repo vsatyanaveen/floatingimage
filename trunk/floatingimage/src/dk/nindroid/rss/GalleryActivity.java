@@ -137,6 +137,9 @@ public class GalleryActivity extends ListActivity {
 		
 		@Override
 		public int getCount() {
+			if(mCursor.isClosed()){
+				return 0;
+			}
 			return mCursor.getCount();
 		}
 
@@ -147,8 +150,11 @@ public class GalleryActivity extends ListActivity {
 
 		@Override
 		public long getItemId(int position) {
-			mCursor.moveToPosition(position);
-			return mCursor.getInt(idi);
+			if(!mCursor.isClosed()){
+				mCursor.moveToPosition(position);
+				return mCursor.getInt(idi);
+			}
+			return 0;
 		}
 
 		@Override
@@ -161,6 +167,9 @@ public class GalleryActivity extends ListActivity {
 				l = (LinearLayout)inflater.inflate(R.layout.feeds_row, parent, false);
 				l.findViewById(R.id.enabled).setVisibility(View.GONE);
 				l.findViewById(R.id.edit).setVisibility(View.VISIBLE);
+			}
+			if(mCursor.isClosed()){
+				return l;
 			}
 			mCursor.moveToPosition(position);
 			
