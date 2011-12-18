@@ -100,7 +100,6 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 	
 	private long					mSetOffset = -1;
 	private int						mShowImage = -1;
-	private int						mShowImageOnNextRun = -1;
 	private long 					mLastShowImageRotations = -1;
 	private String					mPendingShowImage;
 	
@@ -568,6 +567,8 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 		mOsd = osd;
 		osd.registerPlayListener(this);
 		osd.pause();
+		
+		feedsUpdated();
 	}
 	
 	@Override
@@ -772,7 +773,9 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 
 	@Override
 	public void feedsUpdated() {
-		mFeedsUpdated = true;
+		if(mFeedController.getFeedSize() != 0){
+			mFeedsUpdated = true;
+		}
 	}
 	
 	public void showImage(String id){
@@ -806,7 +809,6 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 
 	@Override
 	public ImageReference getImageReference(int id, int rotations) {
-		Log.v("Floating Image", "Get Image reference " + id);
 		long imageNumber = mImgs.length * (long)rotations + id;
 		return mFeedController.getImageReference(imageNumber);
 	}
