@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -93,6 +94,7 @@ public class GalleryActivity extends ListActivity {
 	@Override
 	protected void onPause() {
 		super.onPause();
+		this.setListAdapter(new ArrayAdapter<String>(GalleryActivity.this, android.R.layout.simple_list_item_1, new String[]{}));
 		mCursor.close();
 	}
 	

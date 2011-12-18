@@ -520,15 +520,15 @@ public class ShowStreams extends Activity implements MainActivity {
 		
 		// Make local feeds enabled by default
 		Editor e = getSharedPreferences(Settings.SHARED_PREFS_NAME, 0).edit();
-		for(int i = 0; i < ++localFeedCount; ++i){
-			e.putBoolean("feed_" + i, true);
+		for(int i = 0; i < localFeedCount; ++i){
+			e.putBoolean("feed_" + (i + 1), true);
 		}
 		e.commit();
 		
 		// Make local feeds enabled by default for live wallpaper
 		e = getSharedPreferences(WallpaperSettings.SHARED_PREFS_NAME, 0).edit();
-		for(int i = 0; i < ++localFeedCount; ++i){
-			e.putBoolean("feed_" + i, true);
+		for(int i = 0; i < localFeedCount; ++i){
+			e.putBoolean("feed_" + (i + 1), true);
 		}
 		e.commit();
 		
