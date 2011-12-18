@@ -13,7 +13,6 @@ import android.graphics.Bitmap;
 import android.opengl.GLU;
 import android.opengl.GLUtils;
 import android.util.Log;
-import android.view.FocusFinder;
 import dk.nindroid.rss.Display;
 import dk.nindroid.rss.MainActivity;
 import dk.nindroid.rss.OnDemandImageBank;
