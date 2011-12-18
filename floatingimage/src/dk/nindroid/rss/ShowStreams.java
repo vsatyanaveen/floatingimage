@@ -12,6 +12,7 @@ import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -39,8 +40,10 @@ import dk.nindroid.rss.compatibility.Honeycomb;
 import dk.nindroid.rss.compatibility.SetWallpaper;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.LocalImage;
+import dk.nindroid.rss.flickr.FlickrFeeder;
 import dk.nindroid.rss.launchers.ReadFeeds;
 import dk.nindroid.rss.menu.Settings;
+import dk.nindroid.rss.menu.WallpaperSettings;
 import dk.nindroid.rss.orientation.InitialOritentationReflector;
 import dk.nindroid.rss.orientation.OrientationManager;
 import dk.nindroid.rss.parser.ParserProvider;
@@ -54,6 +57,7 @@ import dk.nindroid.rss.renderers.floating.ShadowPainter;
 import dk.nindroid.rss.renderers.slideshow.SlideshowRenderer;
 import dk.nindroid.rss.settings.FeedsDbAdapter;
 import dk.nindroid.rss.settings.ManageFeeds;
+import dk.nindroid.rss.uiActivities.ShowDialog;
 
 public class ShowStreams extends Activity implements MainActivity {
 	public static final int 			ABOUT_ID 		= Menu.FIRST;
@@ -72,6 +76,7 @@ public class ShowStreams extends Activity implements MainActivity {
 	public static final int				CACHE_SIZE		= 8;
 	
 	public static final String			SHOW_FEED_ID	= "show_feed_id";
+	public static final String			SHOW_IMAGE_ID	= "show_image_id";
 	public static final String			SETTINGS_NAME	= "settings_name";
 	
 	private GLSurfaceView 				mGLSurfaceView;
@@ -85,12 +90,14 @@ public class ShowStreams extends Activity implements MainActivity {
 	private dk.nindroid.rss.settings.Settings		mSettings;
 	
 	private int showFeedId;
+	private String showImageId;
 	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		this.showFeedId = getIntent().getIntExtra(SHOW_FEED_ID, -1);
+		this.showImageId = getIntent().getStringExtra(SHOW_IMAGE_ID);
 		String settingsName = getIntent().getStringExtra(SETTINGS_NAME);
 		if(settingsName == null){
 			settingsName = "dk.nindroid.rss_preferences";
@@ -316,6 +323,10 @@ public class ShowStreams extends Activity implements MainActivity {
 				if(showFeedId != -1){
 					floatingRenderer.disableSettings();
 					floatingRenderer.disableImages();
+					if(showImageId != null){
+						floatingRenderer.showImage(showImageId);
+						showImageId = null;
+					}
 				}
 			}
 			ReadFeeds.runAsync(mFeedController, defaultRenderer.totalImages());
@@ -364,7 +375,7 @@ public class ShowStreams extends Activity implements MainActivity {
 			mSettings.setFullscreen(renderer.mDisplay.isFullscreen());
 			return true;
 		case SHOW_FOLDER_ID:
-			showFolder();
+			manageFeeds();
 			return true;
 		case SETTINGS_ID:
 			showSettings();
@@ -378,7 +389,7 @@ public class ShowStreams extends Activity implements MainActivity {
 		startActivity(showSettings);
 	}
 	
-	public void showFolder(){
+	public void manageFeeds(){
 		Intent showFolder = new Intent(this, ManageFeeds.class);
 		showFolder.putExtra(ManageFeeds.SHARED_PREFS_NAME, Settings.SHARED_PREFS_NAME);
 		startActivityForResult(showFolder, SHOW_ACTIVITY);
@@ -492,15 +503,35 @@ public class ShowStreams extends Activity implements MainActivity {
 				defaultDir = new File(sdcard + "/external_sd/DCIM"); // Samsung
 			}
 		}
+		int localFeedCount = 0;
 		
 		FeedsDbAdapter mDbHelper = new FeedsDbAdapter(this);
 		mDbHelper.open();
 		mDbHelper.addFeed(getString(R.string.cameraPictures), defaultDir.getAbsolutePath(), dk.nindroid.rss.settings.Settings.TYPE_LOCAL, "");
+		++localFeedCount;
 		if(phonePhotos.exists()){
 			mDbHelper.addFeed(getString(R.string.moreCameraPictures), "/emmc/DCIM", dk.nindroid.rss.settings.Settings.TYPE_LOCAL, ""); // Droid
+			++localFeedCount;
 		}
 		mDbHelper.addFeed(getString(R.string.Downloads), Environment.getExternalStorageDirectory().getAbsolutePath() + "/download", dk.nindroid.rss.settings.Settings.TYPE_LOCAL, "");
+		++localFeedCount;
 		// mDbHelper.addFeed(getString(R.string.flickrExplore), FlickrFeeder.getExplore(), dk.nindroid.rss.settings.Settings.TYPE_FLICKR, "");
+		mDbHelper.addFeed(getString(R.string.flickrExplore), FlickrFeeder.getExplore(), dk.nindroid.rss.settings.Settings.TYPE_FLICKR, getString(R.string.flickrExploreSummary));
+		
+		// Make local feeds enabled by default
+		Editor e = getSharedPreferences(Settings.SHARED_PREFS_NAME, 0).edit();
+		for(int i = 0; i < ++localFeedCount; ++i){
+			e.putBoolean("feed_" + i, true);
+		}
+		e.commit();
+		
+		// Make local feeds enabled by default for live wallpaper
+		e = getSharedPreferences(WallpaperSettings.SHARED_PREFS_NAME, 0).edit();
+		for(int i = 0; i < ++localFeedCount; ++i){
+			e.putBoolean("feed_" + i, true);
+		}
+		e.commit();
+		
 		mDbHelper.close();
 	}
 
@@ -540,5 +571,31 @@ public class ShowStreams extends Activity implements MainActivity {
 	@Override
 	public View getView() {
 		return mGLSurfaceView;
+	}
+
+	@Override
+	public void showNoImagesWarning() {
+		Builder b = new Builder(this);
+		b.setMessage(R.string.no_images_showing);
+		b.setCancelable(false).setPositiveButton(R.string.no_images_showing_stay, new OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+			}
+		});
+		b.setNegativeButton(R.string.no_images_showing_manage, new OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+				if(showFeedId == -1){
+					manageFeeds();
+				}else{
+					finish(); // Gallery mode!
+				}
+			}
+		});
+		runOnUiThread(new ShowDialog(this, b));
 	}
 }

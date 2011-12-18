@@ -78,7 +78,8 @@
 	<string name="flickrMyAlbums">My albums</string>
 	<string name="flickrMyFavorites">My favorites</string>
 	<string name="flickrMyContactsPhotos">Photos by my Contacts</string>
-	<string name="flickrExplore">Top 500 (Explore)</string>
+	<string name="flickrExplore">Explore</string>
+	<string name="flickrExploreSummary">Daily 500 most interesting</string>
 	<string name="flickrPhotosFromHere">Photos from here</string>
 	<string name="flickrAllContactsStreams">All contacts\' streams</string>
 	<string name="flickr_search">Search: </string>
@@ -122,10 +123,14 @@
 	<string name="feedActive">Active</string>
 	<string name="feedName">Name</string>
 	<string name="feedSubtitle">Subtitle</string>
-	<string name="add_this_directory">Selecte %s</string>
+	<string name="add_this_directory">Select %s</string>
 	
 	<plurals name="n_images">
 		<item quantity="one">One image</item>
 		<item quantity="other">%d images</item>
 	</plurals>
+	<string name="delete">Delete</string>
+	<string name="include_subdirs">Include images from subdirectories</string>
+	<string name="show_new_feed">Show new feed</string>
+	<string name="select_what_to_show">Select what to show</string>
 </resources>

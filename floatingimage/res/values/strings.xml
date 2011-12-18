@@ -32,4 +32,8 @@
 	<string name="pause">Pause</string>
 	<string name="resume">Resume</string>
 	<string name="stream">Stream</string>
+	
+	<string name="no_images_showing">I cannot seem to find any images. Nothing is going to happen.</string>
+	<string name="no_images_showing_stay">I like this</string>
+	<string name="no_images_showing_manage">Find images</string>
 </resources>
