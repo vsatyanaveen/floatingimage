@@ -8,8 +8,7 @@
 	<string name="manageFeedsSummary">Choose which images to show</string> -->
 	<string name="manageFeeds">Manage feeds</string> 
 	<string name="manageFeedsSummary">Where should the images float from</string>
-	<string name="galleryMode">Gallery mode</string>
-	<string name="galleryModeSummary">Act as a standard gallery. This will override some settings below!</string>
+	
 	<string name="display">Display</string>
 	<string name="searching_for_user">Searching for user</string>
 	<string name="floating">Floating images</string>
@@ -32,7 +31,6 @@
 	<string name="floatingSpeed">Speed</string>
 	<string name="floatingSpeedSummary">How fast do the images traverse the screen</string>
 	<string name="floatingSpeedTitle">Floating images speed</string>
-	<string name="internals">Internals</string>
 	<string name="shuffle">Shuffle images</string>
 	<string name="shuffleSummary">Show images in random order</string>
 	<string name="modeTitle">Select display mode</string>
@@ -53,12 +51,8 @@
 	<string name="forceRotation">Force screen rotation</string>
 	<string name="forceRotationSummary">Adjust screen rotation manually</string>
 	<string name="forceRotationTitle">Screen rotation</string>
-	<string name="useCache">Cache images</string>
-	<string name="useCacheSummary">This gives a steadier flow when streaming</string>
 	<string name="useHighResThumbs">Use high-res thumbnails</string>
 	<string name="useHighResThumbsSummary">EXPERIMENTAL: This might crash your phone! High res devices only.</string>
-	<string name="clearCache">Clear cache</string>
-	<string name="clearCacheSummary">Erase entire image cache</string>
 	<string name="feedMenuAdd">Add new feed</string>
 	<string name="feedMenuAddSummary">Add a new source of images</string>
 	<string name="feedMenuRemove">Remove feed</string>
@@ -80,7 +74,6 @@
 	<string name="flickrMyContactsPhotos">Photos by my Contacts</string>
 	<string name="flickrExplore">Explore</string>
 	<string name="flickrExploreSummary">Daily 500 most interesting</string>
-	<string name="flickrPhotosFromHere">Photos from here</string>
 	<string name="flickrAllContactsStreams">All contacts\' streams</string>
 	<string name="flickr_search">Search: </string>
 	<string name="picasa">Picasa</string>
@@ -108,8 +101,8 @@
 	<string name="photobucketShowUserBadUsername">Sorry, Photobucket user not found.</string>
 	<string name="photobucketShowRecent">Show recent photos</string>
 	<string name="photobucketShowFollowing">Show followed photos</string>
-	<string name="loadingAlbums">Loading albums...</string>
-	<string name="loadingFriends">Loading friends...</string>
+	<string name="loadingAlbums">Loading albums…</string>
+	<string name="loadingFriends">Loading friends…</string>
 	<string name="albumBy">Album by</string>
 	<string name="me">me</string>
 	<string name="cameraPictures">Camera pictures</string>

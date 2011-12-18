@@ -144,4 +144,20 @@
 		<item>180</item>
 		<item>270</item>
 	</string-array>
+	
+	<string-array name="sortOrderFiles">
+		<item>Navn</item>
+		<item>Navn baglæns</item>
+		<item>Dato</item>
+		<item>Dato baglæns</item>
+		<item>Tilfældig</item>
+	</string-array>
+	
+	<string-array name="sortOrderOnline">
+		<item>Navn</item>
+		<item>Navn baglæns</item>
+		<item>Dato</item>
+		<item>Dato baglæns</item>
+		<item>Tilfældig</item>
+	</string-array>
 </resources>
