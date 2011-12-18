@@ -22,7 +22,7 @@ public class Images  extends Button {
 
 	@Override
 	public void click(long time) {
-		mActivity.showFolder();
+		mActivity.manageFeeds();
 	}
 
 	@Override

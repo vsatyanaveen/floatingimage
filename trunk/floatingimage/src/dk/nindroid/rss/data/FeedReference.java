@@ -3,6 +3,7 @@ package dk.nindroid.rss.data;
 import dk.nindroid.rss.parser.FeedParser;
 
 public class FeedReference {
+	private int			mId;
 	private FeedParser 	mParser;
 	private String 		mFeedLocation;
 	private String		mName;
@@ -28,7 +29,12 @@ public class FeedReference {
 		return mSorting;
 	}
 	
-	public FeedReference(FeedParser parser, String feedLocation, String name, int type, int sorting){
+	public int getId(){
+		return this.mId;
+	}
+	
+	public FeedReference(int id, FeedParser parser, String feedLocation, String name, int type, int sorting){
+		this.mId = id;
 		this.mParser = parser;
 		this.mFeedLocation = feedLocation;
 		this.mName = name;

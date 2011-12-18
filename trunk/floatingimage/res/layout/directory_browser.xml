@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
 		android:layout_width="fill_parent" 
 		android:layout_height="wrap_content"
@@ -8,7 +7,6 @@
 			android:layout_width="36dip"
 			android:layout_height="36dip"
 			android:padding="10dip"
-			android:layout_alignParentLeft="true"
 			android:src="@drawable/plus"
 			android:clickable="true"
 			android:visibility="gone" />
@@ -20,15 +18,13 @@
 			<TextView 	android:id="@android:id/title"  
 				android:layout_width="wrap_content" 
 				android:layout_height="wrap_content"
-				android:layout_alignParentLeft="true"
 				android:gravity="center_vertical"
-				android:textSize="22dp"
+				android:textSize="24dp"
 				android:textColor="#FFFFFF" />
 			<TextView 	
 			    android:id="@android:id/summary"
 				android:layout_width="wrap_content" 
 				android:layout_height="wrap_content"
-				android:layout_alignParentLeft="true"
 				android:gravity="center_vertical"
 				android:textSize="18dp"
 				android:textColor="#CCCCCC" />

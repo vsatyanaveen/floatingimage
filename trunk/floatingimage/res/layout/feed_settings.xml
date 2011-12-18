@@ -1,65 +1,83 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="vertical">
-    <TableLayout 
-        android:layout_width="fill_parent"
-    	android:layout_height="wrap_content"
-    	android:stretchColumns="1"
-    	android:layout_weight="1">
-    	<TableRow>
-    	    <TextView 
-    	        android:id="@+id/activeLabel"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:text="@string/feedActive"
-	            android:textSize="22sp"/>
-        	<CheckBox
-	            android:id="@+id/active"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:focusable="true"
-	            android:focusableInTouchMode="true" />
-    	</TableRow>
-    	
-    	<TableRow>
-    	    <TextView 
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:text="@string/feedName"
-	            android:textSize="22sp"/>
-        	<EditText
-	            android:id="@+id/title"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content" />
-    	</TableRow>
-    	
-    	<TableRow>
-			<TextView 
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:text="@string/feedSubtitle"
-	            android:textSize="22sp"/>
-	        <EditText
-	            android:id="@+id/extra"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content" />
-    	</TableRow>
-    	
-    	<TableRow>
-	    	<TextView 
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:text="@string/feedSortOrder"
-	            android:textSize="22sp"/>
-	        <Spinner 
-	            android:id="@+id/sortOrder"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:prompt="@string/feedSortOrder" />
-    	</TableRow>
-    </TableLayout>
+    android:orientation="vertical"
+    android:baselineAligned="false">
+    <LinearLayout
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_weight="1" >
+	    <TableLayout 
+	        android:layout_width="fill_parent"
+	    	android:layout_height="wrap_content"
+	    	android:stretchColumns="1" >
+	    	<TableRow>
+	    	    <TextView 
+	    	        android:id="@+id/activeLabel"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:text="@string/feedActive"
+		            android:textSize="22sp"/>
+	        	<CheckBox
+		            android:id="@+id/active"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:focusable="true"
+		            android:focusableInTouchMode="true" />
+	    	</TableRow>
+	    	
+	    	<TableRow>
+	    	    <TextView 
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:text="@string/feedName"
+		            android:textSize="22sp"/>
+	        	<EditText
+		            android:id="@+id/title"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:inputType="text" />
+	    	</TableRow>
+	    	
+	    	<TableRow>
+				<TextView 
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:text="@string/feedSubtitle"
+		            android:textSize="22sp"/>
+		        <EditText
+		            android:id="@+id/extra"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:inputType="text" />
+	    	</TableRow>
+	    	
+	    	<TableRow>
+		    	<TextView 
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:text="@string/feedSortOrder"
+		            android:textSize="22sp"/>
+		        <Spinner 
+		            android:id="@+id/sortOrder"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:prompt="@string/feedSortOrder" />
+	    	</TableRow>
+	    </TableLayout>
+	    <TextView 
+	        android:id="@+id/subdirs"
+	        android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:text="@string/include_subdirs"
+		    android:visibility="gone"/>
+	    <ListView 
+	        android:id="@android:id/list"
+	        android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:visibility="gone"/>
+	</LinearLayout>
     
     <LinearLayout 
         android:layout_width="fill_parent"
@@ -71,13 +89,19 @@
             android:id="@+id/ok"
             android:layout_width="0dp"
         	android:layout_height="wrap_content"
-        	android:layout_weight="1"
-        	android:text="@android:string/ok"/>
+        	android:text="@android:string/ok"
+        	android:layout_weight="1"/>
         <Button 
             android:id="@+id/cancel"
             android:layout_width="0dp"
         	android:layout_height="wrap_content"
-        	android:layout_weight="1"
-        	android:text="@android:string/cancel"/>
+        	android:text="@android:string/cancel"
+        	android:layout_weight="1"/>
+        <Button 
+            android:id="@+id/delete"
+            android:layout_width="0dp"
+        	android:layout_height="wrap_content"
+        	android:text="@string/delete"
+        	android:layout_weight="1"/>
     </LinearLayout>
 </LinearLayout>

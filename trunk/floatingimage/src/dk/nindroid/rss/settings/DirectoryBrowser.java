@@ -112,9 +112,9 @@ public class DirectoryBrowser extends SourceFragment implements OnTouchListener,
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
 		if(position == 0){
-			oneDirUp();
-		}else if(position == 1){
 			returnResult(currentDirectory.getAbsolutePath());
+		}else if(position == 1){
+			oneDirUp();
 		}else{
 			currentDirectory = new File(currentDirectory, directories.get(position - 2));
 			history.add(currentDirectory);

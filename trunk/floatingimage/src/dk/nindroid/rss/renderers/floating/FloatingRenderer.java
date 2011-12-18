@@ -98,8 +98,16 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 	private long					mSlideshowSlideImageDismissedAt;
 	private int 					mSlideshowLastImage = 0;
 	
+	private long					mSetOffset = -1;
+	private int						mShowImage = -1;
+	private int						mShowImageOnNextRun = -1;
+	private long 					mLastShowImageRotations = -1;
+	private String					mPendingShowImage;
+	
+	
 	private boolean settingsEnabled = true;
 	private boolean imagesEnabled = true;
+	
 	
 	public void disableSettings(){
 		this.settingsEnabled = false;
@@ -320,6 +328,11 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 			}
 		}
 		
+		if(mSetOffset != -1){
+			Log.v("Floating Image", "Set offset");
+			offset = mSetOffset;
+			mSetOffset = -1;
+		}
 		
 		return offset;
 	}
@@ -348,7 +361,7 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 			mDoSelect = -1;
 		}
 		
-        // Deselect selected when it is floating.
+		// Deselect selected when it is floating.
         if(mSelected != null){
         	if(mSelected.stateInFocus()){
         		if(mSelectingNext || mSelectingPrev){
@@ -400,6 +413,17 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
         mLastFrameTime = frameTime;
         //updateRotation(realTime);
         updateTranslation(realTime);
+        
+        if(mShowImage != -1 && mImgs[mShowImage].getShowing() != null){
+			int curRotations = mImgs[mShowImage].getRotations();
+			if(mLastShowImageRotations == curRotations){
+				this.selectImage(gl, frameTime, realTime, mImgs[mShowImage]);
+				mShowImage = -1;
+				mLastShowImageRotations = -1;
+			}else{
+				mLastShowImageRotations = curRotations;
+			}
+		}
 	}
 	
 	public void updateSlideshow(GL10 gl, long frameTime, long realTime){
@@ -751,6 +775,16 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 		mFeedsUpdated = true;
 	}
 	
+	public void showImage(String id){
+		int index = mFeedController.findImageIndex(id);
+		if(index == -1){
+			mPendingShowImage = id;
+		}else{
+			mSetOffset = mActivity.getSettings().floatingTraversal / mImgs.length * index - mActivity.getSettings().floatingTraversal / 2;
+			mShowImage = index % mImgs.length;
+		}
+	}
+	
 	private void feedsUpdated(long frameTime){
 		float lastImagePosition = Float.MAX_VALUE;
 		// Get reverse, if a later image is shown before an earlier one.
@@ -765,10 +799,14 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 				}
 			}
 		}
+		if(mPendingShowImage != null){
+			showImage(mPendingShowImage);
+		}
 	}
 
 	@Override
 	public ImageReference getImageReference(int id, int rotations) {
+		Log.v("Floating Image", "Get Image reference " + id);
 		long imageNumber = mImgs.length * (long)rotations + id;
 		return mFeedController.getImageReference(imageNumber);
 	}

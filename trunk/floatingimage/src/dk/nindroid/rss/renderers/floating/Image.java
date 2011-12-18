@@ -13,6 +13,7 @@ import android.graphics.Bitmap;
 import android.opengl.GLU;
 import android.opengl.GLUtils;
 import android.util.Log;
+import android.view.FocusFinder;
 import dk.nindroid.rss.Display;
 import dk.nindroid.rss.MainActivity;
 import dk.nindroid.rss.OnDemandImageBank;
@@ -90,6 +91,10 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 	
 	public void setPositionController(PositionController pc){
 		this.mPositionController = pc;
+	}
+	
+	public int getRotations(){
+		return mRotations;
 	}
 	
 	public PositionController getPositionController(){
@@ -398,7 +403,10 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 				return;
 			}
 		}
-		if(mImageNotSet) return;
+		if(mImageNotSet && !mLargeTex){
+			drawProgressBar(gl);
+			return;
+		}
 				
 		float x, y, z, szX, szY;
 		x = mPos.getX();
@@ -459,10 +467,8 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 		gl.glEnable(GL10.GL_BLEND);
 		gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_MODULATE);
 		gl.glColor4f(1.0f, 1.0f, 1.0f, alpha);
-		if(!mImageNotSet){
-			if(mActivity.getSettings().imageDecorations){
-				ShadowPainter.draw(gl, x, y, z, mRotationA, mRotationB, userRotation, szX, szY);
-			}
+		if(mActivity.getSettings().imageDecorations){
+			ShadowPainter.draw(gl, x, y, z, mRotationA, mRotationB, userRotation, szX, szY);
 		}
 		gl.glTranslatef(x, y, z);
 		gl.glRotatef(mRotationA.getAngle(), mRotationA.getX(), mRotationA.getY(), mRotationA.getZ());
@@ -473,20 +479,19 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 		// Draw image
 		gl.glActiveTexture(GL10.GL_TEXTURE0); 
 		gl.glVertexPointer(3, GL10.GL_FIXED, 0, mVertexBuffer);
+		if(!mImageNotSet){
+			gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
+			gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mTexBuffer);
 		
-		gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
-		gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mTexBuffer);
-		
-		if(!mImageNotSet){	
 			gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
-		
-			if(mLargeTex){
-				float largeAlpha = Math.min(1.0f, (realTime - mLargeTexTime) / 500.0f);
-				gl.glColor4f(1.0f, 1.0f, 1.0f, largeAlpha);
-				gl.glBindTexture(GL10.GL_TEXTURE_2D, mLargeTexture.getTextureID(gl));
-				gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mLargeTexBuffer);
-				gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
-			}
+		}
+	
+		if(mLargeTex){
+			float largeAlpha = Math.min(1.0f, (realTime - mLargeTexTime) / 500.0f);
+			gl.glColor4f(1.0f, 1.0f, 1.0f, largeAlpha);
+			gl.glBindTexture(GL10.GL_TEXTURE_2D, mLargeTexture.getTextureID(gl));
+			gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mLargeTexBuffer);
+			gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
 		}
 			
 	    
@@ -516,7 +521,11 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 		gl.glPopMatrix();
 		
         
-        if(mState == STATE_FOCUSED && !mLargeTex && mTextureSelector.getProgress() < 100){
+        drawProgressBar(gl);
+	}
+	
+	private void drawProgressBar(GL10 gl){
+		if(mState == STATE_FOCUSED && !mLargeTex && mTextureSelector.getProgress() < 100){
         	ProgressBar.draw(gl, mTextureSelector.getProgress(), mDisplay);
         }
 	}
@@ -1139,12 +1148,14 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 			if(mShowingImage.getBitmap() != null){
 				setTexture(gl, mShowingImage);
 				mShowingImage.recycleBitmap();
-				mImageAppliedTime = realTime;
+				if(!mLargeTex){ // Don't do fancy effect if a large texture is showing already
+					mImageAppliedTime = realTime;
+				}
 			}else{
 				mOnDemandBank.get(mShowingImage, this);
 			}
+			mSetThumbnailTexture = null;
 		}
-		mSetThumbnailTexture = null;
 		// Make sure time is positive, then divide by traversal time to get how far image is
 		if(mState == STATE_FLOATING){
 			depthChanged = updateFloating(gl, time);		
@@ -1312,7 +1323,6 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 	}
 	
 	public void setTexture(GL10 gl, ImageReference ir) {
-		mLargeTex = false;
 		float height = ir.getHeight();
 		float width  = ir.getWidth();
 		//Log.v("Floating Image", "Setting texture (" + ir.getBitmap().getWidth()+ "," + ir.getBitmap().getHeight()+ ")");

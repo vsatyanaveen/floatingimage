@@ -2,6 +2,28 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" 
 		android:layout_width="fill_parent" 
 		android:layout_height="fill_parent">
+		<LinearLayout 
+		    android:layout_width="fill_parent" 
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			android:id="@+id/show_new_entity">
+		    <View 
+		        android:layout_width="0dp"
+		        android:layout_height="10dp"/>
+		    <include 
+			    android:id="@+id/show_new"
+			    layout="@layout/feeds_row"/>
+		</LinearLayout>
+		<TextView 
+		    android:id="@+id/old"
+		    android:layout_width="fill_parent" 
+			android:layout_height="wrap_content"
+			android:layout_below="@id/show_new_entity"
+			android:background="#333333"
+			android:text="@string/feeds"
+			android:textColor="#CCCCCC"
+			android:textSize="14dp"
+			android:layout_marginLeft="5dp"/>
 		<Button 
 		    android:id="@+id/settings"
 		    android:layout_width="fill_parent" 
@@ -12,6 +34,6 @@
 		    android:id="@android:id/list"
 		    android:layout_width="fill_parent" 
 			android:layout_height="fill_parent"
-			android:layout_alignParentTop="true"
+			android:layout_below="@id/old"
 			android:layout_above="@id/settings"/>
 </RelativeLayout>

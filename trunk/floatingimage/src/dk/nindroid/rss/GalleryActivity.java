@@ -1,5 +1,6 @@
 package dk.nindroid.rss;
 
+import android.app.Activity;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
@@ -18,32 +19,81 @@ import android.widget.TextView;
 import dk.nindroid.rss.menu.GallerySettings;
 import dk.nindroid.rss.settings.FeedSettings;
 import dk.nindroid.rss.settings.FeedsDbAdapter;
+import dk.nindroid.rss.settings.ManageFeeds;
 import dk.nindroid.rss.settings.Settings;
 
 public class GalleryActivity extends ListActivity {
+	public static final int ADD_FEED = 0;
+	
 	GalleryListAdapter mAdapter;
+	Cursor mCursor;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		this.setContentView(R.layout.gallery);
-		
 		Button settingsButton = (Button)findViewById(R.id.settings);
 		settingsButton.setOnClickListener(new SettingsListener());
+		
+		View showNew = findViewById(R.id.show_new);
+		showNew.setBackgroundResource(android.R.drawable.list_selector_background);
+		ImageView newIcon = (ImageView)showNew.findViewById(R.id.icon);
+		newIcon.setImageResource(R.drawable.plus_circle);
+		showNew.findViewById(R.id.enabled).setVisibility(View.GONE);
+		TextView newText = (TextView)showNew.findViewById(android.R.id.title);
+		TextView newSummary = (TextView)showNew.findViewById(android.R.id.summary);
+		newText.setText(R.string.feedMenuAdd);
+		newSummary.setText(R.string.feedMenuAddSummary);
+		showNew.setOnClickListener(new ShowNewListener());
 		
 		Editor e = this.getSharedPreferences(GallerySettings.SHARED_PREFS_NAME, 0).edit();
 		e.putBoolean("galleryMode", true);
 		e.commit();
 	}
 	
+	class ShowNewListener implements OnClickListener{
+		@Override
+		public void onClick(View v) {
+			Intent intent = new Intent(GalleryActivity.this, ManageFeeds.class);
+			intent.putExtra(ManageFeeds.ADD_FEED, true);
+			startActivityForResult(intent, ADD_FEED);
+		}
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		switch(requestCode){
+		case ADD_FEED:
+			if(resultCode == Activity.RESULT_OK){
+				//fillFeeds();
+			}
+			break;
+		}
+	}
+	
+	private void fillFeeds(){
+		if(mCursor != null){
+			//stopManagingCursor(mCursor);
+		}
+		FeedsDbAdapter db = new FeedsDbAdapter(this).open();
+		mCursor = db.fetchAllFeeds();
+		mAdapter = new GalleryListAdapter(mCursor);
+		setListAdapter(mAdapter);
+		//this.startManagingCursor(mCursor);
+		db.close();
+	}
+	
 	@Override
 	protected void onResume() {
 		super.onResume();
-		FeedsDbAdapter db = new FeedsDbAdapter(this).open();
-		Cursor c = db.fetchAllFeeds();
-		mAdapter = new GalleryListAdapter(c);
-		setListAdapter(mAdapter);
-		this.startManagingCursor(c);
+		fillFeeds();
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		mCursor.close();
 	}
 	
 	class SettingsListener implements OnClickListener{

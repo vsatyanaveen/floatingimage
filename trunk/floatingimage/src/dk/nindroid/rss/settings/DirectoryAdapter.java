@@ -52,16 +52,16 @@ public class DirectoryAdapter extends BaseAdapter{
 		TextView summary = (TextView)itemLayout.findViewById(android.R.id.summary);
 		
 		if(position == 0){
-			icon.setVisibility(ImageView.GONE);
-			text.setText("..");
-			summary.setVisibility(View.GONE);
-		}else if(position == 1){
 			String add = mContext.getString(R.string.add_this_directory, mCurrent);
 			text.setText(add);
 			icon.setVisibility(ImageView.VISIBLE);
 			String amount = mContext.getResources().getQuantityString(R.plurals.n_images, mImages, mImages);
 			summary.setText(amount);
 			summary.setVisibility(View.VISIBLE);
+		}else if(position == 1){
+			icon.setVisibility(ImageView.GONE);
+			text.setText("..");
+			summary.setVisibility(View.GONE);
 		}else{
 			summary.setVisibility(View.GONE);
 			icon.setVisibility(ImageView.GONE);

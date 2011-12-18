@@ -44,12 +44,16 @@ public class LocalImage extends ImageReference{
 
 	@Override
 	public String getID() {
-		return mFile.getAbsolutePath().replace('/', '_').replace('.', '_');
+		return getID(mFile);
 	}
 
 	@Override
 	public String getImageID() {
-		return mFile.getAbsolutePath().replace('/', '_').replace('.', '_');
+		return getID(mFile);
+	}
+	
+	public static String getID(File f){
+		return f.getAbsolutePath().replace('/', '_').replace('.', '_');
 	}
 
 	@Override

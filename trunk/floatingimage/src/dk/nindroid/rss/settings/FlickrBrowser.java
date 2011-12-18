@@ -277,6 +277,7 @@ public class FlickrBrowser extends SourceSelector.SourceFragment implements Find
 		String streamURL = FlickrFeeder.getExplore();
 		b.putString("PATH", streamURL);
 		b.putString("NAME", getString(R.string.flickrExplore));
+		b.putString("EXTRAS", getString(R.string.flickrExploreSummary));
 		b.putInt("TYPE", Settings.TYPE_FLICKR);
 		intent.putExtras(b);
 		this.getActivity().setResult(Activity.RESULT_OK, intent);		

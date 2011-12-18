@@ -1,5 +1,9 @@
 package dk.nindroid.rss.settings;
 
+import java.util.ArrayList;
+
+import java.util.List;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -29,6 +33,10 @@ public class FeedsDbAdapter {
     public static final String KEY_USER_TITLE = "user_title";
     public static final String KEY_USER_EXTRA = "user_extra";
     public static final String KEY_SORTING = "sorting";
+    
+    public static final String SUBDIR_KEY = "__ID";
+    public static final String KEY_DIR = "dir";
+    public static final String KEY_ENABLED = "enabled";
 
     private static final String TAG = "FeedsDbAdapter";
     private DatabaseHelper mDbHelper;
@@ -37,8 +45,12 @@ public class FeedsDbAdapter {
     /**
      * Database creation sql statement
      */
-    private static final String DATABASE_CREATE =
-            					"create table feeds ("
+    private static final String DATABASE_NAME = "floatingImage";
+    private static final String FEEDS_TABLE = "feeds";
+    private static final String SUBDIR_TABLE = "subdirs";
+    
+    private static final String FEEDS_CREATE =
+            					"create table " + FEEDS_TABLE + " ("
             				  + KEY_ROWID +" integer primary key autoincrement, "
             				  + KEY_TYPE + " integer not null, " 
             				  + KEY_URI + " text not null, " 
@@ -48,9 +60,14 @@ public class FeedsDbAdapter {
             				  + KEY_USER_TITLE + " text, "
             				  + KEY_USER_EXTRA + " text);";
 
-    private static final String DATABASE_NAME = "floatingImage";
-    private static final String DATABASE_TABLE = "feeds";
-    private static final int DATABASE_VERSION = 5;
+    private static final String SUBDIR_CREATE =
+    							"create table " + SUBDIR_TABLE + " ("
+    						  + SUBDIR_KEY + " integer primary key autoincrement, "
+    						  + KEY_DIR + " text, "
+    						  + KEY_ROWID + " integer, "
+    						  + KEY_ENABLED + " bookean not null);";
+    
+    private static final int DATABASE_VERSION = 6;
 
     private final Context mCtx;
 
@@ -62,43 +79,80 @@ public class FeedsDbAdapter {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-
-            db.execSQL(DATABASE_CREATE);
+            db.execSQL(FEEDS_CREATE);
+            db.execSQL(SUBDIR_CREATE);
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
-                    + newVersion + ", which will destroy all old data");
-            db.execSQL("DROP TABLE IF EXISTS " + DATABASE_TABLE);
+                    + newVersion + ". Transfering data");
+            if(oldVersion == 5){
+            	upgradeFrom5(db);
+            }else{
+	            db.execSQL("DROP TABLE IF EXISTS " + FEEDS_TABLE);
+	            onCreate(db);
+            }
+        }
+        
+        void upgradeFrom5(SQLiteDatabase db){
+        	Cursor c = db.query(true, FEEDS_TABLE, new String[] {KEY_ROWID,
+                            KEY_TITLE, KEY_URI, KEY_TYPE, KEY_EXTRA, KEY_SORTING, KEY_USER_TITLE, KEY_USER_EXTRA}, null, null, null, null, null, null);
+        	List<Feed5> feeds = null;
+            if (c != null) {
+            	feeds = new ArrayList<FeedsDbAdapter.DatabaseHelper.Feed5>();
+                while(c.moveToNext()){
+                	Feed5 feed = new Feed5();
+                	feed.title = c.getString(1);
+                	feed.uri = c.getString(2);
+                	feed.type = c.getInt(3);
+                	feed.extra = c.getString(4);
+                	feed.sorting = c.getInt(5);
+                	feed.userTitle= c.getString(6);
+                	feed.userExtra= c.getString(7);
+                	feeds.add(feed);
+                }
+                c.close();
+            }
+            db.execSQL("DROP TABLE IF EXISTS " + FEEDS_TABLE);
             onCreate(db);
+            
+            if(feeds != null){
+            	for(Feed5 feed : feeds){
+            		ContentValues initialValues = new ContentValues();
+                    initialValues.put(KEY_TITLE, feed.title);
+                    initialValues.put(KEY_URI, feed.uri);
+                    initialValues.put(KEY_TYPE, feed.type);
+                    initialValues.put(KEY_EXTRA, feed.extra);
+                    initialValues.put(KEY_SORTING, feed.sorting);
+                    initialValues.put(KEY_USER_TITLE, feed.userTitle);
+                    initialValues.put(KEY_USER_EXTRA, feed.userExtra);
+                    db.insert(FEEDS_TABLE, null, initialValues);
+            	}
+            }
+        }
+        
+        private class Feed5{
+        	public String title;
+        	public String uri;
+        	public int type;
+        	public String extra;
+        	public int sorting;
+        	public String userTitle;
+        	public String userExtra;
         }
     }
     
     public void deleteAll(){
-    	mDb.execSQL("DROP TABLE IF EXISTS " + DATABASE_TABLE);
+    	mDb.execSQL("DROP TABLE IF EXISTS " + FEEDS_TABLE);
+    	mDb.execSQL("DROP TABLE IF EXISTS " + SUBDIR_TABLE);
     	mDbHelper.onCreate(mDb);
     }
 
-    /**
-     * Constructor - takes the context to allow the database to be
-     * opened/created
-     * 
-     * @param ctx the Context within which to work
-     */
     public FeedsDbAdapter(Context ctx) {
         this.mCtx = ctx;
     }
 
-    /**
-     * Open the notes database. If it cannot be opened, try to create a new
-     * instance of the database. If it cannot be created, throw an exception to
-     * signal the failure
-     * 
-     * @return this (self reference, allowing this to be chained in an
-     *         initialization call)
-     * @throws SQLException if the database could be neither opened or created
-     */
     public FeedsDbAdapter open() throws SQLException {
         mDbHelper = new DatabaseHelper(mCtx);
         mDb = mDbHelper.getWritableDatabase();
@@ -128,7 +182,7 @@ public class FeedsDbAdapter {
         initialValues.put(KEY_SORTING, 2);
         //initialValues.put(KEY_ENABLED, enabled ? 1 : 0);
 
-        return mDb.insert(DATABASE_TABLE, null, initialValues);
+        return mDb.insert(FEEDS_TABLE, null, initialValues);
     }
 
     /**
@@ -138,33 +192,37 @@ public class FeedsDbAdapter {
      * @return true if deleted, false otherwise
      */
     public boolean deleteFeed(long rowId) {
-
-        return mDb.delete(DATABASE_TABLE, KEY_ROWID + "=" + rowId, null) > 0;
+    	mDb.delete(SUBDIR_TABLE, KEY_ROWID + "=" + rowId, null);
+        return mDb.delete(FEEDS_TABLE, KEY_ROWID + "=" + rowId, null) > 0;
+    }
+    
+    public long addSubDir(long rowId, String name, boolean enabled){
+    	ContentValues initialValues = new ContentValues();
+    	initialValues.put(KEY_DIR, name);
+    	initialValues.put(KEY_ENABLED, enabled ? 1 : 0);
+    	initialValues.put(KEY_ROWID, rowId);
+    	return mDb.insert(SUBDIR_TABLE, null, initialValues);
     }
 
-    /**
-     * Return a Cursor over the list of all notes in the database
-     * 
-     * @return Cursor over all notes
-     */
+    public Cursor getSubDirs(long rowId){
+    	return mDb.query(SUBDIR_TABLE, new String[]{KEY_DIR, KEY_ENABLED}, KEY_ROWID + "=" + rowId, null, null, null, null);
+    }
+    
+    public boolean deleteSubdirs(long rowId){
+    	return mDb.delete(SUBDIR_TABLE, KEY_ROWID + "=" + rowId, null) > 0;
+    }
+    
     public Cursor fetchAllFeeds() {
 
-        return mDb.query(DATABASE_TABLE, new String[] {KEY_ROWID, KEY_TITLE,
-                KEY_URI, KEY_TYPE, KEY_EXTRA, KEY_SORTING, KEY_USER_TITLE, KEY_USER_EXTRA}, null, null, null, null, null);
+        return mDb.query(FEEDS_TABLE, new String[] {KEY_ROWID, KEY_TITLE,
+                KEY_URI, KEY_TYPE, KEY_EXTRA, KEY_SORTING, KEY_USER_TITLE, KEY_USER_EXTRA}, null, null, null, null, KEY_TYPE);
     }
 
-    /**
-     * Return a Cursor positioned at the note that matches the given rowId
-     * 
-     * @param rowId id of note to retrieve
-     * @return Cursor positioned to matching note, if found
-     * @throws SQLException if note could not be found/retrieved
-     */
     public Cursor fetchFeed(long rowId) throws SQLException {
 
         Cursor mCursor =
 
-                mDb.query(true, DATABASE_TABLE, new String[] {KEY_ROWID,
+                mDb.query(true, FEEDS_TABLE, new String[] {KEY_ROWID,
                         KEY_TITLE, KEY_URI, KEY_TYPE, KEY_EXTRA, KEY_SORTING, KEY_USER_TITLE, KEY_USER_EXTRA}, KEY_ROWID + "=" + rowId, null,
                         null, null, null, null);
         if (mCursor != null) {
@@ -173,17 +231,20 @@ public class FeedsDbAdapter {
         return mCursor;
 
     }
+    
+    public Cursor fetchFeed(String path) throws SQLException {
+    	Cursor mCursor =
 
-    /**
-     * Update the note using the details provided. The note to be updated is
-     * specified using the rowId, and it is altered to use the title and body
-     * values passed in
-     * 
-     * @param rowId id of note to update
-     * @param title value to set note title to
-     * @param body value to set note body to
-     * @return true if the note was successfully updated, false otherwise
-     */
+                mDb.query(true, FEEDS_TABLE, new String[] {KEY_ROWID,
+                        KEY_TITLE, KEY_URI, KEY_TYPE, KEY_EXTRA, KEY_SORTING, KEY_USER_TITLE, KEY_USER_EXTRA}, KEY_URI + "='" + path + "'", null,
+                        null, null, null, null);
+        if (mCursor != null) {
+            mCursor.moveToFirst();
+        }
+        return mCursor;
+    }
+
+
     public boolean updateFeed(long rowId, String title, String body, int type, String extras, int sorting, String userTitle, String userExtra) {
         ContentValues args = new ContentValues();
         args.put(KEY_TITLE, title);
@@ -194,7 +255,7 @@ public class FeedsDbAdapter {
         args.put(KEY_USER_TITLE, userTitle);
         args.put(KEY_USER_EXTRA, userExtra);
 
-        return mDb.update(DATABASE_TABLE, args, KEY_ROWID + "=" + rowId, null) > 0;
+        return mDb.update(FEEDS_TABLE, args, KEY_ROWID + "=" + rowId, null) > 0;
     }
     
     public boolean updateFeed(long rowId, int sorting, String userTitle, String userExtra) {
@@ -203,6 +264,6 @@ public class FeedsDbAdapter {
         args.put(KEY_USER_TITLE, userTitle);
         args.put(KEY_USER_EXTRA, userExtra);
 
-        return mDb.update(DATABASE_TABLE, args, KEY_ROWID + "=" + rowId, null) > 0;
+        return mDb.update(FEEDS_TABLE, args, KEY_ROWID + "=" + rowId, null) > 0;
     }
 }

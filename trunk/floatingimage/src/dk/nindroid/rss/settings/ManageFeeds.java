@@ -29,6 +29,7 @@ import dk.nindroid.rss.gfx.ImageUtil;
 public class ManageFeeds extends PreferenceActivity {
 	public static final String SHARED_PREFS_NAME = "SHARED_PREFS_NAME";
 	public static final String HIDE_CHECKBOXES = "HIDE_CHECKBOXES";
+	public static final String ADD_FEED = "ADD_FEED";
 	
 	public static final int ADD_ID = Menu.FIRST;
 	public static final int CLEAR_ALL_ID = Menu.FIRST + 1;
@@ -40,6 +41,7 @@ public class ManageFeeds extends PreferenceActivity {
 	private List<Feed> 	mRowList = new ArrayList<Feed>();
 	List<Preference> mCheckBoxes;
 	private boolean mHideCheckBoxes;
+	private boolean	mAddFeed;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -48,15 +50,20 @@ public class ManageFeeds extends PreferenceActivity {
 		PreferenceManager pm = this.getPreferenceManager();
 		pm.setSharedPreferencesName(this.getIntent().getExtras().getString(SHARED_PREFS_NAME));
 		this.mHideCheckBoxes = this.getIntent().getExtras().getBoolean(HIDE_CHECKBOXES);
+		this.mAddFeed = this.getIntent().getExtras().getBoolean(ADD_FEED, false);
 		
 		setContentView(R.layout.manage_feeds);
 		mDbHelper = new FeedsDbAdapter(this);
 		registerForContextMenu(getListView());
 		setPreferenceScreen(createPreferenceHierarchy());
+		if(mAddFeed){
+			addFeed();
+		}
+			
 	}
 	
 	void addFeed(){
-		startActivityForResult(new Intent(this, SourceSelector.class), SELECT_FOLDER);
+		startActivityForResult(new Intent(this, SourceSelectorFragmentActivity.class), SELECT_FOLDER);
 	}
 	
 	private PreferenceScreen createPreferenceHierarchy() {
@@ -229,25 +236,32 @@ public class ManageFeeds extends PreferenceActivity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		if(requestCode == SELECT_FOLDER && resultCode == RESULT_OK){
-			Bundle b = data.getExtras();
-			String path = (String)b.get("PATH");
-			String name = (String)b.get("NAME");
-			int type = b.getInt("TYPE");
-			String extras = "";
-			if(b.containsKey("EXTRAS")){
-				extras = (String)b.get("EXTRAS");
+		if(requestCode == SELECT_FOLDER){
+			if(resultCode == RESULT_OK){
+				Bundle b = data.getExtras();
+				String path = (String)b.get("PATH");
+				String name = (String)b.get("NAME");
+				int type = b.getInt("TYPE");
+				String extras = "";
+				if(b.containsKey("EXTRAS")){
+					extras = (String)b.get("EXTRAS");
+				}
+				mDbHelper.open();
+				long id = mDbHelper.addFeed(name, path, type, extras);
+				mDbHelper.close();
+				
+				Intent intent = new Intent(this, FeedSettings.class);
+				intent.putExtra(FeedSettings.FEED_ID, (int)id);
+				intent.putExtra(ManageFeeds.SHARED_PREFS_NAME, getPreferenceManager().getSharedPreferencesName());
+				intent.putExtra(FeedSettings.NEW_FEED, true);
+				intent.putExtra(FeedSettings.HIDE_ACTIVE, this.mHideCheckBoxes);
+				startActivityForResult(intent, EDIT_NEW_FEED);
+			}else{
+				if(mAddFeed){
+					setResult(resultCode);
+					finish();
+				}
 			}
-			mDbHelper.open();
-			long id = mDbHelper.addFeed(name, path, type, extras);
-			mDbHelper.close();
-			
-			Intent intent = new Intent(this, FeedSettings.class);
-			intent.putExtra(FeedSettings.FEED_ID, (int)id);
-			intent.putExtra(ManageFeeds.SHARED_PREFS_NAME, getPreferenceManager().getSharedPreferencesName());
-			intent.putExtra(FeedSettings.NEW_FEED, true);
-			intent.putExtra(FeedSettings.HIDE_ACTIVE, this.mHideCheckBoxes);
-			startActivityForResult(intent, EDIT_NEW_FEED);
 		}else if(requestCode == EDIT_FEED){
 			createPreferenceHierarchy();
 		}else if(requestCode == EDIT_NEW_FEED){
@@ -260,6 +274,10 @@ public class ManageFeeds extends PreferenceActivity {
 				}
 			}else{
 				createPreferenceHierarchy();
+			}
+			if(mAddFeed){
+				setResult(resultCode);
+				finish();
 			}
 		}
 	}
@@ -285,8 +303,7 @@ public class ManageFeeds extends PreferenceActivity {
 	private class AddClickListener implements Preference.OnPreferenceClickListener{
 		@Override
 		public boolean onPreferenceClick(Preference preference) {
-			Intent intent = new Intent(ManageFeeds.this, SourceSelectorFragmentActivity.class);
-			startActivityForResult(intent, SELECT_FOLDER);
+			addFeed();
 			return true;
 		}
 	}

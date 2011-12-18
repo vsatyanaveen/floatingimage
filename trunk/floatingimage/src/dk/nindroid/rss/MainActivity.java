@@ -18,9 +18,10 @@ public interface MainActivity {
 	public void setWallpaper(InputStream is) throws IOException;
 	public void setWallpaper(Bitmap bmp) throws IOException;
 	public Window getWindow();
-	public void showFolder();
+	public void manageFeeds();
 	public void showSettings();
 	public Settings getSettings();
 	public String getSettingsKey();
 	public View getView();
+	public void showNoImagesWarning();
 }

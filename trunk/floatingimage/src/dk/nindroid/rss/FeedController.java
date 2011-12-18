@@ -19,9 +19,11 @@ import android.database.Cursor;
 import android.util.Log;
 import dk.nindroid.rss.data.FeedReference;
 import dk.nindroid.rss.data.ImageReference;
+import dk.nindroid.rss.data.KeyVal;
 import dk.nindroid.rss.data.LocalImage;
 import dk.nindroid.rss.parser.FeedParser;
 import dk.nindroid.rss.parser.ParserProvider;
+import dk.nindroid.rss.settings.FeedSettings;
 import dk.nindroid.rss.settings.FeedsDbAdapter;
 import dk.nindroid.rss.settings.Settings;
 import dk.nindroid.rss.uiActivities.Toaster;
@@ -52,6 +54,16 @@ public class FeedController {
 	
 	public int getFeedSize(){
 		return mReferences.size();
+	}
+	
+	public int findImageIndex(String id){
+		for(int i = 0; i < mReferences.size(); ++i){
+			ImageReference ir = mReferences.get(i);
+			if(ir.getID().equals(id)){
+				return i;
+			}
+		}
+		return -1;
 	}
 	
 	private List<EventSubscriber> eventSubscribers;
@@ -175,7 +187,7 @@ public class FeedController {
 				}
 				// Only add a single feed once!
 				if(enabled && !newFeeds.contains(feed)){
-					newFeeds.add(getFeedReference(feed, type, name, sorting));
+					newFeeds.add(getFeedReference(id, feed, type, name, sorting));
 				}
 			}
 		}catch(Exception e){
@@ -185,7 +197,6 @@ public class FeedController {
 				mActivity.stopManagingCursor(c);
 				c.close();
 			}
-			mDbHelper.close();
 		}
 		
 		// Make sure local feeds are read first - they load crazy fast! :)
@@ -214,12 +225,16 @@ public class FeedController {
 			if(reparseFeeds){
 				mFeeds = newFeeds;
 				mReferences.clear();
-				parseFeeds(active);
+				parseFeeds(mDbHelper, active);
 				feedsChanged();
 				onFeedsUpdated();
+				if(mReferences.size() == 0){
+					mActivity.showNoImagesWarning();
+				}
 			}
 			
 		}
+		mDbHelper.close();
 	}
 	
 	private void feedsChanged(){
@@ -239,12 +254,12 @@ public class FeedController {
 		return mReferences.size();
 	}
 	
-	public FeedReference getFeedReference(String path, int type, String name, int sorting){
-		return new FeedReference(getParser(type), path, name, type, sorting);
+	public FeedReference getFeedReference(int id, String path, int type, String name, int sorting){
+		return new FeedReference(id, getParser(type), path, name, type, sorting);
 	}
 	
 	// False if no images.
-	private synchronized boolean parseFeeds(int active){
+	private synchronized boolean parseFeeds(FeedsDbAdapter db, int active){
 		synchronized(mFeeds){
 			List<List<ImageReference>> refs = new ArrayList<List<ImageReference>>();
 			int progress = 0;
@@ -257,7 +272,7 @@ public class FeedController {
 				}
 				List<ImageReference> references = null;
 				if(feed.getType() == Settings.TYPE_LOCAL){
-					references = readLocalFeed(feed);
+					references = readLocalFeed(feed, db);
 				}else{
 					int i = 5;
 					while(i --> 0){ // Oh glorious obfuscation! :D
@@ -431,16 +446,41 @@ public class FeedController {
 	}
 	
 	// LOCAL
-	private List<ImageReference> readLocalFeed(FeedReference feed){
+	private List<ImageReference> readLocalFeed(FeedReference feed, FeedsDbAdapter db){
 		File f = new File(feed.getFeedLocation());
+		List<String> recurse = getRecurseList(db, feed, f);
 		List<ImageReference> images = new ArrayList<ImageReference>();
 		if(f.exists()){
-			buildImageIndex(images, f, 0);
+			buildImageIndex(images, f, recurse, 0);
 		}
 		return images;
 	}
 	
-	private void buildImageIndex(List<ImageReference> images, File dir, int level){
+	// Get list of immediate child directories to search for images in
+	List<String> getRecurseList(FeedsDbAdapter db, FeedReference feed, File f){
+		List<String> dirs = new ArrayList<String>();
+		File[] allDirs = f.listFiles(new FeedSettings.DirFilter());
+		Cursor c = db.getSubDirs(feed.getId());
+		List<KeyVal<String, Boolean>> saved = new ArrayList<KeyVal<String,Boolean>>();
+		int iDir = c.getColumnIndex(FeedsDbAdapter.KEY_DIR);
+		int iEnabled = c.getColumnIndex(FeedsDbAdapter.KEY_ENABLED);
+		while(c.moveToNext()){
+			String dir = c.getString(iDir);
+			boolean enabled = c.getInt(iEnabled) == 1;
+			saved.add(new KeyVal<String, Boolean>(dir, enabled));
+		}
+		
+		for(File dir : allDirs){
+			KeyVal<String, Boolean> kv = FeedSettings.find(saved, dir.getName());
+			if(kv == null || kv.getVal()){
+				dirs.add(dir.getName());
+			}
+		}
+		c.close();
+		return dirs;
+	}
+	
+	private void buildImageIndex(List<ImageReference> images, File dir, List<String> recurse, int level){
 		File[] files = dir.listFiles();
 		if(files == null || files.length == 0) 
 			return;
@@ -450,7 +490,9 @@ public class FeedController {
 		for(File f : files){
 			if(f.getName().charAt(0) == '.') continue; // Drop hidden files.
 			if(f.isDirectory() && level < 20){ // Some high number to avoid any infinite loops...
-				buildImageIndex(images, f, level + 1);
+				if(recurse != null && recurse.contains(f.getName())){
+					buildImageIndex(images, f, null, level + 1);
+				}
 			}else{
 				if(isImage(f)){
 					ImageReference ir = new LocalImage(f);

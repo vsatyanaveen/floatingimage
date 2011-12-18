@@ -163,7 +163,7 @@ public class Wallpaper extends GLWallpaperService implements MainActivity{
 	}
 
 	@Override
-	public void showFolder() {
+	public void manageFeeds() {
 		// Not used with wallpaper
 	}
 
@@ -190,5 +190,11 @@ public class Wallpaper extends GLWallpaperService implements MainActivity{
 	@Override
 	public View getView() {
 		return null;
+	}
+
+	@Override
+	public void showNoImagesWarning() {
+		// Do nothing, this is disruptive, 
+		// and maybe we're just waiting for the sdcard to mount 
 	}
 }
