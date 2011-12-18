@@ -16,6 +16,7 @@ import org.xml.sax.SAXException;
 
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.util.Log;
 import dk.nindroid.rss.data.FeedReference;
 import dk.nindroid.rss.data.ImageReference;
@@ -92,7 +93,9 @@ public class FeedController {
 	public ImageReference getImageReference(long position){
 		if(System.currentTimeMillis() - mLastFeedRead > RETRY_INTERVAL && mReferences.size() == 0){
 			Log.v("Floating Image", "No pictures are showing, trying to read again.");
-			readFeeds(mCachedActive);
+			synchronized (mReferences) {
+				readFeeds(mCachedActive);
+			}
 		}
 		int refs = mReferences.size();
 		if(refs == 0) return null;
@@ -164,7 +167,13 @@ public class FeedController {
 		List<FeedReference> newFeeds = new ArrayList<FeedReference>();
 		FeedsDbAdapter mDbHelper = new FeedsDbAdapter(mActivity.context());
 		SharedPreferences sp = mActivity.context().getSharedPreferences(mActivity.getSettingsKey(), 0);
-		mDbHelper.open();
+		try{
+			mDbHelper.open();
+		}catch(SQLException e){
+			Log.w("Floating Image", "Database could not be opened", e);
+			mReferences.clear(); // Force retry
+			return;
+		}
 		Cursor c = null;
 		try{
 			c = mDbHelper.fetchAllFeeds();

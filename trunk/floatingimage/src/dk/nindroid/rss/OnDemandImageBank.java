@@ -69,7 +69,10 @@ public class OnDemandImageBank {
 				}
 			}
 		}
-		mPreLoader.mHandler.getLooper().quit();
+		if(mPreLoader.mHandler != null){
+			mPreLoader.mHandler.getLooper().quit();
+			mPreLoader.mHandler = null;
+		}
 	}
 	
 	public void get(LoaderClient callback, boolean isNext){

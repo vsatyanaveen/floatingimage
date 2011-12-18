@@ -892,7 +892,7 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 				this.mScale = invScale;
 				return;
 			}else{
-				this.mScale = Math.min(scale, 5.0f / mInitialScale); // Avoid focusing on a single pixel, that's just silly!
+				this.mScale = scale; // Avoid focusing on a single pixel, that's just silly!
 				x = x + centerX * (1.0f - scale);
 				y = y + centerY * (1.0f - scale);
 				this.move(x, y);
@@ -960,12 +960,21 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 				mInitialY = mRestoreY * (1.0f - fraction);
 				mInitialRotate = mRestoreRotate * (1.0f - fraction);
 				mInitialScale = mRestoreScale - (mRestoreScale - 1.0f) * (fraction);
+				
 			}
 		}
 		adjustMove();
+		adjustScale();
 	}
 	
-	public void adjustMove(){
+	private void adjustScale(){
+		if(!transforming && mScale * mInitialScale > 5.0f){
+			float diff = (mScale * mInitialScale - 5.0f);
+			mScale -= diff / (2.f * mInitialScale);
+		}
+	}
+	
+	private void adjustMove(){
 		float width;
 		float height;
 		boolean isTall = isTall();
@@ -1148,6 +1157,7 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 	public boolean update(GL10 gl, long time, long realTime){
 		boolean depthChanged = false;
 		if(this.doLoad(mSetThumbnailTexture) && mShowingImage != null){
+			mSetThumbnailTexture = null;
 			if(mShowingImage.getBitmap() != null){
 				setTexture(gl, mShowingImage);
 				mShowingImage.recycleBitmap();
@@ -1157,7 +1167,6 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 			}else{
 				mOnDemandBank.get(mShowingImage, this);
 			}
-			mSetThumbnailTexture = null;
 		}
 		// Make sure time is positive, then divide by traversal time to get how far image is
 		if(mState == STATE_FLOATING){
@@ -1487,7 +1496,7 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 		if(this.doLoad(id)){
 			mSetThumbnailTexture = id;
 			return true;
-		}	
+		}
     	return false;
 	}
 
