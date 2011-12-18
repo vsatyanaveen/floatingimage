@@ -446,7 +446,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 		int orientation = mDisplay.getOrientation();
 		float tmp;
 		y *= -1;
-		centerY = mDisplay.getHeightPixels() - centerY;
+		centerY = mDisplay.getPortraitHeightPixels() - centerY;
 		switch(orientation){
 		case Surface.ROTATION_0:
 			break;
@@ -465,6 +465,8 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 			y *= -1;
 			break;
 		}
+		
+		Log.v("Floating Image", "Transform (" + centerX + "," + centerY + ")");
 		
 		x /= mDisplay.getWidthPixels();
 		y /= mDisplay.getHeightPixels();
@@ -483,11 +485,13 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 			break;
 		case Surface.ROTATION_270:
 			centerY -=  mDisplay.getHeight();
+			centerX -=  mDisplay.getWidth();
 			centerX *= -1;
 			break;
 		case Surface.ROTATION_90:
 			centerY -=  mDisplay.getHeight();
 			centerY *= -1;
+			centerX -=  mDisplay.getWidth();
 			break;
 		case Surface.ROTATION_180:
 			centerX -=  mDisplay.getWidth();
@@ -496,6 +500,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 			centerY *= -1;
 			break;
 		}
+		Log.v("Floating Image", "Adjusted transform (" + centerX + "," + centerY + ")");
 		
 		mRenderer.transform(centerX, centerY, x, y, rotate, scale);
 	}
