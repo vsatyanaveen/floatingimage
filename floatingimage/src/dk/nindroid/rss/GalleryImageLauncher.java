@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,6 +27,11 @@ public class GalleryImageLauncher extends Activity {
 			this.finish();
 			return;
 		}
+		
+		Editor e = this.getSharedPreferences(GallerySettings.SHARED_PREFS_NAME, 0).edit();
+		e.putBoolean("galleryMode", true);
+		e.commit();
+		
 		FeedsDbAdapter db = new FeedsDbAdapter(this).open();
 		String dirPath = f.getParent();
 		Cursor c = db.fetchFeed(dirPath);
@@ -41,7 +47,6 @@ public class GalleryImageLauncher extends Activity {
 		}
 		db.close();
 		
-		Log.v("Floating Image", f.getAbsolutePath());
 		this.finish();
 	}
 	

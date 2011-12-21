@@ -238,6 +238,7 @@ public class OnDemandImageBank {
 			}
 			
 			public Bitmap loadFromWeb(ImageReference ir, Progress progress){
+				ir.getExtended();
 				Bitmap bmp = BitmapDownloader.downloadImage(mSettings.highResThumbs ? ir.get256ImageUrl() : ir.get128ImageUrl(), progress, mConfig);
 				synchronized (LoaderHandler.class) {
 					if(bmp == null){
@@ -261,7 +262,6 @@ public class OnDemandImageBank {
 						}
 					}
 				}
-				ir.getExtended();
 				return bmp;
 			}
 			

@@ -14,6 +14,7 @@ public class Settings {
 	public static final int TYPE_PICASA = 3;
 	public static final int TYPE_FACEBOOK = 4;
 	public static final int TYPE_PHOTOBUCKET = 5;
+	public static final int TYPE_FIVEHUNDREDPX = 6;
 	
 	public static final int MODE_NONE = 0;
 	public static final int MODE_SLIDE_RIGHT_TO_LEFT = 1;
@@ -44,6 +45,7 @@ public class Settings {
 	
 	public int		backgroundColor;
 	public boolean	lowFps;
+	public boolean	nudity;
 	
 	public boolean fullscreen;
 	public Bitmap.Config bitmapConfig = Config.RGB_565;
@@ -78,6 +80,7 @@ public class Settings {
 		tsunami = sp.getBoolean("tsunami", false);
 		galleryMode = sp.getBoolean("galleryMode", false);
 		singleClickDeselect = sp.getBoolean("singleClickDeselect", true);
+		nudity = !sp.getBoolean("nudity", true);
 			
 		switch(forceRotation){
 		case 90:

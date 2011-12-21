@@ -46,11 +46,6 @@ public class LocalImage extends ImageReference{
 	public String getID() {
 		return getID(mFile);
 	}
-
-	@Override
-	public String getImageID() {
-		return getID(mFile);
-	}
 	
 	public static String getID(File f){
 		return f.getAbsolutePath().replace('/', '_').replace('.', '_');
@@ -95,16 +90,6 @@ public class LocalImage extends ImageReference{
 	}
 
 	@Override
-	public boolean isNew() {
-		return false;
-	}
-
-	@Override
-	public boolean isPersonal() {
-		return true;
-	}
-
-	@Override
 	public void parseInfo(String[] tokens, Bitmap bmp) throws IOException {
 		mWidth = Float.parseFloat(tokens[2]);
 		mHeight = Float.parseFloat(tokens[3]);
@@ -122,11 +107,6 @@ public class LocalImage extends ImageReference{
 			}
 		}
 		this.mBitmap = bmp;
-	}
-
-	@Override
-	public void setOld() {
-		// No can do
 	}
 	
 	public File getFile(){

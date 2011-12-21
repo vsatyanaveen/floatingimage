@@ -255,6 +255,7 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 	            }
 	        	if(selected != null && selected.canSelect()){
 	        		selectImage(gl, frameTime, realTime, selected);
+	        		mSlideshowLastImage = selected.mId;
 	        		return true;
 	        	}else{
 	        		return false;
@@ -380,7 +381,6 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 	        			mSelected.select(gl, frameTime, realTime);
         			}else{
         				mSelected = null;
-        				mSlideshow = false;
         				mSelectingNext = false;
 	        			mSelectingPrev = false;
         			}
@@ -450,6 +450,10 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 		
 		int next = (mSlideshowLastImage + 1) % mImgs.length;
 		Image img = mImgs[next];
+		if(!(img.canSelect() && img.isShowing())){
+			mOsd.pause();
+			return;
+		}
 		img.lockTexture(true);
 		mTextureSelector.PrepareImage(img, this, img.getShowing());
 		mSlideshowLastImage = next;
@@ -576,6 +580,15 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 	@Override
 	public void Play() {
 		mSlideshowSlideImageDismissedAt = 0;
+		int startTest = mSlideshowLastImage; 
+		while(!(mImgs[mSlideshowLastImage].canSelect() && mImgs[mSlideshowLastImage].isShowing())){
+			mSlideshowLastImage = (mSlideshowLastImage + 1) % mImgs.length;
+			if(startTest == mSlideshowLastImage){
+				mOsd.pause();
+				return; // No images to show
+			}
+		}
+		
 		this.mSlideshow = true;
 	}
 

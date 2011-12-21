@@ -3,6 +3,11 @@
         xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory
             android:title="@string/floating">
+            <CheckBoxPreference 
+            	android:key="nudity"
+                android:title="@string/nudity"
+                android:summary="@string/nuditySummary"
+                android:defaultValue="true" />
 			<CheckBoxPreference
                 android:key="fullscreenBlack"
                 android:title="@string/fullscreenBlack"

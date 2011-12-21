@@ -36,13 +36,9 @@ public abstract class ImageReference {
 	public abstract String getImagePageUrl();
 	public abstract Intent follow();
 	public abstract String getTitle();
-	public abstract String getImageID();
 	public abstract String getID();
 	public abstract String getInfo();
 	public abstract void parseInfo(String[] tokens, Bitmap bmp) throws IOException;
-	public abstract boolean isNew();
-	public abstract void setOld();
-	public abstract boolean isPersonal();
 	public abstract String getAuthor();
 	public abstract void getExtended();
 	

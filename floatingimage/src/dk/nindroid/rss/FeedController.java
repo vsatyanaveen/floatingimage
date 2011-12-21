@@ -37,6 +37,7 @@ public class FeedController {
 	
 	private List<ImageReference> 			mReferences;
 	private List<FeedReference>				mFeeds;
+	private List<FeedReference>				mFailedFeeds;
 	private PositionInterval				mPosition;
 	private Random 							mRand = new Random(System.currentTimeMillis());
 	private RiverRenderer					mRenderer;
@@ -74,6 +75,7 @@ public class FeedController {
 		mReferences = new ArrayList<ImageReference>();
 		mActivity = activity;
 		eventSubscribers = new ArrayList<EventSubscriber>();
+		mFailedFeeds = new ArrayList<FeedReference>();
 	}
 	
 	public void addSubscriber(EventSubscriber subscriber){
@@ -91,7 +93,7 @@ public class FeedController {
 	}
 	
 	public ImageReference getImageReference(long position){
-		if(System.currentTimeMillis() - mLastFeedRead > RETRY_INTERVAL && mReferences.size() == 0){
+		if(System.currentTimeMillis() - mLastFeedRead > RETRY_INTERVAL && (mReferences.size() == 0 || mFailedFeeds.size() > 0)){
 			Log.v("Floating Image", "No pictures are showing, trying to read again.");
 			synchronized (mReferences) {
 				readFeeds(mCachedActive);
@@ -134,7 +136,7 @@ public class FeedController {
 	public ImageReference getImageReference(boolean forward){
 		ImageReference ir = null;
 		
-		if(System.currentTimeMillis() - mLastFeedRead > RETRY_INTERVAL && mReferences.size() == 0){
+		if(System.currentTimeMillis() - mLastFeedRead > RETRY_INTERVAL && (mReferences.size() == 0 || mFailedFeeds.size() > 0)){
 			Log.v("Floating Image", "No pictures are showing, trying to read again.");
 			readFeeds(mCachedActive);
 		}
@@ -163,6 +165,7 @@ public class FeedController {
 	public void readFeeds(int active){
 		mCachedActive = active;
 		mLastFeedRead = System.currentTimeMillis();
+		mFailedFeeds.clear();
 		
 		List<FeedReference> newFeeds = new ArrayList<FeedReference>();
 		FeedsDbAdapter mDbHelper = new FeedsDbAdapter(mActivity.context());
@@ -301,6 +304,7 @@ public class FeedController {
 					refs.add(references);
 				}else{
 					Log.w("Floating Image", "Reading feed failed too many times, giving up!");
+					mFailedFeeds.add(feed);
 				}
 				mRenderer.setFeeds(++progress, mFeeds.size());
 			}
@@ -437,7 +441,9 @@ public class FeedController {
 	
 	private List<ImageReference> parseFeed(FeedReference feed){
 		try {
-			return feed.getParser().parseFeed(feed, mActivity.context());
+			FeedParser parser = feed.getParser();
+			parser.init(mActivity.getSettings());
+			return parser.parseFeed(feed, mActivity.context());
 		} catch (IOException e) {
 			Log.e("Floating Image", "Unexpected exception caught", e);
 		} catch (ParserConfigurationException e) {
@@ -469,23 +475,24 @@ public class FeedController {
 	List<String> getRecurseList(FeedsDbAdapter db, FeedReference feed, File f){
 		List<String> dirs = new ArrayList<String>();
 		File[] allDirs = f.listFiles(new FeedSettings.DirFilter());
-		Cursor c = db.getSubDirs(feed.getId());
-		List<KeyVal<String, Boolean>> saved = new ArrayList<KeyVal<String,Boolean>>();
-		int iDir = c.getColumnIndex(FeedsDbAdapter.KEY_DIR);
-		int iEnabled = c.getColumnIndex(FeedsDbAdapter.KEY_ENABLED);
-		while(c.moveToNext()){
-			String dir = c.getString(iDir);
-			boolean enabled = c.getInt(iEnabled) == 1;
-			saved.add(new KeyVal<String, Boolean>(dir, enabled));
-		}
-		
-		for(File dir : allDirs){
-			KeyVal<String, Boolean> kv = FeedSettings.find(saved, dir.getName());
-			if(kv == null || kv.getVal()){
-				dirs.add(dir.getName());
+		if(allDirs != null){
+			Cursor c = db.getSubDirs(feed.getId());
+			List<KeyVal<String, Boolean>> saved = new ArrayList<KeyVal<String,Boolean>>();
+			int iDir = c.getColumnIndex(FeedsDbAdapter.KEY_DIR);
+			int iEnabled = c.getColumnIndex(FeedsDbAdapter.KEY_ENABLED);
+			while(c.moveToNext()){
+				String dir = c.getString(iDir);
+				boolean enabled = c.getInt(iEnabled) == 1;
+				saved.add(new KeyVal<String, Boolean>(dir, enabled));
 			}
+			for(File dir : allDirs){
+				KeyVal<String, Boolean> kv = FeedSettings.find(saved, dir.getName());
+				if(kv == null || kv.getVal()){
+					dirs.add(dir.getName());
+				}
+			}
+			c.close();
 		}
-		c.close();
 		return dirs;
 	}
 	
