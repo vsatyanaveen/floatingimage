@@ -46,6 +46,7 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 	private ByteBuffer  	mIndexBuffer;
 	private ByteBuffer  	mLineIndexBuffer;
 	private float  			maspect;
+	private float  			mLargeAspect;
 	private int				mRotations;
 	private Rotation		mRotationA;
 	private Rotation		mRotationB;
@@ -220,7 +221,6 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 			if(mShowingImage == null){
 				return;
 			}
-			mShowingImage.setOld();
 			// Select
 			mState = STATE_FOCUSING;
 			mPositionController.getRotation(getInterval(time), mRotationASaved, mRotationBSaved);
@@ -461,9 +461,25 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 		float interval = getInterval(time);
 		gl.glEnable(GL10.GL_BLEND);
 		//Vec3f rot = mPositionController.getRotation(interval);
-		float alpha = (mState == STATE_FLOATING ? mPositionController.getOpacity(interval) : 1) * mAlpha;
+		float alpha = mAlpha;
+		float largeAlpha = Math.min(1.0f, (realTime - mLargeTexTime) / 500.0f);
+		if(mState == STATE_FLOATING){
+			alpha *= mPositionController.getOpacity(interval);
+		}else if(mState == STATE_FOCUSED && mLargeTex){
+			alpha *= Math.min(1.0f, 2 - largeAlpha * 2.0f);
+		}else if(mState == STATE_DEFOCUSING && mLargeTex){
+			long timeToFloat = FloatingRenderer.mSelectedTime  + FloatingRenderer.mFocusDuration - realTime;
+			float floatInterval = timeToFloat / (float)FloatingRenderer.mFocusDuration;
+			
+			largeAlpha = floatInterval;
+			alpha *= 1 - floatInterval;
+		}
+		
 		float imageAppliedFadeInterval = getImageAppliedFadeInterval(realTime);
+				
 		alpha *= imageAppliedFadeInterval;
+		
+		
 		z += imageAppliedFadeInterval * 0.5f - 0.5f;
 		
 		gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
@@ -477,6 +493,8 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 		gl.glRotatef(mRotationA.getAngle(), mRotationA.getX(), mRotationA.getY(), mRotationA.getZ());
 		gl.glRotatef(mRotationB.getAngle(), mRotationB.getX(), mRotationB.getY(), mRotationB.getZ());
 		gl.glRotatef(userRotation, 0, 0, 1);
+		
+		gl.glPushMatrix();
 		gl.glScalef(szX, szY, 1);
 	
 		// Draw image
@@ -488,16 +506,6 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 		
 			gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
 		}
-	
-		if(mLargeTex){
-			float largeAlpha = Math.min(1.0f, (realTime - mLargeTexTime) / 500.0f);
-			gl.glColor4f(1.0f, 1.0f, 1.0f, largeAlpha);
-			gl.glBindTexture(GL10.GL_TEXTURE_2D, mLargeTexture.getTextureID(gl));
-			gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mLargeTexBuffer);
-			gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
-		}
-			
-	    
 		// Show smoothing
 		//if((System.currentTimeMillis() % 10000) < 5000){
 	    if(mActivity.getSettings().blackEdges){
@@ -508,6 +516,31 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 				drawSideSmoothing(gl, alpha, 2, 3, mShowingImage.getWidth(), true, szX, szY); // Right
 			}
 	    }
+		
+		gl.glPopMatrix();
+	
+		if(mLargeTex){			
+			szY = 5.0f; // Huge, since we only scale down.
+			szX = szY * mLargeAspect;
+			
+			float scale = getScale(szX, szY, realTime);
+			szX *= scale;
+			szY *= scale;
+			szX *= mPositionControlerScale;
+			szY *= mPositionControlerScale;
+			userScale = mScale * mInitialScale;
+			szX *= userScale;
+			szY *= userScale;
+			
+			gl.glScalef(szX, szY, 1);
+			
+			gl.glColor4f(1.0f, 1.0f, 1.0f, largeAlpha);
+			gl.glVertexPointer(3, GL10.GL_FIXED, 0, mVertexBuffer);
+			gl.glBindTexture(GL10.GL_TEXTURE_2D, mLargeTexture.getTextureID(gl));
+			gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mLargeTexBuffer);
+			gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
+		}
+		
 		//}
 		
 		//if(realTime % 10000 < 5000){
@@ -1267,7 +1300,7 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 		float width = mFocusWidth;
 		float height = mFocusHeight;
 		
-		maspect = width / height;
+		mLargeAspect = width / height;
 		boolean firstDraw = false;
 		
 		

@@ -1,4 +1,4 @@
-package dk.nindroid.rss.facebook;
+package dk.nindroid.rss.parser.fivehundredpx;
 
 import java.io.IOException;
 
@@ -7,11 +7,12 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import dk.nindroid.rss.data.ImageReference;
 
-public class FacebookImage extends ImageReference {
+public class FiveHundredPxImage extends ImageReference {
 
-	public final static String imageType = "facebook";
+	public final static String imageType = "500px";
 	String imgID;
 	String owner;
+	String title;
 	String sourceURL;
 	String thumb128URL;
 	String thumb256URL;
@@ -23,6 +24,10 @@ public class FacebookImage extends ImageReference {
 		
 	public void setOwner(String owner){
 		this.owner = owner;
+	}
+	
+	public void setTitle(String title){
+		this.title = title;
 	}
 	
 	public void setSourceURL(String source){
@@ -61,12 +66,12 @@ public class FacebookImage extends ImageReference {
 
 	@Override
 	public void getExtended() {
-		// No need, we get everything from the initial lookup!		
+		
 	}
 
-		@Override
+	@Override
 	public String getID() {
-		return imgID;
+		return imageType + "_" + imgID;
 	}
 
 	@Override
@@ -88,6 +93,8 @@ public class FacebookImage extends ImageReference {
 		sb.append(nl);
 		sb.append(owner);
 		sb.append(nl);
+		sb.append(title);
+		sb.append(nl);
 		sb.append(thumb128URL);
 		sb.append(nl);
 		sb.append(thumb256URL);
@@ -104,10 +111,11 @@ public class FacebookImage extends ImageReference {
 		mHeight = Float.parseFloat(tokens[3]);
 		imgID = tokens[4];
 		owner = tokens[5];
-		thumb128URL = tokens[6];
-		thumb256URL = tokens[7];
-		pageURL = tokens[8];
-		sourceURL = tokens[9];
+		title = tokens[6];
+		thumb128URL = tokens[7];
+		thumb256URL = tokens[8];
+		pageURL = tokens[9];
+		sourceURL = tokens[10];
 		this.mBitmap = bmp;
 	}
 
@@ -123,12 +131,11 @@ public class FacebookImage extends ImageReference {
 	
 	@Override
 	public String get256ImageUrl() {
-		//return thumb256URL;
-		return getBigImageUrl();
+		return thumb256URL;
 	}
 
 	@Override
 	public String getTitle() {
-		return "- Facebook image -";
+		return title;
 	}
 }

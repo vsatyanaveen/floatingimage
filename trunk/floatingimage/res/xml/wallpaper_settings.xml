@@ -12,7 +12,12 @@
 				android:action="android.intent.action.MAIN" 
 				android:targetClass="dk.nindroid.rss.menu.WallpaperFeedManagerLauncher" 
 				android:targetPackage="dk.nindroid.rss" />
-        </PreferenceScreen>        
+        </PreferenceScreen>
+        <CheckBoxPreference 
+            	android:key="nudity"
+                android:title="@string/nudityWallpaper"
+                android:summary="@string/nuditySummary"
+                android:defaultValue="true" />
     </PreferenceCategory>
     <PreferenceCategory
             android:title="@string/display">

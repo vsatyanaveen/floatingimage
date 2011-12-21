@@ -21,6 +21,7 @@ import dk.nindroid.rss.data.FeedReference;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.facebook.FacebookImage;
 import dk.nindroid.rss.parser.FeedParser;
+import dk.nindroid.rss.settings.Settings;
 
 public class FacebookParser implements FeedParser {
 	List<ImageReference> images;
@@ -71,6 +72,11 @@ public class FacebookParser implements FeedParser {
 			Log.v("Floating Image", images.size() + " Facebook images found.");
 		}
 		return images;
+	}
+
+	@Override
+	public void init(Settings settings) {
+		
 	}
 
 }

@@ -214,7 +214,7 @@ public class CircularList<ImageRefeference> {
 				if(data[i] == null){
 					Log.e("Floating List", i + " NULL");
 				}else{
-					Log.e("Floating List", i + " " + data[i].getImageID());
+					Log.e("Floating List", i + " " + data[i].getID());
 				}
 			}
 		}

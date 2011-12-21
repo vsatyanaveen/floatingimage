@@ -76,7 +76,7 @@ public class BitmapDownloader implements Runnable {
 							if(ir.getBitmap() != null && !ir.getBitmap().isRecycled()){
 								continue; // Threading issue?
 							}
-							if(bank.doDownload(ir.getImageID())){
+							if(bank.doDownload(ir.getID())){
 								if(ir.getBitmap() != null && !ir.getBitmap().isRecycled()){ // Image is being shown, ignore!
 									break;
 								}else if(ir instanceof LocalImage){
@@ -113,6 +113,7 @@ public class BitmapDownloader implements Runnable {
 	
 	public void addExternalImage(ImageReference ir, boolean next){ 
 		String url = mSettings.highResThumbs ? ir.get256ImageUrl() : ir.get128ImageUrl();
+		ir.getExtended();
 		Bitmap bmp = downloadImage(url, null, mSettings.bitmapConfig);
 		if(bmp == null){
 			return;
@@ -122,7 +123,6 @@ public class BitmapDownloader implements Runnable {
 		}else{
 			ir.set128Bitmap(bmp);
 		}
-		ir.getExtended();
 		bank.addBitmap(ir, true, next);
 	}
 	

@@ -22,6 +22,7 @@ public class SourceSelector extends ListFragment {
 	public static final int 	PICASA_ACTIVITY = 15;
 	public static final int 	FACEBOOK_ACTIVITY = 16;
 	public static final int		PHOTOBUCKET_ACTIVITY = 17;
+	public static final int		FIVEHUNDREDPX_ACTIVITY = 18;
 	
 	boolean mDualPane;
 	int mSelected = 0;
@@ -75,7 +76,11 @@ public class SourceSelector extends ListFragment {
 		Bitmap photobucketBmp = ImageUtil.readBitmap(activity, R.drawable.photobucket_icon);
 		SourceSelectorAdapter.Source photobucketS = new Source(photobucket, photobucketBmp, PHOTOBUCKET_ACTIVITY);		
 		
-		SourceSelectorAdapter.Source[] options = new Source[] {localS, flickrS, picasaS, facebookS};
+		String fivehundredpx = this.getString(R.string.fivehundredpx);
+		Bitmap fivehundredpxBmp = ImageUtil.readBitmap(activity, R.drawable.fivehundredpx_icon);
+		SourceSelectorAdapter.Source fivehundredpxS = new Source(fivehundredpx, fivehundredpxBmp, FIVEHUNDREDPX_ACTIVITY);
+		
+		SourceSelectorAdapter.Source[] options = new Source[] {localS, flickrS, picasaS, facebookS, fivehundredpxS};
 		setListAdapter(new SourceSelectorAdapter(activity, options));
 	}
 		
@@ -94,8 +99,8 @@ public class SourceSelector extends ListFragment {
 			
 			if (f == null || !(f instanceof SourceFragment) || ((SourceFragment)f).getSource() != source) {
 				SourceFragment sf = getSource(source);
-		        
 		        if(sf != null){
+			        
 			        // Execute a transaction, replacing any existing fragment
 			        // with this one inside the frame.
 			        FragmentTransaction ft = getFragmentManager().beginTransaction();
@@ -122,8 +127,12 @@ public class SourceSelector extends ListFragment {
 			case 3: // Facebook
 				startActivityForResult(intent, FACEBOOK_ACTIVITY);
 				break;
-			case 4: // Photobucket
+			case 4: // 500px
+				startActivityForResult(intent, FIVEHUNDREDPX_ACTIVITY);
+				break;
+			case 5: // Photobucket
 				startActivityForResult(intent, PHOTOBUCKET_ACTIVITY);
+				break;
 			}
 		}
 	}
@@ -150,6 +159,9 @@ public class SourceSelector extends ListFragment {
 			case PHOTOBUCKET_ACTIVITY:
 				b.putInt("TYPE", Settings.TYPE_PHOTOBUCKET);
 				break;
+			case FIVEHUNDREDPX_ACTIVITY:
+				b.putInt("TYPE", Settings.TYPE_FIVEHUNDREDPX);
+				break;
 			}
 			intent.putExtras(b);
 			getActivity().setResult(Activity.RESULT_OK, intent);
@@ -168,6 +180,8 @@ public class SourceSelector extends ListFragment {
     	case 3:
     		return new FacebookBrowser();
     	case 4: 
+    		return new FiveHundredPxBrowser();
+    	case 5:
     		return new PhotobucketBrowser();
     	}
 		return null;

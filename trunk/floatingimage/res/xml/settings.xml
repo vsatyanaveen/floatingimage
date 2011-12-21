@@ -11,6 +11,11 @@
 			android:targetClass="dk.nindroid.rss.menu.ApplicationFeedManagerLauncher"
 			android:targetPackage="dk.nindroid.rss" />
         </PreferenceScreen>
+        <CheckBoxPreference 
+            	android:key="nudity"
+                android:title="@string/nudity"
+                android:summary="@string/nuditySummary"
+                android:defaultValue="true" />
     </PreferenceCategory>
     <PreferenceCategory
             android:title="@string/display">

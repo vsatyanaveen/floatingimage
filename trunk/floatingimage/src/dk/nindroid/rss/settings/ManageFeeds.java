@@ -42,13 +42,18 @@ public class ManageFeeds extends PreferenceActivity {
 	List<Preference> mCheckBoxes;
 	private boolean mHideCheckBoxes;
 	private boolean	mAddFeed;
+	private boolean mNudity; 
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		// This works, just need to pass which preference to use
 		PreferenceManager pm = this.getPreferenceManager();
+		String settings = this.getIntent().getExtras().getString(SHARED_PREFS_NAME);
 		pm.setSharedPreferencesName(this.getIntent().getExtras().getString(SHARED_PREFS_NAME));
+		
+		mNudity = !getSharedPreferences(settings, 0).getBoolean("nudity", true);
+		
 		this.mHideCheckBoxes = this.getIntent().getExtras().getBoolean(HIDE_CHECKBOXES);
 		this.mAddFeed = this.getIntent().getExtras().getBoolean(ADD_FEED, false);
 		
@@ -63,7 +68,9 @@ public class ManageFeeds extends PreferenceActivity {
 	}
 	
 	void addFeed(){
-		startActivityForResult(new Intent(this, SourceSelectorFragmentActivity.class), SELECT_FOLDER);
+		Intent intent = new Intent(this, SourceSelectorFragmentActivity.class);
+		intent.putExtra("nudity", mNudity);
+		startActivityForResult(intent, SELECT_FOLDER);
 	}
 	
 	private PreferenceScreen createPreferenceHierarchy() {
@@ -79,6 +86,7 @@ public class ManageFeeds extends PreferenceActivity {
 		List<Feed> flickr = data.get(Settings.TYPE_FLICKR);
 		List<Feed> picasa = data.get(Settings.TYPE_PICASA);
 		List<Feed> photobucket = data.get(Settings.TYPE_PHOTOBUCKET);
+		List<Feed> fivehundredpx = data.get(Settings.TYPE_FIVEHUNDREDPX);
 		
 		if(local.size() != 0){
 			Bitmap bmp = readBitmap(R.drawable.phone_icon);
@@ -140,6 +148,18 @@ public class ManageFeeds extends PreferenceActivity {
 			}
 		}
 		
+		if(fivehundredpx.size() != 0){
+			Bitmap bmp = readBitmap(R.drawable.fivehundredpx_icon);
+			PreferenceCategory fivehundredpxCat = new PreferenceCategory(this);
+			mRowList.add(null);
+			fivehundredpxCat.setTitle(R.string.fivehundredpx);
+			root.addPreference(fivehundredpxCat);
+			for(Feed f : fivehundredpx){
+				fivehundredpxCat.addPreference(createCheckbox(f, bmp));
+				mRowList.add(f);
+			}
+		}
+		
 		PreferenceCategory newCat = new PreferenceCategory(this);
 		newCat.setTitle("");
 		root.addPreference(newCat);
@@ -180,6 +200,7 @@ public class ManageFeeds extends PreferenceActivity {
 		data.put(Settings.TYPE_FACEBOOK, new ArrayList<Feed>());
 		data.put(Settings.TYPE_PICASA, new ArrayList<Feed>());
 		data.put(Settings.TYPE_PHOTOBUCKET, new ArrayList<Feed>());
+		data.put(Settings.TYPE_FIVEHUNDREDPX, new ArrayList<Feed>());
 		int idi = c.getColumnIndex(FeedsDbAdapter.KEY_ROWID);
 		int typei = c.getColumnIndex(FeedsDbAdapter.KEY_TYPE);
 		int namei = c.getColumnIndex(FeedsDbAdapter.KEY_TITLE);

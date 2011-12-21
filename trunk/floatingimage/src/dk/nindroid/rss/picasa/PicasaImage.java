@@ -18,8 +18,6 @@ public class PicasaImage extends ImageReference{
 	String thumbnail128URL;
 	String thumbnail256URL;
 	String imageURL;
-	boolean unseen;
-	boolean personal;
 	
 	public void setImageID(String id){
 		imgID = id;
@@ -78,11 +76,6 @@ public class PicasaImage extends ImageReference{
 
 	@Override
 	public String getID() {
-		return imgID;
-	}
-
-	@Override
-	public String getImageID() {
 		return imgID;
 	}
 
@@ -149,20 +142,5 @@ public class PicasaImage extends ImageReference{
 	@Override
 	public String getTitle() {
 		return title;
-	}
-
-	@Override
-	public boolean isNew() {
-		return unseen;
-	}
-
-	@Override
-	public boolean isPersonal() {
-		return personal;
-	}
-
-	@Override
-	public void setOld() {
-		unseen = false;
 	}
 }
