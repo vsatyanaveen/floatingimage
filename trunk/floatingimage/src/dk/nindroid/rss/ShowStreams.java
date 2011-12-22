@@ -567,7 +567,7 @@ public class ShowStreams extends Activity implements MainActivity {
 
 	@Override
 	public String getSettingsKey() {
-		return Settings.SHARED_PREFS_NAME;
+		return mSettings.settings;
 	}
 
 	@Override

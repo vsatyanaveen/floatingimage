@@ -10,7 +10,7 @@ public class FiveHundredPxFeeder {
 	private static final String USER_URL = IMAGE_LIST_URL + "&user=";
 	private static final String USER_FRIENDS_URL = IMAGE_LIST_URL + "&user_friends=";
 	private static final String USER_FAVORITES_URL = IMAGE_LIST_URL + "&user_favorites=";
-	private static final String SEARCH_URL = IMAGE_LIST_URL + "&term=";
+	private static final String SEARCH_URL = BASE_URL + "/search/?rpp=100&consumer_key=" + CONSUMER_KEY + "&term=";
 	private static final String GET_USER = "https://api.500px.com/v1/users/show?consumer_key=" + CONSUMER_KEY + "&username=";
 	
 	public static final String CATEGORY_CELEBRITIES = "Celebrities";

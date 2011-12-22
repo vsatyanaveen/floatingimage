@@ -963,25 +963,23 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 	}
 	
 	public boolean click(long realTime){
-		if(isTransformed()){
-			mRestoreTransformation = true;
-			mRestoredAt = realTime + RESTORE_TIME;
-			mInitialX += this.mX;
-			mInitialY += this.mY;
-			mInitialRotate += this.mRotate;
-			mInitialScale *= this.mScale;
-			this.mX = 0.0f;
-			this.mY = 0.0f;
-			this.mRotationA.setAngle(0.0f);
-			this.mRotationB.setAngle(0.0f);
-			this.mScale = 1.0f;
-			mRestoreX = mInitialX;
-			mRestoreY = mInitialY;
-			mRestoreRotate = mInitialRotate;
-			mRestoreScale = mInitialScale;
-			return true;
-		}
-		return false;
+		boolean isTransformed = isTransformed();
+		mRestoreTransformation = true;
+		mRestoredAt = realTime + RESTORE_TIME;
+		mInitialX += this.mX;
+		mInitialY += this.mY;
+		mInitialRotate += this.mRotate;
+		mInitialScale *= this.mScale;
+		this.mX = 0.0f;
+		this.mY = 0.0f;
+		this.mRotationA.setAngle(0.0f);
+		this.mRotationB.setAngle(0.0f);
+		this.mScale = 1.0f;
+		mRestoreX = mInitialX;
+		mRestoreY = mInitialY;
+		mRestoreRotate = mInitialRotate;
+		mRestoreScale = mInitialScale;
+		return isTransformed;
 	}
 	
 	public void updateTransformation(long realTime){

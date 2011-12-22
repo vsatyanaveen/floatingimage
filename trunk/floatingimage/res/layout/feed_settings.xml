@@ -66,6 +66,12 @@
 		            android:prompt="@string/feedSortOrder" />
 	    	</TableRow>
 	    </TableLayout>
+	    <CheckBox 
+	        android:id="@+id/allSubdirs"
+	        android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:text="@string/include_all_subdirs"
+		    android:visibility="gone"/>
 	    <TextView 
 	        android:id="@+id/subdirs"
 	        android:layout_width="wrap_content"

@@ -111,6 +111,7 @@ public class GalleryActivity extends ListActivity {
 		super.onListItemClick(l, v, position, id);
 		Intent intent = new Intent(this, ShowStreams.class);
 		intent.putExtra(ShowStreams.SHOW_FEED_ID, (int)mAdapter.getItemId(position));
+		intent.putExtra(FeedSettings.HIDE_ACTIVE, true);
 		intent.putExtra(ShowStreams.SETTINGS_NAME, GallerySettings.SHARED_PREFS_NAME);
 		this.startActivity(intent);
 	}
@@ -220,6 +221,7 @@ public class GalleryActivity extends ListActivity {
 				intent.putExtra(FeedSettings.HIDE_ACTIVE, true);
 				intent.putExtra(FeedSettings.NEW_FEED, false);
 				intent.putExtra(FeedSettings.FEED_ID, this.id);
+				intent.putExtra(ManageFeeds.SHARED_PREFS_NAME, GallerySettings.SHARED_PREFS_NAME);
 				startActivity(intent);
 			}
 			

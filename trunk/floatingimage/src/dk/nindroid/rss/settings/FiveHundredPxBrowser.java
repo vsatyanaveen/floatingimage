@@ -205,7 +205,7 @@ public class FiveHundredPxBrowser extends SourceSelector.SourceFragment implemen
 					Toast.makeText(getActivity(), R.string.fivehundredpxEmptySearch, Toast.LENGTH_LONG).show();
 				}else{
 					dialog.dismiss();
-					returnUrl(term, getString(R.string.fivehundredpxSearch), term);
+					returnUrl(FiveHundredPxFeeder.getSearch(term), getString(R.string.fivehundredpxSearch), term);
 				}
 			}
 		}).setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener(){
