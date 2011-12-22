@@ -463,16 +463,21 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 		//Vec3f rot = mPositionController.getRotation(interval);
 		float alpha = mAlpha;
 		float largeAlpha = Math.min(1.0f, (realTime - mLargeTexTime) / 500.0f);
+		boolean aspectDifferent = Math.abs(maspect - mLargeAspect) > 0.01;
 		if(mState == STATE_FLOATING){
 			alpha *= mPositionController.getOpacity(interval);
 		}else if(mState == STATE_FOCUSED && mLargeTex){
-			alpha *= Math.min(1.0f, 2 - largeAlpha * 2.0f);
+			if(aspectDifferent){
+				alpha *= 1 - largeAlpha;
+			}
 		}else if(mState == STATE_DEFOCUSING && mLargeTex){
 			long timeToFloat = FloatingRenderer.mSelectedTime  + FloatingRenderer.mFocusDuration - realTime;
 			float floatInterval = timeToFloat / (float)FloatingRenderer.mFocusDuration;
 			
 			largeAlpha = floatInterval;
-			alpha *= 1 - floatInterval;
+			if(aspectDifferent){
+				alpha *= 1 - floatInterval;
+			}
 		}
 		
 		float imageAppliedFadeInterval = getImageAppliedFadeInterval(realTime);
