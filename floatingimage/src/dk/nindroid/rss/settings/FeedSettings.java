@@ -17,6 +17,8 @@ import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -35,6 +37,7 @@ public class FeedSettings extends Activity{
 	Spinner mSorting;
 	TextView mSubDirs;
 	ListView mList;
+	CheckBox mAllSubdirs;
 	int mId;
 	FeedsDbAdapter mDb;
 	
@@ -58,6 +61,7 @@ public class FeedSettings extends Activity{
 		mTitle = (EditText)findViewById(R.id.title);
 		mExtra = (EditText)findViewById(R.id.extra);
 		mSorting = (Spinner)findViewById(R.id.sortOrder);
+		mAllSubdirs = (CheckBox)findViewById(R.id.allSubdirs);
 		
 		if(hideActive){
 			mActive.setVisibility(View.GONE);
@@ -75,6 +79,9 @@ public class FeedSettings extends Activity{
 	    mSorting.setAdapter(adapter);
 	    mSubDirs = (TextView)findViewById(R.id.subdirs);
 	    mList = (ListView)findViewById(android.R.id.list);
+	    mAllSubdirs.setChecked(getSharedPreferences(dk.nindroid.rss.menu.Settings.SHARED_PREFS_NAME, 0).getBoolean("feed_allsub_" + mId, false));
+	    
+	    mAllSubdirs.setOnCheckedChangeListener(new AllSubdirsChanged());
 	    
 	    mDb = new FeedsDbAdapter(this).open();
 		setData();
@@ -88,6 +95,14 @@ public class FeedSettings extends Activity{
 	    }else{
 	    	delete.setOnClickListener(new DeleteClicked());
 	    }
+	}
+	
+	private class AllSubdirsChanged implements OnCheckedChangeListener{
+		@Override
+		public void onCheckedChanged(CompoundButton buttonView,
+				boolean isChecked) {
+			mList.setEnabled(!isChecked);
+		}
 	}
 		
 	void setData(){
@@ -136,6 +151,7 @@ public class FeedSettings extends Activity{
 		
 		int type = c.getInt(iType);
 		if(type == Settings.TYPE_LOCAL){
+			mAllSubdirs.setVisibility(View.VISIBLE);
 			String uri = c.getString(iUri);
 			File f = new File(uri);
 			if(f.exists()){
@@ -204,6 +220,10 @@ public class FeedSettings extends Activity{
 		
 		Editor e = getSharedPreferences(mSharedPreferences, 0).edit();
 		e.putBoolean("feed_" + mId, this.mActive.isChecked());
+		e.commit();
+		
+		e = getSharedPreferences(dk.nindroid.rss.menu.Settings.SHARED_PREFS_NAME, 0).edit();
+		e.putBoolean("feed_allsub_" + mId, this.mAllSubdirs.isChecked());
 		e.commit();
 	}
 	

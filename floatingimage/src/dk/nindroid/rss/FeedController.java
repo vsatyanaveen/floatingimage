@@ -475,6 +475,15 @@ public class FeedController {
 	List<String> getRecurseList(FeedsDbAdapter db, FeedReference feed, File f){
 		List<String> dirs = new ArrayList<String>();
 		File[] allDirs = f.listFiles(new FeedSettings.DirFilter());
+		
+		SharedPreferences sp = mActivity.context().getSharedPreferences(dk.nindroid.rss.menu.Settings.SHARED_PREFS_NAME, 0);
+		if(sp.getBoolean("feed_allsub_" + feed.getId(), false)){
+			for(File dir : allDirs){
+				dirs.add(dir.getName());
+			}
+			return dirs;
+		}
+		
 		if(allDirs != null){
 			Cursor c = db.getSubDirs(feed.getId());
 			List<KeyVal<String, Boolean>> saved = new ArrayList<KeyVal<String,Boolean>>();

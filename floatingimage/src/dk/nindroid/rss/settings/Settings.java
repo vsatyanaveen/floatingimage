@@ -52,7 +52,7 @@ public class Settings {
 
 	private SharedPreferences sp;
 	
-	private String settings;
+	public final String settings;
 	
 	public Settings(String settings){
 		this.settings = settings;
