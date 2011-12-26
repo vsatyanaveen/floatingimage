@@ -478,6 +478,7 @@ public class FeedController {
 		
 		SharedPreferences sp = mActivity.context().getSharedPreferences(dk.nindroid.rss.menu.Settings.SHARED_PREFS_NAME, 0);
 		if(sp.getBoolean("feed_allsub_" + feed.getId(), false)){
+			Log.v("Floating Image", "Reading all sub directories");
 			for(File dir : allDirs){
 				dirs.add(dir.getName());
 			}
@@ -516,6 +517,7 @@ public class FeedController {
 			if(f.getName().charAt(0) == '.') continue; // Drop hidden files.
 			if(f.isDirectory() && level < 20){ // Some high number to avoid any infinite loops...
 				if(recurse != null && recurse.contains(f.getName())){
+					Log.v("Floating Image", "Recursing through " + f.getName());
 					buildImageIndex(images, f, null, level + 1);
 				}
 			}else{

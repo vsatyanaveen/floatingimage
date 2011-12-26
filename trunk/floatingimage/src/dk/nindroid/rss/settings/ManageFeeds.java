@@ -54,6 +54,8 @@ public class ManageFeeds extends PreferenceActivity {
 		
 		mNudity = !getSharedPreferences(settings, 0).getBoolean("nudity", true);
 		
+		
+		
 		this.mHideCheckBoxes = this.getIntent().getExtras().getBoolean(HIDE_CHECKBOXES);
 		this.mAddFeed = this.getIntent().getExtras().getBoolean(ADD_FEED, false);
 		
