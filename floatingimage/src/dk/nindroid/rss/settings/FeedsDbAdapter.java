@@ -179,7 +179,7 @@ public class FeedsDbAdapter {
         initialValues.put(KEY_URI, uri);
         initialValues.put(KEY_TYPE, type);
         initialValues.put(KEY_EXTRA, extras);
-        initialValues.put(KEY_SORTING, 2);
+        initialValues.put(KEY_SORTING, 3); // Reverse date search is default!
         //initialValues.put(KEY_ENABLED, enabled ? 1 : 0);
 
         return mDb.insert(FEEDS_TABLE, null, initialValues);

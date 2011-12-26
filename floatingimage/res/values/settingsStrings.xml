@@ -183,4 +183,7 @@
 	<string name="include_all_subdirs">Include all subdirectories</string>
 	<string name="show_new_feed">Show new feed</string>
 	<string name="select_what_to_show">Select what to show</string>
+	
+	<string name="note">Note:</string>
+	<string name="beware_of_public_feeds">If you choose to watch images from a public feed (Like Flickr explore or the 500px discover feeds) you may be exposed to nudity. These are public community driven image services and as such may contain anything. If this sounds bad, please stay away from public feeds!</string>
 </resources>

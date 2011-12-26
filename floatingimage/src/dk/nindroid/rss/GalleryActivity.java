@@ -57,6 +57,8 @@ public class GalleryActivity extends ListActivity {
 		public void onClick(View v) {
 			Intent intent = new Intent(GalleryActivity.this, ManageFeeds.class);
 			intent.putExtra(ManageFeeds.ADD_FEED, true);
+			intent.putExtra(ManageFeeds.HIDE_CHECKBOXES, true);
+			intent.putExtra(ManageFeeds.SHARED_PREFS_NAME, GallerySettings.SHARED_PREFS_NAME);
 			startActivityForResult(intent, ADD_FEED);
 		}
 	}

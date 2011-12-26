@@ -79,9 +79,9 @@ public class FeedSettings extends Activity{
 	    mSorting.setAdapter(adapter);
 	    mSubDirs = (TextView)findViewById(R.id.subdirs);
 	    mList = (ListView)findViewById(android.R.id.list);
-	    mAllSubdirs.setChecked(getSharedPreferences(dk.nindroid.rss.menu.Settings.SHARED_PREFS_NAME, 0).getBoolean("feed_allsub_" + mId, false));
 	    
 	    mAllSubdirs.setOnCheckedChangeListener(new AllSubdirsChanged());
+	    mAllSubdirs.setChecked(getSharedPreferences(dk.nindroid.rss.menu.Settings.SHARED_PREFS_NAME, 0).getBoolean("feed_allsub_" + mId, false));
 	    
 	    mDb = new FeedsDbAdapter(this).open();
 		setData();
@@ -102,6 +102,15 @@ public class FeedSettings extends Activity{
 		public void onCheckedChanged(CompoundButton buttonView,
 				boolean isChecked) {
 			mList.setEnabled(!isChecked);
+			if(isChecked){
+				for(int i = 0; i < mList.getCount(); ++i){
+					mList.setItemChecked(i, true);
+				}
+			}else{
+				mDb.open();
+				setFileChecksFromDb();
+				mDb.close();
+			}
 		}
 	}
 		
@@ -162,25 +171,29 @@ public class FeedSettings extends Activity{
 					mList.setAdapter(new ArrayAdapter<File>(this, android.R.layout.simple_list_item_multiple_choice, dirs));
 					mList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 					
-					// Load if items are checked
-					Cursor subC = mDb.getSubDirs(mId);
-					int iDir = subC.getColumnIndex(FeedsDbAdapter.KEY_DIR);
-					int iEnabled = subC.getColumnIndex(FeedsDbAdapter.KEY_ENABLED);
-					List<KeyVal<String, Boolean>> saved = new ArrayList<KeyVal<String, Boolean>>();
-					while(subC.moveToNext()){
-						saved.add(new KeyVal<String, Boolean>(subC.getString(iDir), subC.getInt(iEnabled) == 1));
-					}
-					subC.close();
-					for(int i = 0; i < dirs.length; ++i){
-						File d = dirs[i];
-						KeyVal<String, Boolean> kv = find(saved, d.getName());
-						if(kv == null){
-							mList.setItemChecked(i, false);
-						}else{
-							mList.setItemChecked(i, kv.getVal());
-						}
-					}
+					setFileChecksFromDb();
 				}
+			}
+		}
+	}
+	
+	private void setFileChecksFromDb(){
+		// Load if items are checked
+		Cursor subC = mDb.getSubDirs(mId);
+		int iDir = subC.getColumnIndex(FeedsDbAdapter.KEY_DIR);
+		int iEnabled = subC.getColumnIndex(FeedsDbAdapter.KEY_ENABLED);
+		List<KeyVal<String, Boolean>> saved = new ArrayList<KeyVal<String, Boolean>>();
+		while(subC.moveToNext()){
+			saved.add(new KeyVal<String, Boolean>(subC.getString(iDir), subC.getInt(iEnabled) == 1));
+		}
+		subC.close();
+		for(int i = 0; i < mList.getCount(); ++i){
+			File d = (File)mList.getItemAtPosition(i);
+			KeyVal<String, Boolean> kv = find(saved, d.getName());
+			if(kv == null){
+				mList.setItemChecked(i, false);
+			}else{
+				mList.setItemChecked(i, kv.getVal());
 			}
 		}
 	}
