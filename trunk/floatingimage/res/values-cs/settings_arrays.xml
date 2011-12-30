@@ -1,0 +1,185 @@
+<resources>
+	<string-array name="displayModeDescriptions">
+		<item>Žádný</item>
+		<item>Najetí shora</item>
+		<item>Najetí odspoda</item>
+		<item>Prolnutí</item>
+		<item>Fade do černé</item>
+
+		<item>Fade do bílé</item>
+		<item>Náhodný z výše uvedených</item>
+		<item>Plovoucí obrazy</item>
+	</string-array>
+	
+	<string-array name="displayModeValues">
+		<item>Žádný</item>
+		<item>Pohyb zprava doleva</item>
+
+		<item>Pohyb shora dolů</item>
+		<item>Prolnutí</item>
+		<item>Fade do černé</item>
+		<item>Fade do bílé</item>
+		<item>Náhodný</item>
+		<item>Plovoucí obrazy</item>
+
+	</string-array>
+	
+	<string-array name="slideIntervalDescriptions">
+		<item>2 sekundy</item>
+		<item>5 sekund</item>
+		<item>10 sekund</item>
+		<item>30 sekund</item>
+		<item>1 minuta</item>
+
+		<item>2 minuty</item>
+		<item>5 minut</item>
+		<item>10 minut</item>
+		<item>30 minut</item>
+		<item>1 hodina</item>
+		<item>2 hodiny</item>
+
+		<item>6 hodin</item>
+		<item>12 hodin</item>
+		<item>1 den</item>
+		<item>1 týden</item>
+	</string-array>
+	
+	<string-array name="slideIntervalValues">
+		<item>2000</item>
+
+		<item>5000</item>
+		<item>10000</item>
+		<item>30000</item>
+		<item>60000</item>
+		<item>120000</item>
+		<item>300000</item>
+
+		<item>600000</item>
+		<item>1800000</item>
+		<item>3600000</item>
+		<item>7200000</item>
+		<item>21600000</item>
+		<item>43200000</item>
+
+		<item>86400000</item>
+		<item>604800000</item>
+	</string-array>
+	
+	<string-array name="backgroundColorDescriptions">
+		<item>Šedá</item>
+		<item>Černá</item>
+		<item>Ryzí černá</item>
+
+		<item>Bílá</item>
+		<item>Modrá</item>
+		<item>Zelená</item>
+		<item>Červená</item>
+		<item>Žlutá</item>
+		<item>Všechny</item>
+
+	</string-array>
+	
+	<string-array name="backgroundColorValues">
+		<item>0</item>
+		<item>1</item>
+		<item>8</item>
+		<item>2</item>
+		<item>3</item>
+
+		<item>4</item>
+		<item>5</item>
+		<item>6</item>
+		<item>7</item>
+	</string-array>
+	
+	<string-array name="slideSpeedDescriptions">
+		<item>Rychle</item>
+
+		<item>Pomalu</item>
+		<item>Nejpomaleji</item>
+	</string-array>
+	
+	<string-array name="slideSpeedValues">
+		<item>300</item>
+		<item>1000</item>
+		<item>3000</item>
+
+	</string-array>
+	
+	<string-array name="floatingTypeDescriptions">
+		<item>Vpravo</item>
+		<item>Vlevo</item>
+		<item>Dolů</item>
+		<item>Nahoru</item>
+		<item>StarWars</item>
+
+		<item>Stůl</item>
+		<item>Balík</item>
+		<item>Mix</item>
+	</string-array>
+	
+	<string-array name="floatingTypeValues">
+		<item>0</item>
+		<item>1</item>
+
+		<item>2</item>
+		<item>3</item>
+		<item>4</item>
+		<item>5</item>
+		<item>6</item>
+		<item>20</item>
+
+	</string-array>
+	
+	<string-array name="floatingSpeedDescriptions">
+		<item>Nejrychleji</item>
+		<item>Rychle</item>
+		<item>Standard</item>
+		<item>Pomalu</item>
+		<item>Nejpomaleji</item>
+
+	</string-array>
+	
+	<string-array name="floatingSpeedValues">
+		<item>7000</item>
+		<item>15000</item>
+		<item>30000</item>
+		<item>60000</item>
+		<item>250000</item>
+
+	</string-array>
+	
+	<string-array name="forceRotationDescriptions">
+		<item>Bez rotace</item>
+		<item>90 stupňů</item>
+		<item>180 stupňů</item>
+		<item>270 stupňů</item>
+	</string-array>
+
+	
+	<string-array name="forceRotationValues">
+		<item>0</item>
+		<item>90</item>
+		<item>180</item>
+		<item>270</item>
+	</string-array>
+	
+	<string-array name="sortOrderFiles">
+
+		<item>Jméno</item>
+		<item>Jméno zpětně</item>
+		<item>Datum</item>
+		<item>Datum zpětně</item>
+		<item>Náhodně</item>
+	</string-array>
+
+	
+	<string-array name="sortOrderOnline">
+		<item>Jméno</item>
+		<item>Jméno zpětně</item>
+		<item>Datum</item>
+		<item>Datum zpětně</item>
+		<item>Náhodně</item>
+
+	</string-array>
+</resources>

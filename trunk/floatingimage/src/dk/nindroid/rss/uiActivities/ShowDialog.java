@@ -2,6 +2,7 @@ package dk.nindroid.rss.uiActivities;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.util.Log;
 
 public class ShowDialog  implements Runnable {
 	Context mContext;
@@ -14,7 +15,11 @@ public class ShowDialog  implements Runnable {
 	
 	@Override
 	public void run() {
-		mDialogBuilder.create().show();
+		try{
+			mDialogBuilder.create().show();
+		}catch(Exception e){
+			Log.w("Floating Image", "Could not show dialog", e);
+		}
 	}
 
 }
