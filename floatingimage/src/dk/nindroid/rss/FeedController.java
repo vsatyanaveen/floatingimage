@@ -475,7 +475,9 @@ public class FeedController {
 	List<String> getRecurseList(FeedsDbAdapter db, FeedReference feed, File f){
 		List<String> dirs = new ArrayList<String>();
 		File[] allDirs = f.listFiles(new FeedSettings.DirFilter());
-		
+		if(allDirs == null){
+			return null;
+		}
 		SharedPreferences sp = mActivity.context().getSharedPreferences(dk.nindroid.rss.menu.Settings.SHARED_PREFS_NAME, 0);
 		if(sp.getBoolean("feed_allsub_" + feed.getId(), false)){
 			Log.v("Floating Image", "Reading all sub directories");

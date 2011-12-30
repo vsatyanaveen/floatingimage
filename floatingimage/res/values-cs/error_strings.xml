@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_showing_fetching_album_list">Chyba přenosu listu alb, klikněte pro nový pokus.</string>
+    <string name="internal_error">Interní chyba, kontaktujte prosím vývojáře.</string>
+    <string name="error_fetching_albums">Chyba přenosu alb, zkuste to prosím znovu.</string>
+    <string name="error_fetching_friends">Chyba přenosu přátel, zkuste to prosím znovu.</string>
+    <string name="error_getting_flickr_user">Chyba přihlášení, zkuste to prosím znovu.</string>
+    <string name="authorization_failed">Chyba při autorizaci... Zkuste to prosím znovu!</string>
+    <string name="cannot_read_feed">Nemohu načíst kanál, pravděpodobně je příliš velký.</string>
+    <string name="device_does_not_support_live_wallpapers">Omlouváme se, ale vaše zařízení nejspíše nepodporuje Živá Pozadí ... :(</string>
+</resources>

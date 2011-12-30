@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Floating Image</string>
+    <string name="about">O aplikaci</string>
+    <string name="authorizing">Autorizace</string>
+    <string name="aboutSummary">Pár slov o autorovi</string>
+	<string name="dataFolder">/floatingImage</string>
+	<string name="exploreFolder">/.exploreCache</string>
+	<string name="fullscreen">Fullscreen</string>
+	<string name="show_details">Zobrazit detaily</string>
+	<string name="show">Zobrazit</string>
+	<string name="show_folder">Zobrazit adresář</string>
+	<string name="show_flickr">Zobrazit Flickr</string>
+	<string name="show_flickr_user">Zobrazit uživatele Flickr</string>
+	<string name="search_flickr">Vyhledat Flickr</string>
+	<string name="cancel_show">Zrušit zobrazení</string>
+	<string name="go_to_source">Přejít ke zdroji</string>
+	<string name="save_image">Uložit obraz</string>
+	<string name="set_as_background">Nastavit jako pozadí</string>
+	<string name="user_agent">Floating image/Android</string>
+	<string name="empty_feed">V kanálu nebyly nalezeny obrazy</string>
+	<string name="authorize">Přihlášení</string>
+	<string name="unauthorize">Odhlášení</string>
+	<string name="please_wait">Probíhá příprava... Prosím strpení</string>
+	<string name="share_subject">Podívejte, obrázek!</string>
+	<string name="share_url">Sdílet URL obrazu</string>
+	<string name="share_image">Sdílet obraz</string>
+	<string name="delete_image">Smazat obraz</string>
+	<string name="delete_image_are_you_sure">Skutečně chcete obraz smazat?</string>
+	<string name="loading_feeds">Nahrávám kanály</string>
+	<string name="pause">Pauza</string>
+	<string name="resume">Pokračovat</string>
+	<string name="stream">Kanál</string>
+	
+	<string name="no_images_showing">Nemohu najít žádné obrazy.</string>
+	<string name="no_images_showing_stay">To se mi líbí</string>
+	<string name="no_images_showing_manage">Najít obrazy</string>
+</resources>

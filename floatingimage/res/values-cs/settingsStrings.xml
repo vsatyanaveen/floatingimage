@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="cancel">Zrušit</string>
+	<string name="settings">Nastavení</string>
+	<string name="dismiss">Zapomenout</string>
+	<string name="feeds">Kanály</string>
+	<!--  <string name="manageFeeds">Manage feeds</string> 
+	<string name="manageFeedsSummary">Choose which images to show</string> -->
+	<string name="manageFeeds">Upravit kanály</string> 
+	<string name="manageFeedsSummary">Nastavení zdrojových složek.</string>
+
+	
+	<string name="nudity">Zakázat nahotu</string>
+	<string name="nudityWallpaper">Zakázat nahotu v pozadích</string>
+	<string name="nuditySummary">Zobrazení nahoty ve veřejných kanálech nelze plně zabránít!</string>
+	
+	<string name="display">Displej</string>
+	<string name="searching_for_user">Hledám uživatele</string>
+	<string name="floating">Plovoucí obrazy</string>
+
+	<string name="rotateImages">Rotavat obrazy</string>
+	<string name="rotateImagesSummary">Naklonit obrazy pro celkové zlepšení efektu.</string>
+	<string name="fullscreenBlack">Fade do černé v případě vyplnění obrazovky</string>
+	<string name="fullscreenBlackSummary">Fade pozadí do černé - pro fullscreen mód</string>
+	<string name="tsunami">Tsunami</string>
+	<string name="tsunamiSummary">Vyplnit displej obrazy. UPOZORNĚNÍ: Může způsobit nestabilitu!</string>
+
+	<string name="blackEdges">Černé orámování</string>
+	<string name="blackEdgesSummary">Nastaví černý rámeček kolem obrazů. Zakažte v případě snížení výkonu.</string>
+	<string name="singleClickDeselect">Jeden klik pro zrušení obrazu</string>
+	<string name="singleClickDeselectSummary">Pokud je tato funkce zapnuta, menu vyvolává dvojtý klik.</string>
+	<string name="imageDecorations">Dekoraze obrazů</string>
+	<string name="imageDecorationsSummary">Zobrazuje stín a záři za obrazy.</string>
+
+	
+	<string name="floatingType">Pohyb</string>
+	<string name="floatingTypeSummary">Jak se mají obrazy pohybovat.</string>
+	<string name="floatingTypeTitle">Plovoucí obrazy</string>
+	<string name="floatingSpeed">Rychlost</string>
+	<string name="floatingSpeedSummary">Jak rychle se mají obrazy pohybovat.</string>
+	<string name="floatingSpeedTitle">Rychlost plovoucích obrazů.</string>
+
+	<string name="shuffle">Náhodný mód</string>
+	<string name="shuffleSummary">Zobrazí obrazy v náhodném pořadí.</string>
+	<string name="modeTitle">Zvolte mód zobrazení.</string>
+	<string name="mode">Mód zobrazení</string>
+	<string name="modeSummary">Jak mají být obrazy zobrazeny.</string>
+	<string name="slideshow">Slideshow</string>
+
+	<string name="slideInterval">Interval Slideshow</string>
+	<string name="slideIntervalSummary">Zvolte čas pro zobrazení obrazu.</string>
+	<string name="slideIntervalTitle">Zvolte interval Slideshow.</string>
+	<string name="slideSpeed">Rychlost přechodů Slideshow</string>
+	<string name="slideSpeedSummary">Zvolte rychlost přechodů pro Slideshow.</string>
+	<string name="slideSpeedTitle">Zvolte rychlost přechodu</string>
+
+	<string name="backgroundColor">Barva pozadí</string>
+	<string name="backgroundColorSummary">Barva za plovoucími obrazy.</string>
+	<string name="backgroundColorTitle">Zvolte barvu pozadí</string>
+	<string name="liveWallpaperLowFramerate">Redukce FPS pro Živé Pozadí</string>
+	<string name="liveWallpaperLowFramerateSummary">Nastaví 20FPS pro snížení spotřeby.</string>
+	<string name="forceRotation">Vynucená rotace displeje</string>
+
+	<string name="forceRotationSummary">Nastavte rotaci displeje</string>
+	<string name="forceRotationTitle">Rotace displeje</string>
+	<string name="useHighResThumbs">Použít vysokou kvalitu zobrazení.</string>
+	<string name="useHighResThumbsSummary">EXPERIMENTÁLNÍ: Může způsobit pád telefonu! Pouze pro High-End zařízení!</string>
+	<string name="feedMenuAdd">Přidat nový kanál</string>
+	<string name="feedMenuAddSummary">Přidat nový zdroj obrazů.</string>
+
+	<string name="feedMenuRemove">Odstranit kanál</string>
+	<string name="selectFolder">Zvolit složku</string>
+	<string name="selectCurrentFolder">Zvolit stávající adresář</string>
+	<string name="showHiddenFiles">Přepnout skryté soubory</string>
+	<string name="signingIn">Přihlášení</string>
+	<string name="flickr">Flickr</string>
+
+	<string name="flickrShowStream">Ukázat Stream</string>
+	<string name="flickrShowStreamUsername">Uveďte uživatelské jméno pro Stream</string>
+	<string name="flickrShowStreamBadUsername">Promiňte, uživatel Flickr nebyl nalezen.</string>
+	<string name="flickrShowStreamNoUsername">Vyplňte prosím uživatelské jméno.</string>
+	<string name="flickrSearch">Vyhledat tagy</string>
+	<string name="flickrSearchTerm">Vyhledávání, údaje oddělujte čárkou (,)</string>
+
+	<string name="flickrSearchNoText">Zvolte údaj pro vyhledávání, prosím.</string>
+	<string name="flickrMyPhotos">Mé fotografie</string>
+	<string name="flickrMyAlbums">Má alba</string>
+	<string name="flickrMyFavorites">Oblíbené</string>
+	<string name="flickrMyContactsPhotos">Fotografie dle mých kontaktů</string>
+	<string name="flickrExplore">Prozkoumat</string>
+
+	<string name="flickrExploreSummary">Dnešních 500 nejzajímavějších</string>
+	<string name="flickrAllContactsStreams">Všechny kontakty\' kanály</string>
+	<string name="flickr_search">Vyhledávání: </string>
+	<string name="picasa">Picasa</string>
+	<string name="picasaShowStream">Ukázat kanál</string>
+	<string name="picasaShowUserUsername">Zvolte prosím jméno požadovaného uživatele.</string>
+
+	<string name="picasaShowStreamBadUsername">Sorry, Picasa uživatel nenalezen.</string>
+	<string name="picasaShowStreamNoUsername">Vyplňte prosím jméno</string>
+	<string name="picasaShowAlbums">Zobrazit alba</string>
+	<string name="picasaShowUser">Zobrazit uživatele</string>
+	<string name="picasaShowMyStream">Zobrazit mé kanály</string>
+	<string name="picasaShowMyAlbums">Zobrazit má alba</string>
+
+	<string name="picasaSearch">Vyhledat klíčová slova</string>
+	<string name="picasaSearchTerm">Vyhledávání, údaje oddělujte čárkou (,)</string>
+	<string name="picasaSearchNoText">Zadejte údaj k vyhledání</string>
+	<string name="local">Telefon</string>
+	<string name="facebook">Facebook</string>
+	<string name="facebookPhotosOfMe">Zobrazit fotografie mé osoby</string>
+
+	<string name="facebookMyAlbums">Má alba</string>
+	<string name="facebookFriends">Přátelé</string>
+	<string name="facebookPhotosOfFriend">Zobrazit fotografie</string>
+	<string name="facebookFriendsAlbums">Alba podle</string>
+	<string name="facebookShowAlbum">Zobrazit</string>
+	<string name="photobucket">Photobucket</string>
+
+	<string name="photobucketShowUser">Zobrazit uživatele</string>
+	<string name="photobucketShowUserBadUsername">Promiňte, Photobucket uživatel nenalezen.</string>
+	<string name="photobucketShowRecent">Zobrazit nedávné fotografie</string>
+	<string name="photobucketShowFollowing">Zobrazit následující fotografie</string>
+	<string name="fivehundredpx">500px</string>
+	<string name="fivehundredpxDiscover">Prozkoumat nové fotografie</string>
+
+	<string name="fivehundredpxCategories">Kategorie</string>
+	<string name="fivehundredpxShowUser">Zobrazit uživatele</string>
+	<string name="fivehundredpxTypeUsername">Vložit uživatele</string>
+	<string name="fivehundredpxTypeSearchTerm">Vložit údaj pro hledání</string>
+	<string name="fivehundredpxShowing">Zobrazit</string>
+	<string name="fivehundredpxShowFavorites">Zobrazit oblíbené</string>
+
+	<string name="fivehundredpxShowingUsersFavorites">Zobrazit %s oblíbené(-ných)</string>
+	<string name="fivehundredpxShowFriends">Zobrazit přátele</string>
+	<string name="fivehundredpxShowingUsersFriends">Zobrazit %s přátele(-tel)</string>
+	<string name="fivehundredpxSearch">Vyhledat</string>
+	<string name="fivehundredpxPopular">Populární</string>
+	<string name="fivehundredpxPopularSummary">Fotografie s hodnocením nad 80</string>
+
+	<string name="fivehundredpxUpcoming">Připravované</string>
+	<string name="fivehundredpxUpcomingSummary">Fotografie s hodnocením nad 60</string>
+	<string name="fivehundredpxEditors">Tipy autora</string>
+	<string name="fivehundredpxEditorsSummary">Zvolit dle 500px autorů</string>
+	<string name="fivehundredpxToday">Dnešní fotografie</string>
+	<string name="fivehundredpxTodaySummary">Fotografie od půlnoci</string>
+
+	<string name="fivehundredpxYesterday">Včerejší fotografie</string>
+	<string name="fivehundredpxYesterdaySummary">Fotografie nahrané včera</string>
+	<string name="fivehundredpxWeek">Fotografie tohoto týdne</string>
+	<string name="fivehundredpxWeekSummary">Fotografie za posledních 7 dní</string>
+	<string name="fivehundredpxCategoryAbstract">Abstraktní</string>
+	<string name="fivehundredpxCategoryAnimals">Zvířata</string>
+
+	<string name="fivehundredpxCategoryBlackAndWhite">Černobílé</string>
+	<string name="fivehundredpxCategoryCelebrities">Celebrity</string>
+	<string name="fivehundredpxCategoryCityAndArchitecture">Město a architektura</string>
+	<string name="fivehundredpxCategoryCommercial">Komerční</string>
+	<string name="fivehundredpxCategoryConcert">Koncert</string>
+	<string name="fivehundredpxCategoryFamily">Rodina</string>
+
+	<string name="fivehundredpxCategoryFashion">Móda</string>
+	<string name="fivehundredpxCategoryFilm">Film</string>
+	<string name="fivehundredpxCategoryFineArt">Umění</string>
+	<string name="fivehundredpxCategoryFood">Potraviny</string>
+	<string name="fivehundredpxCategoryJournalism">Žurnál</string>
+	<string name="fivehundredpxCategoryLandscapes">Krajina</string>
+
+	<string name="fivehundredpxCategoryMacro">Macro</string>
+	<string name="fivehundredpxCategoryNature">Příroda</string>
+	<string name="fivehundredpxCategoryNude">Nahota</string>
+	<string name="fivehundredpxCategoryPeople">Lidé</string>
+	<string name="fivehundredpxCategoryPerformingArts">Umělci</string>
+	<string name="fivehundredpxCategorySport">Sport</string>
+
+	<string name="fivehundredpxCategoryStillLife">Momentky</string>
+	<string name="fivehundredpxCategoryStreet">Ulice</string>
+	<string name="fivehundredpxCategoryTravel">Cestování</string>
+	<string name="fivehundredpxCategoryUnderwater">Vodní svět</string>
+	<string name="fivehundredpxEmptySearch">Zadejte prosím údaj pro vyhledávání</string>
+	<string name="fivehundredpxVerifyingUser">Ověřuji uživatele</string>
+
+	<string name="fivehundredpxUserNotFound">Uživatel nenalezen</string>
+	
+	<string name="loadingAlbums">Nahrávám alba…</string>
+	<string name="loadingFriends">Nahrávám přátele…</string>
+	<string name="albumBy">Alba dle</string>
+	<string name="me">Já</string>
+	<string name="cameraPictures">Fotografie z foťáku</string>
+
+	<string name="moreCameraPictures">Další fotografie z foťáku</string>
+	<string name="Downloads">Stažené</string>
+	<string name="misc">Ostatní</string>
+	<string name="LiveWallpapers">Živá Pozadí</string>
+	<string name="LiveWallpapersSummary">Zvolte Floating Image v Živých Pozadích.</string>
+	
+	<string name="feedSortOrder">Seřadit obrazy podle</string>
+
+	<string name="feedActive">Aktivní</string>
+	<string name="feedName">Jméno</string>
+	<string name="feedSubtitle">Podtitul</string>
+	<string name="add_this_directory">Zvolte %s</string>
+	
+	<plurals name="n_images">
+		<item quantity="one">Jeden obraz</item>
+
+		<item quantity="other">%d obrazů</item>
+	</plurals>
+	<string name="delete">Smazat</string>
+	<string name="include_subdirs">Zahrnout obrazy z podadresářů</string>
+	<string name="include_all_subdirs">Zahrnout všechny podadresáře</string>
+	<string name="show_new_feed">Zobrazit nové kanály</string>
+
+	<string name="select_what_to_show">Zvolte položky k zobrazení</string>
+	
+	<string name="note">Poznámka:</string>
+	<string name="beware_of_public_feeds">Pokud zvolíte obrazy z veřejného kanálu (jako Flickr nebo 500px kanálů), může být vyobrazena i nahota. Tyto kanály jsou řízeny veřejností, a jako takové mohou obsahovat cokoliv. Pokud si toto nepřejete, vyhýbejte se prosím veřejným kanálům!</string>
+</resources>
