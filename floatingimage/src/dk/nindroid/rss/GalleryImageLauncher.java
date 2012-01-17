@@ -8,6 +8,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import dk.nindroid.rss.data.LocalImage;
@@ -19,11 +20,27 @@ public class GalleryImageLauncher extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		File f;
-		try {
-			f = new File(new URI(getIntent().getData().toString()));
-		} catch (URISyntaxException e) {
-			Log.e("Floating Image", "Cannot read uri", e);
+		Uri uri = getIntent().getData();
+		File f = null;
+		if(uri.getScheme().equalsIgnoreCase("file")){
+			try {
+				f = new File(new URI(getIntent().getData().toString()));
+			} catch (URISyntaxException e) {
+				Log.e("Floating Image", "Cannot read uri", e);
+				this.finish();
+				return;
+			}
+		}else if(uri.getScheme().equalsIgnoreCase("content")){
+			Cursor cursor = getContentResolver().query(uri, new String[]{android.provider.MediaStore.Images.ImageColumns.DATA}, null, null, null);
+			if(cursor.moveToFirst())
+			{
+			    String pathUri = Uri.parse(cursor.getString(0)).getPath();
+			    f = new File(pathUri);
+			}
+			cursor.close();
+		}
+		
+		if(f == null){
 			this.finish();
 			return;
 		}

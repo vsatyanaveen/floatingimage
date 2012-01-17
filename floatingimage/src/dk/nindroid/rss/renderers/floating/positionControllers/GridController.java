@@ -3,16 +3,16 @@ package dk.nindroid.rss.renderers.floating.positionControllers;
 
 public abstract class GridController extends PositionController {
 	int mImageId;
-	int mNoImages;
+	FeedDataProvider mDataProvider;
 	
-	public GridController(int imageId, int noImages){
+	public GridController(int imageId, FeedDataProvider dataProvider){
 		this.mImageId = imageId;
-		this.mNoImages = noImages;
+		this.mDataProvider = dataProvider;
 	}
 	
 	@Override
 	public float adjustInterval(float interval){
-		float spacing = 1.0f / (mNoImages / 3.0f * 2);
+		float spacing = 1.0f / (mDataProvider.getNumberOfImages() / 3.0f * 2);
 		if(mImageId % 3 == 0){
 			// Middle
 			int row = mImageId * 2 / 3;

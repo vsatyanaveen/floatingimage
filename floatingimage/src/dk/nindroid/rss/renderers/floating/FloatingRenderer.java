@@ -33,9 +33,10 @@ import dk.nindroid.rss.renderers.floating.positionControllers.Mixup;
 import dk.nindroid.rss.renderers.floating.positionControllers.Stack;
 import dk.nindroid.rss.renderers.floating.positionControllers.StarSpeed;
 import dk.nindroid.rss.renderers.floating.positionControllers.TableTop;
+import dk.nindroid.rss.renderers.floating.positionControllers.PositionController.FeedDataProvider;
 import dk.nindroid.rss.renderers.osd.Play.EventHandler;
 
-public class FloatingRenderer extends Renderer implements EventSubscriber, PrepareCallback, EventHandler, Image.ImageDataProvider{
+public class FloatingRenderer extends Renderer implements EventSubscriber, PrepareCallback, EventHandler, Image.ImageDataProvider, FeedDataProvider{
 	public static final long 	mFocusDuration = 300;
 	public static long			mSelectedTime;
 	public static final float  	mFocusX = 0.0f;
@@ -173,47 +174,47 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 			switch(type){
 			case FLOATING_TYPE_LEFT:
 				for(int i = 0; i < mImgs.length; ++i){
-					mImgs[i].setPositionController(new FloatLeft(mActivity, mDisplay, i, mImgs.length));
+					mImgs[i].setPositionController(new FloatLeft(mActivity, mDisplay, i, this));
 				}
 			break;
 			case FLOATING_TYPE_RIGHT:
 				for(int i = 0; i < mImgs.length; ++i){
-					mImgs[i].setPositionController(new FloatRight(mActivity, mDisplay, i, mImgs.length));
+					mImgs[i].setPositionController(new FloatRight(mActivity, mDisplay, i, this));
 				}
 			break;
 			case FLOATING_TYPE_DOWN:
 				for(int i = 0; i < mImgs.length; ++i){
-					mImgs[i].setPositionController(new FloatDown(mActivity, mDisplay, i, mImgs.length));
+					mImgs[i].setPositionController(new FloatDown(mActivity, mDisplay, i, this));
 				}
 				break;
 			case FLOATING_TYPE_UP:
 				for(int i = 0; i < mImgs.length; ++i){
-					mImgs[i].setPositionController(new FloatUp(mActivity, mDisplay, i, mImgs.length));
+					mImgs[i].setPositionController(new FloatUp(mActivity, mDisplay, i, this));
 				}
 				break;
 			case FLOATING_TYPE_STARSPEED:
 				for(int i = 0; i < mImgs.length; ++i){
-					mImgs[i].setPositionController(new StarSpeed(mActivity, mDisplay, i, mImgs.length));
+					mImgs[i].setPositionController(new StarSpeed(mActivity, mDisplay, i, this));
 				}
 				break;
 			case FLOATING_TYPE_TABLETOP:
 				for(int i = 0; i < mImgs.length; ++i){
-					mImgs[i].setPositionController(new TableTop(mActivity, mDisplay, i, mImgs.length));
+					mImgs[i].setPositionController(new TableTop(mActivity, mDisplay, i, this));
 				}
 				break;
 			case FLOATING_TYPE_STACK:
 				for(int i = 0; i < mImgs.length; ++i){
-					mImgs[i].setPositionController(new Stack(mActivity, mDisplay, i, mImgs.length));
+					mImgs[i].setPositionController(new Stack(mActivity, mDisplay, i, this));
 				}
 				break;
 			case FLOATING_TYPE_MIXUP:
 				for(int i = 0; i < mImgs.length; ++i){
-					mImgs[i].setPositionController(new Mixup(mActivity, mDisplay, this, i, mImgs.length));
+					mImgs[i].setPositionController(new Mixup(mActivity, mDisplay, this, i, this));
 				}
 				break;
 			case FLOATING_TYPE_GALLERY:
 				for(int i = 0; i < mImgs.length; ++i){
-					mImgs[i].setPositionController(new Gallery(mActivity, mDisplay, i, mImgs.length));
+					mImgs[i].setPositionController(new Gallery(mActivity, mDisplay, i, this));
 				}
 				break;
 			}
@@ -826,5 +827,10 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 	public ImageReference getImageReference(int id, int rotations) {
 		long imageNumber = mImgs.length * (long)rotations + id;
 		return mFeedController.getImageReference(imageNumber);
+	}
+
+	@Override
+	public int getNumberOfImages() {
+		return mImgs.length;
 	}
 }

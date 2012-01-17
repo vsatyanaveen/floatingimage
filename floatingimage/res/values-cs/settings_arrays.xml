@@ -12,16 +12,14 @@
 	</string-array>
 	
 	<string-array name="displayModeValues">
-		<item>Žádný</item>
-		<item>Pohyb zprava doleva</item>
-
-		<item>Pohyb shora dolů</item>
-		<item>Prolnutí</item>
-		<item>Fade do černé</item>
-		<item>Fade do bílé</item>
-		<item>Náhodný</item>
-		<item>Plovoucí obrazy</item>
-
+		<item>none</item>
+		<item>slideRightToLeft</item>
+		<item>SlideTopToBottom</item>
+		<item>crossFade</item>
+		<item>fadeToBlack</item>
+		<item>fadeToWhite</item>
+		<item>random</item>
+		<item>floatingImages</item>
 	</string-array>
 	
 	<string-array name="slideIntervalDescriptions">
