@@ -26,8 +26,8 @@ public class FloatDown extends GridController {
 	private final static Vec3f ROTATION = new Vec3f(0, 0, 1);
 	
 	
-	public FloatDown(MainActivity activity, Display display, int image, int noImages){
-		super(image, noImages);
+	public FloatDown(MainActivity activity, Display display, int image, FeedDataProvider dataProvider){
+		super(image, dataProvider);
 		mRand = new Random(System.currentTimeMillis() + image);
 		this.mDisplay = display;
 		this.mActivity = activity;

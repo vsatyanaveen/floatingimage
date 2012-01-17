@@ -18,11 +18,11 @@ public class Gallery extends PositionController {
 	final float mSpacing;
 	final int mImageId;
 
-	private final int mNoImages;
+	FeedDataProvider mDataProvider;
 	
-	public Gallery(MainActivity activity, Display display, int image, int noImages){
-		mSpacing = 1.0f / (noImages / 3.0f);
-		this.mNoImages = noImages;
+	public Gallery(MainActivity activity, Display display, int image, FeedDataProvider dataProvider){
+		mSpacing = 1.0f / (dataProvider.getNumberOfImages() / 3.0f);
+		this.mDataProvider = dataProvider;
 		this.mImageId = image;
 		this.mDisplay = display;
 		this.mActivity = activity;
@@ -84,7 +84,7 @@ public class Gallery extends PositionController {
 
 	@Override
 	public float adjustInterval(float interval) {
-		float spacing = 1.0f / (mNoImages / 3.0f);
+		float spacing = 1.0f / (mDataProvider.getNumberOfImages() / 3.0f);
 		int row = mImageId / 3;
 		return (interval - spacing * row + 1) % 1;
 	}

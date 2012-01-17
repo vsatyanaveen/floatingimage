@@ -90,6 +90,7 @@ public class DirectoryBrowser extends SourceFragment implements OnTouchListener,
 	
 	private int countPictures(String[] files){
 		int count = 0;
+		if(files == null) return 0;
 		for(String file : files){
 			if(FeedController.isImage(file)){
 				++count;
@@ -126,8 +127,10 @@ public class DirectoryBrowser extends SourceFragment implements OnTouchListener,
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo menuInfo) {
 		selected = ((AdapterContextMenuInfo)menuInfo).position - 2;
-		super.onCreateContextMenu(menu, v, menuInfo);
-		menu.add(0, SELECT_ID, 0, R.string.selectFolder);
+		if(selected >= 0){
+			super.onCreateContextMenu(menu, v, menuInfo);
+			menu.add(0, SELECT_ID, 0, R.string.selectFolder);
+		}
 	}
 	
 	@Override

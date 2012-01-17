@@ -30,8 +30,8 @@ public class FloatLeft extends GridController {
 		return true;
 	}	
 	
-	public FloatLeft(MainActivity activity, Display display, int image, int noImages){
-		super(image, noImages);
+	public FloatLeft(MainActivity activity, Display display, int image, FeedDataProvider dataProvider){
+		super(image, dataProvider);
 		mRand = new Random(System.currentTimeMillis() + image);
 		this.mDisplay = display;
 		this.mActivity = activity;

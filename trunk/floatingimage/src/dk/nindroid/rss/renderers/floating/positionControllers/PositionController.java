@@ -22,4 +22,7 @@ public abstract class PositionController {
 	public abstract float getTimeAdjustment(float speedX, float speedY);
 	public abstract void getGlobalOffset(float x, float y, Vec3f out);
 	public abstract float adjustInterval(float interval);
+	public interface FeedDataProvider{
+		int getNumberOfImages();
+	}
 }

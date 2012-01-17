@@ -925,16 +925,10 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 	
 	public void transform(float centerX, float centerY, float x, float y, float rotate, float scale) {
 		if(this.mState == STATE_FOCUSED){
-			float invScale = 1.0f / mInitialScale;
-			if(scale < invScale * 1.01f){
-				this.mScale = invScale;
-				return;
-			}else{
-				this.mScale = scale; // Avoid focusing on a single pixel, that's just silly!
-				x = x + centerX * (1.0f - scale);
-				y = y + centerY * (1.0f - scale);
-				this.move(x, y);
-			}
+			this.mScale = scale; // Avoid focusing on a single pixel, that's just silly!
+			x = x + centerX * (1.0f - scale);
+			y = y + centerY * (1.0f - scale);
+			this.move(x, y);
 			this.mRotate = rotate;
 		}
 	}
@@ -1007,6 +1001,9 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 		if(!transforming && mScale * mInitialScale > 5.0f){
 			float diff = (mScale * mInitialScale - 5.0f);
 			mScale -= diff / (2.f * mInitialScale);
+		}else if(!transforming && mScale * mInitialScale < 1.0f){
+			float diff = (1.0f - mScale * mInitialScale);
+			mScale += diff / (2.f * mInitialScale);
 		}
 	}
 	
@@ -1086,8 +1083,8 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 		if(totalTime > mActivity.getSettings().floatingTraversal * mRotations && !isInRewind){
         	reJitter();
         	depthChanged = true;
-        	//Log.v("Floating Image", "Getting new texture - forward!");
         	++mRotations;
+        	Log.v("Floating Image", "Getting new texture - forward! " + mRotations);
         	resetTexture(true);
         }
 		// Read last texture (Rewind)

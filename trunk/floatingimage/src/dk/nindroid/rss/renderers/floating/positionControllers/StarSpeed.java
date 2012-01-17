@@ -22,8 +22,8 @@ public class StarSpeed extends GridController {
 	private final static Vec3f ROTATION = new Vec3f(1, 0, 0);
 	
 	
-	public StarSpeed(MainActivity activity, Display display, int image, int noImages){
-		super(image, noImages);
+	public StarSpeed(MainActivity activity, Display display, int image, FeedDataProvider dataProvider){
+		super(image, dataProvider);
 		mRand = new Random(System.currentTimeMillis() + image);
 		this.mDisplay = display;
 		this.mActivity = activity;

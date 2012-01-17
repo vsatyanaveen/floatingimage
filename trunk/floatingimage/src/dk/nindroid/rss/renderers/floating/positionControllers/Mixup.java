@@ -19,7 +19,7 @@ public class Mixup extends PositionController {
 	Rotation tmpRot1, tmpRot2;
 	
 	
-	public Mixup(MainActivity activity, Display display, FloatingRenderer renderer, int image, int noImages){
+	public Mixup(MainActivity activity, Display display, FloatingRenderer renderer, int image, FeedDataProvider dataProvider){
 		this.imageId = image;
 		this.beginTime = System.currentTimeMillis();
 		this.renderer = renderer;
@@ -28,11 +28,11 @@ public class Mixup extends PositionController {
 		tmpRot1 = new Rotation();
 		tmpRot2 = new Rotation();
 		controllers = new ArrayList<PositionController>();
-		controllers.add(new FloatLeft(activity, display, image, noImages));
-		controllers.add(new StarSpeed(activity, display, image, noImages));
-		controllers.add(new TableTop(activity, display, image, noImages));
-		controllers.add(new FloatDown(activity, display, image, noImages));
-		controllers.add(new Stack(activity, display, image, noImages));
+		controllers.add(new FloatLeft(activity, display, image, dataProvider));
+		controllers.add(new StarSpeed(activity, display, image, dataProvider));
+		controllers.add(new TableTop(activity, display, image, dataProvider));
+		controllers.add(new FloatDown(activity, display, image, dataProvider));
+		controllers.add(new Stack(activity, display, image, dataProvider));
 	}
 	
 	private static final long INTERVAL = 120000;
