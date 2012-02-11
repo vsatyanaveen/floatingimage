@@ -50,6 +50,7 @@ public class InfoPainter {
 	}
 	
 	protected void drawTitle(Canvas canvas, int textWidth){
+		if(mTitle == null) return;	
 		String title1 = mTitle;
 		int title1Width;
 		String title2 = "";

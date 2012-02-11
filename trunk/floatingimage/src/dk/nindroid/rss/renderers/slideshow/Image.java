@@ -72,7 +72,7 @@ public class Image implements ImagePlane {
 	public Image(Display display, MainActivity activity){
 		this.mDisplay = display;
 		this.mActivity = activity;
-		mTextureSelector = new TextureSelector(display, mActivity.getSettings().bitmapConfig);
+		mTextureSelector = new TextureSelector(display, mActivity.getSettings().bitmapConfig, activity);
 		ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
         tbb.order(ByteOrder.nativeOrder());
         mTexBuffer = tbb.asFloatBuffer();

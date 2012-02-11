@@ -243,6 +243,8 @@ public class GalleryActivity extends ListActivity {
 				return R.drawable.photobucket_icon;
 			case Settings.TYPE_FIVEHUNDREDPX:
 				return R.drawable.fivehundredpx_icon;
+			case Settings.TYPE_RSS:
+				return R.drawable.rss_icon;
 			}
 			return R.drawable.phone_icon;
 		}

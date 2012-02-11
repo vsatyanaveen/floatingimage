@@ -43,6 +43,7 @@ public abstract class XMLParser extends DefaultHandler implements FeedParser {
 		}
 		return list;
 	}
+
 	protected String extendURL(String url, Context context){return url;}
 	protected abstract List<ImageReference> getData();
 	

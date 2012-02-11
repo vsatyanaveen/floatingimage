@@ -89,6 +89,7 @@ public class ManageFeeds extends PreferenceActivity {
 		List<Feed> picasa = data.get(Settings.TYPE_PICASA);
 		List<Feed> photobucket = data.get(Settings.TYPE_PHOTOBUCKET);
 		List<Feed> fivehundredpx = data.get(Settings.TYPE_FIVEHUNDREDPX);
+		List<Feed> rss = data.get(Settings.TYPE_RSS);
 		
 		if(local.size() != 0){
 			Bitmap bmp = readBitmap(R.drawable.phone_icon);
@@ -162,6 +163,18 @@ public class ManageFeeds extends PreferenceActivity {
 			}
 		}
 		
+		if(rss.size() != 0){
+			Bitmap bmp = readBitmap(R.drawable.rss_icon);
+			PreferenceCategory rssCat = new PreferenceCategory(this);
+			mRowList.add(null);
+			rssCat.setTitle("RSS");
+			root.addPreference(rssCat);
+			for(Feed f : rss){
+				rssCat.addPreference(createCheckbox(f, bmp));
+				mRowList.add(f);
+			}
+		}
+		
 		PreferenceCategory newCat = new PreferenceCategory(this);
 		newCat.setTitle("");
 		root.addPreference(newCat);
@@ -203,6 +216,7 @@ public class ManageFeeds extends PreferenceActivity {
 		data.put(Settings.TYPE_PICASA, new ArrayList<Feed>());
 		data.put(Settings.TYPE_PHOTOBUCKET, new ArrayList<Feed>());
 		data.put(Settings.TYPE_FIVEHUNDREDPX, new ArrayList<Feed>());
+		data.put(Settings.TYPE_RSS, new ArrayList<Feed>());
 		int idi = c.getColumnIndex(FeedsDbAdapter.KEY_ROWID);
 		int typei = c.getColumnIndex(FeedsDbAdapter.KEY_TYPE);
 		int namei = c.getColumnIndex(FeedsDbAdapter.KEY_TITLE);

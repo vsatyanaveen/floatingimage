@@ -39,7 +39,7 @@ public class CategoryBrowser extends SourceSelector.SourceFragment {
 	public static final int CATEGORY_UNDERWATER = 23;
 	
 	public CategoryBrowser() {
-		super(5);
+		super(4);
 	}
 	
 	boolean nudity;

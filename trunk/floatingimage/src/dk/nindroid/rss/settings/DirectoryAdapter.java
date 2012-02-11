@@ -45,7 +45,7 @@ public class DirectoryAdapter extends BaseAdapter{
 		if(convertView != null && convertView instanceof LinearLayout){
 			itemLayout = (LinearLayout)convertView;
 		}else{
-			itemLayout = (LinearLayout) LayoutInflater.from(mContext.getActivity()).inflate(R.layout.directory_browser, parent, false);
+			itemLayout = (LinearLayout) LayoutInflater.from(mContext.getActivity()).inflate(R.layout.directory_browser_item, parent, false);
 		}
 		TextView text = (TextView) itemLayout.findViewById(android.R.id.title);
 		ImageView icon = (ImageView) itemLayout.findViewById(R.id.icon);

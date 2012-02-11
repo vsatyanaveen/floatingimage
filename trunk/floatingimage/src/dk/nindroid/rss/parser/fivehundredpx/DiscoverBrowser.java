@@ -21,7 +21,7 @@ public class DiscoverBrowser extends SourceSelector.SourceFragment {
 	public static final int WEEK = 5;
 	
 	public DiscoverBrowser() {
-		super(5);
+		super(4);
 	}
 	
 	@Override

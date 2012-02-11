@@ -1,5 +1,6 @@
 package dk.nindroid.rss;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import android.graphics.Bitmap;
@@ -7,8 +8,10 @@ import android.graphics.Bitmap.Config;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.provider.MediaStore.Images;
 import android.util.Log;
 import dk.nindroid.rss.compatibility.Exif;
+import dk.nindroid.rss.data.ContentUriImage;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.LocalImage;
 import dk.nindroid.rss.data.Progress;
@@ -35,8 +38,10 @@ public class OnDemandImageBank {
 	final Loader[] mLoaders;
 	final ImageCache mImageCache;
 	final Config mConfig;
+	final MainActivity mActivity;
 	
 	public OnDemandImageBank(FeedController feedController, MainActivity activity, ImageCache imageCache) {
+		this.mActivity = activity;
 		this.mFeedController = feedController;
 		mLoaders = new Loader[4];
 		for(int i = 0; i < mLoaders.length; ++i){
@@ -153,6 +158,27 @@ public class OnDemandImageBank {
 				LoaderBundle bundle = (LoaderBundle)msg.obj;
 				ImageReference ir = bundle.ir;
 				LoaderClient callback = bundle.lc;
+				
+				if(ir instanceof ContentUriImage){
+					ContentUriImage cui = (ContentUriImage)ir;
+					Bitmap bmp;
+					try {
+						bmp = Images.Media.getBitmap(mActivity.context().getContentResolver(), cui.getUri());
+						if(bmp != null){
+							if(this.mSettings.highResThumbs){
+								ir.set128Bitmap(bmp);
+							}else{
+								ir.set256Bitmap(bmp);
+							}
+							if(bmp != null){
+								callback.bitmapLoaded(ir.getID());
+							}
+						}
+					} catch (FileNotFoundException e) {
+					} catch (IOException e) {
+					}
+					return;
+				}
 				
 				if(ir == null){
 					return;

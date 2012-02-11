@@ -1,6 +1,8 @@
 package dk.nindroid.rss;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -8,7 +10,9 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Bitmap.Config;
 import android.os.Process;
+import android.provider.MediaStore;
 import android.util.Log;
+import dk.nindroid.rss.data.ContentUriImage;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.LocalImage;
 import dk.nindroid.rss.data.Progress;
@@ -20,10 +24,12 @@ public class TextureSelector {
 	private Config		mConfig;
 	private Bitmap		mCurrentBitmap;
 	private ImagePlane	mCurSelected;
+	private MainActivity mActivity;
 		
-	public TextureSelector(Display display, Config config){
+	public TextureSelector(Display display, Config config, MainActivity activity){
 		this.mDisplay = display;
 		this.mConfig = config;
+		this.mActivity = activity;
 	}
 	
 	public Bitmap getCurrentBitmap(){
@@ -203,6 +209,18 @@ public class TextureSelector {
 			if(res == 0){
 				setTextureResolution();
 				res = mTextureResolution;
+			}
+			if(ref instanceof ContentUriImage){
+				ContentUriImage cui = (ContentUriImage)ref;
+				try {
+					Bitmap bmp = MediaStore.Images.Media.getBitmap(mActivity.context().getContentResolver(), cui.getUri());
+					return bmp;
+				} catch (FileNotFoundException e) {
+					Log.w("Floating Image", "Image not found", e);
+				} catch (IOException e) {
+					Log.w("Floating Image", "Image not found", e);
+				}
+				return null;
 			}
 			if(ref instanceof LocalImage){ // Special case, read from disk
 				Bitmap bmp = null;

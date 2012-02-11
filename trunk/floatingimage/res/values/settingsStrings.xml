@@ -102,16 +102,27 @@
 	<string name="facebookShowAlbum">show</string>
 	<string name="photobucket">Photobucket</string>
 	<string name="photobucketShowUser">Show user</string>
+	<string name="photobucketShowGroup">Show Group</string>
+	<string name="photobucketSearch">Search</string>
+	<string name="photobucketEmptyUserSearch">Please enter a username</string>
+	<string name="photobucketEmptyGroupSearch">Please enter a groupname</string>
+	<string name="photobucketEmptySearch">Please search for something</string>
 	<string name="photobucketShowUserBadUsername">Sorry, Photobucket user not found.</string>
 	<string name="photobucketShowRecent">Show recent photos</string>
 	<string name="photobucketShowFollowing">Show followed photos</string>
+	<string name="photobucketRecent">Recent</string>
+	<string name="photobucketGroup">Group</string>
+	<string name="photobucketImagesBy">Images by %s</string>
+	<string name="photobucketAlbumBy">Album by %s</string>
+	<string name="photobucketLoadingAlbums">Loading albums…</string>
+	<string name="photobucketFollowing">Following</string>
 	<string name="fivehundredpx">500px</string>
 	<string name="fivehundredpxDiscover">Discover new photos</string>
 	<string name="fivehundredpxCategories">Categories</string>
 	<string name="fivehundredpxShowUser">Show user</string>
 	<string name="fivehundredpxTypeUsername">Enter username</string>
 	<string name="fivehundredpxTypeSearchTerm">Enter search term</string>
-	<string name="fivehundredpxShowing">Showing</string>
+	<string name="fivehundredpxShowing">Showing %s</string>
 	<string name="fivehundredpxShowFavorites">Show favorites</string>
 	<string name="fivehundredpxShowingUsersFavorites">Showing %s\'s favorites</string>
 	<string name="fivehundredpxShowFriends">Show friends</string>
@@ -156,6 +167,8 @@
 	<string name="fivehundredpxEmptySearch">Please enter something to search for</string>
 	<string name="fivehundredpxVerifyingUser">Verifying user</string>
 	<string name="fivehundredpxUserNotFound">User could not be found</string>
+	<string name="rssEmptyDialog">Please enter an RSS stream</string>
+	<string name="rssEnterPaste">Please enter (paste) an RSS url</string>
 	
 	<string name="loadingAlbums">Loading albums…</string>
 	<string name="loadingFriends">Loading friends…</string>
@@ -165,6 +178,8 @@
 	<string name="moreCameraPictures">More camera pictures</string>
 	<string name="Downloads">Downloads</string>
 	<string name="misc">Misc</string>
+	<string name="savePath">Save path</string>
+	<string name="savePathSummary">Where should downloaded images be saved</string>
 	<string name="LiveWallpapers">Live wallpapers</string>
 	<string name="LiveWallpapersSummary">Manage live wallpapers to set Floating Image as wallpaper</string>
 	

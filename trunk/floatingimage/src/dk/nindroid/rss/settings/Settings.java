@@ -1,5 +1,6 @@
 package dk.nindroid.rss.settings;
 
+import dk.nindroid.rss.menu.SaveChooser;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -15,6 +16,8 @@ public class Settings {
 	public static final int TYPE_FACEBOOK = 4;
 	public static final int TYPE_PHOTOBUCKET = 5;
 	public static final int TYPE_FIVEHUNDREDPX = 6;
+	public static final int TYPE_RSS = 7;
+	public static final int TYPE_CONTENT_URI = 8;
 	
 	public static final int MODE_NONE = 0;
 	public static final int MODE_SLIDE_RIGHT_TO_LEFT = 1;
@@ -61,11 +64,14 @@ public class Settings {
 	public void readSettings(Context context) {
 		//Display display = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
 		//int max = Math.max(display.getWidth(), display.getHeight());
+		SharedPreferences globalPrefs = context.getSharedPreferences(dk.nindroid.rss.menu.Settings.SHARED_PREFS_NAME, 0);
+		downloadDir = globalPrefs.getString(SaveChooser.SAVEDIR, Environment.getExternalStorageDirectory().getAbsolutePath() + "/download/");
+		
 		
 		this.sp = context.getSharedPreferences(settings, 0);
 		shuffleImages = sp.getBoolean("shuffleImages", true);
 		rotateImages = sp.getBoolean("rotateImages", true);
-		downloadDir = sp.getString("downloadDir", Environment.getExternalStorageDirectory().getAbsolutePath() + "/download/");
+		
 		fullscreen = sp.getBoolean("fullscreen", false);
 		mode = parseMode(sp.getString("mode", "5000"));
 		slideshowInterval = Long.parseLong(sp.getString("slideInterval", "10000"));

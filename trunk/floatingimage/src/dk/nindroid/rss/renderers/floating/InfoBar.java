@@ -15,7 +15,7 @@ import dk.nindroid.rss.gfx.Vec3f;
 
 public class InfoBar {
 	private static final int 	one = 0x10000;
-	private static final int 	MAX_WIDTH = 2048;
+	private final int 	MAX_WIDTH;
 	private Vec3f[]		mVertices;
 	private IntBuffer	mVertexBuffer;
 	private ByteBuffer	mIndexBuffer;
@@ -26,9 +26,16 @@ public class InfoBar {
 	private int 			mLastDisplayWidth = 0;
 	
 	private static final int VERTS = 4;
-	public InfoBar(){
+	public InfoBar(int maxWidth){
 	    mInfoPainter = new InfoPainter(22, 18);
-    	
+    	if(maxWidth < 512){
+    		MAX_WIDTH = 512;
+    	}else if(maxWidth < 1024){
+    		MAX_WIDTH = 1024;
+    	}else{
+    		MAX_WIDTH = 2048;
+    	}
+	    
 		int vertices[] = {
 			 -one,  one, -one,
 			 -one, -one, -one,

@@ -1,5 +1,6 @@
 package dk.nindroid.rss.parser.photobucket;
 
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,7 +15,7 @@ public class PhotobucketFeeder {
 	public static final String SUBDOMAIN = "api.photobucket.com";
 	public static final String PING = "/ping"; // Do we need this? Anyway, it's good for debugging.
 	
-	public static String performRequest(String request, Map<String, String> params) throws Exception{
+	private static String performRequest(String request, Map<String, String> params) throws Exception{
 		PhotobucketAPI api = new PhotobucketAPI();
 		api.setOauthConsumerKey(KEY);
 		api.setOauthConsumerSecret(SECRET);
@@ -27,9 +28,27 @@ public class PhotobucketFeeder {
 		return response.getResponseString();
 	}
 	
+	public static String getImages(String request, int page) throws Exception{
+		Map<String,String> params = new HashMap<String,String> ();
+		params.put("recurse", "1");
+		params.put("view", "flat");
+		params.put("media", "images");
+		params.put("perpage", "100");
+		params.put("page", Integer.toString(page));
+		return performRequest(request, params);
+	}
+	
+	public static String getNoImages(String request) throws Exception{
+		Map<String,String> params = new HashMap<String,String> ();
+		params.put("recurse", "0");
+		params.put("view", "flat");
+		params.put("media", "none");
+		return performRequest(request, params);
+	}
+	
 	public static boolean ping(){
 		try {
-			performRequest(PING, null);
+			getImages(PING, 1);
 			return true;
 		} catch (Exception e) {
 			Log.w("Floating Image", "Error caught pinging!", e);
@@ -37,21 +56,33 @@ public class PhotobucketFeeder {
 		return false;
 	}
 	
-	public static String getUrls(String user){
-		return "/user/" + user + "/url";
+	public static String getRecent(String user){
+		return "/user/" + URLEncoder.encode(user) + "/search";
 	}
 	
-	public static String getAlbum(String user){
-		return "/album/" + user;
+	public static String getAlbums(String user){
+		return "/album/" + URLEncoder.encode(user);
+	}
+	
+	public static String getAlbum(String user, String album){
+		return "/album/" + URLEncoder.encode(user + "/" +  album);
+	}
+	
+	public static String getFollowing(String user){
+		return "/user/" + URLEncoder.encode(user) + "/followingmedia";
+	}
+	
+	public static String getGroup(String group){
+		return "/group/" + URLEncoder.encode(group);
+	}
+	
+	public static String search(String query){
+		return "/search/" + URLEncoder.encode(query) + "/image";
 	}
 	
 	public static void test(){
-		Map<String,String> params = new HashMap<String,String> ();
-		params.put("recurse", "1");
-		params.put("view", "flat");
-		params.put("media", "images");
 		try {
-			String res = performRequest(getAlbum("annoia"), params);
+			String res = getNoImages(getAlbum("annoia", "test2"));
 			Log.v("Floating Image", res);
 		} catch (Exception e) {
 			Log.w("Floating Image", "Error caught testing!", e);
