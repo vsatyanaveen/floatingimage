@@ -32,7 +32,7 @@ public class FiveHundredPxBrowser extends SourceSelector.SourceFragment implemen
 	public static final int SEARCH = 5;
 	
 	public FiveHundredPxBrowser() {
-		super(5);
+		super(4);
 	}
 	
 	boolean mDualPane;

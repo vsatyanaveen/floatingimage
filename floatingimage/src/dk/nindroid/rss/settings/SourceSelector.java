@@ -1,6 +1,8 @@
 package dk.nindroid.rss.settings;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -9,11 +11,17 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.ListFragment;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.WindowManager;
+import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ListView;
+import android.widget.Toast;
 import dk.nindroid.rss.R;
 import dk.nindroid.rss.gfx.ImageUtil;
+import dk.nindroid.rss.parser.photobucket.PhotobucketFeeder;
 import dk.nindroid.rss.settings.SourceSelectorAdapter.Source;
 
 public class SourceSelector extends ListFragment {
@@ -23,6 +31,7 @@ public class SourceSelector extends ListFragment {
 	public static final int 	FACEBOOK_ACTIVITY = 16;
 	public static final int		PHOTOBUCKET_ACTIVITY = 17;
 	public static final int		FIVEHUNDREDPX_ACTIVITY = 18;
+	public static final int		RSS = 19;
 	
 	boolean mDualPane;
 	int mSelected = 0;
@@ -72,15 +81,19 @@ public class SourceSelector extends ListFragment {
 		Bitmap facebookBmp = ImageUtil.readBitmap(activity, R.drawable.facebook_icon);
 		SourceSelectorAdapter.Source facebookS = new Source(facebook, facebookBmp, FACEBOOK_ACTIVITY);
 		
-		String photobucket = this.getString(R.string.photobucket);
-		Bitmap photobucketBmp = ImageUtil.readBitmap(activity, R.drawable.photobucket_icon);
-		SourceSelectorAdapter.Source photobucketS = new Source(photobucket, photobucketBmp, PHOTOBUCKET_ACTIVITY);		
-		
 		String fivehundredpx = this.getString(R.string.fivehundredpx);
 		Bitmap fivehundredpxBmp = ImageUtil.readBitmap(activity, R.drawable.fivehundredpx_icon);
 		SourceSelectorAdapter.Source fivehundredpxS = new Source(fivehundredpx, fivehundredpxBmp, FIVEHUNDREDPX_ACTIVITY);
 		
-		SourceSelectorAdapter.Source[] options = new Source[] {localS, flickrS, picasaS, facebookS, fivehundredpxS};
+		String photobucket = this.getString(R.string.photobucket);
+		Bitmap photobucketBmp = ImageUtil.readBitmap(activity, R.drawable.photobucket_icon);
+		SourceSelectorAdapter.Source photobucketS = new Source(photobucket, photobucketBmp, PHOTOBUCKET_ACTIVITY);		
+		
+		String rss = "RSS";
+		Bitmap rssBmp = ImageUtil.readBitmap(activity, R.drawable.rss_icon);
+		SourceSelectorAdapter.Source rssS = new Source(rss, rssBmp, RSS);
+		
+		SourceSelectorAdapter.Source[] options = new Source[] {localS, flickrS, picasaS, facebookS, fivehundredpxS, photobucketS, rssS};
 		setListAdapter(new SourceSelectorAdapter(activity, options));
 	}
 		
@@ -133,8 +146,54 @@ public class SourceSelector extends ListFragment {
 			case 5: // Photobucket
 				startActivityForResult(intent, PHOTOBUCKET_ACTIVITY);
 				break;
+			case 6:
+				handleRss();
+				break;
 			}
 		}
+	}
+	
+	void handleRss(){
+		FrameLayout fl = new FrameLayout(this.getActivity());
+		final EditText input = new EditText(this.getActivity());
+
+		fl.addView(input, FrameLayout.LayoutParams.FILL_PARENT);
+		input.setGravity(Gravity.CENTER);
+		final AlertDialog streamDialog = new AlertDialog.Builder(this.getActivity())
+		.setView(fl)
+		.setTitle(R.string.rssEnterPaste)
+		.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				String url = input.getText().toString();
+				if(url.isEmpty()){
+					Toast.makeText(getActivity(), R.string.rssEmptyDialog, Toast.LENGTH_LONG).show();
+				}else{
+					dialog.dismiss();
+					
+					String title = url.substring(0, url.indexOf("?"));
+					returnUrl(url.toString(), title, "", Settings.TYPE_RSS);
+				}
+			}
+		}).setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener(){
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+			}
+		}).create();
+		showKeyboard(streamDialog, input);
+		streamDialog.show();
+	}
+	
+	protected static void showKeyboard(final AlertDialog dialog, EditText editText){
+		editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+		    @Override
+		    public void onFocusChange(View v, boolean hasFocus) {
+		        if (hasFocus) {
+		        	dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+		        }
+		    }
+		});
 	}
 	
 	@Override
@@ -185,6 +244,18 @@ public class SourceSelector extends ListFragment {
     		return new PhotobucketBrowser();
     	}
 		return null;
+	}
+	
+	void returnUrl(String url, String title, String extras, int type){
+		Intent intent = new Intent();
+		Bundle b = new Bundle();
+		b.putString("PATH", url);
+		b.putString("NAME", title);
+		b.putString("EXTRAS", extras);
+		b.putInt("TYPE", type);
+		intent.putExtras(b);
+		this.getActivity().setResult(Activity.RESULT_OK, intent);		
+		this.getActivity().finish();
 	}
 	
 	public static class SourceActivity extends FragmentActivity{

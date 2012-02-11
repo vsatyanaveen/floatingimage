@@ -159,7 +159,6 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
         		toggleMenu();
         	}
         }
-        
         mRenderer.update(gl, time - mStartTime, realTime);
         
         ///////// DRAWING /////////

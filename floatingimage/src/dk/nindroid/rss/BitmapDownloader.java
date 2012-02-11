@@ -4,20 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.List;
-
-import javax.xml.parsers.FactoryConfigurationError;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.Config;
+import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
 import android.os.Process;
 import android.util.Log;
@@ -25,8 +15,6 @@ import dk.nindroid.rss.compatibility.Exif;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.LocalImage;
 import dk.nindroid.rss.data.Progress;
-import dk.nindroid.rss.data.RssElement;
-import dk.nindroid.rss.parser.RSSParser;
 import dk.nindroid.rss.settings.Settings;
 
 public class BitmapDownloader implements Runnable {
@@ -169,15 +157,6 @@ public class BitmapDownloader implements Runnable {
 			}
 			bank.addBitmap(image, true, next);
 		}
-	}
-	
-	public static List<RssElement> parseRss(URL feed) throws ParserConfigurationException, SAXException, FactoryConfigurationError, IOException{
-		SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
-		XMLReader xmlReader = parser.getXMLReader();
-		RSSParser rssParser = new RSSParser();
-		xmlReader.setContentHandler(rssParser);
-		xmlReader.parse(new InputSource(feed.openStream()));
-		return rssParser.getData();
 	}
 	
 	public static Bitmap downloadImage(String URL, Progress progress, Config config){

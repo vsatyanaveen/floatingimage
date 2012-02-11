@@ -134,6 +134,12 @@
      -->
      <PreferenceCategory
             android:title="@string/misc">
+           <PreferenceScreen android:title="@string/savePath" android:summary="@string/savePathSummary">
+		 	    <intent 
+		 	        android:action="android.intent.action.MAIN"
+		 	        android:targetClass="dk.nindroid.rss.menu.SaveChooser" 
+					android:targetPackage="dk.nindroid.rss" />
+		 	</PreferenceScreen>
 	     <PreferenceScreen android:title="@string/LiveWallpapers" android:summary="@string/LiveWallpapersSummary">
 				<intent 
 				android:action="android.intent.action.MAIN"

@@ -8,6 +8,7 @@ import javax.microedition.khronos.opengles.GL10;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.util.Log;
 import dk.nindroid.rss.Display;
 import dk.nindroid.rss.FeedController;
@@ -30,10 +31,10 @@ import dk.nindroid.rss.renderers.floating.positionControllers.FloatRight;
 import dk.nindroid.rss.renderers.floating.positionControllers.FloatUp;
 import dk.nindroid.rss.renderers.floating.positionControllers.Gallery;
 import dk.nindroid.rss.renderers.floating.positionControllers.Mixup;
+import dk.nindroid.rss.renderers.floating.positionControllers.PositionController.FeedDataProvider;
 import dk.nindroid.rss.renderers.floating.positionControllers.Stack;
 import dk.nindroid.rss.renderers.floating.positionControllers.StarSpeed;
 import dk.nindroid.rss.renderers.floating.positionControllers.TableTop;
-import dk.nindroid.rss.renderers.floating.positionControllers.PositionController.FeedDataProvider;
 import dk.nindroid.rss.renderers.osd.Play.EventHandler;
 
 public class FloatingRenderer extends Renderer implements EventSubscriber, PrepareCallback, EventHandler, Image.ImageDataProvider, FeedDataProvider{
@@ -103,6 +104,7 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 	private int						mShowImage = -1;
 	private long 					mLastShowImageRotations = -1;
 	private String					mPendingShowImage;
+	private ImageReference			mForcedImage;
 	
 	
 	private boolean settingsEnabled = true;
@@ -119,9 +121,9 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 	
 	public FloatingRenderer(MainActivity activity, OnDemandImageBank onDemandBank, FeedController feedController, Display display){
 		this.mActivity = activity;
-		mTextureSelector = new TextureSelector(display, mActivity.getSettings().bitmapConfig);
+		mTextureSelector = new TextureSelector(display, mActivity.getSettings().bitmapConfig, mActivity);
 		mRequestedStreamOffset = new Vec3f();
-		mInfoBar = new InfoBar();
+		mInfoBar = new InfoBar(Math.max(display.getHeightPixels(), display.getWidthPixels()));
 		mBackgroundPainter = new BackgroundPainter();
 		this.mDisplay = display;
 		this.mOnDemandBank = onDemandBank;
@@ -764,12 +766,6 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 	public void wallpaperMove(float fraction){
 		mStreamRotation = -fraction * 10.0f;
 		mStreamOffsetX = -fraction * 1.0f;
-		/*
-		mUpTime = System.currentTimeMillis();
-		mRequestedStreamRotation = mStreamRotation;
-		mRequestedStreamRotation += x / 50.0f;
-		mRequestedStreamRotation = Math.max(Math.min(15.0f, mRequestedStreamRotation), -15.0f);
-		*/
 	}
 
 	@Override
@@ -792,6 +788,10 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 		if(mFeedController.getFeedSize() != 0){
 			mFeedsUpdated = true;
 		}
+	}
+	
+	public void showImagePosition(int pos){
+		mShowImage = pos;
 	}
 	
 	public void showImage(String id){
@@ -825,8 +825,15 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 
 	@Override
 	public ImageReference getImageReference(int id, int rotations) {
-		long imageNumber = mImgs.length * (long)rotations + id;
-		return mFeedController.getImageReference(imageNumber);
+		if(mForcedImage == null){
+			long imageNumber = mImgs.length * (long)rotations + id;
+			return mFeedController.getImageReference(imageNumber);
+		}else{
+			if(id == 0){
+				return mForcedImage;
+			}
+		}
+		return null;
 	}
 
 	@Override

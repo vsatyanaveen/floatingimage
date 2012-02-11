@@ -14,11 +14,13 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.view.ContextMenu;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnTouchListener;
 import android.widget.ListView;
@@ -27,12 +29,15 @@ import dk.nindroid.rss.FeedController;
 import dk.nindroid.rss.R;
 import dk.nindroid.rss.settings.SourceSelector.SourceFragment;
 
-public class DirectoryBrowser extends SourceFragment implements OnTouchListener, SettingsFragment{
-	public static final int SELECT_ID = Menu.FIRST;
-	public static final String ID = "local";
+public class DirectoryBrowser extends SourceFragment implements OnTouchListener, SettingsFragment{	
+	private static final int SELECT_ID = Menu.FIRST;
 	private boolean showHidden = false;
 	private int selected;
 	private Stack<File> history;
+	
+	// Used for non-feed related purposes
+	public String returnPath;
+	public String initialDir;
 	
 	private List<String> directories;
 	File currentDirectory;
@@ -40,16 +45,19 @@ public class DirectoryBrowser extends SourceFragment implements OnTouchListener,
 	public DirectoryBrowser(){
 		super(0);
 	}
-	
+		
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		
 		SharedPreferences sp = getActivity().getSharedPreferences("dk.nindroid.rss_preferences", 0);
 		showHidden = sp.getBoolean("folderShowHiddenFiles", false);
 		directories = new ArrayList<String>();
 		registerForContextMenu(getListView());
-		currentDirectory = Environment.getExternalStorageDirectory();
+		if(initialDir == null){
+			currentDirectory = Environment.getExternalStorageDirectory();
+		}else{
+			currentDirectory = new File(initialDir);
+		}
 		history = new Stack<File>();
 		if(!currentDirectory.exists()){
 			currentDirectory = new File("/");
@@ -70,7 +78,7 @@ public class DirectoryBrowser extends SourceFragment implements OnTouchListener,
 		//menu.add(0, SHOW_HIDDEN, 0, R.string.showHiddenFiles);
 	}
 	
-	private void browseTo(String curDir) {
+	public void browseTo(String curDir) {
 		Log.v("Floating Image", "Browse to " + curDir);
 		File current = new File(curDir);
 		String[] files = current.list();
@@ -158,7 +166,9 @@ public class DirectoryBrowser extends SourceFragment implements OnTouchListener,
 		}
 		return super.onOptionsItemSelected(item);
 	}
+	
 	void returnResult(String path){
+		returnPath = path;
 		Intent intent = new Intent();
 		Bundle b = new Bundle();
 		b.putInt("TYPE", Settings.TYPE_LOCAL);

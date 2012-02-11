@@ -50,7 +50,9 @@ import dk.nindroid.rss.parser.ParserProvider;
 import dk.nindroid.rss.parser.facebook.FacebookParser;
 import dk.nindroid.rss.parser.fivehundredpx.FiveHundredPxParser;
 import dk.nindroid.rss.parser.flickr.FlickrParser;
+import dk.nindroid.rss.parser.photobucket.PhotobucketParser;
 import dk.nindroid.rss.parser.picasa.PicasaParser;
+import dk.nindroid.rss.parser.rss.RssParser;
 import dk.nindroid.rss.renderers.OSD;
 import dk.nindroid.rss.renderers.Renderer;
 import dk.nindroid.rss.renderers.floating.FloatingRenderer;
@@ -78,6 +80,7 @@ public class ShowStreams extends Activity implements MainActivity {
 	
 	public static final String			SHOW_FEED_ID	= "show_feed_id";
 	public static final String			SHOW_IMAGE_ID	= "show_image_id";
+	public static final String			SHOW_CONTENT_URI= "show_content_uri";
 	public static final String			SETTINGS_NAME	= "settings_name";
 	
 	private GLSurfaceView 				mGLSurfaceView;
@@ -92,6 +95,7 @@ public class ShowStreams extends Activity implements MainActivity {
 	
 	private int showFeedId;
 	private String showImageId;
+	
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -149,14 +153,19 @@ public class ShowStreams extends Activity implements MainActivity {
 		ParserProvider.registerParser(dk.nindroid.rss.settings.Settings.TYPE_FLICKR, FlickrParser.class);
 		ParserProvider.registerParser(dk.nindroid.rss.settings.Settings.TYPE_PICASA, PicasaParser.class);
 		ParserProvider.registerParser(dk.nindroid.rss.settings.Settings.TYPE_FACEBOOK, FacebookParser.class);
+		ParserProvider.registerParser(dk.nindroid.rss.settings.Settings.TYPE_PHOTOBUCKET, PhotobucketParser.class);
 		ParserProvider.registerParser(dk.nindroid.rss.settings.Settings.TYPE_FIVEHUNDREDPX, FiveHundredPxParser.class);
+		ParserProvider.registerParser(dk.nindroid.rss.settings.Settings.TYPE_RSS, RssParser.class);
 	}
 	
 	TextureBank setupFeeders(){
 		TextureBank bank = new TextureBank(this);
 		mFeedController = new FeedController(this);
-		if(showFeedId != -1){
+		if(showFeedId > -1){
 			mFeedController.showFeed(showFeedId);
+		}
+		if(showFeedId == FeedController.FORCE_CONTENT_URI){
+			mFeedController.showUri(Uri.parse(showImageId));
 		}
 		BitmapDownloader bitmapDownloader = new BitmapDownloader(bank, mFeedController, mSettings);
 		mImageCache = new ImageCache(this, bank);
@@ -219,7 +228,7 @@ public class ShowStreams extends Activity implements MainActivity {
 				return true;
 			case CONTEXT_SAVE: 
 				ir = renderer.getSelected();
-				ImageDownloader.downloadImage(ir.getOriginalImageUrl(), ir.getTitle(), this);
+				ImageDownloader.downloadImage(ir.getOriginalImageUrl(), ir.getTitle() + "-" + ir.getID(), this);
 				return true;
 			case CONTEXT_SHARE:
 				Intent shareIntent = new Intent(android.content.Intent.ACTION_SEND);
@@ -325,9 +334,12 @@ public class ShowStreams extends Activity implements MainActivity {
 				if(showFeedId != -1){
 					floatingRenderer.disableSettings();
 					floatingRenderer.disableImages();
-					if(showImageId != null){
+					if(showFeedId == FeedController.FORCE_CONTENT_URI){
+						floatingRenderer.showImagePosition(0);
+					}else if(showImageId != null){
 						floatingRenderer.showImage(showImageId);
 						showImageId = null;
+						this.showFeedId = -1;
 					}
 				}
 			}
@@ -409,6 +421,9 @@ public class ShowStreams extends Activity implements MainActivity {
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		switch(keyCode){
 		case KeyEvent.KEYCODE_BACK:
+			if(this.showFeedId < -1){
+				this.finish();
+			}
 			if(renderer.unselect()) return true;
 			break;
 		case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:

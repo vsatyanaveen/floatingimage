@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -17,7 +18,9 @@ public class SourceSelectorFragmentActivity extends FragmentActivity {
 	@Override
 	protected void onCreate(Bundle arg0) {
 		super.onCreate(arg0);
-		getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
+		}
 		setContentView(R.layout.source_selector);
 		
 		final SharedPreferences sp = getSharedPreferences(Settings.SHARED_PREFS_NAME, 0);

@@ -1,6 +1,8 @@
 package dk.nindroid.rss;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -8,8 +10,10 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import dk.nindroid.rss.data.LocalImage;
 import dk.nindroid.rss.menu.GallerySettings;
@@ -31,17 +35,23 @@ public class GalleryImageLauncher extends Activity {
 				return;
 			}
 		}else if(uri.getScheme().equalsIgnoreCase("content")){
-			Cursor cursor = getContentResolver().query(uri, new String[]{android.provider.MediaStore.Images.ImageColumns.DATA}, null, null, null);
+			Cursor cursor = getContentResolver().query(uri, new String[]{android.provider.MediaStore.Images.ImageColumns.DATA, android.provider.MediaStore.Images.ImageColumns._ID}, null, null, null);
 			if(cursor.moveToFirst())
 			{
-			    String pathUri = Uri.parse(cursor.getString(0)).getPath();
-			    f = new File(pathUri);
+				String uriString = cursor.getString(0);
+				if(uriString != null){
+					Uri dataUri = Uri.parse(uriString);
+					if(dataUri != null){
+					    String pathUri = dataUri.getPath();
+					    f = new File(pathUri);
+					}
+				}
 			}
 			cursor.close();
 		}
 		
 		if(f == null){
-			this.finish();
+			showUri(uri.toString());
 			return;
 		}
 		
@@ -66,6 +76,13 @@ public class GalleryImageLauncher extends Activity {
 		
 		this.finish();
 	}
+	void showUri(String uri){
+		Intent intent = new Intent(this, ShowStreams.class);
+		intent.putExtra(ShowStreams.SHOW_FEED_ID, FeedController.FORCE_CONTENT_URI);
+		intent.putExtra(ShowStreams.SHOW_IMAGE_ID, uri);
+		intent.putExtra(ShowStreams.SETTINGS_NAME, GallerySettings.SHARED_PREFS_NAME);
+		this.startActivityForResult(intent, 0);
+	}
 	
 	void showImage(int feedId, File f){
 		Intent intent = new Intent(this, ShowStreams.class);
@@ -73,5 +90,10 @@ public class GalleryImageLauncher extends Activity {
 		intent.putExtra(ShowStreams.SHOW_IMAGE_ID, LocalImage.getID(f));
 		intent.putExtra(ShowStreams.SETTINGS_NAME, GallerySettings.SHARED_PREFS_NAME);
 		this.startActivity(intent);
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		finish();
 	}
 }

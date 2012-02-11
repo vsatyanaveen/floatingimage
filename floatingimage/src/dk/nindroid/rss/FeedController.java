@@ -17,6 +17,7 @@ import org.xml.sax.SAXException;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.SQLException;
+import android.net.Uri;
 import android.util.Log;
 import dk.nindroid.rss.data.FeedReference;
 import dk.nindroid.rss.data.ImageReference;
@@ -24,16 +25,21 @@ import dk.nindroid.rss.data.KeyVal;
 import dk.nindroid.rss.data.LocalImage;
 import dk.nindroid.rss.parser.FeedParser;
 import dk.nindroid.rss.parser.ParserProvider;
+import dk.nindroid.rss.parser.contentUri.ContentUriParser;
 import dk.nindroid.rss.settings.FeedSettings;
 import dk.nindroid.rss.settings.FeedsDbAdapter;
 import dk.nindroid.rss.settings.Settings;
 import dk.nindroid.rss.uiActivities.Toaster;
 
 public class FeedController {
+	public static int						FORCE_CONTENT_URI = -2;
+	
 	private static long						REFRESH_INTERVAL = 7200000; // Every other hour;
 	//private static long						REFRESH_INTERVAL = 120000; // Every other hour;
 	private static long						RETRY_INTERVAL = 30000; // Every half minute;
+	
 	private long							mLastFeedRead = 0;
+	
 	
 	private List<ImageReference> 			mReferences;
 	private List<FeedReference>				mFeeds;
@@ -44,6 +50,7 @@ public class FeedController {
 	private MainActivity					mActivity;
 	private int								mCachedActive;
 	
+	private boolean noImagesWarningShown = false;
 	private int								mForceFeedId = -1;
 	
 	public interface EventSubscriber{
@@ -52,6 +59,13 @@ public class FeedController {
 	
 	public void showFeed(int id){
 		this.mForceFeedId = id;
+	}
+	
+	public void showUri(Uri uri){
+		this.mForceFeedId = FORCE_CONTENT_URI;
+		this.mFeeds.clear();
+		this.mFeeds.add(new FeedReference(FORCE_CONTENT_URI, new ContentUriParser(), uri.toString(), "", Settings.TYPE_CONTENT_URI, 0));
+		mReferences = parseFeed(mFeeds.get(0));
 	}
 	
 	public int getFeedSize(){
@@ -163,6 +177,7 @@ public class FeedController {
 	}
 		
 	public void readFeeds(int active){
+		if(mForceFeedId == FORCE_CONTENT_URI) return;
 		mCachedActive = active;
 		mLastFeedRead = System.currentTimeMillis();
 		mFailedFeeds.clear();
@@ -230,6 +245,7 @@ public class FeedController {
 				for(int i = 0; i < mFeeds.size(); ++i){
 					if(!(mFeeds.get(i).equals(newFeeds.get(i)))){
 						reparseFeeds = true;
+						noImagesWarningShown = false;
 						break;
 					}
 				}
@@ -237,11 +253,15 @@ public class FeedController {
 			if(reparseFeeds){
 				mFeeds = newFeeds;
 				mReferences.clear();
+				mRenderer.resetImages();
 				parseFeeds(mDbHelper, active);
 				feedsChanged();
 				onFeedsUpdated();
 				if(mReferences.size() == 0){
-					mActivity.showNoImagesWarning();
+					if(!noImagesWarningShown){
+						noImagesWarningShown = true;
+						mActivity.showNoImagesWarning();
+					}
 				}
 			}
 			

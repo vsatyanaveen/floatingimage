@@ -7,9 +7,9 @@ public class FiveHundredPxFeeder {
 	private static final String IMAGE_LIST_URL = BASE_URL + "?rpp=100&sort=created_at&consumer_key=" + CONSUMER_KEY;
 	private static final String FEATURE_URL = IMAGE_LIST_URL + "&feature=";
 	private static final String CATEGORY_URL = IMAGE_LIST_URL + "&only=";
-	private static final String USER_URL = IMAGE_LIST_URL + "&user=";
-	private static final String USER_FRIENDS_URL = IMAGE_LIST_URL + "&user_friends=";
-	private static final String USER_FAVORITES_URL = IMAGE_LIST_URL + "&user_favorites=";
+	private static final String USER_URL = IMAGE_LIST_URL + "&feature=user&username=";
+	private static final String USER_FRIENDS_URL = IMAGE_LIST_URL + "&feature=user_friends&username=";
+	private static final String USER_FAVORITES_URL = IMAGE_LIST_URL + "&feature=user_favorites&username=";
 	private static final String SEARCH_URL = BASE_URL + "/search/?rpp=100&consumer_key=" + CONSUMER_KEY + "&term=";
 	private static final String GET_USER = "https://api.500px.com/v1/users/show?consumer_key=" + CONSUMER_KEY + "&username=";
 	
