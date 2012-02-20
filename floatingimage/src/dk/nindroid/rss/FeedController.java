@@ -488,6 +488,9 @@ public class FeedController {
 		if(f.exists()){
 			buildImageIndex(images, f, recurse, 0);
 		}
+		if(images != null && images.size() == 0){
+			return null;
+		}
 		return images;
 	}
 	

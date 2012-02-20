@@ -9,6 +9,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import android.graphics.Bitmap;
 import android.opengl.GLUtils;
+import android.util.Log;
 import dk.nindroid.rss.Display;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.gfx.Vec3f;
@@ -156,7 +157,7 @@ public class InfoBar {
 			drawBlackBar(gl, fraction);
 			gl.glDisableClientState(GL10.GL_COLOR_ARRAY);
 			gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
-			drawInfo(gl);
+			drawInfo(gl, fraction);
 			
 		gl.glPopMatrix();
 		gl.glDisable(GL10.GL_BLEND);
@@ -180,11 +181,12 @@ public class InfoBar {
 		
 	}
 	
-	protected void drawInfo(GL10 gl){
+	protected void drawInfo(GL10 gl, float fraction){
+		gl.glColor4f(1, 1, 1, fraction);
         gl.glTexParameterx(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S,GL10.GL_REPEAT);
         gl.glTexParameterx(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_REPEAT);
 		gl.glEnable(GL10.GL_TEXTURE_2D);
-		gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE);
+		gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
 		gl.glActiveTexture(GL10.GL_TEXTURE0);
 		gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
 		gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mTexBuffer);

@@ -1,8 +1,6 @@
 package dk.nindroid.rss;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -10,11 +8,10 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.util.Log;
+import android.widget.Toast;
 import dk.nindroid.rss.data.LocalImage;
 import dk.nindroid.rss.menu.GallerySettings;
 import dk.nindroid.rss.settings.FeedsDbAdapter;
@@ -35,19 +32,25 @@ public class GalleryImageLauncher extends Activity {
 				return;
 			}
 		}else if(uri.getScheme().equalsIgnoreCase("content")){
-			Cursor cursor = getContentResolver().query(uri, new String[]{android.provider.MediaStore.Images.ImageColumns.DATA, android.provider.MediaStore.Images.ImageColumns._ID}, null, null, null);
-			if(cursor.moveToFirst())
-			{
-				String uriString = cursor.getString(0);
-				if(uriString != null){
-					Uri dataUri = Uri.parse(uriString);
-					if(dataUri != null){
-					    String pathUri = dataUri.getPath();
-					    f = new File(pathUri);
+			try{
+				Cursor cursor = getContentResolver().query(uri, new String[]{android.provider.MediaStore.Images.ImageColumns.DATA, android.provider.MediaStore.Images.ImageColumns._ID}, null, null, null);
+				if(cursor.moveToFirst())
+				{
+					String uriString = cursor.getString(0);
+					if(uriString != null){
+						Uri dataUri = Uri.parse(uriString);
+						if(dataUri != null){
+						    String pathUri = dataUri.getPath();
+						    f = new File(pathUri);
+						}
 					}
 				}
+				cursor.close();
+			}catch(Exception e){
+				Toast.makeText(this, "Apologies, image cannot be shown in Floating Image.", Toast.LENGTH_LONG).show();
+				this.finish();
+				return;
 			}
-			cursor.close();
 		}
 		
 		if(f == null){

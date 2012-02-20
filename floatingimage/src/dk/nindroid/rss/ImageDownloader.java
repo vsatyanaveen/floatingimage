@@ -50,7 +50,7 @@ public class ImageDownloader implements Runnable {
 		else{
 			try {
 				url = new URL(urlString);
-				f = new File(mActivity.getSettings().downloadDir + "/" + name.replace("/", "_") + ".jpg"); // Assuming jpg... Jpeg is popular!
+				f = new File(mActivity.getSettings().downloadDir + "/" + name.replace("/", "_").replace("*", "") + ".jpg"); // Assuming jpg... Jpeg is popular!
 				f.createNewFile();
 				OutputStream os = new FileOutputStream(f);
 				byte[] dl = DownloadUtil.fetchUrlBytes(url, mActivity.context().getString(R.string.user_agent), null);

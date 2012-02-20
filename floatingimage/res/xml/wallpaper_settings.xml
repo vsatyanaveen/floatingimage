@@ -74,6 +74,13 @@
                 android:title="@string/rotateImages"
                 android:summary="@string/rotateImagesSummary"
                 android:defaultValue="true" />
+            <!-- Next version!
+            <CheckBoxPreference
+                android:key="autoSelect"
+                android:title="@string/autoSelect"
+                android:summary="@string/autoSelectSummary"
+                android:defaultValue="false" />
+            -->
 			<CheckBoxPreference
                 android:key="fullscreenBlack"
                 android:title="@string/fullscreenBlack"

@@ -4,6 +4,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -17,6 +19,10 @@ import dk.nindroid.rss.renderers.osd.Button;
 import dk.nindroid.rss.renderers.osd.Fullscreen;
 import dk.nindroid.rss.renderers.osd.Images;
 import dk.nindroid.rss.renderers.osd.Play;
+import dk.nindroid.rss.renderers.osd.PlayPauseAbstractButton;
+import dk.nindroid.rss.renderers.osd.PlayPauseAutoPicker;
+import dk.nindroid.rss.renderers.osd.PlayPauseEventHandler;
+import dk.nindroid.rss.renderers.osd.PlayPauseFloating;
 import dk.nindroid.rss.renderers.osd.RotateClockwise;
 import dk.nindroid.rss.renderers.osd.RotateCounterClockwise;
 import dk.nindroid.rss.uiActivities.ToggleNotificationBar;
@@ -41,7 +47,9 @@ public class OSD {
 	private static Brightness								mBrightness;
 	private static Fullscreen								mFullscreen;
 	private static Images									mImages;
-	private static Play										mPlay;
+	private static PlayPauseAbstractButton					mPlay;
+	private static PlayPauseAbstractButton					mPlayPauseAutopicker;
+	private static PlayPauseAbstractButton					mPlayPauseFloating;
 	private static dk.nindroid.rss.renderers.osd.Settings 	mSettings;
 	
 	private boolean 										mShowRotation;
@@ -98,13 +106,15 @@ public class OSD {
 	
 	public static void init(MainActivity activity, RiverRenderer renderer){
 		mBrightness = new Brightness(activity);
-		//mAbout = new About(context);
 		mImages = new Images(activity);
 		mSettings = new dk.nindroid.rss.renderers.osd.Settings(activity);
-		mFullscreen = new Fullscreen(activity.context());
-		mPlay = new Play(activity.context());
-		mRotateClockwise = new RotateClockwise(activity.context(), renderer);
-		mRotateCounterClockwise = new RotateCounterClockwise(activity.context(), renderer);
+		mFullscreen = new Fullscreen();
+		mPlay = new Play();
+		
+		mRotateClockwise = new RotateClockwise(renderer);
+		mRotateCounterClockwise = new RotateCounterClockwise(renderer);
+		mPlayPauseAutopicker = new PlayPauseAutoPicker();
+		mPlayPauseFloating = new PlayPauseFloating();
 	}
 	
 	public OSD(MainActivity activity){
@@ -116,62 +126,71 @@ public class OSD {
 		mBrightness.init(gl);
 		mImages.init(gl);
 		mSettings.init(gl);
-		mFullscreen.init(gl, mDisplay);
-		mPlay.init(gl);
-		mRotateClockwise.init(gl);
-		mRotateCounterClockwise.init(gl);
+		mFullscreen.init(gl, mActivity.context(), mDisplay);
+		mPlay.init(gl, mActivity.context());
+		mRotateClockwise.init(gl, mActivity.context());
+		mRotateCounterClockwise.init(gl, mActivity.context());
+		mPlayPauseAutopicker.init(gl, mActivity.context());
+		mPlayPauseFloating.init(gl, mActivity.context());
 	}
 	
 	public boolean isShowing(){
 		return mFraction != 0.0f;
 	}
 	
-	public void setEnabled(boolean play, boolean fullscreen, boolean rotation, boolean settings, boolean images){
+	public void setEnabled(boolean play, boolean playIsAutoSelect, boolean moveImages, boolean fullscreen, boolean rotation, boolean settings, boolean images){
+		List<Button> buttons = new ArrayList<Button>();
 		mShowRotation = rotation;
 		int amount = 1;
-		if(play) ++amount;
-		if(fullscreen) ++amount;
+		
+		buttons.add(mBrightness);
+		if(play){
+			if(playIsAutoSelect){
+				buttons.add(mPlayPauseAutopicker);
+			}else{
+				buttons.add(mPlay);
+			}
+			++amount;
+		}
+		if(moveImages){
+			buttons.add(mPlayPauseFloating);
+			++amount;
+		}
+		if(fullscreen){
+			buttons.add(mFullscreen);
+			++amount;
+		}
 		if(settings) ++amount;
-		if(images) ++amount;
-		int index = 0;
+		if(images){
+			buttons.add(mImages);
+			++amount;
+		}
 		mButtons = new Button[amount];
-		mButtons[index++] = mBrightness;
+		
+		int buttonsIndex = 0;		
 		
 		// Ensure settings is always bottom right corner! (if shown)
-		if(amount == 4){
-			if(images){
-				mButtons[index++] = mImages;
-			}
-			if(play){
-				mButtons[index++] = mPlay;
-			}
-			if(fullscreen){
-				mButtons[index++] = mFullscreen;
+		if(amount % 2 == 0){
+			int i;
+			for(i = 0; i < 3; ++i){
+				mButtons[buttonsIndex++] = buttons.get(i);
 			}
 			if(settings){
-				mButtons[index++] = mSettings;
+				mButtons[buttonsIndex++] = mSettings;
+			}
+			while(i < buttons.size()){
+				mButtons[buttonsIndex++] = buttons.get(i++);
 			}
 		}else{
-			if(amount % 2 == 0){
-				if(settings){
-					mButtons[index++] = mSettings;
-				}
-				if(images){
-					mButtons[index++] = mImages;
-				}
-			}else{
-				if(images){
-					mButtons[index++] = mImages;
-				}
-				if(settings){
-					mButtons[index++] = mSettings;
-				}
+			int i;
+			for(i = 0; i < 2; ++i){
+				mButtons[buttonsIndex++] = buttons.get(i);
 			}
-			if(play){
-				mButtons[index++] = mPlay;
+			if(settings){
+				mButtons[buttonsIndex++] = mSettings;
 			}
-			if(fullscreen){
-				mButtons[index++] = mFullscreen;
+			while(i < buttons.size()){
+				mButtons[buttonsIndex++] = buttons.get(i++);
 			}
 		}
 	}
@@ -497,7 +516,7 @@ public class OSD {
 		return false;
 	}
 	
-	public void registerPlayListener(Play.EventHandler listener){
+	public void registerPlayListener(PlayPauseEventHandler listener){
 		mPlay.registerEventListener(listener);
 	}
 	
@@ -507,5 +526,29 @@ public class OSD {
 	
 	public void pause(){
 		mPlay.pause();
+	}
+	
+	public void registerPlayAutoPickerListener(PlayPauseEventHandler listener){
+		mPlayPauseAutopicker.registerEventListener(listener);
+	}
+	
+	public void playAutopicker(){
+		mPlayPauseAutopicker.play();
+	}
+	
+	public void pauseAutopicker(){
+		mPlayPauseAutopicker.pause();
+	}
+	
+	public void registerPlayFloatingListener(PlayPauseEventHandler listener){
+		mPlayPauseFloating.registerEventListener(listener);
+	}
+	
+	public void playFloating(){
+		mPlayPauseFloating.play();
+	}
+	
+	public void pauseFloating(){
+		mPlayPauseFloating.pause();
 	}
 }

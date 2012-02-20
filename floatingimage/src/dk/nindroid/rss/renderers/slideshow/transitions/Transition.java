@@ -9,11 +9,26 @@ public abstract class Transition {
 	Image mPrevious, mNext;
 	long  mDuration, mStartTime;
 	boolean mFinished = true;
+	boolean mIsReverse;
 	
-	public void update(long frameTime){}
+	public final void update(long frameTime){
+		float fraction = getFraction(frameTime);
+		if(fraction > 1.0f){
+			this.finish();
+		}else{
+			if(mIsReverse){
+				fraction = 1.0f - fraction;
+			}
+			
+			updateTransition(fraction);
+		}
+	}
+	
+	protected void updateTransition(float fraction){}
+	
 	public void preRender(GL10 gl, long frameTime){}
 	public void postRender(GL10 gl, long frameTime){}
-	public void init(Image previous, Image next, long now, long duration){
+	public void init(Image previous, Image next, long now, long duration, boolean isReverse){
 		next.setFocus(true);
 		previous.setFocus(false);
 		this.mFinished = false;	
@@ -21,17 +36,27 @@ public abstract class Transition {
 		this.mNext = next;
 		this.mDuration = duration;
 		this.mStartTime = now;
+		this.mIsReverse = isReverse;
 		mNext.setPos(new Vec3f(20.0f, 0.0f, -1.0f));
 	}
 	
 	protected void finish(){
 		this.mFinished = true;
-		mNext.getPos().setX(0.0f);
-		mNext.getPos().setY(0.0f);
-		mNext.setAlpha(1.0f);
-		mPrevious.getPos().setX(-20.0f);
-		mPrevious.getPos().setY(0.0f);
-		mPrevious.setAlpha(1.0f);
+		if(mIsReverse){
+			mPrevious.getPos().setX(0.0f);
+			mPrevious.getPos().setY(0.0f);
+			mPrevious.setAlpha(1.0f);
+			mNext.getPos().setX(-20.0f);
+			mNext.getPos().setY(0.0f);
+			mNext.setAlpha(1.0f);
+		}else{
+			mNext.getPos().setX(0.0f);
+			mNext.getPos().setY(0.0f);
+			mNext.setAlpha(1.0f);
+			mPrevious.getPos().setX(-20.0f);
+			mPrevious.getPos().setY(0.0f);
+			mPrevious.setAlpha(1.0f);
+		}
 	}
 	
 	public final float getFraction(long now){
@@ -40,6 +65,10 @@ public abstract class Transition {
 	
 	public final boolean isFinished(){
 		return mFinished;
+	}
+	
+	public final boolean isReverse(){
+		return this.mIsReverse;
 	}
 	
 	protected final float smoothstep(float val){

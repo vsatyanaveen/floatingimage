@@ -527,8 +527,12 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 		if(mLargeTex){			
 			szY = 5.0f; // Huge, since we only scale down.
 			szX = szY * mLargeAspect;
-			
-			float scale = getScale(szX, szY, realTime);
+			float scale;
+			if(mShowingImage != null){
+				scale = getScale(szX, szY, realTime);
+			}else{
+				scale = 1.0f;
+			}
 			szX *= scale;
 			szY *= scale;
 			szX *= mPositionControlerScale;
@@ -1072,19 +1076,13 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 		long totalTime = mPositionController.adjustTime(time, mActivity.getSettings().floatingTraversal);
 		float interval = getInterval(time);
 		
-		Vec3f pos = mPositionController.getPosition(interval);
-		mPos.set(pos);
-		mPositionController.getRotation(interval, mRotationA, mRotationB);
-		
-		mPositionControlerScale = mPositionController.getScale();
-		
 		boolean isInRewind = totalTime < mActivity.getSettings().floatingTraversal * (mRotations - 1);
 		// Get new texture...
 		if(totalTime > mActivity.getSettings().floatingTraversal * mRotations && !isInRewind){
         	reJitter();
         	depthChanged = true;
         	++mRotations;
-        	Log.v("Floating Image", "Getting new texture - forward! " + mRotations);
+        	//Log.v("Floating Image", "Getting new texture - forward! " + mRotations);
         	resetTexture(true);
         }
 		// Read last texture (Rewind)
@@ -1099,6 +1097,13 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 			//Log.v("Floating Image", "Getting new texture - I need one!");
 			resetTexture(true);
 		}
+		
+		Vec3f pos = mPositionController.getPosition(interval);
+		mPos.set(pos);
+		mPositionController.getRotation(interval, mRotationA, mRotationB);
+		
+		mPositionControlerScale = mPositionController.getScale();
+		
 		return depthChanged;
 	}
 	

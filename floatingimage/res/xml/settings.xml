@@ -140,6 +140,11 @@
 		 	        android:targetClass="dk.nindroid.rss.menu.SaveChooser" 
 					android:targetPackage="dk.nindroid.rss" />
 		 	</PreferenceScreen>
+		 <CheckBoxPreference 
+            	android:key="open_on_dock"
+                android:title="@string/launchOnDock"
+                android:summary="@string/launchOnDockSummary"
+                android:defaultValue="false" />
 	     <PreferenceScreen android:title="@string/LiveWallpapers" android:summary="@string/LiveWallpapersSummary">
 				<intent 
 				android:action="android.intent.action.MAIN"

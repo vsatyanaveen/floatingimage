@@ -12,6 +12,7 @@ import dk.nindroid.rss.gfx.Vec3f;
 import dk.nindroid.rss.renderers.OSD;
 import dk.nindroid.rss.renderers.ProgressBar;
 import dk.nindroid.rss.renderers.Renderer;
+import dk.nindroid.rss.renderers.osd.PlayPauseEventHandler;
 import dk.nindroid.rss.renderers.slideshow.transitions.CrossFade;
 import dk.nindroid.rss.renderers.slideshow.transitions.FadeToBlack;
 import dk.nindroid.rss.renderers.slideshow.transitions.FadeToWhite;
@@ -22,7 +23,7 @@ import dk.nindroid.rss.renderers.slideshow.transitions.SlideTopToBottom;
 import dk.nindroid.rss.renderers.slideshow.transitions.Transition;
 import dk.nindroid.rss.settings.Settings;
 
-public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.renderers.osd.Play.EventHandler {
+public class SlideshowRenderer extends Renderer implements PlayPauseEventHandler {
 	Image 			mPrevious, mCurrent, mNext;
 	TextureBank 	mBank;
 	long			mSlideTime;
@@ -31,7 +32,9 @@ public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.rende
 	boolean			mPlaying = true;
 	boolean			mStartPlaying = false;
 	boolean			mNextSet = false;
+	boolean			mPreviousSet = false;
 	boolean			mResetImages = false;
+	boolean			mMoveBack = false;
 	MainActivity	mActivity;
 	
 	public SlideshowRenderer(MainActivity activity, TextureBank bank, Display display){
@@ -125,7 +128,7 @@ public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.rende
 
 	@Override
 	public void init(GL10 gl, long time, OSD osd) {
-		osd.setEnabled(true, false, true, true, true);
+		osd.setEnabled(true, false, false, false, true, true, true);
 		osd.registerPlayListener(this);
 		mPrevious.init(gl, time);
 		mCurrent.init(gl, time);
@@ -142,8 +145,14 @@ public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.rende
 		if(!mCurrentTransition.isFinished()){
 			mCurrentTransition.preRender(gl, frameTime);
 		}
-		mPrevious.render(gl, realtime);
-		mCurrent.render(gl, realtime);
+		if(mCurrentTransition.isReverse()){
+			mNext.render(gl, realtime);
+			mCurrent.render(gl, realtime);
+		}else{
+			mPrevious.render(gl, realtime);
+			mCurrent.render(gl, realtime);
+		}
+		
 		if(!mCurrent.hasBitmap()){
 			ProgressBar.draw(gl, mCurrent.getProgress(), mDisplay);
 		}
@@ -156,6 +165,13 @@ public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.rende
 
 	@Override
 	public void update(GL10 gl, long time, long realTime) {
+		long timeSinceSlide = realTime - mSlideTime;
+		if(timeSinceSlide > mActivity.getSettings().slideSpeed && timeSinceSlide < mActivity.getSettings().slideshowInterval - 40){
+			try {
+				Thread.sleep(40);
+			} catch (InterruptedException e) {}
+		}
+		
 		if (mResetImages){
 			resetImages(gl);
 		}
@@ -171,8 +187,13 @@ public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.rende
 		}else if(mCurrent.hasBitmap() && mNext.getImage() == null){ // Load next image when first is done.
 				mNext.setImage(gl, mBank.getTexture(null, true));
 		}// Continue with normal slideshow
-		else if(realTime - mSlideTime > mActivity.getSettings().slideshowInterval + mActivity.getSettings().slideSpeed && mPlaying){
-			next(gl, realTime);
+		else if(timeSinceSlide > mActivity.getSettings().slideshowInterval + mActivity.getSettings().slideSpeed && mPlaying){
+			if(mMoveBack){
+				previous(gl, realTime);
+				mMoveBack = false;
+			}else{
+				next(gl, realTime);
+			}
 		}
 		
 		if(!mCurrentTransition.isFinished()){
@@ -187,15 +208,32 @@ public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.rende
 		mPrevious = temp;
 		mNextSet = false;
 		mSlideTime = realTime;
-		mCurrentTransition.init(mPrevious, mCurrent, realTime, mActivity.getSettings().slideSpeed);
+		mCurrentTransition.init(mPrevious, mCurrent, realTime, mActivity.getSettings().slideSpeed, false);
+	}
+	
+	private void previous(GL10 gl, long realTime){
+		Image temp = mCurrent;
+		mCurrent = mPrevious;
+		mPrevious = mNext;
+		mNext = temp;
+		mPreviousSet = false;
+		mSlideTime = realTime;
+		mCurrentTransition.init(mCurrent, mNext, realTime, mActivity.getSettings().slideSpeed, true);
 	}
 	
 	private void updateNext(GL10 gl, long realTime){
-		if(!mNextSet && realTime - mSlideTime > mActivity.getSettings().slideSpeed){
-			ImageReference oldImage = mNext.getImage();
-			mNext.clear(); // Clean slate
-			mNext.setImage(gl, mBank.getTexture(oldImage, true));
-			mNextSet = true;
+		if(realTime - mSlideTime > mActivity.getSettings().slideSpeed){
+			if(!mNextSet){
+				ImageReference oldImage = mNext.getImage();
+				mNext.clear(); // Clean slate
+				mNext.setImage(gl, mBank.getTexture(oldImage, true));
+				mNextSet = true;
+			}else if(!mPreviousSet){
+				ImageReference oldImage = mPrevious.getImage();
+				mPrevious.clear();
+				mPrevious.setImage(gl, mBank.getTexture(oldImage, false));
+				mPreviousSet = true;
+			}
 		}
 	}
 	
@@ -207,7 +245,9 @@ public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.rende
 
 	@Override
 	public boolean slideRight(long realTime) {
-		return false;
+		mSlideTime = 0;
+		mMoveBack = true;
+		return true;
 	}
 	
 	@Override
@@ -234,6 +274,7 @@ public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.rende
 	public void resetImages(GL10 gl) {
 		mResetImages = false;
 		mBank.reset();
+		mPrevious.clear();
 		mCurrent.clear();
 		mNext.clear();
 	}
@@ -278,7 +319,7 @@ public class SlideshowRenderer extends Renderer implements dk.nindroid.rss.rende
 		// TODO Auto-generated method stub
 		
 	}
-
+	
 	@Override
 	public void wallpaperMove(float fraction) {
 		// TODO Auto-generated method stub

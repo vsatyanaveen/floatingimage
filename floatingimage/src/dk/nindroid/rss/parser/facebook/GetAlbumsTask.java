@@ -51,7 +51,9 @@ public class GetAlbumsTask extends BlockingTask<String, List<FacebookAlbumBrowse
 					JSONObject obj = data.getJSONObject(i);
 					String name = obj.getString(FacebookTags.NAME);
 					String id = obj.getString(FacebookTags.ID);
-					albums.add(new Album(name, id));
+					if(name != null && id != null){
+						albums.add(new Album(name, id));
+					}
 				}
 				return albums;
 			} catch (JSONException e) {

@@ -22,10 +22,10 @@ public class Random extends Transition{
 	}
 	
 	@Override
-	public void init(Image previous, Image next, long now, long duration) {
+	public void init(Image previous, Image next, long now, long duration, boolean isReverse) {
 		this.mFinished = false;
 		mCurrent = mTransitions[mRand.nextInt(5)];
-		mCurrent.init(previous, next, now, duration);
+		mCurrent.init(previous, next, now, duration, isReverse);
 	}
 	
 	@Override
@@ -39,8 +39,7 @@ public class Random extends Transition{
 	}
 	
 	@Override
-	public void update(long frameTime) {
-		mCurrent.update(frameTime);
-		this.mFinished = mCurrent.mFinished;
+	public void updateTransition(float fraction) {
+		mCurrent.updateTransition(fraction);
 	}
 }

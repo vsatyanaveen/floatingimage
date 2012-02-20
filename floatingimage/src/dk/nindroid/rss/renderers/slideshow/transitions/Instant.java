@@ -5,16 +5,14 @@ import dk.nindroid.rss.renderers.slideshow.Image;
 
 public class Instant extends Transition {	
 	@Override
-	public void init(Image previous, Image next, long now, long duration) {
-		super.init(previous, next, now, duration);
+	public void init(Image previous, Image next, long now, long duration, boolean isReverse) {
+		super.init(previous, next, now, duration, isReverse);
 		mNext.setPos(new Vec3f(20.0f, 0.0f, -1.0f));
 	}
 	
 	@Override
-	public void update(long frameTime) {
-		if(this.getFraction(frameTime) > 0.5){
-			this.finish();
-		}
+	public void updateTransition(float fraction) {
+		
 	}
 
 }

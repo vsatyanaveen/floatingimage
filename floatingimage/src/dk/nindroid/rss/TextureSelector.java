@@ -160,15 +160,17 @@ public class TextureSelector {
 					String id = ref.getID();
 					if(!id.equals(this.mId)){
 						this.mId = id;
-						Bitmap bmp = prepare(ref);
-						if(bmp != null){
-							applyLarge(bmp);
-							if(mCallback != null){
-								mCallback.TexturePrepared(ref.getID());
-								mCallback = null;
+						synchronized (TextureSelector.class) {
+							Bitmap bmp = prepare(ref);
+							if(bmp != null){
+								applyLarge(bmp);
+								if(mCallback != null){
+									mCallback.TexturePrepared(ref.getID());
+									mCallback = null;
+								}
+							}else{
+								mCurSelected.setFocusTexture(null, 0, 0, ImagePlane.SIZE_LARGE);
 							}
-						}else{
-							mCurSelected.setFocusTexture(null, 0, 0, ImagePlane.SIZE_LARGE);
 						}
 					}
 				}
@@ -198,7 +200,6 @@ public class TextureSelector {
 		}
 		
 		public Bitmap prepare(ImageReference ref){
-			
 			int rot = (int)ref.getTargetOrientation();
 			mSwapSides = rot % 180 == 90;
 			mCurrentBitmap = null;

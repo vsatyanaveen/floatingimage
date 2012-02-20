@@ -11,19 +11,14 @@ public class SlideTopToBottom extends Transition {
 	}
 	
 	@Override
-	public void init(Image previous, Image next, long now, long duration) {
-		super.init(previous, next, now, duration);
+	public void init(Image previous, Image next, long now, long duration, boolean isReverse) {
+		super.init(previous, next, now, duration, isReverse);
 		mNext.getPos().setX(0.0f);
 	}
-	public void update(long now){
-		float fraction = this.getFraction(now);
+	public void updateTransition(float fraction){
 		float height = mDisplay.getHeight() * 2.0f;
-		if(fraction > 1.0f){
-			this.finish();
-		}else{
-			float nextY = height - smoothstep(fraction) * height;
-			mNext.getPos().setY(nextY);
-			mPrevious.getPos().setY(nextY - height);
-		}
+		float nextY = height - smoothstep(fraction) * height;
+		mNext.getPos().setY(nextY);
+		mPrevious.getPos().setY(nextY - height);
 	}
 }

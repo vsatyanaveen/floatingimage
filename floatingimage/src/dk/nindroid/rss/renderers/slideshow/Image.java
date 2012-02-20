@@ -129,6 +129,7 @@ public class Image implements ImagePlane {
 		this.mBitmapWidth = image.getWidth();
 		this.mBitmapHeight = image.getHeight();
 		setTexture(gl, mTextureID, false);
+		this.mBitmap = null;
 		mTextureSelector.selectImage(this, image);
 	}
 	
@@ -213,6 +214,10 @@ public class Image implements ImagePlane {
 		if(this.mSetLargeTexture){
 			setTexture(gl, mLargeTextureID, true);
 			mSetLargeTexture = false;
+			if(mBitmap != null && !mBitmap.isRecycled()){
+				mBitmap.recycle();
+				mBitmap = null;
+			}
 		}
 		if(mRevive){
 			setTexture(gl, mTextureID, mHasBitmap);
@@ -224,7 +229,7 @@ public class Image implements ImagePlane {
 		
 		float x, y, z, szX, szY;
 		x = mPos.getX();
-		y = mPos.getY();
+		y = mPos.getY(); 
 		z = mPos.getZ();
 		
 		szY = 5.0f; // Huge, since we only scale down.
@@ -247,9 +252,7 @@ public class Image implements ImagePlane {
 		gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_MODULATE);
 		gl.glFrontFace(GL10.GL_CCW);
 		gl.glEnable(GL10.GL_TEXTURE_2D);
-		
-		Log.v("Floating Image", "Alpha: " + mAlpha);
-		
+				
 		gl.glColor4f(1.0f, 1.0f, 1.0f, mAlpha);
 		gl.glActiveTexture(GL10.GL_TEXTURE0);
 		if(!mHasBitmap){
@@ -366,7 +369,7 @@ public class Image implements ImagePlane {
 	public void setBackground(){
 		if(mHasBitmap){
 			try {
-				mActivity.setWallpaper(mBitmap);
+				mActivity.setWallpaper(mTextureSelector.getCurrentBitmap());
 			} catch (IOException e) {
 				Log.e("ImageDownloader", "Failed to get image", e);
 				Toaster toaster = new Toaster(mActivity.context(), "Sorry, there was an error setting wallpaper!");

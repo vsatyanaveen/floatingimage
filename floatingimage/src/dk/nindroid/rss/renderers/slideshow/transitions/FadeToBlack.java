@@ -16,18 +16,15 @@ public class FadeToBlack extends Transition {
 	}
 	
 	@Override
-	public void init(Image previous, Image next, long now, long duration) {
-		super.init(previous, next, now, duration);
+	public void init(Image previous, Image next, long now, long duration, boolean isReverse) {
+		super.init(previous, next, now, duration, isReverse);
 		mNext.setPos(new Vec3f(20.0f, 0.0f, -1.0f));
 	}
 
 	@Override
-	public void update(long now) {
-		float fraction = this.getFraction(now);
+	public void updateTransition(float fraction) {
 		this.fraction = fraction;
-		if(fraction > 1.0f){
-			this.finish();
-		}else if(fraction > 0.5f){
+		if(fraction > 0.5f){
 			mNext.getPos().setX(0.0f);
 			mPrevious.getPos().setX(20.0f);
 		}

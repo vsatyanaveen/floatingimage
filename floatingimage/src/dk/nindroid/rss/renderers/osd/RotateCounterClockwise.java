@@ -13,13 +13,10 @@ import dk.nindroid.rss.data.ImageReference;
 
 public class RotateCounterClockwise extends Button {
 	RiverRenderer mRenderer;
-	Bitmap mCounterClockwise;
 	int		mTexId;
 	
-	public RotateCounterClockwise(Context context, RiverRenderer renderer){
+	public RotateCounterClockwise(RiverRenderer renderer){
 		this.mRenderer = renderer;
-		InputStream is = context.getResources().openRawResource(R.drawable.osd_rotate_counterclockwise);
-		mCounterClockwise = BitmapFactory.decodeStream(is);
 	}
 
 	@Override
@@ -33,11 +30,16 @@ public class RotateCounterClockwise extends Button {
 		return mTexId;
 	}
 
-	public void init(GL10 gl) {
+	public void init(GL10 gl, Context context) {
+		InputStream is = context.getResources().openRawResource(R.drawable.osd_rotate_counterclockwise);
+		Bitmap bmp = BitmapFactory.decodeStream(is);
+		
 		int[] textures = new int[1];
 		gl.glGenTextures(1, textures, 0);
 		mTexId = textures[0];
-		setTexture(gl, mCounterClockwise, mTexId);
+		setTexture(gl, bmp, mTexId);
+		
+		bmp.recycle();
 	}
 	public boolean doShow(){
 		return mRenderer.getSelected() != null;
