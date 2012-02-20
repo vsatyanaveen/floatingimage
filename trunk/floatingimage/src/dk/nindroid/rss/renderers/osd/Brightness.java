@@ -21,13 +21,10 @@ public class Brightness extends Button {
 	
 	private int 					mBrightnessIndex = 0; 
 	
-	Bitmap 	mBrightness;
 	int		mBrightnessTex;
 
 	public Brightness(MainActivity activity) {
 		this.mActivity = activity;
-		InputStream is = activity.context().getResources().openRawResource(R.drawable.osd_brightness);
-		mBrightness = BitmapFactory.decodeStream(is);
 	}
 
 	@Override
@@ -47,11 +44,15 @@ public class Brightness extends Button {
 	}
 
 	public void init(GL10 gl) {
+		InputStream is = mActivity.context().getResources().openRawResource(R.drawable.osd_brightness);
+		Bitmap bmp = BitmapFactory.decodeStream(is);
+		
 		int[] textures = new int[1];
 		gl.glGenTextures(1, textures, 0);
 		mBrightnessTex = textures[0];
-		setTexture(gl, mBrightness, mBrightnessTex);
+		setTexture(gl, bmp, mBrightnessTex);
 		
+		bmp.recycle();
 	}
 
 }

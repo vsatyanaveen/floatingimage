@@ -11,14 +11,10 @@ import dk.nindroid.rss.Display;
 import dk.nindroid.rss.R;
 
 public class Fullscreen extends Button {
-	Bitmap 	mFullscreen;
 	int		mFullscreenTex;
 	Display mDisplay;
 
-	public Fullscreen(Context context) {
-		InputStream is = context.getResources().openRawResource(R.drawable.osd_toggle_full);
-		mFullscreen = BitmapFactory.decodeStream(is);
-	}
+	public Fullscreen() {}
 
 	@Override
 	public void click(long time) {
@@ -30,12 +26,17 @@ public class Fullscreen extends Button {
 		return mFullscreenTex;
 	}
 
-	public void init(GL10 gl, Display display) {
+	public void init(GL10 gl, Context context, Display display) {
+		InputStream is = context.getResources().openRawResource(R.drawable.osd_toggle_full);
+		Bitmap bmp = BitmapFactory.decodeStream(is);
+		
 		this.mDisplay = display;
 		int[] textures = new int[1];
 		gl.glGenTextures(1, textures, 0);
 		mFullscreenTex = textures[0];
-		setTexture(gl, mFullscreen, mFullscreenTex);
+		setTexture(gl, bmp, mFullscreenTex);
+		
+		bmp.recycle();
 	}
 
 }

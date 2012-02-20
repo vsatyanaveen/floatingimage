@@ -166,12 +166,17 @@ public class SourceSelector extends ListFragment {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				String url = input.getText().toString();
-				if(url.isEmpty()){
+				if(url.length() == 0){
 					Toast.makeText(getActivity(), R.string.rssEmptyDialog, Toast.LENGTH_LONG).show();
 				}else{
 					dialog.dismiss();
-					
-					String title = url.substring(0, url.indexOf("?"));
+					int qIndex = url.indexOf("?");
+					String title;
+					if(qIndex > 0 && qIndex < url.length()){
+						title = url.substring(0, qIndex);
+					}else{
+						title = url;
+					}
 					returnUrl(url.toString(), title, "", Settings.TYPE_RSS);
 				}
 			}

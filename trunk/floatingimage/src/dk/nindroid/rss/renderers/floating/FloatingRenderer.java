@@ -5,11 +5,12 @@ import java.util.Arrays;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.util.Log;
+import android.view.WindowManager;
 import dk.nindroid.rss.Display;
 import dk.nindroid.rss.FeedController;
 import dk.nindroid.rss.FeedController.EventSubscriber;
@@ -35,9 +36,9 @@ import dk.nindroid.rss.renderers.floating.positionControllers.PositionController
 import dk.nindroid.rss.renderers.floating.positionControllers.Stack;
 import dk.nindroid.rss.renderers.floating.positionControllers.StarSpeed;
 import dk.nindroid.rss.renderers.floating.positionControllers.TableTop;
-import dk.nindroid.rss.renderers.osd.Play.EventHandler;
+import dk.nindroid.rss.renderers.osd.PlayPauseEventHandler;
 
-public class FloatingRenderer extends Renderer implements EventSubscriber, PrepareCallback, EventHandler, Image.ImageDataProvider, FeedDataProvider{
+public class FloatingRenderer extends Renderer implements EventSubscriber, PrepareCallback, Image.ImageDataProvider, FeedDataProvider{
 	public static final long 	mFocusDuration = 300;
 	public static long			mSelectedTime;
 	public static final float  	mFocusX = 0.0f;
@@ -123,7 +124,10 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 		this.mActivity = activity;
 		mTextureSelector = new TextureSelector(display, mActivity.getSettings().bitmapConfig, mActivity);
 		mRequestedStreamOffset = new Vec3f();
-		mInfoBar = new InfoBar(Math.max(display.getHeightPixels(), display.getWidthPixels()));
+		
+		WindowManager wm = (WindowManager)activity.context().getSystemService(Context.WINDOW_SERVICE);
+		android.view.Display disp = wm.getDefaultDisplay();
+		mInfoBar = new InfoBar(Math.max(disp.getWidth(), disp.getHeight()));
 		mBackgroundPainter = new BackgroundPainter();
 		this.mDisplay = display;
 		this.mOnDemandBank = onDemandBank;
@@ -224,7 +228,7 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 	}
 		
 	public boolean click(GL10 gl, float x, float y, long frameTime, long realTime){
-		mOsd.pause();
+		mOsd.pauseAutopicker();
 		Vec3f rayDir = new Vec3f(x, y, -1);
     	rayDir.normalize();
     	Ray r = new Ray(mCamPos, rayDir);
@@ -410,10 +414,6 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
         
         updateSlideshow(gl, frameTime, realTime);
         
-        if(sortArray)
-        {
-        	updateDepths();	
-        }
         mLastFrameTime = frameTime;
         //updateRotation(realTime);
         updateTranslation(realTime);
@@ -428,6 +428,11 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 				mLastShowImageRotations = curRotations;
 			}
 		}
+        
+        if(sortArray)
+        {
+        	updateDepths();	
+        }
 	}
 	
 	public void updateSlideshow(GL10 gl, long frameTime, long realTime){
@@ -454,7 +459,7 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 		int next = (mSlideshowLastImage + 1) % mImgs.length;
 		Image img = mImgs[next];
 		if(!(img.canSelect() && img.isShowing())){
-			mOsd.pause();
+			mOsd.pauseAutopicker();
 			return;
 		}
 		img.lockTexture(true);
@@ -562,7 +567,7 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 	
 	public void init(GL10 gl, long time, OSD osd){
 		mBackgroundPainter.initTexture(gl, mActivity, mActivity.getSettings().backgroundColor);
-		osd.setEnabled(true, true, true, settingsEnabled, imagesEnabled);
+		osd.setEnabled(true, true, true, true, true, settingsEnabled, imagesEnabled);
 		for(int i = 0; i < mImgCnt; ++i){
 			mImgs[i].init(gl, time);
 		}
@@ -574,30 +579,52 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 			mFeedController.addSubscriber(this);
 		}
 		mOsd = osd;
-		osd.registerPlayListener(this);
+		mOsd.pauseAutopicker();
+		if(mActivity.getRenderer() != null && mActivity.getRenderer().isPaused()){
+			osd.pauseFloating();
+		}
+		osd.registerPlayAutoPickerListener(new PlayPauseSlideshowHandler());
+		osd.registerPlayFloatingListener(new PlayPauseFloatingHandler());
 		osd.pause();
 		
 		feedsUpdated();
 	}
 	
-	@Override
-	public void Play() {
-		mSlideshowSlideImageDismissedAt = 0;
-		int startTest = mSlideshowLastImage; 
-		while(!(mImgs[mSlideshowLastImage].canSelect() && mImgs[mSlideshowLastImage].isShowing())){
-			mSlideshowLastImage = (mSlideshowLastImage + 1) % mImgs.length;
-			if(startTest == mSlideshowLastImage){
-				mOsd.pause();
-				return; // No images to show
+	class PlayPauseFloatingHandler implements PlayPauseEventHandler{
+		@Override
+		public void Play() {
+			if(mActivity.getRenderer().isPaused()){
+				mActivity.getRenderer().pause();
 			}
 		}
-		
-		this.mSlideshow = true;
+		@Override
+		public void Pause() {
+			if(!mActivity.getRenderer().isPaused()){
+				mActivity.getRenderer().pause();
+			}
+		}
 	}
-
-	@Override
-	public void Pause() {
-		this.mSlideshow = false;
+	
+	class PlayPauseSlideshowHandler implements PlayPauseEventHandler{
+		@Override
+		public void Play() {
+			mSlideshowSlideImageDismissedAt = 0;
+			int startTest = mSlideshowLastImage; 
+			while(!(mImgs[mSlideshowLastImage].canSelect() && mImgs[mSlideshowLastImage].isShowing())){
+				mSlideshowLastImage = (mSlideshowLastImage + 1) % mImgs.length;
+				if(startTest == mSlideshowLastImage){
+					mOsd.pauseAutopicker();
+					return; // No images to show
+				}
+			}
+			
+			mSlideshow = true;
+		}
+		
+		@Override
+		public void Pause() {
+			mSlideshow = false;
+		}
 	}
 		
 	@Override

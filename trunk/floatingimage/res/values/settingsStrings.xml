@@ -180,6 +180,8 @@
 	<string name="misc">Misc</string>
 	<string name="savePath">Save path</string>
 	<string name="savePathSummary">Where should downloaded images be saved</string>
+	<string name="launchOnDock">Launch on dock</string>
+	<string name="launchOnDockSummary">Start Floating Image when docked</string>
 	<string name="LiveWallpapers">Live wallpapers</string>
 	<string name="LiveWallpapersSummary">Manage live wallpapers to set Floating Image as wallpaper</string>
 	

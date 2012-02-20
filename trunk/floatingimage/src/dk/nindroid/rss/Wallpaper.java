@@ -18,11 +18,12 @@ import dk.nindroid.rss.settings.Settings;
 
 public class Wallpaper extends GLWallpaperService implements MainActivity{
 	Settings mSettings;
+	MyEngine mEngine;
 	
 	public Engine onCreateEngine() {
 		mSettings = new Settings(WallpaperSettings.SHARED_PREFS_NAME);
-		MyEngine engine = new MyEngine(this, mSettings);
-		return engine;
+		mEngine = new MyEngine(this, mSettings);
+		return mEngine;
 	}
 	
 	// prefs and sensor interface is optional, just showing that this is where you do all of that - everything that would normally be in an activity is in here.
@@ -107,8 +108,10 @@ public class Wallpaper extends GLWallpaperService implements MainActivity{
 		public void onSharedPreferenceChanged(
 				SharedPreferences sharedPreferences, String key) {
 			Log.v("Floating Image", "Live wallpaper, preference changed: " + key);
-			mSettings.readSettings(mContext);
-			init();
+			if(!"fullscreen".equalsIgnoreCase(key)){
+				mSettings.readSettings(mContext);
+				init();
+			}
 		}
 		
 		float x, y;
@@ -196,5 +199,10 @@ public class Wallpaper extends GLWallpaperService implements MainActivity{
 	public void showNoImagesWarning() {
 		// Do nothing, this is disruptive, 
 		// and maybe we're just waiting for the sdcard to mount 
+	}
+
+	@Override
+	public RiverRenderer getRenderer() {
+		return mEngine.renderer;
 	}
 }

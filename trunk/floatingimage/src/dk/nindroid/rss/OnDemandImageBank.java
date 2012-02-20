@@ -155,52 +155,54 @@ public class OnDemandImageBank {
 			@Override
 			public void handleMessage(Message msg) {
 				super.handleMessage(msg);
-				LoaderBundle bundle = (LoaderBundle)msg.obj;
-				ImageReference ir = bundle.ir;
-				LoaderClient callback = bundle.lc;
-				
-				if(ir instanceof ContentUriImage){
-					ContentUriImage cui = (ContentUriImage)ir;
-					Bitmap bmp;
-					try {
-						bmp = Images.Media.getBitmap(mActivity.context().getContentResolver(), cui.getUri());
-						if(bmp != null){
-							if(this.mSettings.highResThumbs){
-								ir.set128Bitmap(bmp);
-							}else{
-								ir.set256Bitmap(bmp);
-							}
+				synchronized (TextureSelector.class) {
+					LoaderBundle bundle = (LoaderBundle)msg.obj;
+					ImageReference ir = bundle.ir;
+					LoaderClient callback = bundle.lc;
+					
+					if(ir instanceof ContentUriImage){
+						ContentUriImage cui = (ContentUriImage)ir;
+						Bitmap bmp;
+						try {
+							bmp = Images.Media.getBitmap(mActivity.context().getContentResolver(), cui.getUri());
 							if(bmp != null){
-								callback.bitmapLoaded(ir.getID());
+								if(this.mSettings.highResThumbs){
+									ir.set128Bitmap(bmp);
+								}else{
+									ir.set256Bitmap(bmp);
+								}
+								if(bmp != null){
+									callback.bitmapLoaded(ir.getID());
+								}
 							}
+						} catch (FileNotFoundException e) {
+						} catch (IOException e) {
 						}
-					} catch (FileNotFoundException e) {
-					} catch (IOException e) {
+						return;
 					}
-					return;
-				}
 				
-				if(ir == null){
-					return;
-				}
-				if(!callback.doLoad(ir.getID())){
-					return;
-				}
-				if(ir.getBitmap() != null){
-					return;
-				}
-				
-				if(mImageCache.exists(ir.getID(), this.mSettings.highResThumbs ? 256 : 128)){
-					mImageCache.getImage(ir, this.mSettings.highResThumbs ? 256 : 128);
-				}
-				if(ir.getBitmap() != null){
-					if(!callback.bitmapLoaded(ir.getID())){
-						ir.recycleBitmap();
+					if(ir == null){
+						return;
 					}
-					return;
+					if(!callback.doLoad(ir.getID())){
+						return;
+					}
+					if(ir.getBitmap() != null){
+						return;
+					}
+					
+					if(mImageCache.exists(ir.getID(), this.mSettings.highResThumbs ? 256 : 128)){
+						mImageCache.getImage(ir, this.mSettings.highResThumbs ? 256 : 128);
+					}
+					if(ir.getBitmap() != null){
+						if(!callback.bitmapLoaded(ir.getID())){
+							ir.recycleBitmap();
+						}
+						return;
+					}
+					curLoader = (curLoader + 1) % mLoaders.length;
+					mLoaders[curLoader].sendMessage(Message.obtain(msg));
 				}
-				curLoader = (curLoader + 1) % mLoaders.length;
-				mLoaders[curLoader].sendMessage(Message.obtain(msg));
 			}
 		}
 	}

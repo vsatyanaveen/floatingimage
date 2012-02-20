@@ -82,6 +82,9 @@ public class ShowStreams extends Activity implements MainActivity {
 	public static final String			SHOW_IMAGE_ID	= "show_image_id";
 	public static final String			SHOW_CONTENT_URI= "show_content_uri";
 	public static final String			SETTINGS_NAME	= "settings_name";
+	public static final String			DISABLE_KEYGUARD= "disable_keyguard";
+	
+	public static boolean				running = false;
 	
 	private GLSurfaceView 				mGLSurfaceView;
 	private RiverRenderer 				renderer;
@@ -104,11 +107,17 @@ public class ShowStreams extends Activity implements MainActivity {
 		this.showFeedId = getIntent().getIntExtra(SHOW_FEED_ID, -1);
 		this.showImageId = getIntent().getStringExtra(SHOW_IMAGE_ID);
 		String settingsName = getIntent().getStringExtra(SETTINGS_NAME);
+		
+		if(getIntent().getBooleanExtra(DISABLE_KEYGUARD, false)){
+			Window window = getWindow();  
+			window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+		}
+		
+		Editor e;
 		if(settingsName == null){
 			settingsName = "dk.nindroid.rss_preferences";
-			
 			// Ensure that gallery mode is disabled when not running gallery
-			Editor e = this.getSharedPreferences(settingsName, 0).edit();
+			e = this.getSharedPreferences(settingsName, 0).edit();
 			e.putBoolean("galleryMode", false);
 			e.commit();
 		}
@@ -131,7 +140,7 @@ public class ShowStreams extends Activity implements MainActivity {
 		ShadowPainter.init(this);
 		this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-		wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "Floating Image");
+		wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "Floating Image");
 		//ShowStreams.current = this;
 		mTextureBank = setupFeeders();
 		cleanIfOld();
@@ -183,9 +192,10 @@ public class ShowStreams extends Activity implements MainActivity {
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo menuInfo) {
-		((Vibrator)getSystemService(Activity.VIBRATOR_SERVICE)).vibrate(100l);
 		ImageReference ir = renderer.getSelected();
 		if(ir != null){
+			((Vibrator)getSystemService(Activity.VIBRATOR_SERVICE)).vibrate(100l);
+			
 			super.onCreateContextMenu(menu, v, menuInfo);
 			menu.add(0, CONTEXT_GO_TO_SOURCE, 0, R.string.go_to_source);
 			menu.add(0, CONTEXT_BACKGROUND, 0, R.string.set_as_background);
@@ -196,10 +206,10 @@ public class ShowStreams extends Activity implements MainActivity {
 			if(ir instanceof LocalImage){
 				menu.add(0, CONTEXT_DELETE, 0, R.string.delete_image);
 			}
-		}else{
+		}/*else{
 			boolean paused = renderer.pause();
 			Toast.makeText(this, paused ? R.string.pause : R.string.resume, Toast.LENGTH_SHORT).show();
-		}
+		}*/
 	}
 	
 	@Override
@@ -295,6 +305,10 @@ public class ShowStreams extends Activity implements MainActivity {
 	protected void onPause() {
 		Log.v("Floating image", "Pausing...");
 		mOnDemandBank.stop();
+		Editor e = this.getSharedPreferences(Settings.SHARED_PREFS_NAME, 0).edit();
+		e.putBoolean("running", false);
+		e.commit();
+		Log.v("Floating Image", "Running: true");
 		//Debug.stopMethodTracing();
 		mGLSurfaceView.onPause();
 		renderer.onPause();
@@ -310,10 +324,17 @@ public class ShowStreams extends Activity implements MainActivity {
 	protected void onResume() {
 		Log.v("Floating Image", "Resuming main activity");
 		super.onResume();
+		
 		mOnDemandBank.start();
 		//String loading = this.getString(dk.nindroid.rss.R.string.please_wait);
 		//ProgressDialog dialog = ProgressDialog.show(this, "", loading, true);
 		mSettings.readSettings(this);
+		
+		Editor e = this.getSharedPreferences(Settings.SHARED_PREFS_NAME, 0).edit();
+		e.putBoolean("running", true);
+		e.commit();
+		Log.v("Floating Image", "Running: true");
+		
 		try{
 			ButtonBrightness.setButtonBrightness(getWindow().getAttributes(), 0.0f);
 			if(android.os.Build.VERSION.SDK_INT>=android.os.Build.VERSION_CODES.HONEYCOMB) {
@@ -614,5 +635,10 @@ public class ShowStreams extends Activity implements MainActivity {
 			}
 		});
 		runOnUiThread(new ShowDialog(this, b));
+	}
+
+	@Override
+	public RiverRenderer getRenderer() {
+		return renderer;
 	}
 }

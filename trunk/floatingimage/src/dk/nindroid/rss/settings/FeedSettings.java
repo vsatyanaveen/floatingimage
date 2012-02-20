@@ -165,7 +165,7 @@ public class FeedSettings extends Activity{
 			File f = new File(uri);
 			if(f.exists()){
 				File[] dirs = f.listFiles(new DirFilter());
-				if(dirs.length > 0){					
+				if(dirs != null && dirs.length > 0){					
 					mSubDirs.setVisibility(View.VISIBLE);
 					mList.setVisibility(View.VISIBLE);
 					mList.setAdapter(new ArrayAdapter<File>(this, android.R.layout.simple_list_item_multiple_choice, dirs));

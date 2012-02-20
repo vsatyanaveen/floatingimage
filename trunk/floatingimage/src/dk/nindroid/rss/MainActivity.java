@@ -24,4 +24,5 @@ public interface MainActivity {
 	public String getSettingsKey();
 	public View getView();
 	public void showNoImagesWarning();
+	public RiverRenderer getRenderer();
 }

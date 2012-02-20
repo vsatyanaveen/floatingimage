@@ -9,15 +9,10 @@ public class SlideRightToLeft extends Transition {
 		this.mDisplay = display;
 	}
 	
-	public void update(long now){
-		float fraction = getFraction(now);
+	public void updateTransition(float fraction){
 		float width = mDisplay.getWidth() * 2.0f;
-		if(fraction > 1.0f){
-			this.finish();
-		}else{
-			float nextX = width - smoothstep(fraction) * width;
-			mNext.getPos().setX(nextX);
-			mPrevious.getPos().setX(nextX - width);
-		}
+		float nextX = width - smoothstep(fraction) * width;
+		mNext.getPos().setX(nextX);
+		mPrevious.getPos().setX(nextX - width);
 	}
 }

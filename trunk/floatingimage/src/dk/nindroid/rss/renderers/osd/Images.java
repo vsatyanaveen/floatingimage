@@ -10,14 +10,11 @@ import dk.nindroid.rss.MainActivity;
 import dk.nindroid.rss.R;
 
 public class Images  extends Button {
-	Bitmap 	mImages;
 	int		mImagesTex;
 	MainActivity mActivity;
 
 	public Images(MainActivity activity) {
 		this.mActivity = activity;
-		InputStream is = activity.context().getResources().openRawResource(R.drawable.osd_images);
-		mImages = BitmapFactory.decodeStream(is);
 	}
 
 	@Override
@@ -31,10 +28,15 @@ public class Images  extends Button {
 	}
 
 	public void init(GL10 gl) {
+		InputStream is = mActivity.context().getResources().openRawResource(R.drawable.osd_images);
+		Bitmap bmp = BitmapFactory.decodeStream(is);
+		
 		int[] textures = new int[1];
 		gl.glGenTextures(1, textures, 0);
 		mImagesTex = textures[0];
-		setTexture(gl, mImages, mImagesTex);
+		setTexture(gl, bmp, mImagesTex);
+		
+		bmp.recycle();
 	}
 
 }
