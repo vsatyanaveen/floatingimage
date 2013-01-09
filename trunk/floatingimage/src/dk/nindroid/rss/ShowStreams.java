@@ -141,6 +141,7 @@ public class ShowStreams extends Activity implements MainActivity {
 		this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "Floating Image");
+		wl.setReferenceCounted(false);
 		//ShowStreams.current = this;
 		mTextureBank = setupFeeders();
 		cleanIfOld();
@@ -148,7 +149,7 @@ public class ShowStreams extends Activity implements MainActivity {
 		mFeedController.setRenderer(renderer);
 		OSD.init(this, renderer);
 		orientationManager.addSubscriber(renderer.mDisplay);
-		ClickHandler.init(this, renderer);
+		ClickHandler.init();
 		setContentView(R.layout.main); 
 		mGLSurfaceView = new GLSurfaceView(this);
 		//mGLSurfaceView.setEGLConfigChooser(8, 8, 8, 0, 0, 0);
@@ -329,6 +330,8 @@ public class ShowStreams extends Activity implements MainActivity {
 		//String loading = this.getString(dk.nindroid.rss.R.string.please_wait);
 		//ProgressDialog dialog = ProgressDialog.show(this, "", loading, true);
 		mSettings.readSettings(this);
+		mSettings.moveStream = true;
+		mSettings.selectImage = true;
 		
 		Editor e = this.getSharedPreferences(Settings.SHARED_PREFS_NAME, 0).edit();
 		e.putBoolean("running", true);
@@ -496,7 +499,7 @@ public class ShowStreams extends Activity implements MainActivity {
 	@Override
 	public boolean dispatchTouchEvent(MotionEvent ev) {
 		super.dispatchTouchEvent(ev);
-		return ClickHandler.onTouchEvent(ev);
+		return ClickHandler.onTouchEvent(ev, renderer, this);
 	}
 	
 	void saveVersion(File dataFolder){
@@ -640,5 +643,10 @@ public class ShowStreams extends Activity implements MainActivity {
 	@Override
 	public RiverRenderer getRenderer() {
 		return renderer;
+	}
+
+	@Override
+	public boolean canShowOSD() {
+		return true;
 	}
 }

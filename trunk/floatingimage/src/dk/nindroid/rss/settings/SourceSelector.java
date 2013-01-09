@@ -106,7 +106,7 @@ public class SourceSelector extends ListFragment {
 	
 	void showSource(int source){
 		this.mSelected = source;
-		if(mDualPane){
+		if(mDualPane && source != 6){
 			getListView().setItemChecked(source, true);
 			Fragment f = getFragmentManager().findFragmentById(R.id.source);
 			

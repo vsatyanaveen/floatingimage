@@ -135,9 +135,10 @@ public class TextureSelector {
 			if(max <= 512){
 				mTextureResolution = 512;
 			}
-			else
-			{
+			else if(max <= 1024){
 				mTextureResolution = 1024;
+			}else{
+				mTextureResolution = 2048;
 			}
 		}
 		

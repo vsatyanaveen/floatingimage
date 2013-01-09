@@ -112,7 +112,7 @@ public class PhotobucketBrowser extends SourceFragment {
 		.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				if(input.getText().toString().isEmpty()){
+				if(input.getText().toString().length() == 0){
 					Toast.makeText(getActivity(), R.string.photobucketEmptyGroupSearch, Toast.LENGTH_LONG).show();
 				}else{
 					dialog.dismiss();

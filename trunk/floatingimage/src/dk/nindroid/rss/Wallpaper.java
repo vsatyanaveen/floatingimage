@@ -1,10 +1,15 @@
 package dk.nindroid.rss;
 
+import java.io.IOException;
+import java.io.InputStream;
+
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.os.Build;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import dk.nindroid.rss.helpers.GLWallpaperService;
@@ -16,30 +21,31 @@ import dk.nindroid.rss.renderers.floating.ShadowPainter;
 import dk.nindroid.rss.renderers.slideshow.SlideshowRenderer;
 import dk.nindroid.rss.settings.Settings;
 
-public class Wallpaper extends GLWallpaperService implements MainActivity{
-	Settings mSettings;
-	MyEngine mEngine;
+@TargetApi(Build.VERSION_CODES.ECLAIR_MR1)
+public class Wallpaper extends GLWallpaperService {
+	int idCounter = 0;
 	
 	public Engine onCreateEngine() {
-		mSettings = new Settings(WallpaperSettings.SHARED_PREFS_NAME);
-		mEngine = new MyEngine(this, mSettings);
-		return mEngine;
+		GLEngine engine = new MyEngine(this);
+		return engine;
 	}
 	
 	// prefs and sensor interface is optional, just showing that this is where you do all of that - everything that would normally be in an activity is in here.
-	class MyEngine extends GLEngine implements SharedPreferences.OnSharedPreferenceChangeListener {
+	class MyEngine extends GLEngine implements SharedPreferences.OnSharedPreferenceChangeListener, MainActivity {
 		RiverRenderer renderer;
+		Settings mSettings;
 		FeedController mFeedController;
 		Wallpaper mContext;
-		Settings mSettings;
 		TextureBank mBank;
 		ImageCache mImageCache;
 		OnDemandImageBank mOnDemandBank;
+		int id;
 		
-		public MyEngine(Wallpaper context, Settings settings) {
+		public MyEngine(Wallpaper context) {
 			super();
 			mContext = context;
-			this.mSettings = settings;
+			this.mSettings = new Settings(WallpaperSettings.SHARED_PREFS_NAME);
+			Log.v("Floating Image", "Created engine: " + idCounter++);
 			
 			ShadowPainter.init(context);
 			
@@ -47,17 +53,18 @@ public class Wallpaper extends GLWallpaperService implements MainActivity{
 			
 			mBank = setupFeeders();			
 			
-			renderer = new RiverRenderer(context, false, true);
+			renderer = new RiverRenderer(this, false, true);
 			mFeedController.setRenderer(renderer);
-			OSD.init(context, renderer);
+			OSD.init(this, renderer);
 			
 			SharedPreferences sp = mContext.getSharedPreferences(WallpaperSettings.SHARED_PREFS_NAME, 0);
 			sp.registerOnSharedPreferenceChangeListener(this);
 			onSharedPreferenceChanged(sp, null);
 			
 			this.setRenderer(renderer);
+			ClickHandler.init();
 			this.setRenderMode(RENDERMODE_CONTINUOUSLY);
-			//this.setTouchEventsEnabled(true);
+			this.setTouchEventsEnabled(true);
 		}
 		
 		void init(){
@@ -67,12 +74,12 @@ public class Wallpaper extends GLWallpaperService implements MainActivity{
 				if(mSettings.mode == dk.nindroid.rss.settings.Settings.MODE_FLOATING_IMAGE){
 					if(!(defaultRenderer instanceof FloatingRenderer)){
 						Log.v("Floating Image", "Switching to floating renderer");
-						defaultRenderer = new FloatingRenderer(mContext, mOnDemandBank, mFeedController, renderer.mDisplay);
+						defaultRenderer = new FloatingRenderer(this, mOnDemandBank, mFeedController, renderer.mDisplay);
 					}
 				}else{
 					if(!(defaultRenderer instanceof SlideshowRenderer)){
 						Log.v("Floating Image", "Switching to slideshow renderer");
-						defaultRenderer = new SlideshowRenderer(mContext, mBank, renderer.mDisplay);
+						defaultRenderer = new SlideshowRenderer(this, mBank, renderer.mDisplay);
 						mBank.initCache(ShowStreams.CACHE_SIZE, defaultRenderer.totalImages());
 						mBank.start();
 					}
@@ -85,22 +92,24 @@ public class Wallpaper extends GLWallpaperService implements MainActivity{
 		}
 		
 		TextureBank setupFeeders(){
-			TextureBank bank = new TextureBank(mContext);
-			mFeedController = new FeedController(mContext);
+			TextureBank bank = new TextureBank(this);
+			mFeedController = new FeedController(this);
 			BitmapDownloader bitmapDownloader = new BitmapDownloader(bank, mFeedController, mSettings);
-			mImageCache = new ImageCache(mContext, bank);
+			mImageCache = new ImageCache(this, bank);
 			bank.setFeeders(bitmapDownloader, mImageCache);
-			mOnDemandBank = new OnDemandImageBank(mFeedController, mContext, mImageCache);
+			mOnDemandBank = new OnDemandImageBank(mFeedController, this, mImageCache);
 			return bank;
 		}
 	
 		public void onDestroy() {
 			super.onDestroy();
+			Log.v("Floating Image", "Desroying engine: " + id);
 			mBank.stop();
 			if (renderer != null) {
 				renderer.onPause();
 			}
 			renderer = null;
+			this.setTouchEventsEnabled(false);
 			mImageCache.cleanCache();
 		}
 
@@ -110,6 +119,8 @@ public class Wallpaper extends GLWallpaperService implements MainActivity{
 			Log.v("Floating Image", "Live wallpaper, preference changed: " + key);
 			if(!"fullscreen".equalsIgnoreCase(key)){
 				mSettings.readSettings(mContext);
+				mSettings.fullscreen = true;
+				mSettings.fullscreenBlack = false;
 				init();
 			}
 		}
@@ -122,14 +133,24 @@ public class Wallpaper extends GLWallpaperService implements MainActivity{
 				int yPixelOffset) {
 			super.onOffsetsChanged(xOffset, yOffset, xOffsetStep, yOffsetStep,
 					xPixelOffset, yPixelOffset);
+			Log.v("Floating Image", "Offset changed for: " + id);
 			float offset = (xOffset - 0.5f) * 2.0f; 
 			if(renderer != null){
 				renderer.wallpaperMove(offset);
 			}
 		}
 		
+		@Override
 		public void onTouchEvent(android.view.MotionEvent e) 
 		{
+			Log.v("Floating Image", "Touched: " + id);
+			RiverRenderer renderer = getRenderer();
+			if(renderer != null){
+				ClickHandler.onTouchEvent(e, getRenderer(), this);
+			}
+		}
+		
+			/*
 			if(e.getAction() == MotionEvent.ACTION_MOVE){
 				if(x != 0 || y != 0){
 					//renderer.wallpaperMove(e.getX() - x, e.getY() - y);
@@ -141,68 +162,83 @@ public class Wallpaper extends GLWallpaperService implements MainActivity{
 				y = 0;
 			}
 		}
+		*/
 		
-	}
+		@Override
+		public Context context() {
+			return Wallpaper.this;
+		}
 
-	@Override
-	public Context context() {
-		return this;
-	}
+		@Override
+		public Window getWindow() {
+			// Not used with wallpaper
+			return null;
+		}
 
-	@Override
-	public Window getWindow() {
-		// Not used with wallpaper
-		return null;
-	}
+		@Override
+		public void openContextMenu() {
+			// Not used with wallpaper
+		}
 
-	@Override
-	public void openContextMenu() {
-		// Not used with wallpaper
-	}
+		@Override
+		public void runOnUiThread(Runnable action) {
+			// Not used with wallpaper
+		}
 
-	@Override
-	public void runOnUiThread(Runnable action) {
-		// Not used with wallpaper
-	}
+		@Override
+		public void manageFeeds() {
+			// Not used with wallpaper
+		}
 
-	@Override
-	public void manageFeeds() {
-		// Not used with wallpaper
-	}
+		@Override
+		public void showSettings() {
+			// Not used with wallpaper
+		}
 
-	@Override
-	public void showSettings() {
-		// Not used with wallpaper
-	}
+		@Override
+		public void stopManagingCursor(Cursor c) {
+			// Not used with wallpaper
+		}
 
-	@Override
-	public void stopManagingCursor(Cursor c) {
-		// Not used with wallpaper
-	}
+		@Override
+		public Settings getSettings() {
+			return mSettings;
+		}
 
-	@Override
-	public Settings getSettings() {
-		return mSettings;
-	}
+		@Override
+		public String getSettingsKey() {
+			return WallpaperSettings.SHARED_PREFS_NAME;
+		}
 
-	@Override
-	public String getSettingsKey() {
-		return WallpaperSettings.SHARED_PREFS_NAME;
-	}
+		@Override
+		public View getView() {
+			return null;
+		}
 
-	@Override
-	public View getView() {
-		return null;
-	}
+		@Override
+		public void showNoImagesWarning() {
+			// Do nothing, this is disruptive, 
+			// and maybe we're just waiting for the sdcard to mount 
+		}
 
-	@Override
-	public void showNoImagesWarning() {
-		// Do nothing, this is disruptive, 
-		// and maybe we're just waiting for the sdcard to mount 
-	}
+		@Override
+		public RiverRenderer getRenderer() {
+			return this.renderer;
+		}
 
-	@Override
-	public RiverRenderer getRenderer() {
-		return mEngine.renderer;
+		@Override
+		public boolean canShowOSD() {
+			return false;
+		}
+
+		@Override
+		public void setWallpaper(InputStream is) throws IOException {
+			Wallpaper.this.setWallpaper(is);
+		}
+
+		@Override
+		public void setWallpaper(Bitmap bmp) throws IOException {
+			Wallpaper.this.setWallpaper(bmp);
+		}
 	}
 }

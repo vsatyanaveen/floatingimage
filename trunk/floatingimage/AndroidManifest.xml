@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="dk.nindroid.rss"
-      android:installLocation="auto" android:versionName="3.4.16" android:versionCode="112">
-    <application android:icon="@drawable/icon" android:label="@string/app_name" android:hardwareAccelerated="true" android:debuggable="true">
+      android:installLocation="auto" android:versionName="3.4.23" android:versionCode="119">
+    <application android:icon="@drawable/icon" android:label="@string/app_name" android:hardwareAccelerated="true" android:debuggable="false" android:largeHeap="true">
         <activity android:name=".ShowStreams" android:screenOrientation="nosensor">
         	<intent-filter>
         		<action android:name="android.intent.action.MAIN"></action>
@@ -84,16 +84,20 @@
 <activity android:name=".settings.FiveHundredPxBrowser$DiscoverActivity"></activity>
 <activity android:name=".settings.FiveHundredPxBrowser$CategoryActivity"></activity>
 <activity android:name=".menu.SaveChooser"></activity>
-<activity android:name="DockListener">
+<activity android:name=".DockListener">
     <action android:name="android.intent.action.MAIN" /> 
     <category android:name="android.intent.category.DESK_DOCK" />
     <category android:name="android.intent.category.DEFAULT" />
 </activity>
-<receiver android:name="DockBroadcastReceiver" android:label="@string/app_name">
+<receiver android:name=".DockBroadcastReceiver" android:label="@string/app_name">
     <intent-filter>
         <action android:name="android.intent.action.ACTION_POWER_CONNECTED"></action>
     </intent-filter>
 </receiver>
+<activity android:name=".settings.ClockSettings"></activity>
+<activity android:name=".menu.ApplicationClockSettingsLauncher"></activity>
+<activity android:name=".menu.GalleryClockSettingsLauncher"></activity>
+<activity android:name=".menu.WallpaperClockSettingsLauncher"></activity>
 </application>
     <uses-sdk android:minSdkVersion="4" android:targetSdkVersion="11"/>
 	<uses-permission android:name="android.permission.VIBRATE"></uses-permission>
@@ -103,7 +107,7 @@
 	<uses-permission android:name="android.permission.WRITE_SETTINGS"></uses-permission>
 	<uses-permission android:name="android.permission.BIND_WALLPAPER"></uses-permission>
 	<uses-permission android:name="android.permission.INTERNET" />
-	<uses-feature android:name="android.hardware.touchscreen" android:required="false"/>
+	<uses-feature android:name="android.hardware.touchscreen" android:required="false"/> 
 	
 	<supports-screens 
 		android:largeScreens="true" 

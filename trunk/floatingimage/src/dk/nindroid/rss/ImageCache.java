@@ -92,10 +92,10 @@ public class ImageCache {
 					DataInputStream dis = new DataInputStream(bis_info);
 					File img = new File(dis.readLine());
 					img.delete();
-					files[i].delete();
-					files[i] = null;
 					dis.close();
 					bis_info.close();
+					files[i].delete();
+					files[i] = null;
 				}catch(NullPointerException e){
 					Log.w("Floating Image", "Unexpected null pointer exception caught.", e);
 					files[i].delete();

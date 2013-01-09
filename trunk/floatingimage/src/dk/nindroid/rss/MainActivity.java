@@ -25,4 +25,5 @@ public interface MainActivity {
 	public View getView();
 	public void showNoImagesWarning();
 	public RiverRenderer getRenderer();
+	public boolean canShowOSD();
 }

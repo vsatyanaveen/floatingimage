@@ -94,7 +94,9 @@ public class FacebookAlbumBrowser extends ListFragment implements GetAlbumsTask.
 		for(int i = 0; i < albums.size(); ++i){
 			options[i] = albums.get(i).name;
 		}
-		setListAdapter(new ArrayAdapter<String>(this.getActivity(), android.R.layout.simple_list_item_1, options));
+		Activity a = getActivity();
+		if(a == null) return;
+		setListAdapter(new ArrayAdapter<String>(a, android.R.layout.simple_list_item_1, options));
 	}
 
 	@Override

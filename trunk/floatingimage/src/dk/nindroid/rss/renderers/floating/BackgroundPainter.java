@@ -175,17 +175,6 @@ public class BackgroundPainter {
 		}
 	}
 	
-	/**
-	 * Draw glow around image at x, y, z with size szX, szY
-	 * 
-	 * @param gl
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @param szX
-	 * @param szY
-	 * @param szZ
-	 */
 	public void draw(GL10 gl, Display display, int backgroundColor){
 		gl.glDisable(GL10.GL_BLEND);
 		

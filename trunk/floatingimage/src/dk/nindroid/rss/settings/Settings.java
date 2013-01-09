@@ -28,6 +28,12 @@ public class Settings {
 	public static final int MODE_RANDOM = 6;
 	public static final int MODE_FLOATING_IMAGE = 7;
 	
+	public static final int CLOCK_POS_TOP_LEFT = 0;
+	public static final int CLOCK_POS_TOP_RIGHT = 1;
+	public static final int CLOCK_POS_BOTTOM_LEFT = 2;
+	public static final int CLOCK_POS_BOTTOM_RIGHT = 3;
+	public static final int CLOCK_DISABLED = 4;
+	
 	public boolean	galleryMode;
 	public boolean 	shuffleImages;
 	public boolean 	rotateImages;
@@ -49,6 +55,14 @@ public class Settings {
 	public int		backgroundColor;
 	public boolean	lowFps;
 	public boolean	nudity;
+	public boolean	selectImage;
+	public boolean	moveStream;
+	public boolean  pauseWhenSelected;
+	
+	public boolean  clockAboveImages;
+	public float 	clockXPosition;
+	public float 	clockYPosition;
+	public boolean	clockVisible;
 	
 	public boolean fullscreen;
 	public Bitmap.Config bitmapConfig = Config.RGB_565;
@@ -87,7 +101,14 @@ public class Settings {
 		galleryMode = sp.getBoolean("galleryMode", false);
 		singleClickDeselect = sp.getBoolean("singleClickDeselect", true);
 		nudity = !sp.getBoolean("nudity", true);
-			
+		selectImage = sp.getBoolean("selectImage", false);
+		moveStream = sp.getBoolean("moveStream", false);
+		pauseWhenSelected = sp.getBoolean("pauseWhenSelected", false);
+		clockAboveImages = sp.getBoolean("clockAboveImages", true);
+		clockXPosition = sp.getFloat(ClockSettings.X_POSITION, 0.65f);
+		clockYPosition = sp.getFloat(ClockSettings.Y_POSITION, 0.8f);
+		clockVisible = sp.getBoolean(ClockSettings.VISIBLE, true);
+		
 		switch(forceRotation){
 		case 90:
 			forceRotation = Surface.ROTATION_90;
@@ -111,6 +132,22 @@ public class Settings {
 		memoryBalancing(context);
 	}
 	
+	private int parseClockPosition(String pos) {
+		if(pos.equalsIgnoreCase("topleft")){
+			return CLOCK_POS_TOP_LEFT;
+		}
+		if(pos.equalsIgnoreCase("topright")){
+			return CLOCK_POS_TOP_RIGHT;
+		}
+		if(pos.equalsIgnoreCase("bottomleft")){
+			return CLOCK_POS_BOTTOM_LEFT;
+		}
+		if(pos.equalsIgnoreCase("bottomright")){
+			return CLOCK_POS_BOTTOM_RIGHT;
+		}
+		return CLOCK_DISABLED;
+	}
+
 	void memoryBalancing(Context context){
 		/*
 		ActivityManager am = (ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE);

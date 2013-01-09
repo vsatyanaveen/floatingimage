@@ -358,6 +358,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 	}
 	
 	public void move(float x, float y, float speedX, float speedY){
+		if(!mActivity.getSettings().moveStream) return;
 		// Transform event!
 		int orientation = mDisplay.getOrientation();
 		float tmp;
@@ -407,6 +408,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 	}
 	
 	public void moveEnd(float speedX, float speedY){
+		if(!mActivity.getSettings().moveStream) return;
 		if(!mMoveEventHandled){
 			// Transform event!
 			int orientation = mDisplay.getOrientation();
@@ -514,6 +516,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 	}
 	
 	public void onClick(float x, float y){
+		if(!mActivity.getSettings().selectImage) return;
 		// Transform coordinates!
 		Vec2f pos = transformClick(x, y);
 		x = pos.getX();
@@ -566,7 +569,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 		if(mOSD.isShowing()){
 			mHideOSD = true;
 		}else{
-			mShowOSD = true;
+			mShowOSD = mActivity.canShowOSD();
 		}
 	}
  

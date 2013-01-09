@@ -24,6 +24,11 @@
                 android:title="@string/fullscreenBlack"
                 android:summary="@string/fullscreenBlackSummary"
                 android:defaultValue="true" />
+			<CheckBoxPreference
+                android:key="pauseWhenSelected"
+                android:title="@string/pauseWhenSelected"
+                android:summary="@string/pauseWhenSelectedSummary"
+                android:defaultValue="false" />
             <CheckBoxPreference
             	android:key="singleClickDeselect"
                 android:title="@string/singleClickDeselect"
@@ -60,4 +65,9 @@
                 android:entryValues="@array/backgroundColorValues"
                 android:dialogTitle="@string/backgroundColorTitle"
                 android:defaultValue="0" />
+           <CheckBoxPreference
+                android:key="clockAboveImages"
+                android:title="@string/clockAboveImages"
+                android:summary="@string/clockAboveImagesSummary"
+                android:defaultValue="true" />
 </PreferenceScreen>

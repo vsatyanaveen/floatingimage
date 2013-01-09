@@ -15,7 +15,7 @@ public class ClickHandler {
 	private static MultitouchHandler mtHandler;
 	
 	
-	private static RiverRenderer renderer;
+	//private static RiverRenderer renderer;
 	private static Vec2f 	mTouchLastPos;
 	private static Vec2f	mTouchStartPos;
 	private static Timer	mClickTimer;
@@ -25,7 +25,7 @@ public class ClickHandler {
 	private static float[]	mLastSpeedX = new float[2];
 	private static float[]	mLastSpeedY = new float[2];
 	private static boolean 	mIsMultitouch = false;
-	private static MainActivity	mActivity;
+	//private static MainActivity	mActivity;
 	
 	private static int 		mAction = 0;
 	
@@ -34,15 +34,20 @@ public class ClickHandler {
 	private final static int ACTION_LONG_CLICK	= 2;
 	private final static int ACTION_CLICK		= 3;
 	
-	public static void init(MainActivity activity, RiverRenderer renderer){
-		ClickHandler.renderer = renderer;
-		mActivity = activity;
+	public static void init(){//MainActivity activity, RiverRenderer renderer){
+		//ClickHandler.renderer = renderer;
+		//mActivity = activity;
 		mTouchLastPos = new Vec2f();
 		mTouchStartPos = new Vec2f();
 		mtHandler = new MultitouchHandler();
 	}
 	
-	private static class LongClickTimer extends TimerTask { 	
+	private static class LongClickTimer extends TimerTask {
+		MainActivity mActivity;
+		public LongClickTimer(MainActivity activity) {
+			mActivity = activity;
+		}
+		
 		@Override
 		public void run() {
 			mAction = ACTION_LONG_CLICK;
@@ -51,9 +56,11 @@ public class ClickHandler {
 	}
 	
 	private static class SingleClickTimer extends TimerTask {
+		RiverRenderer renderer;
 		private float x, y;
-		
-		public SingleClickTimer(float x, float y){
+				
+		public SingleClickTimer(RiverRenderer renderer, float x, float y){
+			this.renderer = renderer;
 			this.x = x;
 			this.y = y;
 		}
@@ -65,8 +72,8 @@ public class ClickHandler {
 		}
 	}
 	
-	public static boolean onTouchEvent(MotionEvent event) {
-		if(mtHandler.handleMultitouch(event)){
+	public static boolean onTouchEvent(MotionEvent event, RiverRenderer renderer, MainActivity activity) {
+		if(mtHandler.handleMultitouch(event, renderer)){
 			return true;
 		}
 		
@@ -85,7 +92,7 @@ public class ClickHandler {
 				mTouchStartPos.set(x, y);
 				mTouchLastPos.set(mTouchStartPos);
 				mClickTimer = new Timer();
-				mClickTimer.schedule(new LongClickTimer(), LONGCLICKTIME);
+				mClickTimer.schedule(new LongClickTimer(activity), LONGCLICKTIME);
 			}
 		}else if(action ==  MotionEvent.ACTION_UP){
 			// Click
@@ -93,7 +100,7 @@ public class ClickHandler {
 				mAction = ACTION_CLICK;
 				mClickTimer.cancel();
 				mClickTimer = new Timer();
-				mClickTimer.schedule(new SingleClickTimer(x, y), DOUBLECLICKTIME);
+				mClickTimer.schedule(new SingleClickTimer(renderer, x, y), DOUBLECLICKTIME);
 			}else if(mAction == ACTION_CLICK){
 				mAction = ACTION_NOTHING;
 			}
@@ -250,7 +257,7 @@ public class ClickHandler {
 			return -1;
 		}
 		
-		public boolean handleMultitouch(MotionEvent event) {
+		public boolean handleMultitouch(MotionEvent event, RiverRenderer renderer) {
 			if(getPointerCount == null) return false; // Old API, no multitouch
 			int pointerCount = 0;
 			try {
@@ -260,7 +267,7 @@ public class ClickHandler {
 				return false;
 			}
 			if(pointerCount > 1 || mIsMultitouch){
-				actOnMultitouch(event, pointerCount);
+				actOnMultitouch(event, renderer, pointerCount);
 				return true;
 			}
 			return false;
@@ -270,7 +277,7 @@ public class ClickHandler {
 		private static int		mPointerA;
 		private static int		mPointerB;
 		
-		private void actOnMultitouch(MotionEvent event, int pointerCount) {
+		private void actOnMultitouch(MotionEvent event, RiverRenderer renderer, int pointerCount) {
 			// We only get one "up" for when the user stops touching the screen!
 			if(event.getAction() == MotionEvent.ACTION_UP){
 				mIsMultitouch = false;
@@ -282,7 +289,9 @@ public class ClickHandler {
 			}
 			float ax = 0, ay = 0, bx = 0, by = 0;
 			if(!mIsMultitouch){
-				mClickTimer.cancel();
+				if(mClickTimer != null){
+					mClickTimer.cancel();
+				}
 				mIsMultitouch = true;
 				try{
 					mPointerA = runGetPointerId(event, 0);

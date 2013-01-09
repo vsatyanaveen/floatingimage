@@ -1,23 +1,28 @@
 package dk.nindroid.rss;
 
 import java.io.File;
+import java.io.IOError;
+import java.io.IOException;
 
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapFactory.Options;
+import android.graphics.BitmapRegionDecoder;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.Bitmap.Config;
-import android.graphics.BitmapFactory.Options;
 import android.util.Log;
 import dk.nindroid.rss.data.Progress;
 
 public class ImageFileReader{
 	static Paint mPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
-
+	static boolean canChunkDecode = true;
+	
 	public static Bitmap readImage(File f, int size, Progress progress, Config config){
 		String path = f.getAbsolutePath();
 		Options opts = new Options();
+		
 		setProgress(progress, 10);
 		// Get bitmap dimensions before reading...
 		opts.inJustDecodeBounds = true;
@@ -25,15 +30,34 @@ public class ImageFileReader{
 		int width = opts.outWidth;
 		int height = opts.outHeight;
 		int largerSide = Math.max(width, height);
+				
 		setProgress(progress, 20);
 		opts.inJustDecodeBounds = false;
 		opts.inDither = true;
 		opts.inPreferredConfig = config;
-		if(width + height > size * 1.5f){
-			int sampleSize = getSampleSize(size, largerSide);
-			opts.inSampleSize = sampleSize;
-		}
+		
 		Bitmap bmp = null;
+		if(canChunkDecode){
+			try{
+				bmp = ImageFileChunkDecoder.readImage(size, opts, progress, path, config, width, height);
+				setProgress(progress, 90);
+				return bmp;
+			}catch(IOException e){
+				Log.e("Floating Image", "Chunk decoder failed - bailing!", e);
+				setProgress(progress, 100);
+				return null;
+			}
+			catch(OutOfMemoryError e){
+				Log.e("Floating Image", "Chunk decoder out of memory. Bailing!", e);
+				return null;
+			}
+			catch(Throwable t){
+				canChunkDecode = false;
+				Log.e("Floating Image", "Chunk decoder disabled!", t);
+				// Doing it the old fashioned style
+			}
+		}
+		opts.inSampleSize = getSampleSize(size, largerSide);
 		try{
 			bmp = BitmapFactory.decodeFile(path, opts);
 		}catch(Throwable t){
@@ -43,7 +67,7 @@ public class ImageFileReader{
 			try{
 				bmp = BitmapFactory.decodeFile(path, opts);
 			}catch(Throwable tr){
-				Log.e("Floating Image", "Still not working - bailing!.", tr);
+				Log.e("Floating Image", "Still not working - bailing!", tr);
 				setProgress(progress, 100);
 			}
 		}
@@ -55,6 +79,7 @@ public class ImageFileReader{
 			bmp = scaleAndRecycle(bmp, size, config);
 		}
 		setProgress(progress, 90);
+		
 		return bmp;
 	}
 	

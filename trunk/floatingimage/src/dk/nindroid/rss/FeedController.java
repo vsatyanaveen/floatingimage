@@ -110,16 +110,16 @@ public class FeedController {
 		if(System.currentTimeMillis() - mLastFeedRead > RETRY_INTERVAL && (mReferences.size() == 0 || mFailedFeeds.size() > 0)){
 			Log.v("Floating Image", "No pictures are showing, trying to read again.");
 			synchronized (mReferences) {
-				readFeeds(mCachedActive);
+				readFeeds(mCachedActive, true);
 			}
 		}
-		int refs = mReferences.size();
-		if(refs == 0) return null;
 		
 		synchronized (mReferences) {
+			int refs = mReferences.size();
+			if(refs == 0) return null;
 			if(System.currentTimeMillis() - mLastFeedRead > REFRESH_INTERVAL){
 				Log.v("Floating Image", "Refreshing feeds.");
-				readFeeds(mCachedActive);
+				readFeeds(mCachedActive, true);
 			}
 			
 			if(refs != 0){
@@ -152,14 +152,14 @@ public class FeedController {
 		
 		if(System.currentTimeMillis() - mLastFeedRead > RETRY_INTERVAL && (mReferences.size() == 0 || mFailedFeeds.size() > 0)){
 			Log.v("Floating Image", "No pictures are showing, trying to read again.");
-			readFeeds(mCachedActive);
+			readFeeds(mCachedActive, true);
 		}
 		
 		if(mReferences.size() == 0) return null;
 		synchronized (mReferences) {
 			if(System.currentTimeMillis() - mLastFeedRead > REFRESH_INTERVAL){
 				Log.v("Floating Image", "Refreshing feeds.");
-				readFeeds(mCachedActive);
+				readFeeds(mCachedActive, true);
 			}
 			
 			if(mReferences.size() != 0){
@@ -176,7 +176,7 @@ public class FeedController {
 		return ir;
 	}
 		
-	public void readFeeds(int active){
+	public void readFeeds(int active, boolean forceReparse){
 		if(mForceFeedId == FORCE_CONTENT_URI) return;
 		mCachedActive = active;
 		mLastFeedRead = System.currentTimeMillis();
@@ -239,7 +239,7 @@ public class FeedController {
 		
 		synchronized(mFeeds){
 			boolean reparseFeeds = false;
-			if(mFeeds.size() != newFeeds.size() || mReferences.size() == 0){
+			if(mFeeds.size() != newFeeds.size() || mReferences.size() == 0 || forceReparse){
 				reparseFeeds = true;
 			}else{
 				for(int i = 0; i < mFeeds.size(); ++i){
@@ -487,8 +487,7 @@ public class FeedController {
 		List<ImageReference> images = new ArrayList<ImageReference>();
 		if(f.exists()){
 			buildImageIndex(images, f, recurse, 0);
-		}
-		if(images != null && images.size() == 0){
+		}else{
 			return null;
 		}
 		return images;
@@ -539,10 +538,13 @@ public class FeedController {
 			Arrays.sort(files, new InverseComparator()); // Show last items first
 		}
 		for(File f : files){
-			if(f.getName().charAt(0) == '.') continue; // Drop hidden files.
+			String filename = f.getName();
+			if(filename.charAt(0) == '.') continue; // Drop hidden files.
+			if(filename.equalsIgnoreCase("thumbnails")) continue; // Drop thumbnails
+			if(filename.equalsIgnoreCase("thumbnail")) continue; // Drop thumbnails
 			if(f.isDirectory() && level < 20){ // Some high number to avoid any infinite loops...
-				if(recurse != null && recurse.contains(f.getName())){
-					Log.v("Floating Image", "Recursing through " + f.getName());
+				if(recurse == null || recurse.contains(f.getName())){
+					Log.v("Floating Image", "Recursing through " + filename);
 					buildImageIndex(images, f, null, level + 1);
 				}
 			}else{

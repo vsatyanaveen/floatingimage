@@ -111,6 +111,12 @@
 	<string name="LiveWallpapers">Bevægelige baggrunde</string>
 	<string name="LiveWallpapersSummary">Sæt bevægelige baggrunde op for at sætte Floating Image som en baggrund</string>
 	
+	<string name="controls">Kontroller</string>
+	<string name="selectImage">Tryk på billede for at vælge</string>
+	<string name="selectImageSummary">Flyt et billede i fokus ved at trykke på det</string>
+	<string name="moveStream">Billedestrømmen kan blive flyttet</string>
+	<string name="moveStreamSummary">Bevæg dig rundt i billedestrømmen ved at flytte fingeren hen over skærmen</string>
+	
 	<string name="feedSortOrder">Sortér billeder efter</string>
 	<string name="feedActive">Aktiv</string>
 	<string name="feedName">Navn</string>

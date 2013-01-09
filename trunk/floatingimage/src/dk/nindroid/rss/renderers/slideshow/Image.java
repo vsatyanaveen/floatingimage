@@ -76,6 +76,7 @@ public class Image implements ImagePlane {
 		ByteBuffer tbb = ByteBuffer.allocateDirect(VERTS * 2 * 4);
         tbb.order(ByteOrder.nativeOrder());
         mTexBuffer = tbb.asFloatBuffer();
+        mPos = new Vec3f();
         
         float tex[] = {
         	0.0f,  0.0f,
@@ -267,12 +268,10 @@ public class Image implements ImagePlane {
 		gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
 		gl.glEnable(GL10.GL_BLEND);
 		gl.glPushMatrix();
-				
-		gl.glTranslatef(x, y, z);
-		gl.glRotatef(mImage.getRotation(mTextureSelector, time), 0, 0, 1.0f);
-		gl.glScalef(szX, szY, 1);
-		gl.glDrawElements(GL10.GL_TRIANGLE_STRIP, 4, GL10.GL_UNSIGNED_BYTE, mIndexBuffer);
-		
+			gl.glTranslatef(x, y, z);
+			gl.glRotatef(mImage.getRotation(mTextureSelector, time), 0, 0, 1.0f);
+			gl.glScalef(szX, szY, 1);
+			gl.glDrawElements(GL10.GL_TRIANGLE_STRIP, 4, GL10.GL_UNSIGNED_BYTE, mIndexBuffer);
 		gl.glPopMatrix();
 		gl.glDisable(GL10.GL_BLEND);
     }

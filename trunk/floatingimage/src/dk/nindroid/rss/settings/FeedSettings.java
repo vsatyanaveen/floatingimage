@@ -14,6 +14,8 @@ import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -79,6 +81,7 @@ public class FeedSettings extends Activity{
 	    mSorting.setAdapter(adapter);
 	    mSubDirs = (TextView)findViewById(R.id.subdirs);
 	    mList = (ListView)findViewById(android.R.id.list);
+	    mList.setOnItemClickListener(new ItemClickedListener());
 	    
 	    mAllSubdirs.setOnCheckedChangeListener(new AllSubdirsChanged());
 	    mAllSubdirs.setChecked(getSharedPreferences(dk.nindroid.rss.menu.Settings.SHARED_PREFS_NAME, 0).getBoolean("feed_allsub_" + mId, false));
@@ -97,20 +100,36 @@ public class FeedSettings extends Activity{
 	    }
 	}
 	
+	boolean mProgramCheck;
+	
+	private class ItemClickedListener implements OnItemClickListener{
+		@Override
+		public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+				long arg3) {
+			mProgramCheck = true;
+			mAllSubdirs.setChecked(false);
+			mProgramCheck = false;
+		}
+	}
+	
 	private class AllSubdirsChanged implements OnCheckedChangeListener{
 		@Override
 		public void onCheckedChanged(CompoundButton buttonView,
 				boolean isChecked) {
-			mList.setEnabled(!isChecked);
-			if(isChecked){
+			//mList.setEnabled(!isChecked);
+			//if(isChecked){
+			if(!mProgramCheck){
 				for(int i = 0; i < mList.getCount(); ++i){
-					mList.setItemChecked(i, true);
+					mList.setItemChecked(i, isChecked);
 				}
+			}
+				/*
 			}else{
 				mDb.open();
 				setFileChecksFromDb();
 				mDb.close();
 			}
+			*/
 		}
 	}
 		
