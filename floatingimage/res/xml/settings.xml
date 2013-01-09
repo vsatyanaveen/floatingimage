@@ -51,6 +51,14 @@
                 android:entryValues="@array/forceRotationValues"
                 android:dialogTitle="@string/forceRotationTitle"
                 android:defaultValue="0" />
+            <PreferenceScreen 
+			    android:title="@string/clockPosition" 
+			    android:summary="@string/clockPositionSummary">
+				<intent 
+					android:action="android.intent.action.MAIN" 
+					android:targetClass="dk.nindroid.rss.menu.ApplicationClockSettingsLauncher"
+					android:targetPackage="dk.nindroid.rss" />
+		    </PreferenceScreen>
     </PreferenceCategory>
     <PreferenceCategory
             android:title="@string/floating">
@@ -77,6 +85,11 @@
                 android:title="@string/fullscreenBlack"
                 android:summary="@string/fullscreenBlackSummary"
                 android:defaultValue="true" />
+			<CheckBoxPreference
+                android:key="pauseWhenSelected"
+                android:title="@string/pauseWhenSelected"
+                android:summary="@string/pauseWhenSelectedSummary"
+                android:defaultValue="false" />
             <CheckBoxPreference
             	android:key="singleClickDeselect"
                 android:title="@string/singleClickDeselect"
@@ -113,6 +126,11 @@
                 android:entryValues="@array/backgroundColorValues"
                 android:dialogTitle="@string/backgroundColorTitle"
                 android:defaultValue="0" />
+           <CheckBoxPreference
+                android:key="clockAboveImages"
+                android:title="@string/clockAboveImages"
+                android:summary="@string/clockAboveImagesSummary"
+                android:defaultValue="true" />
 	</PreferenceCategory>
     <!-- 
     <PreferenceCategory

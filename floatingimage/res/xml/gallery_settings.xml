@@ -49,6 +49,19 @@
                 android:entryValues="@array/backgroundColorValues"
                 android:dialogTitle="@string/backgroundColorTitle"
                 android:defaultValue="0" />
+           <PreferenceScreen 
+			    android:title="@string/clockPosition" 
+			    android:summary="@string/clockPositionSummary">
+				<intent 
+					android:action="android.intent.action.MAIN" 
+					android:targetClass="dk.nindroid.rss.menu.GalleryClockSettingsLauncher"
+					android:targetPackage="dk.nindroid.rss" />
+		    </PreferenceScreen>
+		    <CheckBoxPreference
+                android:key="clockAboveImages"
+                android:title="@string/clockAboveImages"
+                android:summary="@string/clockAboveImagesSummary"
+                android:defaultValue="true" />
 	</PreferenceCategory>
      <PreferenceCategory
             android:title="@string/misc">

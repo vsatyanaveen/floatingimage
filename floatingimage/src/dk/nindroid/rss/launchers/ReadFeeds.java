@@ -17,6 +17,6 @@ public class ReadFeeds implements Runnable {
 	
 	@Override
 	public void run() {
-		mFeedController.readFeeds(mActive);
+		mFeedController.readFeeds(mActive, false);
 	}
 }

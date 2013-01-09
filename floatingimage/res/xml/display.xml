@@ -33,5 +33,24 @@
 	    android:entryValues="@array/forceRotationValues"
 	    android:dialogTitle="@string/forceRotationTitle"
 	    android:defaultValue="0" />
+	<PreferenceScreen 
+	    android:title="@string/clockPosition" 
+	    android:summary="@string/clockPositionSummary">
+		<intent 
+			android:action="android.intent.action.MAIN" 
+			android:targetClass="dk.nindroid.rss.menu.ApplicationClockSettingsLauncher"
+			android:targetPackage="dk.nindroid.rss" />
+    </PreferenceScreen>
+	<!--
+	
+	<ListPreference 
+	    android:key="clockPosition"
+	    android:title="@string/clockPosition"
+	    android:summary="@string/clockPositionSummary"
+	    android:entries="@array/clockPositionDescriptions"
+	    android:entryValues="@array/clockPositionValues"
+	    android:dialogTitle="@string/clockPositionTitle"
+	    android:defaultValue="topright"/>
+	-->
 </PreferenceScreen>
              

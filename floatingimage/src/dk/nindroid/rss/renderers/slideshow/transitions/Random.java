@@ -23,6 +23,7 @@ public class Random extends Transition{
 	
 	@Override
 	public void init(Image previous, Image next, long now, long duration, boolean isReverse) {
+		super.init(previous, next, now, duration, isReverse);
 		this.mFinished = false;
 		mCurrent = mTransitions[mRand.nextInt(5)];
 		mCurrent.init(previous, next, now, duration, isReverse);

@@ -53,6 +53,14 @@
                 android:entryValues="@array/forceRotationValues"
                 android:dialogTitle="@string/forceRotationTitle"
                 android:defaultValue="0" />
+            <PreferenceScreen 
+			    android:title="@string/clockPosition" 
+			    android:summary="@string/clockPositionSummary">
+				<intent 
+					android:action="android.intent.action.MAIN" 
+					android:targetClass="dk.nindroid.rss.menu.WallpaperClockSettingsLauncher"
+					android:targetPackage="dk.nindroid.rss" />
+		    </PreferenceScreen>
     </PreferenceCategory>
     <PreferenceCategory
             android:title="@string/floating">
@@ -74,7 +82,7 @@
                 android:title="@string/rotateImages"
                 android:summary="@string/rotateImagesSummary"
                 android:defaultValue="true" />
-            <!-- Next version!
+            <!-- Next version!  ??? WHAT?!
             <CheckBoxPreference
                 android:key="autoSelect"
                 android:title="@string/autoSelect"
@@ -82,10 +90,10 @@
                 android:defaultValue="false" />
             -->
 			<CheckBoxPreference
-                android:key="fullscreenBlack"
-                android:title="@string/fullscreenBlack"
-                android:summary="@string/fullscreenBlackSummary"
-                android:defaultValue="true" />
+                android:key="pauseWhenSelected"
+                android:title="@string/pauseWhenSelected"
+                android:summary="@string/pauseWhenSelectedSummary"
+                android:defaultValue="false" />
             <CheckBoxPreference
             	android:key="blackEdges"
                 android:title="@string/blackEdges"
@@ -113,10 +121,28 @@
                 android:dialogTitle="@string/backgroundColorTitle"
                 android:defaultValue="0" />
            <CheckBoxPreference
+                android:key="clockAboveImages"
+                android:title="@string/clockAboveImages"
+                android:summary="@string/clockAboveImagesSummary"
+                android:defaultValue="true" />
+           <CheckBoxPreference
            		android:key="liveWallpaperLowFramerate"
                 android:title="@string/liveWallpaperLowFramerate"
                 android:summary="@string/liveWallpaperLowFramerateSummary"
                 android:defaultValue="false" />
+	</PreferenceCategory>
+	<PreferenceCategory
+	    android:title="@string/controls">
+	    <CheckBoxPreference 
+	        android:key="selectImage"
+	        android:title="@string/selectImage"
+	        android:summary="selectImageSummary"
+	        android:defaultValue="false"/>
+	    <CheckBoxPreference 
+	        android:key="moveStream"
+	        android:title="@string/moveStream"
+	        android:summary="moveStreamSummary"
+	        android:defaultValue="false"/>
 	</PreferenceCategory>
     <!-- 
     <PreferenceCategory

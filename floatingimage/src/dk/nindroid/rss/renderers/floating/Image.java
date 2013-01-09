@@ -452,7 +452,7 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 		float userScale = mScale * mInitialScale;
 		float userMoveX = mX + mInitialX;
 		float userMoveY = mY + mInitialY;
-		
+				
 		x += userMoveX;
 		y += userMoveY;
 		szX *= userScale;
@@ -1017,10 +1017,10 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
 		boolean isTall = isTall();
 		if(isTall){
 			height = mDisplay.getHeight();
-			width = maspect * height;
+			width = mLargeAspect * height;
 		}else{
 			width = mDisplay.getWidth();
-			height = width / maspect;
+			height = width / mLargeAspect;
 		}
 		float scale = mInitialScale * mScale;
 		float maxX = width - scale * width;
@@ -1367,7 +1367,6 @@ public class Image implements ImagePlane, OnDemandImageBank.LoaderClient {
         }catch(IllegalArgumentException e){
         	Log.w("Floating Image", "Large texture could not be shown", e);
 			mLargeTex = false;
-        	setTexture(gl, mShowingImage);
         }
         setState(gl);
 	}

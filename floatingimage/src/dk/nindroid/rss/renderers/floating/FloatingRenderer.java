@@ -17,12 +17,15 @@ import dk.nindroid.rss.FeedController.EventSubscriber;
 import dk.nindroid.rss.MainActivity;
 import dk.nindroid.rss.OnDemandImageBank;
 import dk.nindroid.rss.R;
+import dk.nindroid.rss.RiverRenderer;
 import dk.nindroid.rss.TextureSelector;
 import dk.nindroid.rss.TextureSelector.PrepareCallback;
+import dk.nindroid.rss.Wallpaper;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.data.Ray;
 import dk.nindroid.rss.data.Texture;
 import dk.nindroid.rss.gfx.Vec3f;
+import dk.nindroid.rss.renderers.Clock;
 import dk.nindroid.rss.renderers.Dimmer;
 import dk.nindroid.rss.renderers.OSD;
 import dk.nindroid.rss.renderers.Renderer;
@@ -83,6 +86,7 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 	private long			mLastFrameTime;
 	private FeedController	mFeedController;
 	private OSD				mOsd;
+	private Clock 			mClock;
 	
 	private static final Vec3f 		mCamPos = new Vec3f(0,0,0);
 	private Image					mSelected = null;
@@ -124,10 +128,11 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 		this.mActivity = activity;
 		mTextureSelector = new TextureSelector(display, mActivity.getSettings().bitmapConfig, mActivity);
 		mRequestedStreamOffset = new Vec3f();
-		
 		WindowManager wm = (WindowManager)activity.context().getSystemService(Context.WINDOW_SERVICE);
 		android.view.Display disp = wm.getDefaultDisplay();
-		mInfoBar = new InfoBar(Math.max(disp.getWidth(), disp.getHeight()));
+		int maxSide = Math.max(disp.getWidth(), disp.getHeight());
+		mClock = new Clock(activity.context(), maxSide);
+		mInfoBar = new InfoBar(maxSide);
 		mBackgroundPainter = new BackgroundPainter();
 		this.mDisplay = display;
 		this.mOnDemandBank = onDemandBank;
@@ -368,13 +373,19 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 			mDoSelect = -1;
 		}
 		
-		// Deselect selected when it is floating.
+		boolean isPaused = mActivity.getRenderer().isPaused();
         if(mSelected != null){
+        	// Pause when image is selected
+			if(mActivity.getSettings().pauseWhenSelected && !isPaused){
+    			mActivity.getRenderer().pause();
+    		}
+			// Select next / previous
         	if(mSelected.stateInFocus()){
         		if(mSelectingNext || mSelectingPrev){
         			deselect(gl, frameTime, realTime);
         		}
         	}
+        	// Deselect selected when it is floating.
         	if(mSelected.stateFloating()){
         		if(mSelectingNext || mSelectingPrev){
         			int imageCount = mImgDepths.length;
@@ -396,6 +407,11 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
         		}
         		sortArray = true;
         	}
+        }else{
+        	// Resume when image is deselected
+        	if(mOsd.isFloating() && isPaused){
+    			mActivity.getRenderer().pause();
+    		}
         }
         
         if(mLastFrameTime < frameTime){
@@ -498,18 +514,28 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 		
 		// Background first, this is backmost
 		mBackgroundPainter.draw(gl, mDisplay, mActivity.getSettings().backgroundColor);
-        //Image.setState(gl);
-		gl.glPushMatrix();
-		gl.glTranslatef(mStreamOffsetX, mStreamOffsetY, mStreamOffsetZ);
-		gl.glRotatef(mStreamRotation, 0.0f, 1.0f, 0.0f);
-        for(int i = 0; i < mImgCnt; ++i){
-        	if(mImgDepths[i] != mSelected){
-        		mImgDepths[i].draw(gl, time, realTime);
-        	}
+		
+		if(!mActivity.getSettings().clockAboveImages){
+        	mClock.update(gl, mDisplay, mActivity.getSettings());
         }
+		
+		//Image.setState(gl);
+		gl.glPushMatrix();
+			gl.glTranslatef(mStreamOffsetX, mStreamOffsetY, mStreamOffsetZ);
+			gl.glRotatef(mStreamRotation, 0.0f, 1.0f, 0.0f);
+	        for(int i = 0; i < mImgCnt; ++i){
+	        	if(mImgDepths[i] != mSelected){
+	        		mImgDepths[i].draw(gl, time, realTime);
+	        	}
+	        }
         gl.glPopMatrix();
         
         Image.unsetState(gl);
+        
+        if(mActivity.getSettings().clockAboveImages){
+        	mClock.update(gl, mDisplay, mActivity.getSettings());
+        }
+        
         float fraction = getFraction(realTime);
         if(mSelected != null){
         	float dark = mActivity.getSettings().fullscreenBlack ? mDisplay.getFill() * mDisplay.getFill() : 0.8f;
@@ -529,11 +555,14 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
         		mInfoBar.draw(gl, mDisplay, fraction);
         		mInfoBar.unsetState(gl);
     		}
-        	
-        	gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
-        	Image.setState(gl);
-        	mSelected.draw(gl, time, realTime);
-        	Image.unsetState(gl);
+        	gl.glPushMatrix();
+	        	gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+	        	Image.setState(gl);
+	        	//gl.glTranslatef(mStreamOffsetX, mStreamOffsetY, mStreamOffsetZ);
+	    		gl.glRotatef(mStreamRotation, 0.0f, 1.0f, 0.0f);
+	        	mSelected.draw(gl, time, realTime);
+	        	Image.unsetState(gl);
+        	gl.glPopMatrix();
         }
 	}
 	
@@ -574,7 +603,7 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 		if(mSelected != null){
 			mInfoBar.select(gl, mDisplay, mSelected.getShowing());
 		}
-		
+		mClock.resume(gl);
 		if(mFeedController.getShowing() == 0){
 			mFeedController.addSubscriber(this);
 		}
@@ -593,14 +622,18 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 	class PlayPauseFloatingHandler implements PlayPauseEventHandler{
 		@Override
 		public void Play() {
-			if(mActivity.getRenderer().isPaused()){
-				mActivity.getRenderer().pause();
+			RiverRenderer r = mActivity.getRenderer();
+			if (r == null) return;
+			if(r.isPaused()){
+				r.pause();
 			}
 		}
 		@Override
 		public void Pause() {
-			if(!mActivity.getRenderer().isPaused()){
-				mActivity.getRenderer().pause();
+			RiverRenderer r = mActivity.getRenderer();
+			if (r == null) return;
+			if(!r.isPaused()){
+				r.pause();
 			}
 		}
 	}
@@ -689,11 +722,12 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 	@Override
 	public boolean slideLeft(long realTime) {
 		if(mSelected != null){
-			boolean reverse = mSelected.getPositionController().isReversed();
-			mSelectingNext = reverse; // Normal is false
-			mSelectingPrev = !reverse; // Normal is true
-			Log.v("Floating Image", "SlideLeft");
-			return true;
+			if(!(mActivity instanceof Wallpaper)){
+				boolean reverse = mSelected.getPositionController().isReversed();
+				mSelectingNext = reverse; // Normal is false
+				mSelectingPrev = !reverse; // Normal is true
+				return true;
+			}
 		}
 		return false;
 	}
@@ -701,11 +735,12 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 	@Override
 	public boolean slideRight(long realTime) {
 		if(mSelected != null){
-			boolean reverse = mSelected.getPositionController().isReversed();
-			mSelectingNext = !reverse; // Normal is true
-			mSelectingPrev = reverse; // Normal is false
-			Log.v("Floating Image", "SlideRight");
-			return true;
+			if(!(mActivity instanceof Wallpaper)){
+				boolean reverse = mSelected.getPositionController().isReversed();
+				mSelectingNext = !reverse; // Normal is true
+				mSelectingPrev = reverse; // Normal is false
+				return true;
+			}
 		}
 		return false;
 	}

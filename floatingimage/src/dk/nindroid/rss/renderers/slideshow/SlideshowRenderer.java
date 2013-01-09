@@ -2,13 +2,16 @@ package dk.nindroid.rss.renderers.slideshow;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
+import android.view.WindowManager;
 import dk.nindroid.rss.Display;
 import dk.nindroid.rss.MainActivity;
 import dk.nindroid.rss.TextureBank;
 import dk.nindroid.rss.data.ImageReference;
 import dk.nindroid.rss.gfx.Vec3f;
+import dk.nindroid.rss.renderers.Clock;
 import dk.nindroid.rss.renderers.OSD;
 import dk.nindroid.rss.renderers.ProgressBar;
 import dk.nindroid.rss.renderers.Renderer;
@@ -36,10 +39,15 @@ public class SlideshowRenderer extends Renderer implements PlayPauseEventHandler
 	boolean			mResetImages = false;
 	boolean			mMoveBack = false;
 	MainActivity	mActivity;
+	Clock			mClock;
 	
 	public SlideshowRenderer(MainActivity activity, TextureBank bank, Display display){
 		this.mDisplay = display;
 		this.mActivity = activity;
+		WindowManager wm = (WindowManager)activity.context().getSystemService(Context.WINDOW_SERVICE);
+		android.view.Display disp = wm.getDefaultDisplay();
+		int maxSide = Math.max(disp.getWidth(), disp.getHeight());
+		mClock = new Clock(activity.context(), maxSide);
 		mPrevious = new Image(display, activity);
 		mCurrent = new Image(display, activity);
 		mNext = new Image(display, activity);
@@ -136,15 +144,28 @@ public class SlideshowRenderer extends Renderer implements PlayPauseEventHandler
 		mPrevious.setPos(new Vec3f(-20.0f, 0.0f, -1.0f));
 		mCurrent.setPos(new Vec3f(0.0f, 0.0f, -1.0f));
 		mNext.setPos(new Vec3f(20.0f, 0.0f, -1.0f));
+		mClock.resume(gl);
 	}
 
 	@Override
 	public void render(GL10 gl, long frameTime, long realtime) {
 		gl.glDisable(GL10.GL_DEPTH_TEST);
 		gl.glDepthMask(false);
+		/*
+		gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+		gl.glEnable(GL10.GL_TEXTURE_2D);
+		gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_REPLACE);
+		gl.glFrontFace(GL10.GL_CCW);
+		gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER,GL10.GL_LINEAR);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D,GL10.GL_TEXTURE_MAG_FILTER,GL10.GL_LINEAR);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S,GL10.GL_CLAMP_TO_EDGE);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T,GL10.GL_CLAMP_TO_EDGE);
+		*/
+		
 		if(!mCurrentTransition.isFinished()){
 			mCurrentTransition.preRender(gl, frameTime);
 		}
+		
 		if(mCurrentTransition.isReverse()){
 			mNext.render(gl, realtime);
 			mCurrent.render(gl, realtime);
@@ -153,20 +174,21 @@ public class SlideshowRenderer extends Renderer implements PlayPauseEventHandler
 			mCurrent.render(gl, realtime);
 		}
 		
+		
 		if(!mCurrent.hasBitmap()){
 			ProgressBar.draw(gl, mCurrent.getProgress(), mDisplay);
 		}
 		if(!mCurrentTransition.isFinished()){
 			mCurrentTransition.postRender(gl, frameTime);
 		}
-		gl.glDepthMask(true);
-		gl.glEnable(GL10.GL_DEPTH_TEST);
+		
+		mClock.update(gl, mDisplay, mActivity.getSettings());
 	}
 
 	@Override
 	public void update(GL10 gl, long time, long realTime) {
 		long timeSinceSlide = realTime - mSlideTime;
-		if(timeSinceSlide > mActivity.getSettings().slideSpeed && timeSinceSlide < mActivity.getSettings().slideshowInterval - 40){
+		if(timeSinceSlide > mActivity.getSettings().slideSpeed && (timeSinceSlide < mActivity.getSettings().slideshowInterval - 40 || !mPlaying)){
 			try {
 				Thread.sleep(40);
 			} catch (InterruptedException e) {}

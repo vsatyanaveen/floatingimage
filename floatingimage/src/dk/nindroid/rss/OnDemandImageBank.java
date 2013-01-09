@@ -43,7 +43,7 @@ public class OnDemandImageBank {
 	public OnDemandImageBank(FeedController feedController, MainActivity activity, ImageCache imageCache) {
 		this.mActivity = activity;
 		this.mFeedController = feedController;
-		mLoaders = new Loader[4];
+		mLoaders = new Loader[1];
 		for(int i = 0; i < mLoaders.length; ++i){
 			mLoaders[i] = new Loader(activity.getSettings());
 		}

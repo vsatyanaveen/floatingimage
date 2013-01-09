@@ -38,6 +38,10 @@ public abstract class PlayPauseAbstractButton extends Button {
 		}
 	}
 	
+	public boolean isPlaying(){
+		return playing;
+	}
+	
 	@Override
 	public void click(long time) {
 		if(playing){

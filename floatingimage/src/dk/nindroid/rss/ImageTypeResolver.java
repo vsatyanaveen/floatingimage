@@ -21,6 +21,7 @@ public class ImageTypeResolver {
 		}else if(type.equals(LocalImage.imageType)){
 			return new LocalImage();
 		}
+		
 		return null; // ?? Unknown internal format! Ought to be an exception!
 	}
 }

@@ -28,11 +28,12 @@ import javax.microedition.khronos.egl.EGLSurface;
 import javax.microedition.khronos.opengles.GL;
 import javax.microedition.khronos.opengles.GL10;
 
-import dk.nindroid.rss.helpers.BaseConfigChooser.ComponentSizeChooser;
-import dk.nindroid.rss.helpers.BaseConfigChooser.SimpleEGLConfigChooser;
+import android.opengl.GLSurfaceView;
 import android.service.wallpaper.WallpaperService;
 import android.util.Log;
 import android.view.SurfaceHolder;
+import dk.nindroid.rss.helpers.BaseConfigChooser.ComponentSizeChooser;
+import dk.nindroid.rss.helpers.BaseConfigChooser.SimpleEGLConfigChooser;
 
 // Original code provided by Robert Green
 // http://www.rbgrn.net/content/354-glsurfaceview-adapted-3d-live-wallpapers
@@ -189,13 +190,8 @@ public class GLWallpaperService extends WallpaperService {
 		}
 	}
 
-	public interface Renderer {
+	public interface Renderer extends GLSurfaceView.Renderer {
 
-		public void onSurfaceCreated(GL10 gl, EGLConfig config);
-
-		public void onSurfaceChanged(GL10 gl, int width, int height);
-
-		public void onDrawFrame(GL10 gl);
 	}
 }
 
@@ -667,6 +663,7 @@ class GLThread extends Thread {
 					 * rendered frame
 					 */
 					mEglHelper.swap();
+					Thread.sleep(10);
 				}
 			}
 		} finally {

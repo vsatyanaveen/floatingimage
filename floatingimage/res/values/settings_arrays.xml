@@ -160,4 +160,20 @@
 		<item>Date reverse</item>
 		<item>Random</item>
 	</string-array>
+	
+	<array name="clockPositionDescriptions">
+	    <item>Top left</item>
+	    <item>Top right</item>
+	    <item>Bottom left</item>
+	    <item>Bottom right</item>
+	    <item>No clock</item>
+	</array>
+	
+	<array name="clockPositionValues">
+	    <item>topleft</item>
+	    <item>topright</item>
+	    <item>bottomleft</item>
+	    <item>bottomright</item>
+	    <item>disabled</item>
+	</array>
 </resources>

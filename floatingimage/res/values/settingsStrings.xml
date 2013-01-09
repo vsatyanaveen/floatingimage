@@ -11,7 +11,11 @@
 	
 	<string name="nudity">Disallow nudity</string>
 	<string name="nudityWallpaper">Disallow nudity in wallpaper</string>
-	<string name="nuditySummary">If some sneaks in anyway, the service is at fault.</string>
+	<string name="nuditySummary">If some sneak in anyway, the service is at fault.</string>
+	
+	<string name="center">Center</string>
+	<string name="visible">Visible</string>
+	<string name="disabled">Disabled</string>
 	
 	<string name="display">Display</string>
 	<string name="searching_for_user">Searching for user</string>
@@ -20,6 +24,8 @@
 	<string name="rotateImagesSummary">Tilt images for a slightly more messed up effect</string>
 	<string name="fullscreenBlack">Fade to black when fullscreen</string>
 	<string name="fullscreenBlackSummary">Fade background to all black when in fullscreen mode</string>
+	<string name="pauseWhenSelected">Pause stream on selection</string>
+	<string name="pauseWhenSelectedSummary">Stop floating when an image is selected</string>
 	<string name="tsunami">Tsunami</string>
 	<string name="tsunamiSummary">Fill screen with images. USE WITH CAUTION: This may cause strange behaviour and instability!</string>
 	<string name="blackEdges">Black outline</string>
@@ -35,6 +41,11 @@
 	<string name="floatingSpeed">Speed</string>
 	<string name="floatingSpeedSummary">How fast do the images traverse the screen</string>
 	<string name="floatingSpeedTitle">Floating images speed</string>
+	<string name="clockPosition">Position of clock</string>
+	<string name="clockPositionSummary">Where should the time be displayed</string>
+	<string name="clockPositionTitle">Choose position of clock</string>
+	<string name="clockAboveImages">Show clock above images</string>
+	<string name="clockAboveImagesSummary">Should the time be shown above or below the images</string>
 	<string name="shuffle">Shuffle images</string>
 	<string name="shuffleSummary">Show images in random order</string>
 	<string name="modeTitle">Select display mode</string>
@@ -185,11 +196,18 @@
 	<string name="LiveWallpapers">Live wallpapers</string>
 	<string name="LiveWallpapersSummary">Manage live wallpapers to set Floating Image as wallpaper</string>
 	
+	<string name="controls">Controls</string>
+	<string name="selectImage">Tap image to select</string>
+	<string name="selectImageSummary">Move image to focus by tapping on it</string>
+	<string name="moveStream">Stream can be pushed</string>
+	<string name="moveStreamSummary">Browse stream by swiping screen</string>
+	
 	<string name="feedSortOrder">Sort images by</string>
 	<string name="feedActive">Active</string>
 	<string name="feedName">Name</string>
 	<string name="feedSubtitle">Subtitle</string>
 	<string name="add_this_directory">Select %s</string>
+	
 	
 	<plurals name="n_images">
 		<item quantity="one">One image</item>
