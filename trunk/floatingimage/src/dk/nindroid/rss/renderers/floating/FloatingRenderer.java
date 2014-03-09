@@ -409,7 +409,7 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
         	}
         }else{
         	// Resume when image is deselected
-        	if(mOsd.isFloating() && isPaused){
+        	if(mOsd.isFloating() && isPaused && !mActivity.getRenderer().isMovePaused()){
     			mActivity.getRenderer().pause();
     		}
         }
@@ -812,17 +812,17 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 	@Override
 	public void streamMoved(float x, float y) {
 		mUpTime = System.currentTimeMillis();
-		mRequestedStreamOffset.setX(mStreamOffsetX);
-		mRequestedStreamOffset.setY(mStreamOffsetY);
-		mRequestedStreamOffset.setZ(mStreamOffsetZ);
-		tmpVar.setX(0);
-		tmpVar.setY(0);
-		tmpVar.setZ(0);
-		mImgs[0].getPositionController().getGlobalOffset(x, y, tmpVar);
-		mRequestedStreamOffset.minus(tmpVar, mRequestedStreamOffset);
-		mRequestedStreamOffset.setX(Math.max(Math.min(1.0f, mRequestedStreamOffset.getX()), -1.0f));
-		mRequestedStreamOffset.setY(Math.max(Math.min(1.0f, mRequestedStreamOffset.getY()), -1.0f));
-		mRequestedStreamOffset.setZ(Math.max(Math.min(1.0f, mRequestedStreamOffset.getZ()), -1.0f));
+        mRequestedStreamOffset.setX(mStreamOffsetX);
+        mRequestedStreamOffset.setY(mStreamOffsetY);
+        mRequestedStreamOffset.setZ(mStreamOffsetZ);
+        tmpVar.setX(0);
+        tmpVar.setY(0);
+        tmpVar.setZ(0);
+        mImgs[0].getPositionController().getGlobalOffset(x, y, tmpVar);
+        mRequestedStreamOffset.minus(tmpVar, tmpVar);
+        mRequestedStreamOffset.setX(Math.max(Math.min(1.0f, tmpVar.getX()), -1.0f));
+        mRequestedStreamOffset.setY(Math.max(Math.min(1.0f, tmpVar.getY()), -1.0f));
+        mRequestedStreamOffset.setZ(Math.max(Math.min(1.0f, tmpVar.getZ()), -1.0f));
 	}
 	
 	public void wallpaperMove(float fraction){
@@ -833,7 +833,7 @@ public class FloatingRenderer extends Renderer implements EventSubscriber, Prepa
 	@Override
 	public float adjustOffset(float speedX, float speedY) {
 		float offset = mImgs[0].getPositionController().getTimeAdjustment(speedX, speedY);
-		offset = offset * mActivity.getSettings().floatingTraversal / 1000;
+		offset = offset * mActivity.getSettings().floatingTraversal;
 		return offset;
 	}
 

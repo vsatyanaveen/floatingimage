@@ -44,6 +44,7 @@ public class Settings {
 	public long	 	slideSpeed;
 	public boolean	imageDecorations;
 	public boolean	highResThumbs;
+	public boolean 	slideshowFill;
 	public int		floatingType = 0;
 	public long		floatingTraversal = 30000;
 	public int		forceRotation;
@@ -71,6 +72,7 @@ public class Settings {
 	
 	public final String settings;
 	
+	
 	public Settings(String settings){
 		this.settings = settings;
 	}
@@ -93,6 +95,7 @@ public class Settings {
 		fullscreenBlack = sp.getBoolean("fullscreenBlack", true);
 		imageDecorations = sp.getBoolean("imageDecorations", true);
 		highResThumbs = sp.getBoolean("highResThumbs", false);
+		slideshowFill = sp.getBoolean("slideshowFill", false);
 		floatingType = Integer.parseInt(sp.getString("floatingType", "0"));
 		floatingTraversal = Long.parseLong(sp.getString("floatingSpeed", "30000"));
 		forceRotation = Integer.parseInt(sp.getString("forceRotation", "0"));

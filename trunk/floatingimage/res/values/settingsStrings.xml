@@ -58,6 +58,8 @@
 	<string name="slideSpeed">Slideshow transition speed</string>
 	<string name="slideSpeedSummary">How fast should the slide transitions be</string>
 	<string name="slideSpeedTitle">Select transition speed</string>
+	<string name="slideshowFill">Slideshow zooms on pictures</string>
+	<string name="slideshowFillSummary">Zoom in on pictures to avoid black borders</string>
 	<string name="backgroundColor">Background color</string>
 	<string name="backgroundColorSummary">The color behind the floating images</string>
 	<string name="backgroundColorTitle">Select the background color</string>

@@ -46,7 +46,6 @@
 						android:textSize="22sp"
 						android:textColor="?android:attr/textColorPrimary" /> 
 			<TextView 	android:id="@id/android:summary"
-						xmlns:android="http://schemas.android.com/apk/res/android" 
 						android:layout_width="fill_parent" 
 						android:layout_height="wrap_content" />
 		</LinearLayout>

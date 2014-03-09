@@ -15,7 +15,7 @@ import android.util.Log;
 
 public class FacebookFeeder {
 	private static final String APP_ID = "120339624649114";
-	private static final String APP_SECRET = "085182d54361333699c436f5e0e45f71";
+	private static final String APP_SECRET = "1a7851eef777702d1d0ec408e5fef0ab";
 	
 	private static final String CALLBACK_URL = "http://floating-image.appspot.com/facebookauthorization";
 	private static final String AUTHORIZATION_URL = "https://graph.facebook.com/oauth/authorize?client_id=" + APP_ID + "&scope=user_photos,read_friendlists,friends_photos,offline_access,user_photo_video_tags,friends_photo_video_tags&redirect_uri=" + CALLBACK_URL;// + "&display=touch";
