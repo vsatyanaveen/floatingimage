@@ -40,6 +40,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 	private long			mLastFPSTime = 0;
 	private int				mFrames = 0;
 	private boolean			mPause = false;
+	private boolean			mMovePaused = false;
 	
 	private int				mFeedsLoaded;
 	private int				mFeedsTotal;
@@ -174,7 +175,7 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 	
 	private void fadeOffset(long time) {
 		float timeFactor = (3000 - (time - mUpTime)) / 3000.0f;
-		float fadeOffset = mFadeOffset * timeFactor * timeFactor;// * mSensitivityX;
+		float fadeOffset = mFadeOffset * timeFactor * timeFactor * 0.9f;//
 		if(timeFactor > 0){
 			mOffset += fadeOffset;
 		}else{
@@ -396,21 +397,41 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 			mRenderer.move(x, y);
 		}else{
 			if(!mMoveEventHandled){
-				// Pull up OSD?
-				//if(isVertical(speedX, speedY)){
-					//showOSD(speedX, speedY);
 				if(mRenderer.getCurrent() == null){
-					mFadeOffset = mRenderer.adjustOffset(speedX, speedY);
+					speedX = speedX / mDisplay.getWidthPixels();
+					speedY = speedY / mDisplay.getHeightPixels();
+					
+					float newOffset = mRenderer.adjustOffset(speedX, speedY);
+					
+					float lastOvershot;
+					if(System.currentTimeMillis() - mUpTime < 100){
+						lastOvershot = (mOffset - mOffsetAtLastEvent) - mLastFadeOffset;
+					}else{
+						lastOvershot = 0;
+					}
+					float newFadeOffset = newOffset - lastOvershot;
+					Log.v("Floating Image", "adjusted: " + newFadeOffset + ", new: " + newOffset + ", last: " + lastOvershot);
+					
+					mLastFadeOffset = newFadeOffset;
+					mOffsetAtLastEvent = mOffset;
+					mFadeOffset = newFadeOffset;
 					mUpTime = System.currentTimeMillis();
 				}
 			}
 		}
 	}
 	
+	float mLastFadeOffset;
+	float mOffsetAtLastEvent;
+	
 	public void moveEnd(float speedX, float speedY){
 		if(!mActivity.getSettings().moveStream) return;
 		if(!mMoveEventHandled){
 			// Transform event!
+			if(mPause && mMovePaused){
+				pause();
+				mMovePaused = false;
+			}
 			int orientation = mDisplay.getOrientation();
 			float tmp;
 			switch(orientation){
@@ -509,6 +530,11 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 	public void moveInit(){
 		mMoveEventHandled = false;
 		mRenderer.initTransform();
+		if(!mPause){
+			Log.v("Floating Image", "moveInit, pause");
+			mMovePaused = true;
+			pause();
+		}
 	}
 	
 	public void transformEnd(){
@@ -516,6 +542,10 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 	}
 	
 	public void onClick(float x, float y){
+		if(mPause && mMovePaused){
+			pause();
+			mMovePaused = false;
+		}
 		if(!mActivity.getSettings().selectImage) return;
 		// Transform coordinates!
 		Vec2f pos = transformClick(x, y);
@@ -530,6 +560,10 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
 	}
 	
 	public void onDoubleClick(float x, float y){
+		if(mPause && mMovePaused){
+			pause();
+			mMovePaused = false;
+		}
 		mDoubleClicked = true;
 		Vec2f pos = transformClick(x, y);
 		toScreenSpace(pos);
@@ -606,5 +640,9 @@ public class RiverRenderer implements GLSurfaceView.Renderer, dk.nindroid.rss.he
          gl.glDisable(GL10.GL_CULL_FACE);
          gl.glShadeModel(GL10.GL_FLAT);
          gl.glDisable(GL10.GL_DEPTH_TEST);
+	}
+
+	public boolean isMovePaused() {
+		return mMovePaused;
 	}
 }

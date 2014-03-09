@@ -36,6 +36,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 import dk.nindroid.rss.compatibility.ButtonBrightness;
+import dk.nindroid.rss.compatibility.GetCameraDirectory;
 import dk.nindroid.rss.compatibility.Honeycomb;
 import dk.nindroid.rss.compatibility.SetWallpaper;
 import dk.nindroid.rss.data.ImageReference;
@@ -537,11 +538,20 @@ public class ShowStreams extends Activity implements MainActivity {
 	private void addDefaultLocalPaths() {
 		File phonePhotos = new File("/emmc");
 		String sdcard = Environment.getExternalStorageDirectory().getAbsolutePath();
-		File defaultDir = new File(sdcard + "/DCIM");
-		if(!defaultDir.exists()){
-			defaultDir = new File(sdcard + "/photos"); // Something
+		
+		File defaultDir = null;
+		
+		try{
+			defaultDir = GetCameraDirectory.getCameraDirectory();
+		}catch(Throwable t){}
+		
+		if(defaultDir == null){
+			defaultDir = new File(sdcard + "/DCIM");
 			if(!defaultDir.exists()){
-				defaultDir = new File(sdcard + "/external_sd/DCIM"); // Samsung
+				defaultDir = new File(sdcard + "/photos"); // Something
+				if(!defaultDir.exists()){
+					defaultDir = new File(sdcard + "/external_sd/DCIM"); // Samsung
+				}
 			}
 		}
 		int localFeedCount = 0;
